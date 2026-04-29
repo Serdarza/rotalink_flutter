@@ -1,0 +1,73 @@
+name: rotalink_flutter
+description: Rotalink — Flutter (Android + iOS), Kotlin uygulamasıyla aynı veri kaynağı.
+publish_to: 'none'
+
+version: 4.0.0+41
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  firebase_core: ^3.8.1
+  firebase_database: ^11.2.0
+  cloud_firestore: ^5.6.0
+  firebase_analytics: ^11.4.0
+  firebase_remote_config: ^5.3.0
+  firebase_messaging: ^15.1.0
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  geolocator: ^13.0.2
+  permission_handler: ^11.3.1
+  package_info_plus: ^8.1.1
+  google_mobile_ads: ^5.3.0
+  shared_preferences: ^2.3.3
+  url_launcher: ^6.3.1
+  share_plus: ^10.1.4
+  intl: ^0.20.2
+  http: ^1.2.2
+  speech_to_text: ^7.0.0
+  connectivity_plus: ^6.0.0
+  provider: ^6.1.2
+  flutter_native_splash: ^2.4.7
+  flutter_map_marker_popup: ^7.0.0
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.10.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/legacy_res/drawable/
+    - assets/legacy_res/mipmap-anydpi-v26/
+    - assets/images/app_logo.png
+
+# dart run flutter_launcher_icons
+# Kare logo (app_logo.png); adaptive arka plan PNG köşe rengine yakın — maskede renk farkı görünmez.
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/images/app_logo.png
+  adaptive_icon_background: "#26A69A"
+  adaptive_icon_foreground: assets/images/app_logo.png
+  remove_alpha_ios: true
+
+# dart run flutter_native_splash:create
+# İlk kare tam ekran kurumsal renk — Flutter splash ile aynı (#007B8F).
+flutter_native_splash:
+  color: "#007B8F"
+  android_gravity: center
+  ios: true
+  android: true
+  fullscreen: true
+  web: false
+  android_12:
+    color: "#007B8F"
+    icon_background_color: "#26A69A"
