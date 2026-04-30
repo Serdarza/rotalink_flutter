@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
@@ -52,10 +54,10 @@ class FirebaseRotaRepository {
     } catch (_) {}
   }
 
-  /// Splash / açılışta bir kez; disk önbelleğinden (offline persistence) veya sunucudan kök veriyi önceden yükler.
+  /// Splash / açılışta bir kez; izin verilen yollardan ön yükleme yapar.
   Future<void> primeRootSnapshot() async {
     try {
-      await _db.ref().get();
+      await _db.ref(pathTesisler).get();
     } catch (_) {}
   }
 
@@ -65,17 +67,76 @@ class FirebaseRotaRepository {
   static const String pathYemekler = 'yemekler';
   static const String pathSosyal = 'sosyal';
 
+  /// Kök yerine izin verilen 5 yolu ayrı ayrı dinler ve birleştirir.
+  /// Kural: kök ".read": false olsa bile çalışır.
   Stream<RotaDataState> watchRoot() {
-    return _db.ref().onValue.map((DatabaseEvent e) {
+    final controller = StreamController<RotaDataState>.broadcast();
+
+    dynamic valTesisler;
+    dynamic valLegacy;
+    dynamic valGeziler;
+    dynamic valYemekler;
+    dynamic valSosyal;
+    var readyCount = 0;
+
+    void emit() {
+      if (readyCount < 5) return;
       try {
-        return _mapSnapshotToState(e.snapshot.value);
+        controller.add(_mapSnapshotToState({
+          pathTesisler: valTesisler,
+          pathTesislerLegacy: valLegacy,
+          pathGeziler: valGeziler,
+          pathYemekler: valYemekler,
+          pathSosyal: valSosyal,
+        }));
       } catch (err) {
-        return RotaDataState(
+        controller.add(RotaDataState(
           initialLoadCompleted: true,
           errorMessage: kDebugMode ? err.toString() : 'Veri okunamadı.',
-        );
+        ));
       }
-    });
+    }
+
+    void onError(Object err) {
+      readyCount++;
+      emit();
+    }
+
+    final s1 = _db.ref(pathTesisler).onValue.listen((e) {
+      valTesisler = e.snapshot.value;
+      if (readyCount < 1) readyCount++;
+      emit();
+    }, onError: onError);
+    final s2 = _db.ref(pathTesislerLegacy).onValue.listen((e) {
+      valLegacy = e.snapshot.value;
+      if (readyCount < 2) readyCount++;
+      emit();
+    }, onError: onError);
+    final s3 = _db.ref(pathGeziler).onValue.listen((e) {
+      valGeziler = e.snapshot.value;
+      if (readyCount < 3) readyCount++;
+      emit();
+    }, onError: onError);
+    final s4 = _db.ref(pathYemekler).onValue.listen((e) {
+      valYemekler = e.snapshot.value;
+      if (readyCount < 4) readyCount++;
+      emit();
+    }, onError: onError);
+    final s5 = _db.ref(pathSosyal).onValue.listen((e) {
+      valSosyal = e.snapshot.value;
+      if (readyCount < 5) readyCount++;
+      emit();
+    }, onError: onError);
+
+    controller.onCancel = () {
+      s1.cancel();
+      s2.cancel();
+      s3.cancel();
+      s4.cancel();
+      s5.cancel();
+    };
+
+    return controller.stream;
   }
 
   RotaDataState _mapSnapshotToState(dynamic root) {
