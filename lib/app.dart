@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
@@ -9,6 +10,7 @@ import 'navigator_keys.dart';
 import 'l10n/app_strings.dart';
 import 'screens/no_connection_screen.dart';
 import 'screens/splash_screen.dart';
+import 'services/holiday_notification_scheduler.dart';
 import 'services/network_service.dart';
 import 'theme/app_theme.dart';
 
@@ -52,6 +54,20 @@ class _ConnectivityGateState extends State<_ConnectivityGate> {
   void initState() {
     super.initState();
     unawaited(_decideInitialRoute());
+    // İzin diyaloğu runApp() sonrası ilk frame'den itibaren gösterilir.
+    // Önce gösterilirse iOS launch screen erken kapanır → siyah ekran.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_requestPermissions());
+    });
+  }
+
+  Future<void> _requestPermissions() async {
+    try {
+      await FirebaseMessaging.instance.requestPermission();
+    } catch (_) {}
+    try {
+      await HolidayNotificationScheduler.requestPermissions();
+    } catch (_) {}
   }
 
   Future<void> _decideInitialRoute() async {

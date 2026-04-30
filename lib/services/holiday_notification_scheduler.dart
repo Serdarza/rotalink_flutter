@@ -120,19 +120,22 @@ class HolidayNotificationScheduler {
     return false;
   }
 
-  static Future<void> scheduleUpcomingHolidayReminders() async {
+  /// İzin diyaloğunu UI hazır olduktan sonra göstermek için ayrı metot.
+  /// [app.dart] içindeki post-frame callback'ten çağrılır.
+  static Future<void> requestPermissions() async {
     final android = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
     if (defaultTargetPlatform == TargetPlatform.android) {
       await android?.requestNotificationsPermission();
     }
-
     final ios = _plugin.resolvePlatformSpecificImplementation<
         IOSFlutterLocalNotificationsPlugin>();
     if (defaultTargetPlatform == TargetPlatform.iOS) {
       await ios?.requestPermissions(alert: true, badge: true, sound: true);
     }
+  }
 
+  static Future<void> scheduleUpcomingHolidayReminders() async {
     for (var i = 0; i < kPublicHolidays2026.length; i++) {
       await _plugin.cancel(_idBase + i);
     }

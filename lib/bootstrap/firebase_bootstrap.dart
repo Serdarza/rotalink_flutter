@@ -26,7 +26,6 @@ Future<FirebaseApp> initializeFirebase() async {
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   await FirebaseMessaging.instance.setAutoInitEnabled(true);
-  await FirebaseMessaging.instance.requestPermission();
 
   await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
 
