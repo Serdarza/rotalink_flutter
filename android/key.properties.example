@@ -1,0 +1,28 @@
+# Play Store: Bu dosyayı "android/key.properties" olarak kopyalayın (git'e eklemeyin).
+#
+# ÖNEMLİ — "Yanlış anahtarla imzalanmış" hatası:
+# Play Console'da kayıtlı *upload* sertifikasının SHA1'i ile bu keystore'un SHA1'i
+# birebir eşleşmeli. Eski Kotlin / önceki Flutter sürümünde kullandığınız .jks
+# dosyasını burada storeFile ile gösterin.
+#
+# Bu uygulama (com.serdarza.rotalink) için Play'in beklediği yükleme sertifikası SHA1:
+#   86:22:41:C5:43:C1:AF:2D:89:8E:EB:1C:A8:39:82:F9:4E:B9:9F:9D
+# keytool çıktınız bununla aynı değilse yanlış .jks kullanıyorsunuz veya release
+# debug ile imzalanmıştır (key.properties eksikse Flutter release debug'a düşer).
+#
+# Keystore SHA1 kontrolü (Windows PowerShell / CMD):
+#   keytool -list -v -keystore YOL\upload-keystore.jks -alias upload
+# Çıktıdaki "SHA1" satırı, Play Console → Kurulum → Uygulama imzalama →
+# "Yükleme anahtarı sertifikası" ile aynı olmalı.
+#
+# Yanlış .jks kullanıyorsanız veya debug ile imzaladıysanız yükleme reddedilir.
+# Doğru keystore yoksa: Play Console'dan "Yükleme anahtarını sıfırlama" talebi gerekir.
+#
+# Yeni keystore (Play'de yükleme anahtarı sıfırlama sonrası örnek):
+#   keytool -genkeypair -v -keystore rotalink_yeni_anahtar.jks -alias rotalink_yeni -keyalg RSA -keysize 2048 -validity 10000
+# Ardından SHA1'i Play Console'a kaydedin; şifreleri bu dosyada tutun (git'e eklemeyin).
+
+storePassword=CHANGE_ME
+keyPassword=CHANGE_ME
+keyAlias=rotalink_yeni
+storeFile=rotalink_yeni_anahtar.jks

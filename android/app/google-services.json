@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "409913824071",
+    "project_id": "rotalink-d738c",
+    "storage_bucket": "rotalink-d738c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:409913824071:android:665a37bc5dadea32763262",
+        "android_client_info": {
+          "package_name": "com.serdarza.rotalink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5_7XVR9Qe5qxG8g-zyx6i-kjwob3aEWM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
