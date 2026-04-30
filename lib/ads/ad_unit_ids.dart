@@ -1,13 +1,19 @@
-/// Kotlin `DiscoverActivity` / `MainActivity` / `CampaignDetailActivity` ile aynı birimler.
+import 'dart:io' show Platform;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
+
 abstract final class AdUnitIds {
-  static const String appId = 'ca-app-pub-6478556288740067~6800762661';
+  static bool get _ios => !kIsWeb && Platform.isIOS;
 
-  /// `activity_main.xml` banner.
-  static const String banner = 'ca-app-pub-6478556288740067/9417170109';
+  static String get appId =>
+      _ios ? 'ca-app-pub-6478556288740067~6588925851' : 'ca-app-pub-6478556288740067~6800762661';
 
-  /// `MainActivity.loadInterstitialAd`.
-  static const String interstitial = 'ca-app-pub-6478556288740067/7001215166';
+  static String get banner =>
+      _ios ? 'ca-app-pub-6478556288740067/3449514789' : 'ca-app-pub-6478556288740067/9417170109';
 
-  /// Keşfet / bottom sheet / kampanya native (`DiscoverActivity.NATIVE_AD_UNIT_ID`).
-  static const String nativeList = 'ca-app-pub-6478556288740067/2117264587';
+  static String get interstitial =>
+      _ios ? 'ca-app-pub-6478556288740067/4219670970' : 'ca-app-pub-6478556288740067/7001215166';
+
+  static String get nativeList =>
+      _ios ? 'ca-app-pub-6478556288740067/1593507634' : 'ca-app-pub-6478556288740067/2117264587';
 }

@@ -980,9 +980,7 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
             final ll = _latLngGeziYemek(g);
             Future<void> openImages() => _openGoogleImages('${g.il} ${g.isim}'.trim());
             Future<void> openNativeMapSearch() async {
-              final q = '${g.il} ${g.isim}'.trim();
-              if (q.isEmpty) return;
-              await openInNativeMaps(context, query: q);
+              await openMapSearch(context, g.il, g.isim);
             }
             return InkWell(
               onTap: () => unawaited(openImages()),

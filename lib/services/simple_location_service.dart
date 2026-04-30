@@ -1,3 +1,4 @@
+import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 /// Kullanıcı tarafından tetiklenen izin isteğinin sonucu.
@@ -46,7 +47,10 @@ class SimpleLocationService {
 
   /// İzin durumunu kontrol et. İzin zaten verilmişse her zaman `false` döner.
   static Future<bool> isLocationPermissionDeclinedByUser() async {
-    if (await Permission.locationWhenInUse.isGranted) return false;
+    final geo = await Geolocator.checkPermission();
+    if (geo == LocationPermission.whileInUse || geo == LocationPermission.always) {
+      return false;
+    }
     return _declinedThisSession;
   }
 
@@ -81,42 +85,40 @@ class SimpleLocationService {
 
   static Future<PermissionRequestOutcome> _userTapFlow() async {
     try {
-      // 1. İzin zaten verilmiş mi?
-      if (await Permission.locationWhenInUse.isGranted) {
+      // 1. İzin zaten verilmiş mi? (Geolocator — iOS CLLocationManager ile doğrudan)
+      var geo = await Geolocator.checkPermission();
+      if (geo == LocationPermission.whileInUse || geo == LocationPermission.always) {
         _declinedThisSession = false;
         return PermissionRequestOutcome.granted;
       }
 
-      final status = await Permission.locationWhenInUse.status;
-
-      // 2. Kalıcı red / kısıtlı: sistem penceresi artık açılmaz → Ayarlar'a yönlendir.
-      if (status.isPermanentlyDenied || status.isRestricted) {
-        await openAppSettings();
+      // 2. iOS'ta 'denied' = kalıcı red (kullanıcı daha önce reddetti → Ayarlar).
+      if (geo == LocationPermission.deniedForever) {
+        await Geolocator.openAppSettings();
         return PermissionRequestOutcome.openedSettings;
       }
 
-      // 3. Normal istek göster.
-      final result = await Permission.locationWhenInUse.request();
-      final granted =
-          result.isGranted || await Permission.locationWhenInUse.isGranted;
-
-      if (granted) {
+      // 3. İlk istek (notDetermined → denied): sistem diyaloğunu göster.
+      geo = await Geolocator.requestPermission();
+      if (geo == LocationPermission.whileInUse || geo == LocationPermission.always) {
         _declinedThisSession = false;
         return PermissionRequestOutcome.granted;
       }
 
-      // 4. İstek sonrası kalıcı red oldu mu? (bazı cihazlarda ikinci redde geçer)
-      final statusAfter = await Permission.locationWhenInUse.status;
-      if (statusAfter.isPermanentlyDenied) {
-        await openAppSettings();
+      // 4. İstek sonrası kalıcı red (ikinci redde iOS deniedForever döner) → Ayarlar.
+      if (geo == LocationPermission.deniedForever) {
+        await Geolocator.openAppSettings();
         return PermissionRequestOutcome.openedSettings;
       }
 
       _declinedThisSession = true;
       return PermissionRequestOutcome.denied;
     } catch (_) {
-      _declinedThisSession = true;
-      return PermissionRequestOutcome.denied;
+      // Exception durumunda Ayarlar fallback.
+      try {
+        await Geolocator.openAppSettings();
+      } catch (_) {}
+      return PermissionRequestOutcome.openedSettings;
     }
   }
 
@@ -125,7 +127,8 @@ class SimpleLocationService {
   static Future<bool> _requestFlow() async {
     try {
       // 1. İzin zaten var mı?
-      if (await Permission.locationWhenInUse.isGranted) {
+      var geo = await Geolocator.checkPermission();
+      if (geo == LocationPermission.whileInUse || geo == LocationPermission.always) {
         _declinedThisSession = false;
         return true;
       }
@@ -133,19 +136,16 @@ class SimpleLocationService {
       // 2. Bu oturumda daha önce reddedildi mi?
       if (_declinedThisSession) return false;
 
-      final status = await Permission.locationWhenInUse.status;
-
-      // 3. Kalıcı red veya kısıtlı: sistem penceresini gösterme, sessizce bloke et.
-      if (status.isPermanentlyDenied || status.isRestricted) {
+      // 3. Kalıcı red: sessizce bloke et (chip dokunuşu değil → ayarlar açmaya gerek yok).
+      if (geo == LocationPermission.deniedForever) {
         _declinedThisSession = true;
         return false;
       }
 
       // 4. Sistem izin penceresini göster.
-      final result = await Permission.locationWhenInUse.request();
+      geo = await Geolocator.requestPermission();
       final granted =
-          result.isGranted || await Permission.locationWhenInUse.isGranted;
-
+          geo == LocationPermission.whileInUse || geo == LocationPermission.always;
       _declinedThisSession = !granted;
       return granted;
     } catch (_) {
