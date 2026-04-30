@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import '../services/simple_location_service.dart';
 import '../theme/app_colors.dart';
@@ -23,13 +22,14 @@ Future<void> showWeatherBottomSheet(BuildContext context) async {
   var lon = 35.0;
   if (context.mounted) {
     // İzin yoksa ve bu oturumda reddedilmemişse iste.
-    if (!await Permission.locationWhenInUse.isGranted) {
+    var geoStatus = await Geolocator.checkPermission();
+    if (geoStatus != LocationPermission.whileInUse && geoStatus != LocationPermission.always) {
       if (!await SimpleLocationService.isLocationPermissionDeclinedByUser()) {
         final granted =
             await SimpleLocationService.ensureLocationPermissionFromUserAction();
         if (!granted) {
-          final st = await Permission.locationWhenInUse.status;
-          if (st.isPermanentlyDenied && context.mounted) {
+          geoStatus = await Geolocator.checkPermission();
+          if (geoStatus == LocationPermission.deniedForever && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text(
@@ -40,7 +40,7 @@ Future<void> showWeatherBottomSheet(BuildContext context) async {
                 duration: const Duration(seconds: 6),
                 action: SnackBarAction(
                   label: 'Ayarlar',
-                  onPressed: () => openAppSettings(),
+                  onPressed: () => Geolocator.openAppSettings(),
                 ),
               ),
             );
@@ -49,7 +49,8 @@ Future<void> showWeatherBottomSheet(BuildContext context) async {
       }
     }
     // İzin verilmişse konumu al (red durumunda fallback Türkiye merkezi).
-    if (await Permission.locationWhenInUse.isGranted) {
+    geoStatus = await Geolocator.checkPermission();
+    if (geoStatus == LocationPermission.whileInUse || geoStatus == LocationPermission.always) {
       try {
         final last = await Geolocator.getLastKnownPosition();
         if (last != null) {

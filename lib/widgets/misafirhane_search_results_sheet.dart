@@ -417,6 +417,19 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
     return out;
   }
 
+  List<Misafirhane> _sortedTesis() {
+    final out = List<Misafirhane>.from(widget.facilities);
+    out.sort((a, b) {
+      double d(Misafirhane m) => _distanceMetersToUser(
+        (m.latitude == 0 && m.longitude == 0)
+            ? null
+            : LatLng(m.latitude, m.longitude),
+      );
+      return d(a).compareTo(d(b));
+    });
+    return out;
+  }
+
   void _onTabChanged(int index) {
     setState(() => _tabIndex = index);
     _scheduleNativesForTab(index);
@@ -661,7 +674,8 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
       ];
     }
 
-    final n = widget.facilities.length;
+    final sorted = _sortedTesis();
+    final n = sorted.length;
     final childCount = n * 2 - 1;
     return [
       SliverList(
@@ -669,7 +683,7 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
           (ctx, index) {
             if (index.isOdd) return const Divider(height: 1);
             final i = index ~/ 2;
-            return _tesisFacilityRow(context, widget.facilities[i]);
+            return _tesisFacilityRow(context, sorted[i]);
           },
           childCount: childCount,
         ),

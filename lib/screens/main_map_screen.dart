@@ -855,7 +855,8 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   Future<void> _refreshLocationStateOnResume() async {
     if (!mounted) return;
     try {
-      final granted = await Permission.locationWhenInUse.isGranted;
+      final geo = await Geolocator.checkPermission();
+      final granted = geo == LocationPermission.whileInUse || geo == LocationPermission.always;
       if (granted) {
         await SimpleLocationService.prepareForUserInitiatedPermissionDialog();
       }
@@ -893,7 +894,8 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   Future<void> _syncLocationUiFromPermissionOnly() async {
     if (!mounted) return;
     try {
-      final granted = await Permission.locationWhenInUse.isGranted;
+      final geo = await Geolocator.checkPermission();
+      final granted = geo == LocationPermission.whileInUse || geo == LocationPermission.always;
       if (!mounted) return;
       if (!granted) {
         await UserLocationCache.clear();

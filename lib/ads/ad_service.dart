@@ -8,20 +8,19 @@ import 'ad_unit_ids.dart';
 /// Kotlin `MyApplication.setupFamilyFriendlyAds` + `MainActivity` reklam akışı.
 ///
 /// - [initialize]: `MobileAds.initialize` + G içerik derecesi.
-/// - [scheduleLaunchInterstitialPattern]: Açılış anından itibaren **1 dk, 5 dk, 10 dk**
-///   sonra geçiş reklamı; sonra aynı aralıklar **10 dakikalık döngü** ile tekrarlanır
-///   (11., 15., 20. dk, ardından 21., 25., 30. dk …).
+/// - [scheduleLaunchInterstitialPattern]: Açılış anından itibaren **1 dk** sonra
+///   ilk geçiş reklamı; ardından her **3 dakikada** bir tekrar.
 class AdService {
   AdService._();
   static final AdService instance = AdService._();
 
   static const bool adsEnabled = true;
 
-  /// Bir döngü içindeki gösterimler (saniye): 1 dk, 5 dk, 10 dk.
-  static const List<int> _offsetsInCycleSec = [60, 300, 600];
+  /// İlk gösterim zamanı (saniye): 1 dk.
+  static const List<int> _offsetsInCycleSec = [60];
 
-  /// Döngü uzunluğu: her tekrarda bu kadar saniye eklenir (10 dk).
-  static const int _cycleLengthSec = 600;
+  /// Döngü uzunluğu: her tekrarda bu kadar saniye eklenir (3 dk).
+  static const int _cycleLengthSec = 180;
 
   InterstitialAd? _interstitial;
   Timer? _launchTimer;
