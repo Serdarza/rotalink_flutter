@@ -95,11 +95,6 @@ abstract final class AppStrings {
       'Canlı mesafe hesabına ulaşılamadı; haritada rota yine de çizilecek.';
   static const String routePlanInsufficientLocations = 'Rota için yeterli konum bulunamadı.';
   static const String bottomDiscover = 'Keşfet';
-  static const String bottomIlanlar = 'İlanlar';
-  static const String ilanlarSearchHint = 'Kurum veya pozisyon ara';
-  static const String ilanlarEmpty = 'Henüz aktif ilan bulunmuyor.';
-  static const String ilanlarNoResult = 'Aramanıza uygun ilan bulunamadı.';
-  static const String ilanlarLoadError = 'İlanlar yüklenemedi. Önbellek gösteriliyor.';
   static const String drawerSubtitle = 'Akıllı Seyahat Rehberiniz';
   static const String drawerVersionPrefix = 'Sürüm: ';
 
@@ -116,7 +111,6 @@ abstract final class AppStrings {
   static const String locationServicesOffSnack =
       'Konum hizmetleri kapalı. Lütfen cihaz ayarlarından GPS\'i açın.';
   static const String locationFailedPrefix = 'Konum alınamadı: ';
-  static const String featureSoon = 'Bu bölüm yakında eklenecek.';
 
   static const String suggestionTitle = 'Önerinizi Bize İletin';
   static const String suggestionSubtitle =
@@ -133,7 +127,4 @@ abstract final class AppStrings {
   static const String suggestionOk = 'Tamam';
   static const String suggestionMailFailed = 'E-posta uygulaması açılamadı.';
 
-  static const String kamuIlanlarTitle = 'Kamu İş İlanları';
-  static const String kamuIlanlarNoActive = 'Şu an aktif ilan bulunmamaktadır.';
-  static const String kamuIlanlarLinkError = 'Bağlantı açılamadı.';
 }
