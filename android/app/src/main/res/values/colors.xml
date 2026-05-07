@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- FCM default_notification_color ile uyumlu (Kotlin colors.xml primary) -->
+    <color name="primary">#007B8F</color>
+	<color name="ic_launcher_background">#26A69A</color>
+</resources>
