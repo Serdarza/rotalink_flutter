@@ -10,7 +10,6 @@ import 'package:flutter_map_marker_popup/src/state/popup_event.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -902,7 +901,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   Future<void> _refreshLocationStateOnResume() async {
     if (!mounted) return;
     try {
-      final granted = await Permission.locationWhenInUse.isGranted;
+      final granted = await SimpleLocationService.isLocationGranted();
       if (granted) {
         await SimpleLocationService.prepareForUserInitiatedPermissionDialog();
       }
@@ -940,7 +939,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   Future<void> _syncLocationUiFromPermissionOnly() async {
     if (!mounted) return;
     try {
-      final granted = await Permission.locationWhenInUse.isGranted;
+      final granted = await SimpleLocationService.isLocationGranted();
       if (!mounted) return;
       if (!granted) {
         await UserLocationCache.clear();
@@ -1040,7 +1039,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     bool fromDistanceChip = false,
   }) async {
     // Kural 2: İzin + GPS var → sessizce hesapla.
-    if (await Permission.locationWhenInUse.isGranted &&
+    if (await SimpleLocationService.isLocationGranted() &&
         await Geolocator.isLocationServiceEnabled()) {
       await _applyLocationAfterPermissionGranted();
       await _reopenSearchSheetIfLocationGranted();
@@ -1054,7 +1053,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     }
 
     // Otomatik tetik (arama vb.): İzin var ama GPS kapalı → bu oturumda bir kez GPS ekranı aç.
-    if (await Permission.locationWhenInUse.isGranted &&
+    if (await SimpleLocationService.isLocationGranted() &&
         !await Geolocator.isLocationServiceEnabled() &&
         !_pendingLocationCheckAfterSettings) {
       _pendingLocationCheckAfterSettings = true;
@@ -1066,7 +1065,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     if (await SimpleLocationService.isLocationPermissionDeclinedByUser()) return;
     await SimpleLocationService.ensureLocationPermissionFromUserAction();
     if (!mounted) return;
-    if (!await Permission.locationWhenInUse.isGranted) return;
+    if (!await SimpleLocationService.isLocationGranted()) return;
     await _applyLocationAfterPermissionGranted();
     await _reopenSearchSheetIfLocationGranted();
   }
@@ -1074,7 +1073,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   Future<void> _reopenSearchSheetIfLocationGranted() async {
     await _syncLocationUiFromPermissionOnly();
     if (!mounted) return;
-    if (!await Permission.locationWhenInUse.isGranted) return;
+    if (!await SimpleLocationService.isLocationGranted()) return;
     final data = _cachedRotaData;
     final facilities = _markerOverride;
     final highlight = _searchSheetHighlight;
@@ -1241,7 +1240,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   }) async {
     try {
       if (!mounted || !context.mounted) return;
-      final granted = await Permission.locationWhenInUse.isGranted;
+      final granted = await SimpleLocationService.isLocationGranted();
       LatLng? userForSort;
       if (granted &&
           _userLocationLatLng != null &&
@@ -1299,7 +1298,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     });
     // Arama sonuçları açılınca izin yoksa otomatik iste (oturumda red yoksa).
     if (mounted &&
-        !await Permission.locationWhenInUse.isGranted &&
+        !await SimpleLocationService.isLocationGranted() &&
         !await SimpleLocationService.isLocationPermissionDeclinedByUser()) {
       unawaited(_ensureLocationPermissionAndLocationForLists());
     }
@@ -1750,7 +1749,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     if (!mounted) return;
     await _syncLocationUiFromPermissionOnly();
     if (!mounted) return;
-    if (!await Permission.locationWhenInUse.isGranted) {
+    if (!await SimpleLocationService.isLocationGranted()) {
       await _handleChipTapLocationRequest();
       return;
     }
@@ -1924,7 +1923,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
               await _ensureLocationPermissionAndLocationForLists(
                 fromDistanceChip: true,
               );
-              if (!mounted || !await Permission.locationWhenInUse.isGranted) return;
+              if (!mounted || !await SimpleLocationService.isLocationGranted()) return;
               if (!sheetCtx.mounted) return;
               Navigator.pop(sheetCtx);
               if (!mounted) return;

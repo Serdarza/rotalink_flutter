@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../services/simple_location_service.dart';
@@ -42,7 +41,7 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
 
   Future<void> _resolveLocation() async {
     // İzin zaten verilmişse direkt konuma geç.
-    if (!await Permission.locationWhenInUse.isGranted) {
+    if (!await SimpleLocationService.isLocationGranted()) {
       // Bu oturumda reddedilmişse tekrar sorma.
       if (await SimpleLocationService.isLocationPermissionDeclinedByUser()) {
         if (mounted) setState(() => _locDone = true);
@@ -53,8 +52,8 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
       if (!granted) {
         // Reddetti — snackbar göster, bu oturumda bir daha sorma.
         if (mounted) setState(() => _locDone = true);
-        final st = await Permission.locationWhenInUse.status;
-        if (st.isPermanentlyDenied && mounted) {
+        final forever = await Geolocator.checkPermission() == LocationPermission.deniedForever;
+        if (forever && mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: const Text(
@@ -65,7 +64,7 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
               duration: const Duration(seconds: 6),
               action: SnackBarAction(
                 label: 'Ayarlar',
-                onPressed: () => openAppSettings(),
+                onPressed: () => Geolocator.openAppSettings(),
               ),
             ),
           );

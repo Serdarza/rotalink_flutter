@@ -1,6 +1,6 @@
 import 'dart:io' show Platform;
 
-import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
 
 /// Kullanıcı tarafından tetiklenen izin isteğinin sonucu.
 enum PermissionRequestOutcome {
@@ -10,30 +10,29 @@ enum PermissionRequestOutcome {
   /// Kullanıcı bu oturumda izni reddetti — bir daha otomatik sorma.
   denied,
 
-  /// İzin kalıcı reddedildi (isPermanentlyDenied). Sistem ayarlar menüsü açıldı.
+  /// İzin kalıcı reddedildi. Sistem ayarlar menüsü açıldı.
   /// Çağıran taraf [WidgetsBindingObserver] ile uygulamaya dönüşü izlemeli.
   openedSettings,
 }
 
-/// Konum izni yönetimi — tamamen oturum bazlı.
-/// Tüm bayraklar bellek içindedir; uygulama kapanıp açılınca otomatik sıfırlanır.
+/// Konum izni yönetimi — tamamen oturum bazlı, yalnızca [Geolocator] kullanır.
+///
+/// iOS'ta hem [permission_handler] hem [geolocator] kullanmak iki ayrı
+/// CLLocationManager oluşturur ve izin diyaloğunun sessizce iptal edilmesine
+/// yol açar. Tüm konum izni işlemlerini [Geolocator] ile yapmak bu çakışmayı önler.
 ///
 /// Kullanım:
-///   - Otomatik tetikleme (arama, panel açılışı vb.): [ensureLocationPermissionFromUserAction]
-///   - Chip dokunuşu (kullanıcı isteği, tam zincir): [requestFromUserTap]
-///   - Oturum bloğu kontrolü:                        [isLocationPermissionDeclinedByUser]
+///   - Anlık izin kontrolü:                           [isLocationGranted]
+///   - Chip / konum butonu dokunuşu (tam zincir):     [requestFromUserTap]
+///   - Otomatik tetikleme (arama vb.):                [ensureLocationPermissionFromUserAction]
+///   - Oturum bloğu kontrolü:                         [isLocationPermissionDeclinedByUser]
 class SimpleLocationService {
   SimpleLocationService._();
 
   // ─── Oturum bayrakları (bellek; uygulama kapanınca sıfırlanır) ────────────
 
-  /// Kullanıcı bu oturumda sistem izin penceresini kapattı veya reddetti.
   static bool _declinedThisSession = false;
-
-  /// GPS / Play Services "Konum doğruluğu" penceresinde bu oturumda "Hayır" dedi.
   static bool _gpsUnavailableThisSession = false;
-
-  // ─── Uçuştaki istek (eşzamanlı çoklu çağrıyı önler) ─────────────────────
   static Future<bool>? _inFlightRequest;
 
   // ─── GPS erişimi ──────────────────────────────────────────────────────────
@@ -46,18 +45,23 @@ class SimpleLocationService {
 
   // ─── Ana API ──────────────────────────────────────────────────────────────
 
+  /// Konum izni verilmiş mi? [Geolocator.checkPermission] tabanlı.
+  static Future<bool> isLocationGranted() async {
+    final p = await Geolocator.checkPermission();
+    return p == LocationPermission.always || p == LocationPermission.whileInUse;
+  }
+
   /// İzin durumunu kontrol et. İzin zaten verilmişse her zaman `false` döner.
   static Future<bool> isLocationPermissionDeclinedByUser() async {
-    if (await Permission.locationWhenInUse.isGranted) return false;
+    if (await isLocationGranted()) return false;
     return _declinedThisSession;
   }
 
-  /// Kullanıcı "Size uzaklık: Konum izni vermeniz gereklidir" metnine dokunduğunda çağrılır.
-  /// Oturum bloğunu sıfırlar; bir sonraki [ensureLocationPermissionFromUserAction] çağrısı
-  /// yeniden sistem penceresini gösterebilir.
+  /// Oturum bloğunu sıfırlar; bir sonraki [ensureLocationPermissionFromUserAction]
+  /// çağrısı yeniden sistem penceresini gösterebilir.
   static Future<void> prepareForUserInitiatedPermissionDialog() async {
     _declinedThisSession = false;
-    _inFlightRequest = null; // devam eden isteği iptal et
+    _inFlightRequest = null;
   }
 
   /// İzin iste. Oturum bloğuna uyar: kullanıcı bu oturumda zaten reddettiyse
@@ -67,14 +71,12 @@ class SimpleLocationService {
         _requestFlow().whenComplete(() => _inFlightRequest = null);
   }
 
-  // ─── Kullanıcı isteği (chip dokunuşu) ────────────────────────────────────
+  // ─── Kullanıcı isteği (chip / konum butonu dokunuşu) ─────────────────────
 
-  /// "Size uzaklık: Konum izni vermeniz gereklidir" metnine dokunulduğunda çağrılır.
-  ///
-  /// Tam zincir:
-  ///   1. İzin zaten varsa → [PermissionRequestOutcome.granted]
-  ///   2. Kalıcı red → [openAppSettings] → [PermissionRequestOutcome.openedSettings]
-  ///   3. Normal red → istek → verilmezse tekrar kalıcı red kontrolü → ayarlar veya [denied]
+  /// Tam izin zinciri:
+  ///   1. Zaten verilmişse → [granted]
+  ///   2. Kalıcı red → [Geolocator.openAppSettings] → [openedSettings]
+  ///   3. İlk istek → OS diyaloğu → verilmezse iOS'ta Ayarlar, Android'de [denied]
   static Future<PermissionRequestOutcome> requestFromUserTap() {
     _declinedThisSession = false;
     _inFlightRequest = null;
@@ -84,34 +86,32 @@ class SimpleLocationService {
   static Future<PermissionRequestOutcome> _userTapFlow() async {
     try {
       // 1. İzin zaten verilmiş mi?
-      if (await Permission.locationWhenInUse.isGranted) {
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.always ||
+          perm == LocationPermission.whileInUse) {
         _declinedThisSession = false;
         return PermissionRequestOutcome.granted;
       }
 
-      final status = await Permission.locationWhenInUse.status;
-
-      // 2. Kalıcı red / kısıtlı: sistem penceresi artık açılmaz → Ayarlar'a yönlendir.
-      if (status.isPermanentlyDenied || status.isRestricted) {
-        await openAppSettings();
+      // 2. Kalıcı red → Ayarlar'a yönlendir.
+      if (perm == LocationPermission.deniedForever) {
+        await Geolocator.openAppSettings();
         return PermissionRequestOutcome.openedSettings;
       }
 
-      // 3. Normal istek göster.
-      final result = await Permission.locationWhenInUse.request();
-      final granted =
-          result.isGranted || await Permission.locationWhenInUse.isGranted;
-
-      if (granted) {
+      // 3. İlk istek veya normal red → OS diyaloğunu göster.
+      perm = await Geolocator.requestPermission();
+      if (perm == LocationPermission.always ||
+          perm == LocationPermission.whileInUse) {
         _declinedThisSession = false;
         return PermissionRequestOutcome.granted;
       }
 
-      // 4. İstek sonrası kalıcı red oldu mu?
-      // iOS'ta redden sonra dialog bir daha gösterilmez — direkt Ayarlar.
-      final statusAfter = await Permission.locationWhenInUse.status;
-      if (statusAfter.isPermanentlyDenied || Platform.isIOS) {
-        await openAppSettings();
+      // 4. İstek sonrası hâlâ red:
+      //    - Kalıcı red oldu → Ayarlar
+      //    - iOS'ta her red sonrası Ayarlar (sistem diyalog bir daha çıkmaz)
+      if (perm == LocationPermission.deniedForever || Platform.isIOS) {
+        await Geolocator.openAppSettings();
         return PermissionRequestOutcome.openedSettings;
       }
 
@@ -123,32 +123,25 @@ class SimpleLocationService {
     }
   }
 
-  // ─── Dahili akış ──────────────────────────────────────────────────────────
+  // ─── Dahili akış (otomatik tetik) ─────────────────────────────────────────
 
   static Future<bool> _requestFlow() async {
     try {
-      // 1. İzin zaten var mı?
-      if (await Permission.locationWhenInUse.isGranted) {
+      if (await isLocationGranted()) {
         _declinedThisSession = false;
         return true;
       }
-
-      // 2. Bu oturumda daha önce reddedildi mi?
       if (_declinedThisSession) return false;
 
-      final status = await Permission.locationWhenInUse.status;
-
-      // 3. Kalıcı red veya kısıtlı: sistem penceresini gösterme, sessizce bloke et.
-      if (status.isPermanentlyDenied || status.isRestricted) {
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.deniedForever) {
         _declinedThisSession = true;
         return false;
       }
 
-      // 4. Sistem izin penceresini göster.
-      final result = await Permission.locationWhenInUse.request();
-      final granted =
-          result.isGranted || await Permission.locationWhenInUse.isGranted;
-
+      perm = await Geolocator.requestPermission();
+      final granted = perm == LocationPermission.always ||
+          perm == LocationPermission.whileInUse;
       _declinedThisSession = !granted;
       return granted;
     } catch (_) {
