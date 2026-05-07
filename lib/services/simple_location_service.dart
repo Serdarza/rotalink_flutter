@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:permission_handler/permission_handler.dart';
 
 /// Kullanıcı tarafından tetiklenen izin isteğinin sonucu.
@@ -105,9 +107,10 @@ class SimpleLocationService {
         return PermissionRequestOutcome.granted;
       }
 
-      // 4. İstek sonrası kalıcı red oldu mu? (bazı cihazlarda ikinci redde geçer)
+      // 4. İstek sonrası kalıcı red oldu mu?
+      // iOS'ta redden sonra dialog bir daha gösterilmez — direkt Ayarlar.
       final statusAfter = await Permission.locationWhenInUse.status;
-      if (statusAfter.isPermanentlyDenied) {
+      if (statusAfter.isPermanentlyDenied || Platform.isIOS) {
         await openAppSettings();
         return PermissionRequestOutcome.openedSettings;
       }

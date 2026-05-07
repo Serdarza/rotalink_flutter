@@ -1749,13 +1749,9 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   Future<void> _goToMyLocation() async {
     if (!mounted) return;
     await _syncLocationUiFromPermissionOnly();
-    if (!mounted || !await Permission.locationWhenInUse.isGranted) {
-      if (mounted) {
-        _toast(
-          context,
-          'Konum izni yok. İzin için önce arama yapın veya Ayarlardan açın.',
-        );
-      }
+    if (!mounted) return;
+    if (!await Permission.locationWhenInUse.isGranted) {
+      await _handleChipTapLocationRequest();
       return;
     }
     if (SimpleLocationService.shouldSuppressPlayServicesLocationActivity) {
