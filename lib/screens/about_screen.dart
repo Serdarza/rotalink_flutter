@@ -22,6 +22,18 @@ class AboutScreen extends StatelessWidget {
       'Tamamen bağımsız bir çabayla tasarlanan Rotalink, sizlerin destekleriyle büyümeye devam edecektir.\n\n'
       'Rotanız hep açık olsun!';
 
+  static const String _dataSources =
+      'Uygulamada sunulan tesis bilgileri; kurumların resmî web siteleri, '
+      'kamuya açık duyurular ve kullanıcı bildirimleri gibi çeşitli kaynaklardan derlenmektedir. '
+      'Harita altyapısı OpenStreetMap katkıcıları tarafından sağlanmaktadır (© OpenStreetMap). '
+      'Rota hesaplama hizmeti OSRM (Open Source Routing Machine) tarafından sunulmaktadır.';
+
+  static const String _disclaimer =
+      'Rotalink, herhangi bir devlet kuruluşunu, kamu kurumunu veya resmî makamı temsil etmemektedir. '
+      'Uygulama tamamen bağımsız bir girişim olup hiçbir resmî kurum ya da kuruluşla organik bağı bulunmamaktadır. '
+      'Sunulan bilgiler genel rehberlik amaçlıdır; resmî ve güncel bilgi için ilgili kurumların resmî '
+      'kanallarını kontrol etmeniz tavsiye edilir.';
+
   Future<void> _openUrl(BuildContext context, String url) async {
     final uri = Uri.parse(url);
     try {
@@ -162,6 +174,11 @@ class AboutScreen extends StatelessWidget {
               body:
                   'Geri bildirim ve önerileriniz için uygulama menüsündeki «Öneri Gönder» seçeneğini kullanabilirsiniz.',
             ),
+            _SectionCard(
+              title: 'Veri Kaynakları',
+              body: _dataSources,
+            ),
+            _DisclaimerCard(text: _disclaimer),
             Padding(
               padding: EdgeInsets.fromLTRB(20, 8, 20, 28 + navBarInset),
               child: Text(
@@ -172,6 +189,57 @@ class AboutScreen extends StatelessWidget {
                   color: AppColors.primary,
                   fontWeight: FontWeight.w500,
                 ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DisclaimerCard extends StatelessWidget {
+  const _DisclaimerCard({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF8E1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFFFB300), width: 1.5),
+        ),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Icon(Icons.info_outline, color: Color(0xFFFFB300), size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Sorumluluk Reddi',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: Color(0xFF795548),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    text,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      height: 1.5,
+                      color: Color(0xFF5D4037),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
