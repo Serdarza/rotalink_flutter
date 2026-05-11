@@ -80,6 +80,10 @@ class MainMapScreen extends StatefulWidget {
 
 class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserver {
   final ValueNotifier<bool> _discoverFlash = ValueNotifier<bool>(false);
+
+  /// Harita pan/zoom event'lerinde sadece önizleme kartını yeniden çizmek için.
+  /// [setState] yerine bu notifier güncellenir → tüm ekran rebuild olmaz.
+  final ValueNotifier<int> _previewPositionTick = ValueNotifier<int>(0);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final MapController _mapController = MapController();
   final PopupController _popupController = PopupController();
@@ -172,6 +176,17 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   /// Arama / favori / geçmiş mesafe satırları için paylaşılan konum durumu.
   final MapLocationState _mapLocationState = MapLocationState();
 
+  // ─── Marker önbelleği — her build'de yeni nesne oluşturulmasın ──────────────
+  List<Marker>? _cachedPopupMarkers;
+  RotaDataState? _cachedMarkersData;
+  List<Misafirhane>? _cachedMarkersOverride;
+  Misafirhane? _cachedMarkersHighlight;
+  bool? _cachedMarkersInRoute;
+
+  // ─── İl listesi önbelleği ─────────────────────────────────────────────────
+  List<String>? _cachedIlOptions;
+  RotaDataState? _cachedIlOptionsSource;
+
   @override
   void initState() {
     super.initState();
@@ -254,6 +269,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _discoverFlash.dispose();
+    _previewPositionTick.dispose();
     _stopLocationStream();
     _dismissAttachedBottomSheet();
     _disposeSearchSheetExtentController();
@@ -450,7 +466,8 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
       unawaited(_closeMapPreviewAnimated());
       return;
     }
-    if (mounted) setState(() {});
+    // Sadece önizleme kartını yeniden konumlandır — tüm ekranı rebuild etme.
+    _previewPositionTick.value++;
   }
 
   bool _shouldDismissPreviewForMapEvent(MapEvent e) {
@@ -634,8 +651,6 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     Misafirhane? primaryHighlight,
   ) {
     final hl = primaryHighlight;
-    // Aynı stableFacilityId'ye sahip tekrarlı tesisleri filtrele;
-    // aksi hâlde PopupMarkerLayer "Duplicate keys" hatasıyla çöker.
     final seen = <String>{};
     return list
         .where(_validFacilityCoords)
@@ -647,6 +662,42 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
           ),
         )
         .toList();
+  }
+
+  /// Önbellekten marker listesi — veri/highlight değişmedikçe yeni nesne oluşturulmaz.
+  List<Marker> _cachedMarkers(
+    RotaDataState? data,
+    List<Misafirhane> display,
+    Misafirhane? highlight,
+    bool inRoute,
+  ) {
+    if (inRoute) return const [];
+    final same = identical(_cachedMarkersData, data) &&
+        identical(_cachedMarkersOverride, _markerOverride) &&
+        _cachedMarkersHighlight == highlight &&
+        _cachedMarkersInRoute == inRoute &&
+        _cachedPopupMarkers != null;
+    if (same) return _cachedPopupMarkers!;
+    _cachedMarkersData = data;
+    _cachedMarkersOverride = _markerOverride;
+    _cachedMarkersHighlight = highlight;
+    _cachedMarkersInRoute = inRoute;
+    _cachedPopupMarkers = _misafirhaneMapMarkers(display, highlight);
+    return _cachedPopupMarkers!;
+  }
+
+  /// Önbellekten il listesi — veri değişmedikçe yeniden sıralanmaz.
+  List<String>? _getIlOptions(RotaDataState? data) {
+    if (data == null) return null;
+    if (identical(data, _cachedIlOptionsSource) && _cachedIlOptions != null) {
+      return _cachedIlOptions;
+    }
+    _cachedIlOptionsSource = data;
+    _cachedIlOptions = MainMapSearch.distinctSortedIller(
+      aramaIcinTumTesisler: data.aramaIcinTumTesisler,
+      misafirhaneler: data.misafirhaneler,
+    );
+    return _cachedIlOptions;
   }
 
   void _onMisafirhanePopupEvent(PopupEvent event, List<Marker> selectedMarkers) {
@@ -1352,9 +1403,9 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                         ..._routeLabelMarkers,
                       ]
                     : const <Marker>[];
-                final facilityPopupMarkers = !inRoute
-                    ? _misafirhaneMapMarkers(display, _searchSheetHighlight)
-                    : const <Marker>[];
+                final facilityPopupMarkers = _cachedMarkers(
+                  data, display, _searchSheetHighlight, inRoute,
+                );
                 /// Arama sekmeli sheet açıkken tam görünürken gizlenir; küçültülünce veya
                 /// tamamen kapatılınca FAB tekrar çıkar (listeyi yeniden açmak için).
                 final searchSheetFab = _markerOverride != null &&
@@ -1560,12 +1611,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                       child: CustomSearchBar(
                         key: ValueKey<int>(_searchBarSession),
                         controller: _searchController,
-                        ilOptionsSorted: rotaForUi != null
-                            ? MainMapSearch.distinctSortedIller(
-                                aramaIcinTumTesisler: rotaForUi.aramaIcinTumTesisler,
-                                misafirhaneler: rotaForUi.misafirhaneler,
-                              )
-                            : null,
+                        ilOptionsSorted: _getIlOptions(rotaForUi),
                         onSubmitted: rotaForUi != null
                             ? () => unawaited(_performSearch(context, rotaForUi))
                             : null,
@@ -1580,9 +1626,12 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                         },
                       ),
                     ),
-                    if (_mapPreviewFacility != null)
-                      LayoutBuilder(
-                        builder: (context, constraints) {
+                    ValueListenableBuilder<int>(
+                      valueListenable: _previewPositionTick,
+                      builder: (_, _a, _b) {
+                        if (_mapPreviewFacility == null) return const SizedBox.shrink();
+                        return LayoutBuilder(
+                          builder: (context, constraints) {
                           final m = _mapPreviewFacility!;
                           const cardWMax = 200.0;
                           // ~2 satır + padding; marker ile boşluk
@@ -1631,7 +1680,9 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                             ),
                           );
                         },
-                      ),
+                        );
+                      },
+                    ),
                     Positioned(
                       right: 16,
                       bottom: 8,

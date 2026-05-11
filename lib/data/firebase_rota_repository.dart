@@ -48,7 +48,7 @@ class FirebaseRotaRepository {
         databaseURL: kFirebaseRtdbUrl,
       );
       db.setPersistenceEnabled(true);
-      db.setPersistenceCacheSizeBytes(20 * 1024 * 1024);
+      db.setPersistenceCacheSizeBytes(10 * 1024 * 1024);
     } catch (_) {}
   }
 
