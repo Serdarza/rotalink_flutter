@@ -9,7 +9,7 @@ abstract final class AdUnitIds {
   static const String _androidNativeList  = 'ca-app-pub-6478556288740067/2117264587';
 
   // ─── iOS ──────────────────────────────────────────────────────────────────
-  static const String _iosAppId           = 'ca-app-pub-6478556288740067~6800762661';
+  static const String _iosAppId           = 'ca-app-pub-6478556288740067~6588925851';
   static const String _iosBanner          = 'ca-app-pub-6478556288740067/3449514789';
   static const String _iosInterstitial    = 'ca-app-pub-6478556288740067/4219670970';
   static const String _iosNativeList      = 'ca-app-pub-6478556288740067/1593507634';
