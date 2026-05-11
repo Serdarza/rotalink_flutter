@@ -1628,7 +1628,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                     ),
                     ValueListenableBuilder<int>(
                       valueListenable: _previewPositionTick,
-                      builder: (_, _a, _b) {
+                      builder: (__, a, b) {
                         if (_mapPreviewFacility == null) return const SizedBox.shrink();
                         return LayoutBuilder(
                           builder: (context, constraints) {

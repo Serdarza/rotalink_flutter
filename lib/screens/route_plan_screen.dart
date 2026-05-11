@@ -20,7 +20,9 @@ import '../utils/maps_launch.dart';
 import '../utils/route_facility_lookup.dart';
 import '../utils/safe_map_coordinates.dart';
 import '../utils/search_normalize.dart';
+import '../ads/ad_service.dart';
 import '../widgets/il_search_sheet.dart';
+import '../widgets/rotalink_banner_ad.dart';
 import '../widgets/route_plan_preview_sheet.dart';
 
 /// Kotlin [MainActivity.showRoutePlanningFlow] — OSRM zenginleştirme ana haritada.
@@ -462,7 +464,7 @@ class _RoutePlanScaffoldState extends State<_RoutePlanScaffold> {
                       children: [
                         Expanded(
                           child: SingleChildScrollView(
-                            padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + ime),
+                            padding: EdgeInsets.fromLTRB(16, 12, 16, 16 + ime + bottomInset),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
@@ -613,6 +615,7 @@ class _RoutePlanScaffoldState extends State<_RoutePlanScaffold> {
                           n,
                           bottomInset: bottomInset,
                         ),
+                        RotalinkBannerAd(adsEnabled: AdService.adsEnabled),
                       ],
                     );
                   },

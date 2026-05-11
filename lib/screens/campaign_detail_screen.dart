@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../ads/ad_service.dart';
 import '../ads/discover_native_merge.dart';
+import '../widgets/rotalink_banner_ad.dart';
 import '../l10n/app_strings.dart';
 import '../models/campaign.dart';
 import '../theme/app_colors.dart';
@@ -201,6 +202,7 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: RotalinkBannerAd(adsEnabled: AdService.adsEnabled),
     );
   }
 }
