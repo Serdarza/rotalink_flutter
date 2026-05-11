@@ -1,13 +1,22 @@
-/// Kotlin `DiscoverActivity` / `MainActivity` / `CampaignDetailActivity` ile aynı birimler.
+import 'dart:io' show Platform;
+
+/// Android ve iOS için ayrı AdMob reklam birimi kimlikleri.
 abstract final class AdUnitIds {
-  static const String appId = 'ca-app-pub-6478556288740067~6800762661';
+  // ─── Android ──────────────────────────────────────────────────────────────
+  static const String _androidAppId       = 'ca-app-pub-6478556288740067~6800762661';
+  static const String _androidBanner      = 'ca-app-pub-6478556288740067/9417170109';
+  static const String _androidInterstitial= 'ca-app-pub-6478556288740067/7001215166';
+  static const String _androidNativeList  = 'ca-app-pub-6478556288740067/2117264587';
 
-  /// `activity_main.xml` banner.
-  static const String banner = 'ca-app-pub-6478556288740067/9417170109';
+  // ─── iOS ──────────────────────────────────────────────────────────────────
+  static const String _iosAppId           = 'ca-app-pub-6478556288740067~6800762661';
+  static const String _iosBanner          = 'ca-app-pub-6478556288740067/3449514789';
+  static const String _iosInterstitial    = 'ca-app-pub-6478556288740067/4219670970';
+  static const String _iosNativeList      = 'ca-app-pub-6478556288740067/1593507634';
 
-  /// `MainActivity.loadInterstitialAd`.
-  static const String interstitial = 'ca-app-pub-6478556288740067/7001215166';
-
-  /// Keşfet / bottom sheet / kampanya native (`DiscoverActivity.NATIVE_AD_UNIT_ID`).
-  static const String nativeList = 'ca-app-pub-6478556288740067/2117264587';
+  // ─── Aktif platform ───────────────────────────────────────────────────────
+  static String get appId        => Platform.isIOS ? _iosAppId        : _androidAppId;
+  static String get banner       => Platform.isIOS ? _iosBanner       : _androidBanner;
+  static String get interstitial => Platform.isIOS ? _iosInterstitial : _androidInterstitial;
+  static String get nativeList   => Platform.isIOS ? _iosNativeList   : _androidNativeList;
 }
