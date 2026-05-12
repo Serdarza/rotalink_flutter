@@ -28,6 +28,17 @@ class AboutScreen extends StatelessWidget {
       'Harita altyapısı OpenStreetMap katkıcıları tarafından sağlanmaktadır (© OpenStreetMap). '
       'Rota hesaplama hizmeti OSRM (Open Source Routing Machine) tarafından sunulmaktadır.';
 
+  static const List<_SourceLink> _officialSources = [
+    _SourceLink('Öğretmenevleri / Uygulama Otelleri (MEB)', 'https://mtegm.meb.gov.tr'),
+    _SourceLink('Polisevleri (EGM)', 'https://www.egm.gov.tr'),
+    _SourceLink('Orduevleri / Hekimevleri (MSB)', 'https://www.msb.gov.tr'),
+    _SourceLink('DSİ Misafirhaneleri', 'https://www.dsi.gov.tr'),
+    _SourceLink('Karayolları Misafirhaneleri (KGM)', 'https://www.kgm.gov.tr'),
+    _SourceLink('Orman İşletme Misafirhaneleri (OGM)', 'https://www.ogm.gov.tr'),
+    _SourceLink('Harita Altyapısı (OpenStreetMap)', 'https://www.openstreetmap.org'),
+    _SourceLink('Rota Hesaplama (OSRM)', 'https://project-osrm.org'),
+  ];
+
   static const String _disclaimer =
       'Rotalink, herhangi bir devlet kuruluşunu, kamu kurumunu veya resmî makamı temsil etmemektedir. '
       'Uygulama tamamen bağımsız bir girişim olup hiçbir resmî kurum ya da kuruluşla organik bağı bulunmamaktadır. '
@@ -178,6 +189,10 @@ class AboutScreen extends StatelessWidget {
               title: 'Veri Kaynakları',
               body: _dataSources,
             ),
+            _SourceLinksCard(
+              sources: _officialSources,
+              onOpen: (url) => _openUrl(context, url),
+            ),
             _DisclaimerCard(text: _disclaimer),
             Padding(
               padding: EdgeInsets.fromLTRB(20, 8, 20, 28 + navBarInset),
@@ -192,6 +207,83 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SourceLink {
+  const _SourceLink(this.label, this.url);
+  final String label;
+  final String url;
+}
+
+class _SourceLinksCard extends StatelessWidget {
+  const _SourceLinksCard({required this.sources, required this.onOpen});
+  final List<_SourceLink> sources;
+  final void Function(String url) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 18, 18, 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Resmî Kaynaklar',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Container(width: 40, height: 2, color: AppColors.primary),
+              const SizedBox(height: 4),
+              ...sources.map(
+                (s) => InkWell(
+                  onTap: () => onOpen(s.url),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.open_in_new, size: 15, color: AppColors.primary),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                s.label,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                s.url,
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.primary,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
