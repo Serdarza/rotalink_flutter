@@ -271,6 +271,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 headerBottom: _headerBottom,
                 onBack: () => Navigator.of(context).pop(),
               ),
+              _DisclaimerBanner(),
               Expanded(
                 child: AnimatedBuilder(
                   animation: Listenable.merge([
@@ -307,6 +308,30 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DisclaimerBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: const Color(0xFFFFF8E1),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, size: 15, color: Color(0xFFE65100)),
+          const SizedBox(width: 6),
+          const Expanded(
+            child: Text(
+              'Kampanyalar bağımsız kaynaklardan derlenmektedir. '
+              'Rotalink hiçbir devlet kuruluşunu temsil etmemektedir.',
+              style: TextStyle(fontSize: 11, color: Color(0xFF5D4037), height: 1.4),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -170,7 +170,7 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
               ),
             ],
             const SizedBox(height: 28),
-            if (campaign.linkUrl != null && campaign.linkUrl!.trim().isNotEmpty)
+            if (campaign.linkUrl != null && campaign.linkUrl!.trim().isNotEmpty) ...[
               FilledButton.icon(
                 onPressed: _openLink,
                 icon: const Icon(Icons.open_in_new),
@@ -180,6 +180,13 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
                   foregroundColor: AppColors.white,
                 ),
               ),
+              const SizedBox(height: 6),
+              const Text(
+                'Bu bağlantı üçüncü taraf bir kaynağa aittir. '
+                'Rotalink bu kurumla bağlantılı değildir.',
+                style: TextStyle(fontSize: 11, color: Color(0xFF9E9E9E), height: 1.4),
+              ),
+            ],
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: _share,
