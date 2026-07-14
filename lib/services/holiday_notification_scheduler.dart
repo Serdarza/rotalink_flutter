@@ -10,6 +10,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../constants/public_holidays_2026.dart';
 import '../navigator_keys.dart';
 import '../screens/holidays_screen.dart';
+import '../navigation/rotalink_shell_routes.dart';
 
 /// Arka planda bildirime tıklanınca (ayrı isolate); [pragma] zorunlu.
 @pragma('vm:entry-point')
@@ -93,6 +94,11 @@ class HolidayNotificationScheduler {
 
   static void _onForegroundNotificationResponse(NotificationResponse r) {
     if (r.payload != payloadOpenHolidays) return;
+    final shellNav = rotalinkShellBodyNavigatorKey.currentState;
+    if (shellNav != null) {
+      shellNav.pushNamed(RotalinkShellRoutes.holidays);
+      return;
+    }
     final ctx = rotalinkNavigatorKey.currentContext;
     if (ctx != null && ctx.mounted) {
       Navigator.of(ctx).push(

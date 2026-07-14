@@ -231,43 +231,38 @@ Future<bool?> showRoutePlanPreviewSheet({
                       ),
                       if (placeQ != null && placeQ.length >= 2) ...[
                         const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
+                        Row(
                           children: [
-                            OutlinedButton.icon(
-                              onPressed: () =>
-                                  openGoogleDirectionsPlaceQueries(ctx, placeQ),
-                              icon: const Icon(Icons.navigation_rounded, size: 18),
-                              label: const Text(AppStrings.routePlanNavGoogle),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () =>
+                                    openGoogleDirectionsPlaceQueries(ctx, placeQ),
+                                icon: const Icon(Icons.navigation_rounded, size: 18),
+                                label: const Text(AppStrings.routePlanNavGoogle),
+                              ),
                             ),
-                            OutlinedButton.icon(
-                              onPressed: () =>
-                                  openYandexDirectionsPlaceQueries(ctx, placeQ),
-                              icon: const Icon(Icons.alt_route_rounded, size: 18),
-                              label: const Text(AppStrings.routePlanNavYandex),
-                            ),
-                            OutlinedButton.icon(
-                              onPressed: () =>
-                                  openAppleDirectionsPlaceQueries(ctx, placeQ),
-                              icon: const Icon(Icons.map_rounded, size: 18),
-                              label: const Text(AppStrings.routePlanNavApple),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () =>
+                                    openAppleDirectionsPlaceQueries(ctx, placeQ),
+                                icon: const Icon(Icons.map_rounded, size: 18),
+                                label: const Text(AppStrings.routePlanNavApple),
+                              ),
                             ),
                           ],
                         ),
                       ] else if (navigationWaypoints != null &&
                           navigationWaypoints.length >= 2) ...[
                         const SizedBox(height: 10),
-                        TextButton.icon(
+                        OutlinedButton.icon(
                           onPressed: () =>
                               openGoogleDirectionsWaypoints(ctx, navigationWaypoints),
-                          icon: const Icon(Icons.alt_route_rounded, size: 20),
-                          label: const Text(
-                            AppStrings.routePlanGoogleFullDirections,
-                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                          ),
+                          icon: const Icon(Icons.navigation_rounded, size: 18),
+                          label: const Text(AppStrings.routePlanNavGoogle),
                         ),
                       ],
+                      const SizedBox(height: 10),
                       FilledButton(
                         onPressed: () => Navigator.pop(ctx, true),
                         style: FilledButton.styleFrom(

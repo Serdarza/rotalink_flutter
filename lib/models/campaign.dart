@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Kotlin [Campaign] — Firestore `KAMPANYALAR` belgesi.
+/// Kotlin [Campaign] — GitHub kampanya.json / eski Firestore alan eşlemesi.
 class Campaign {
   const Campaign({
     required this.id,
@@ -20,8 +20,7 @@ class Campaign {
   final DateTime? createdAt;
   final List<String> tags;
 
-  factory Campaign.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final d = doc.data() ?? {};
+  factory Campaign.fromMap(Map<String, dynamic> d, {required String id}) {
     final link = _firstNonBlankString([
       d['link'],
       d['detayLink'],
@@ -37,19 +36,58 @@ class Campaign {
       d['kampanyaKurumu'],
     ]) ?? '';
     final summary = _string(d['aciklama']) ?? '';
-    final ts = d['tarih'] is Timestamp
-        ? d['tarih'] as Timestamp
-        : (d['eklenmeTarihi'] is Timestamp ? d['eklenmeTarihi'] as Timestamp : null);
+    final ts = d['tarih'];
+    DateTime? createdAt;
+    if (ts is Timestamp) {
+      createdAt = ts.toDate();
+    } else if (ts is String) {
+      createdAt = DateTime.tryParse(ts);
+    } else if (d['eklenmeTarihi'] is Timestamp) {
+      createdAt = (d['eklenmeTarihi'] as Timestamp).toDate();
+    }
 
     return Campaign(
-      id: doc.id,
+      id: id,
       title: title,
       organization: org,
       summary: summary,
       linkUrl: link?.isEmpty ?? true ? null : link,
-      createdAt: ts?.toDate(),
+      createdAt: createdAt,
       tags: _tagsFromDoc(d, org),
     );
+  }
+
+  factory Campaign.fromJson(Map<String, dynamic> json, {String? id, int? index}) {
+    final title = (_string(json['baslik']) ?? _string(json['kampanyaBaslik']) ?? '')
+        .trim();
+    final resolvedId = id ??
+        _string(json['id'])?.trim() ??
+        (index != null ? 'kampanya-$index' : 'kampanya-${title.hashCode.abs()}');
+    return Campaign.fromMap(json, id: resolvedId);
+  }
+
+  /// GitHub `kampanya.json` kök nesnesinden sıralı kampanya listesi.
+  static List<Campaign> parseListFromRoot(dynamic root) {
+    if (root is! Map) return const [];
+    final raw = root['kampanyalar'];
+    if (raw is! List) return const [];
+
+    final out = <Campaign>[];
+    for (var i = 0; i < raw.length; i++) {
+      final item = raw[i];
+      if (item is! Map) continue;
+      final map = item.map((k, v) => MapEntry(k.toString(), v));
+      final campaign = Campaign.fromJson(map, index: i);
+      if (campaign.title.trim().isEmpty) continue;
+      out.add(campaign);
+    }
+
+    out.sort((a, b) {
+      final ta = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final tb = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return tb.compareTo(ta);
+    });
+    return out;
   }
 
   static String? _string(dynamic v) => v?.toString();

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/public_holidays_2026.dart';
 import '../l10n/app_strings.dart';
+import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
 
 /// 2026 resmi tatiller — liste, kart tasarımı ve geri sayım.
@@ -179,7 +180,12 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
         title: Text(AppStrings.drawerHolidays),
       ),
       body: ListView.builder(
-        padding: EdgeInsets.fromLTRB(16, 12, 16, 24 + MediaQuery.viewPaddingOf(context).bottom),
+        padding: EdgeInsets.fromLTRB(
+          16,
+          12,
+          16,
+          12 + RotalinkShellScope.scrollBottomPadding(context),
+        ),
         itemCount: kPublicHolidays2026.length,
         itemBuilder: (context, index) {
           final h = kPublicHolidays2026[index];

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../ads/ad_service.dart';
+import '../ads/discover_native_ad_pool.dart';
 import '../ads/discover_native_merge.dart';
 import '../data/campaign_repository.dart';
 import '../l10n/app_strings.dart';
@@ -19,10 +20,20 @@ const _headerBottom = Color(0xFF008898);
 
 /// Kotlin [DiscoverActivity] + [DiscoverComposeScreen] (liste arası native + banner).
 class DiscoverScreen extends StatefulWidget {
-  DiscoverScreen({super.key, CampaignRepository? repository})
-    : repository = repository ?? CampaignRepository();
+  DiscoverScreen({
+    super.key,
+    CampaignRepository? repository,
+    this.embeddedInShell = false,
+    this.showBackButton = true,
+  }) : repository = repository ?? CampaignRepository();
 
   final CampaignRepository repository;
+
+  /// [RotalinkMainShell] içinde — alt menü dışarıda kalır.
+  final bool embeddedInShell;
+
+  /// Alt menü sekmesinden açıldığında geri oku gizlenir.
+  final bool showBackButton;
 
   @override
   State<DiscoverScreen> createState() => _DiscoverScreenState();
@@ -36,11 +47,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   StreamSubscription<List<Campaign>>? _campaignSub;
 
   List<Campaign> _allCampaigns = const [];
-  String? _firestoreError;
+  String? _loadError;
   bool _streamWaiting = true;
 
   List<NativeAd> _nativeAds = const [];
-  bool _nativeBusy = false;
   int _nativeGen = 0;
 
   void _onSearchTextChanged() {
@@ -54,13 +64,21 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.repository.isReady) {
+      _allCampaigns = widget.repository.currentCampaigns;
+      _streamWaiting = false;
+      _nativeAds = DiscoverNativeAdPool.instance.snapshot(_allCampaigns.length);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _onCampaignsDataChanged();
+      });
+    }
     _search.addListener(_onSearchTextChanged);
     _campaignSub = widget.repository.watchCampaignsOrdered().listen(
       (list) {
         if (!mounted) return;
         setState(() {
           _allCampaigns = list;
-          _firestoreError = null;
+          _loadError = null;
           _streamWaiting = false;
         });
         _discoverBodyTick.value++;
@@ -71,10 +89,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         _nativeGen++;
         _disposeNatives();
         setState(() {
-          _firestoreError = 'Kampanyalar yüklenemedi.';
+          _loadError = 'Kampanyalar yüklenemedi.';
           _allCampaigns = const [];
           _streamWaiting = false;
-          _nativeBusy = false;
         });
         _discoverBodyTick.value++;
       },
@@ -82,19 +99,15 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   void _disposeNatives() {
-    for (final a in _nativeAds) {
-      a.dispose();
-    }
     _nativeAds = const [];
   }
 
   void _onCampaignsDataChanged() {
-    if (_firestoreError != null) return;
+    if (_loadError != null) return;
 
     if (!AdService.adsEnabled || kIsWeb) {
       _disposeNatives();
       if (mounted) {
-        setState(() => _nativeBusy = false);
         _discoverBodyTick.value++;
       }
       return;
@@ -104,7 +117,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     if (needed == 0) {
       _disposeNatives();
       if (mounted) {
-        setState(() => _nativeBusy = false);
         _discoverBodyTick.value++;
       }
       return;
@@ -112,7 +124,16 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
     if (_nativeAds.length >= needed) {
       if (mounted) {
-        setState(() => _nativeBusy = false);
+        _discoverBodyTick.value++;
+      }
+      return;
+    }
+
+    if (DiscoverNativeAdPool.instance.hasAdsFor(_allCampaigns.length)) {
+      if (mounted) {
+        setState(() {
+          _nativeAds = DiscoverNativeAdPool.instance.snapshot(_allCampaigns.length);
+        });
         _discoverBodyTick.value++;
       }
       return;
@@ -122,25 +143,16 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   Future<void> _reloadNativeAds(int needed) async {
-    _disposeNatives();
     final gen = ++_nativeGen;
-    if (mounted) {
-      setState(() => _nativeBusy = true);
-      _discoverBodyTick.value++;
-    }
 
-    final loaded = await DiscoverNativeMerge.loadPool(needed);
+    final loaded = await DiscoverNativeAdPool.instance.ensureAds(_allCampaigns.length);
 
     if (!mounted || gen != _nativeGen) {
-      for (final a in loaded) {
-        a.dispose();
-      }
       return;
     }
 
     setState(() {
       _nativeAds = loaded;
-      _nativeBusy = false;
     });
     _discoverBodyTick.value++;
   }
@@ -173,20 +185,14 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     required List<Campaign> all,
     required List<Campaign> filtered,
   }) {
-    if (_firestoreError != null) return _firestoreError!;
+    if (_loadError != null) return _loadError!;
     if (overlayLoading) return '';
     if (filtered.isNotEmpty) return '';
     if (all.isEmpty) return 'Henüz kampanya yok.';
     return 'Aramana uygun kampanya bulunamadı.';
   }
 
-  bool _overlayLoading() {
-    if (_streamWaiting) return true;
-    if (_firestoreError != null) return false;
-    if (!AdService.adsEnabled || kIsWeb) return false;
-    final needed = DiscoverNativeMerge.nativeSlotsNeeded(_allCampaigns.length);
-    return needed > 0 && _nativeBusy;
-  }
+  bool _overlayLoading() => _streamWaiting && _loadError == null;
 
   Widget _buildBody({
     required BuildContext context,
@@ -221,7 +227,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           return _CampaignDiscoverCard(
             campaign: c,
             onOpenDetail: () {
-              Navigator.of(context).push<void>(
+              Navigator.of(context, rootNavigator: false).push<void>(
                 MaterialPageRoute<void>(
                   builder: (_) => CampaignDetailScreen(campaign: c),
                 ),
@@ -258,17 +264,20 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       // Üst şerit status bar’a taşsın; alt gest / üç tuş hep üstte kalsın (viewPadding klavyede de doğru).
       body: SafeArea(
         top: false,
-        bottom: false,
+        bottom: !widget.embeddedInShell,
         child: Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.viewPaddingOf(context).bottom,
-          ),
+          padding: widget.embeddedInShell
+              ? EdgeInsets.zero
+              : EdgeInsets.only(
+                  bottom: MediaQuery.viewPaddingOf(context).bottom,
+                ),
           child: Column(
             children: [
               _DiscoverHeader(
                 searchController: _search,
                 headerTop: _headerTop,
                 headerBottom: _headerBottom,
+                showBackButton: widget.showBackButton,
                 onBack: () => Navigator.of(context).pop(),
               ),
               _DisclaimerBanner(),
@@ -280,7 +289,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                   ]),
                   builder: (context, _) {
                     final filterQuery = _debouncedFilter.value;
-                    final filtered = _firestoreError != null
+                    final filtered = _loadError != null
                         ? const <Campaign>[]
                         : _filtered(_allCampaigns, filterQuery);
                     final merged = DiscoverNativeMerge.mergeFiltered(
@@ -343,12 +352,14 @@ class _DiscoverHeader extends StatelessWidget {
     required this.headerTop,
     required this.headerBottom,
     required this.onBack,
+    this.showBackButton = true,
   });
 
   final TextEditingController searchController;
   final Color headerTop;
   final Color headerBottom;
   final VoidCallback onBack;
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -374,11 +385,12 @@ class _DiscoverHeader extends StatelessWidget {
           children: [
             Row(
               children: [
-                IconButton(
-                  onPressed: onBack,
-                  icon: const Icon(Icons.arrow_back, color: AppColors.white),
-                  tooltip: 'Geri',
-                ),
+                if (showBackButton)
+                  IconButton(
+                    onPressed: onBack,
+                    icon: const Icon(Icons.arrow_back, color: AppColors.white),
+                    tooltip: 'Geri',
+                  ),
                 const Text(
                   AppStrings.bottomDiscover,
                   style: TextStyle(

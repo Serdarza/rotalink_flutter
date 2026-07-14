@@ -81,13 +81,11 @@ class RoutePlanningNotifier extends ChangeNotifier {
   void trimStopSelectionsForCity(int stopIndex, String il, RotaDataState data) {
     if (stopIndex < 0 || stopIndex >= _intermediate.length) return;
     final row = _intermediate[stopIndex];
-    final n = il.trim().toLowerCase();
-    if (n.isEmpty) return;
-    row.konakSecimler.removeWhere((m) => m.il.trim().toLowerCase() != n);
-    row.geziSecimler.removeWhere((g) => g.il.trim().toLowerCase() != n);
-    row.yemekSecimler.removeWhere((y) => y.il.trim().toLowerCase() != n);
+    if (il.trim().isEmpty) return;
+    row.konakSecimler.clear();
+    row.geziSecimler.clear();
+    row.yemekSecimler.clear();
     row.suggestionsTabIndex = 0;
-    seedSuggestionsForStop(stopIndex, data);
     notifyListeners();
   }
 
@@ -339,7 +337,7 @@ class RoutePlanningNotifier extends ChangeNotifier {
         snack(AppStrings.routePlanSaveEmptyName);
         return;
       }
-      final lites = stops.map((s) => RouteStopLite(city: s.city, days: s.days)).toList();
+      final lites = stops.map(RouteStopLite.fromRouteStop).toList();
       await _savedRoutesRepository.upsert(
         SavedRouteRecord(
           name: name,

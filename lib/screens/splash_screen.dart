@@ -5,10 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import '../data/app_rating_prefs.dart';
+import '../ads/discover_native_ad_pool.dart';
+import '../data/campaign_repository.dart';
 import '../data/firebase_rota_repository.dart';
 import '../l10n/app_strings.dart';
 import '../theme/app_colors.dart';
-import 'main_map_screen.dart';
+import 'rotalink_main_shell.dart';
 
 /// Tam ekran kurumsal renk; ortada başlık + alt slogan. İkon / logo yok.
 class SplashScreen extends StatefulWidget {
@@ -31,7 +33,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _entrance = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 450),
     );
     _fade = CurvedAnimation(parent: _entrance, curve: Curves.easeOut);
 
@@ -47,14 +49,22 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FlutterNativeSplash.remove();
-      unawaited(widget.repository.primeRootSnapshot());
       unawaited(_runSplashSequence());
     });
   }
 
   Future<void> _runSplashSequence() async {
     await _entrance.forward();
-    await Future<void>.delayed(const Duration(milliseconds: 1600));
+    // İlk kurulumda GitHub'dan indir; önbellek varsa anında geç.
+    await Future.wait([
+      widget.repository.ensureLocalDataReady(),
+      CampaignRepository.instance.ensureLocalDataReady(),
+    ]);
+    final campaignCount = CampaignRepository.instance.currentCampaigns.length;
+    if (campaignCount > 0) {
+      unawaited(DiscoverNativeAdPool.instance.ensureAds(campaignCount));
+    }
+    await Future<void>.delayed(const Duration(milliseconds: 220));
     if (!mounted) return;
     _goMain();
   }
@@ -63,7 +73,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (_) => MainMapScreen(repository: widget.repository),
+        builder: (_) => RotalinkMainShell(repository: widget.repository),
       ),
     );
   }

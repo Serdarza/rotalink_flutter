@@ -20,7 +20,8 @@ abstract final class AppStrings {
   static const String fabMisafirhaneList = 'Misafirhane Listesini Aç';
   static const String fabEmergency = 'Acil — SOS ve sağlık';
   static const String emergencyLabel = 'ACİL';
-  static const String bottomHistory = 'Geçmiş';
+  static const String bottomHome = 'Ana Sayfa';
+  static const String bottomSearch = 'Ara';
   static const String bottomFavorites = 'Favorilerim';
   static const String favoritesEmpty = 'Favori listeniz boş.';
   static const String bottomRoutePlan = 'Rota Planla';
@@ -104,6 +105,12 @@ abstract final class AppStrings {
   static const String drawerWebsite = 'Web Sitemize Git';
   static const String drawerShareApp = 'Uygulamayı Paylaş';
   static const String drawerAbout = 'Hakkımızda';
+  static const String drawerSocialMedia = 'Sosyal Medya Hesaplarımız';
+  static const String drawerSocialInstagram = 'Instagram';
+  static const String drawerSocialInstagramHandle = '@rotalink_tr';
+  static const String drawerSocialFacebook = 'Facebook';
+  static const String drawerSocialFacebookHandle = 'Rotalink Kamu Seyahat Rehberi';
+  static const String drawerSocialOpenFailed = 'Bağlantı açılamadı.';
 
   static const String myLocationTooltip = 'Konumum';
   static const String mapDataLoading = 'Veri yükleniyor…';
@@ -126,5 +133,9 @@ abstract final class AppStrings {
       'Öneriniz için teşekkür ederiz. Geri bildiriminiz bizim için çok değerli.';
   static const String suggestionOk = 'Tamam';
   static const String suggestionMailFailed = 'E-posta uygulaması açılamadı.';
+
+  static const String onboardingNext = 'İleri';
+  static const String onboardingSkip = 'Atla';
+  static const String onboardingFinish = 'Başla';
 
 }

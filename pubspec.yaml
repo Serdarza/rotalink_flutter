@@ -2,7 +2,7 @@ name: rotalink_flutter
 description: Rotalink — Flutter (Android + iOS), Kotlin uygulamasıyla aynı veri kaynağı.
 publish_to: 'none'
 
-version: 4.1.0+61
+version: 4.2.1+63
 
 environment:
   sdk: ^3.11.4
@@ -10,9 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.8
   firebase_core: ^3.8.1
-  firebase_database: ^11.2.0
   cloud_firestore: ^5.6.0
   firebase_analytics: ^11.4.0
   firebase_remote_config: ^5.3.0
@@ -20,19 +18,18 @@ dependencies:
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
   geolocator: ^13.0.2
-  permission_handler: ^11.3.1
   package_info_plus: ^8.1.1
   google_mobile_ads: ^5.3.0
   shared_preferences: ^2.3.3
+  path_provider: ^2.1.5
   url_launcher: ^6.3.1
   share_plus: ^10.1.4
-  flutter_qiblah: ^3.1.0
-  sensors_plus: ^4.0.0
   intl: ^0.20.2
   http: ^1.2.2
   speech_to_text: ^7.0.0
   connectivity_plus: ^6.0.0
   provider: ^6.1.2
+  flutter_riverpod: ^2.6.1
   flutter_native_splash: ^2.4.7
   flutter_map_marker_popup: ^7.0.0
   flutter_local_notifications: ^18.0.1
@@ -47,9 +44,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/legacy_res/drawable/
-    - assets/legacy_res/mipmap-anydpi-v26/
     - assets/images/app_logo.png
+    - assets/images/kami_logo.png
+    - assets/images/social_instagram.png
+    - assets/images/social_facebook.png
 
 # dart run flutter_launcher_icons
 # Kare logo (app_logo.png); adaptive arka plan PNG köşe rengine yakın — maskede renk farkı görünmez.

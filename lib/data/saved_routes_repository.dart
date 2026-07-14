@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/gezi_yemek_item.dart';
+import '../models/misafirhane.dart';
 import '../models/route_stop.dart';
 
 /// Kotlin `encryptedPrefs` + `saved_routes` anahtarı; en fazla 5 rota.
@@ -25,7 +27,8 @@ class SavedRouteRecord {
   static SavedRouteRecord? tryParse(Map<String, dynamic> m) {
     final name = (m['name'] ?? '').toString().trim();
     if (name.isEmpty) return null;
-    final saved = (m['savedDate'] as num?)?.toInt() ?? DateTime.now().millisecondsSinceEpoch;
+    final saved =
+        (m['savedDate'] as num?)?.toInt() ?? DateTime.now().millisecondsSinceEpoch;
     final rawStops = m['routeStops'] as List<dynamic>? ?? const [];
     final stops = rawStops.map((e) {
       if (e is! Map) return null;
@@ -37,22 +40,78 @@ class SavedRouteRecord {
   }
 }
 
+/// Kayıtlı rota durağı — şehir, gün ve seçili tesis/gezi/yemek.
 class RouteStopLite {
-  const RouteStopLite({required this.city, required this.days});
+  const RouteStopLite({
+    required this.city,
+    required this.days,
+    this.items = const [],
+  });
 
   final String city;
   final int days;
 
-  Map<String, dynamic> toJson() => {'city': city, 'days': days};
+  /// [Misafirhane] veya [GeziYemekItem] JSON map listesi.
+  final List<Map<String, dynamic>> items;
+
+  Map<String, dynamic> toJson() => {
+        'city': city,
+        'days': days,
+        if (items.isNotEmpty) 'items': items,
+      };
 
   static RouteStopLite? tryParse(Map<String, dynamic> m) {
     final city = (m['city'] ?? '').toString().trim();
     if (city.isEmpty) return null;
     final d = (m['days'] as num?)?.toInt() ?? 1;
-    return RouteStopLite(city: city, days: d);
+    final rawItems = m['items'];
+    final items = <Map<String, dynamic>>[];
+    if (rawItems is List) {
+      for (final e in rawItems) {
+        if (e is! Map) continue;
+        items.add(e.map((k, v) => MapEntry(k.toString(), v)));
+      }
+    }
+    return RouteStopLite(city: city, days: d, items: items);
   }
 
-  RouteStop toRouteStop() => RouteStop(city: city, days: days, items: []);
+  factory RouteStopLite.fromRouteStop(RouteStop stop) {
+    final items = <Map<String, dynamic>>[];
+    for (final o in stop.items) {
+      if (o is Misafirhane) {
+        items.add({...o.toJson(), '_kind': 'tesis'});
+      } else if (o is GeziYemekItem) {
+        items.add({...o.toJson(), '_kind': 'gezi_yemek'});
+      }
+    }
+    return RouteStopLite(city: stop.city, days: stop.days, items: items);
+  }
+
+  RouteStop toRouteStop() {
+    final out = <Object>[];
+    for (final raw in items) {
+      final kind = (raw['_kind'] ?? '').toString();
+      if (kind == 'tesis') {
+        final m = Misafirhane.tryParse(raw);
+        if (m != null) out.add(m);
+        continue;
+      }
+      if (kind == 'gezi_yemek') {
+        final g = GeziYemekItem.tryParse(raw);
+        if (g != null) out.add(g);
+        continue;
+      }
+      // Eski / belirsiz kayıtlar: önce tesis, değilse gezi-yemek dene.
+      final m = Misafirhane.tryParse(raw);
+      if (m != null && m.isim.trim().isNotEmpty) {
+        out.add(m);
+        continue;
+      }
+      final g = GeziYemekItem.tryParse(raw);
+      if (g != null) out.add(g);
+    }
+    return RouteStop(city: city, days: days, items: out);
+  }
 }
 
 class SavedRoutesRepository {

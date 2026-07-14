@@ -1,0 +1,10 @@
+{
+  "kampanyalar": [
+    {
+      "baslik": "Örnek Kampanya Başlığı",
+      "aciklama": "Kısa açıklama metni.",
+      "link": "https://ornek.com/detay",
+      "tarih": "2026-06-01T09:00:00Z"
+    }
+  ]
+}

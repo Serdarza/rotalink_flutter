@@ -31,13 +31,19 @@ class CustomSearchBar extends StatefulWidget {
   const CustomSearchBar({
     super.key,
     required this.controller,
+    this.focusNode,
     this.ilOptionsSorted,
     this.onSubmitted,
     this.onSearchCleared,
     this.onFilterPressed,
+    this.onFocusChanged,
+    this.ignoreKeyboardInset = false,
   });
 
   final TextEditingController controller;
+
+  /// Dışarıdan odak kontrolü (alt menü "Ara" vb.).
+  final FocusNode? focusNode;
 
   /// Sıralı il listesi — `MainMapSearch.distinctSortedIller` çıktısı.
   final List<String>? ilOptionsSorted;
@@ -49,6 +55,12 @@ class CustomSearchBar extends StatefulWidget {
 
   /// Filtre ikonu tıklandığında (geçilmezse ikon soluk gösterilir).
   final VoidCallback? onFilterPressed;
+
+  /// Odak değişimi — ana harita arama kromu animasyonu için.
+  final ValueChanged<bool>? onFocusChanged;
+
+  /// Klavye açılınca alt boşluk ekleme (ana harita sabit krom için true).
+  final bool ignoreKeyboardInset;
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -72,6 +84,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
     final empty = widget.controller.text.trim().isEmpty;
     if (_hadMeaningfulText && empty) widget.onSearchCleared?.call();
     _hadMeaningfulText = !empty;
+    _rebuild();
+  }
+
+  void _onFocusChanged() {
+    widget.onFocusChanged?.call(_focusNode.hasFocus);
     _rebuild();
   }
 
@@ -192,16 +209,19 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   void initState() {
     super.initState();
     _hadMeaningfulText = widget.controller.text.trim().isNotEmpty;
-    _focusNode = FocusNode()..addListener(_rebuild);
+    _focusNode = widget.focusNode ?? FocusNode()
+      ..addListener(_onFocusChanged);
     widget.controller.addListener(_onControllerChanged);
   }
 
   @override
   void dispose() {
     widget.controller.removeListener(_onControllerChanged);
-    _focusNode
-      ..removeListener(_rebuild)
-      ..dispose();
+    _focusNode.removeListener(_onFocusChanged);
+    _focusNode.removeListener(_rebuild);
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
     super.dispose();
   }
 
@@ -211,7 +231,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   Widget build(BuildContext context) {
     final focused = _focusNode.hasFocus;
     final showClear = widget.controller.text.isNotEmpty;
-    final imeBottom = MediaQuery.viewInsetsOf(context).bottom;
+    final imeBottom =
+        widget.ignoreKeyboardInset ? 0.0 : MediaQuery.viewInsetsOf(context).bottom;
     final iller = widget.ilOptionsSorted;
     final useAuto = iller != null && iller.isNotEmpty;
 

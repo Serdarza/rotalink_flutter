@@ -2,12 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../ads/ad_service.dart';
+import '../providers/facility_filter_provider.dart';
 import '../screens/yorum_screen.dart';
 import '../services/review_repository.dart';
 import '../ads/discover_native_merge.dart';
@@ -23,6 +25,7 @@ import 'distance_permission_chip.dart';
 import '../utils/maps_launch.dart';
 import '../utils/safe_map_coordinates.dart';
 import '../utils/search_normalize.dart';
+import 'rotalink_glass_bottom_nav.dart';
 
 /// Arama sonucu alt paneli: en fazla ekranın yarısı; daha yukarı sürüklenemez.
 const double kMisafirhaneSearchSheetOpenExtent = 0.5;
@@ -33,11 +36,10 @@ const double kMisafirhaneSearchSheetMainBottomBarReserve = 56;
 /// Kotlin [MisafirhaneBottomSheet] (arama modu): Tesis / Gezi / Yemek / Sosyal sekmeleri.
 /// Ana harita gövdesindeki [Stack] içine yerleştirilir; üstteki toolbar ve arama çubuğu sheet’ten sonra
 /// çizilerek her zaman önde kalır.
-class MisafirhaneSearchResultsPanel extends StatefulWidget {
+class MisafirhaneSearchResultsPanel extends ConsumerStatefulWidget {
   const MisafirhaneSearchResultsPanel({
     super.key,
     required this.sheetExtentController,
-    required this.facilities,
     required this.rotaData,
     required this.mapLocationState,
     this.highlightTarget,
@@ -52,7 +54,6 @@ class MisafirhaneSearchResultsPanel extends StatefulWidget {
 
   final DraggableScrollableController sheetExtentController;
 
-  final List<Misafirhane> facilities;
   final RotaDataState rotaData;
   final MapLocationState mapLocationState;
   final Misafirhane? highlightTarget;
@@ -68,10 +69,12 @@ class MisafirhaneSearchResultsPanel extends StatefulWidget {
   final VoidCallback onClosePanel;
 
   @override
-  State<MisafirhaneSearchResultsPanel> createState() => _MisafirhaneSearchResultsPanelState();
+  ConsumerState<MisafirhaneSearchResultsPanel> createState() =>
+      _MisafirhaneSearchResultsPanelState();
 }
 
-class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResultsPanel> {
+class _MisafirhaneSearchResultsPanelState
+    extends ConsumerState<MisafirhaneSearchResultsPanel> {
   int _tabIndex = 0;
   List<Misafirhane> _favorites = const [];
 
@@ -159,20 +162,16 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
   @override
   void didUpdateWidget(covariant MisafirhaneSearchResultsPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.facilities.length != widget.facilities.length) {
-      _facilityRowKeys.clear();
-    }
     final ho = oldWidget.highlightTarget;
     final hn = widget.highlightTarget;
     final hlChanged = (ho == null) != (hn == null) ||
         (ho != null && hn != null && !ho.sameFavoriteIdentity(hn));
-    if (hlChanged || oldWidget.facilities.length != widget.facilities.length) {
+    if (hlChanged) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) unawaited(_expandSheetAndScrollToHighlight());
       });
     }
-    if (oldWidget.facilities.length != widget.facilities.length ||
-        oldWidget.rotaData.gezi.length != widget.rotaData.gezi.length ||
+    if (oldWidget.rotaData.gezi.length != widget.rotaData.gezi.length ||
         oldWidget.rotaData.yemek.length != widget.rotaData.yemek.length ||
         oldWidget.rotaData.sosyal.length != widget.rotaData.sosyal.length) {
       _scheduleNativesForTab(_tabIndex);
@@ -429,7 +428,8 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
     setState(() => _favorites = list);
   }
 
-  Set<String> get _facilityIllerNorm => widget.facilities
+  Set<String> get _facilityIllerNorm => ref
+      .read(searchPanelFacilitiesSourceProvider)
       .map((e) => normalizeForSearch(e.il))
       .where((s) => s.isNotEmpty)
       .toSet();
@@ -644,13 +644,19 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
   }
 
   SliverToBoxAdapter _listBottomInset(BuildContext context) {
-    final sys = MediaQuery.paddingOf(context).bottom;
-    final h = sys + kMisafirhaneSearchSheetMainBottomBarReserve + 24;
+    final h = RotalinkGlassBottomNav.totalHeight(context) + 24;
     return SliverToBoxAdapter(child: SizedBox(height: h));
   }
 
   @override
   Widget build(BuildContext context) {
+    final tesisFacilities = ref.watch(filteredTesisListProvider);
+    ref.listen<List<Misafirhane>>(filteredTesisListProvider, (prev, next) {
+      if (prev == null || prev.length != next.length) {
+        _facilityRowKeys.clear();
+      }
+    });
+
     return ListenableBuilder(
       listenable: widget.mapLocationState,
       builder: (context, _) {
@@ -695,7 +701,7 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
                                     tabIndex: _tabIndex,
                                     onTabChanged: _onTabChanged,
                                     counts: [
-                                      widget.facilities.length,
+                                      tesisFacilities.length,
                                       _geziFiltered.length,
                                       _yemekFiltered.length,
                                       _sosyalFiltered.length,
@@ -722,7 +728,7 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
   List<Widget> _tabSlivers(BuildContext context) {
     switch (_tabIndex) {
       case 0:
-        return _tesisTabSlivers(context);
+        return _tesisTabSlivers(context, ref.watch(filteredTesisListProvider));
       case 1:
         return _geziTabSlivers(context, _sortedGezi(_geziFiltered));
       case 2:
@@ -735,8 +741,8 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
   }
 
 
-  List<Widget> _tesisTabSlivers(BuildContext context) {
-    if (widget.facilities.isEmpty) {
+  List<Widget> _tesisTabSlivers(BuildContext context, List<Misafirhane> facilities) {
+    if (facilities.isEmpty) {
       return [
         SliverFillRemaining(
           hasScrollBody: false,
@@ -753,7 +759,7 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
       ];
     }
 
-    final n = widget.facilities.length;
+    final n = facilities.length;
     final childCount = n * 2 - 1;
     return [
       SliverList(
@@ -761,7 +767,7 @@ class _MisafirhaneSearchResultsPanelState extends State<MisafirhaneSearchResults
           (ctx, index) {
             if (index.isOdd) return const Divider(height: 1);
             final i = index ~/ 2;
-            return _tesisFacilityRow(context, widget.facilities[i]);
+            return _tesisFacilityRow(context, facilities[i]);
           },
           childCount: childCount,
         ),

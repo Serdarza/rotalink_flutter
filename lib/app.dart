@@ -4,8 +4,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
+import 'main.dart';
 import 'data/app_rating_prefs.dart';
 import 'data/firebase_rota_repository.dart';
+import 'data/rota_local_cache.dart';
 import 'navigator_keys.dart';
 import 'l10n/app_strings.dart';
 import 'screens/no_connection_screen.dart';
@@ -25,6 +27,8 @@ class RotalinkApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: buildRotalinkTheme(),
       home: const _ConnectivityGate(),
+      // AnalyticsObserver'ı navigatorObservers'a ekle - ekran izlemeyi etkinleştirir
+      navigatorObservers: [analyticsObserver],
     );
   }
 }
@@ -32,7 +36,7 @@ class RotalinkApp extends StatelessWidget {
 /// Uygulama giriş noktası: internet durumunu ve geçmiş açılış sayısını kontrol eder.
 ///
 /// - İlk açılış (hiç önbellek yok) + internet yok → [NoConnectionScreen]
-/// - Geri dönen kullanıcı (RTDB disk önbelleği var) → internet olmadan da [SplashScreen]
+/// - Geri dönen kullanıcı (yerel veri önbelleği var) → internet olmadan da [SplashScreen]
 /// - İnternet var → [SplashScreen]
 ///
 /// Bağlantı geldiğinde [NoConnectionScreen] otomatik olarak [SplashScreen]'e geçer.
@@ -55,7 +59,6 @@ class _ConnectivityGateState extends State<_ConnectivityGate> {
     super.initState();
     unawaited(_decideInitialRoute());
     // İzin diyaloğu runApp() sonrası ilk frame'den itibaren gösterilir.
-    // Önce gösterilirse iOS launch screen erken kapanır → siyah ekran.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_requestPermissions());
     });
@@ -71,9 +74,10 @@ class _ConnectivityGateState extends State<_ConnectivityGate> {
   }
 
   Future<void> _decideInitialRoute() async {
-    // Geri dönen kullanıcı: RTDB disk önbelleği mevcuttur, çevrimdışı çalışır.
+    // Geri dönen kullanıcı: yerel önbellek mevcuttur, çevrimdışı çalışır.
     final launchCount = await AppRatingPrefs.getLaunchCount();
-    final isReturningUser = launchCount > 0;
+    final hasLocalRota = await RotaLocalCache.hasCache();
+    final isReturningUser = launchCount > 1 || hasLocalRota;
 
     if (isReturningUser) {
       if (mounted) setState(() => _showSplash = true);
@@ -87,7 +91,6 @@ class _ConnectivityGateState extends State<_ConnectivityGate> {
     if (connected) {
       setState(() => _showSplash = true);
     } else {
-      // Native splash'i kaldır ve "Bağlantı Yok" ekranını göster.
       FlutterNativeSplash.remove();
       setState(() => _showSplash = false);
     }
@@ -100,7 +103,6 @@ class _ConnectivityGateState extends State<_ConnectivityGate> {
 
   @override
   Widget build(BuildContext context) {
-    // Karar henüz verilmedi: native splash hâlâ ekranda, boş scaffold yeterli.
     if (_showSplash == null) {
       return const Scaffold(backgroundColor: Colors.transparent);
     }

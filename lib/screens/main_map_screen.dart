@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 // ignore: implementation_imports — [PopupEvent] public export yok.
@@ -14,10 +15,16 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../ads/ad_service.dart';
+import '../constants/store_links.dart';
 import '../data/app_rating_prefs.dart';
 import '../data/favorites_repository.dart';
 import '../data/firebase_rota_repository.dart';
-import '../data/history_repository.dart';
+import '../providers/rota_data_provider.dart';
+import '../navigator_keys.dart';
+import '../navigation/main_map_nav_bridge.dart';
+import '../navigation/rotalink_shell_routes.dart';
+import '../navigation/rotalink_shell_scope.dart';
+import '../onboarding/app_onboarding_controller.dart';
 import '../data/saved_routes_repository.dart';
 import '../data/user_location_cache.dart';
 import '../l10n/app_strings.dart';
@@ -28,6 +35,8 @@ import '../models/route_plan_outcome.dart';
 import '../models/route_stop.dart';
 import '../services/osrm_route_service.dart';
 import '../services/holiday_notification_scheduler.dart';
+import '../services/version_check_service.dart';
+import '../widgets/update_required_dialog.dart';
 import '../services/simple_location_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/geo_helpers.dart';
@@ -38,21 +47,24 @@ import '../utils/safe_map_coordinates.dart';
 import '../utils/main_map_search.dart';
 import '../widgets/app_rating_dialog.dart';
 import '../widgets/distance_permission_chip.dart';
+import '../kami/kami_overlay.dart';
 import '../widgets/emergency_bottom_sheet.dart';
-import '../widgets/custom_search_bar.dart';
+import '../providers/facility_filter_provider.dart';
+import '../providers/main_map_search_ui_provider.dart';
+import '../widgets/main_map_search_chrome.dart';
+import '../widgets/map_facility_markers_layer.dart';
+import '../widgets/city_overview_marker.dart';
 import '../widgets/map_facility_preview_card.dart';
 import '../widgets/misafirhane_map_marker.dart';
 import '../widgets/misafirhane_marker_info_popup.dart';
 import '../widgets/misafirhane_search_results_sheet.dart';
 import '../widgets/rotalink_banner_ad.dart';
-import '../widgets/premium_story_row.dart';
+import '../widgets/rotalink_tile_layer.dart';
+import '../widgets/map_weather_chip.dart';
 import '../widgets/weather_bottom_sheet.dart';
+import '../widgets/drawer_social_section.dart';
 import '../services/review_repository.dart';
-import 'about_screen.dart';
-import 'discover_screen.dart';
-import 'holidays_screen.dart';
 import 'route_plan_screen.dart';
-import 'suggestion_screen.dart';
 import 'yorum_screen.dart';
 
 /// Yüksek doğruluk istemez; aksi halde Google Play "Konum doğruluğu" penceresi sık tetiklenir.
@@ -67,20 +79,100 @@ const _kLocationStreamSettings = LocationSettings(
   distanceFilter: 50,
 );
 
-/// `activity_main.xml` + `MainActivity` ana iskeleti: çekmece, teal toolbar,
-/// harita alanı, arama kartı, FAB’lar, banner alanı, alt gezinme çubuğu.
-class MainMapScreen extends StatefulWidget {
-  const MainMapScreen({super.key, required this.repository});
+const double _kOverviewCityZoomThreshold = 8;
 
-  final FirebaseRotaRepository repository;
+const List<String> _kOverviewCityNames = <String>[
+  'İstanbul',
+  'Ankara',
+  'İzmir',
+  'Bursa',
+  'Antalya',
+  'Adana',
+  'Konya',
+  'Eskişehir',
+  'Samsun',
+  'Kastamonu',
+  'Trabzon',
+  'Erzurum',
+  'Diyarbakır',
+  'Mardin',
+  'Van',
+  'Kayseri',
+  'Gaziantep',
+  'Mersin',
+  'Denizli',
+  'Muğla',
+  'Aydın',
+];
 
-  @override
-  State<MainMapScreen> createState() => _MainMapScreenState();
+String _normalizeCityKey(String raw) {
+  const replacements = <String, String>{
+    'ı': 'i',
+    'İ': 'i',
+    'I': 'i',
+    'ş': 's',
+    'Ş': 's',
+    'ğ': 'g',
+    'Ğ': 'g',
+    'ü': 'u',
+    'Ü': 'u',
+    'ö': 'o',
+    'Ö': 'o',
+    'ç': 'c',
+    'Ç': 'c',
+  };
+  final sb = StringBuffer();
+  for (final rune in raw.trim().runes) {
+    final ch = String.fromCharCode(rune);
+    sb.write(replacements[ch] ?? ch.toLowerCase());
+  }
+  return sb.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
 }
 
-class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserver {
-  final ValueNotifier<bool> _discoverFlash = ValueNotifier<bool>(false);
+final Set<String> _kOverviewCityKeys =
+    _kOverviewCityNames.map(_normalizeCityKey).toSet();
 
+final Map<String, LatLng> _kOverviewCityAnchorPoints = <String, LatLng>{
+  'istanbul': LatLng(41.0082, 28.9784),
+  'ankara': LatLng(39.9334, 32.8597),
+  'izmir': LatLng(38.4237, 27.1428),
+  'bursa': LatLng(40.1950, 29.0600),
+  'antalya': LatLng(36.8969, 30.7133),
+  'adana': LatLng(37.0000, 35.3213),
+  'konya': LatLng(37.8746, 32.4932),
+  'eskisehir': LatLng(39.7767, 30.5206),
+  'samsun': LatLng(41.2867, 36.3300),
+  'kastamonu': LatLng(41.3887, 33.7827),
+  'trabzon': LatLng(41.0015, 39.7178),
+  'erzurum': LatLng(39.9043, 41.2679),
+  'diyarbakir': LatLng(37.9144, 40.2306),
+  'mardin': LatLng(37.3212, 40.7245),
+  'van': LatLng(38.4891, 43.4089),
+  'kayseri': LatLng(38.7312, 35.4787),
+  'gaziantep': LatLng(37.0662, 37.3833),
+  'mersin': LatLng(36.8121, 34.6415),
+  'denizli': LatLng(37.7765, 29.0864),
+  'mugla': LatLng(37.2153, 28.3636),
+  'aydin': LatLng(37.8450, 27.8396),
+};
+
+/// `activity_main.xml` + `MainActivity` ana iskeleti: çekmece, teal toolbar,
+/// harita alanı, arama kartı, FAB’lar, banner alanı, alt gezinme çubuğu.
+class MainMapScreen extends ConsumerStatefulWidget {
+  const MainMapScreen({
+    super.key,
+    required this.repository,
+    this.navBridge,
+  });
+
+  final FirebaseRotaRepository repository;
+  final MainMapNavBridge? navBridge;
+
+  @override
+  ConsumerState<MainMapScreen> createState() => _MainMapScreenState();
+}
+
+class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindingObserver {
   /// Harita pan/zoom event'lerinde sadece önizleme kartını yeniden çizmek için.
   /// [setState] yerine bu notifier güncellenir → tüm ekran rebuild olmaz.
   final ValueNotifier<int> _previewPositionTick = ValueNotifier<int>(0);
@@ -88,9 +180,13 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   final MapController _mapController = MapController();
   final PopupController _popupController = PopupController();
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchBarFocusNode = FocusNode();
 
   LatLng _center = kTurkeyMapFallbackCenter;
   double _zoom = kTurkeyMapFallbackZoom;
+
+  /// Kullanıcı haritayı kaydırdı/yakınlaştırdı — geri tuşu önce Türkiye görünümüne döner.
+  bool _mapCameraUserAdjusted = false;
 
   /// Açılışta bir kez tam Türkiye görünümü (padding: arama / alt çubuk).
   bool _initialTurkeyBoundsApplied = false;
@@ -110,22 +206,19 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
 
   final SavedRoutesRepository _savedRoutes = SavedRoutesRepository();
   final FavoritesRepository _favoritesRepo = FavoritesRepository();
-  final HistoryRepository _historyRepo = HistoryRepository();
 
   /// Kotlin `loadListFromPrefs("favorites")`.
   List<Misafirhane> _favoritesCache = const [];
 
-  /// Kotlin `loadListFromPrefs("history")`.
-  List<Misafirhane> _historyCache = const [];
-
   /// Kotlin `isShowingFavorites` — harita işaretleri favori listesinden gelir.
   bool _favoritesBrowseActive = false;
 
-  /// Kotlin `isShowingHistory`.
-  bool _historyBrowseActive = false;
-
   /// Marker seçiminde altta gösterilen önizleme kartı.
   Misafirhane? _mapPreviewFacility;
+
+  /// Ana ekran genel Türkiye görünümünden il görünümüne marker dokunuşuyla geçildi mi.
+  /// `null` ise henüz il odaklı görünüm yoktur.
+  String? _mainMapFocusedCity;
 
   /// Önizleme kapanırken kısa çıkış animasyonu (harita kaydırma / dokunuş ile tetiklenir).
   bool _previewClosing = false;
@@ -143,6 +236,9 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
 
   /// Arama sonucu sekmeli panel ([DraggableScrollableSheet]) görünür mü.
   bool isSheetVisible = true;
+
+  /// Geri tuşu: 1↓ 2↑ 3 uyarı 4 ana ekran (il araması paneli açıkken).
+  int _searchBackPressCount = 0;
 
   /// Geri tuşu: önce paneli gizle → tekrar aç + çıkış hazır → ana ekran sıfırlama.
   bool readyToExit = false;
@@ -173,23 +269,33 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   /// Kullanıcı konumu değiştikçe mesafeleri güncelleyen sürekli GPS akışı.
   StreamSubscription<Position>? _locationStreamSub;
 
-  /// Arama / favori / geçmiş mesafe satırları için paylaşılan konum durumu.
+  /// Arama / favori mesafe satırları için paylaşılan konum durumu.
   final MapLocationState _mapLocationState = MapLocationState();
 
   // ─── Marker önbelleği — her build'de yeni nesne oluşturulmasın ──────────────
-  List<Marker>? _cachedPopupMarkers;
-  RotaDataState? _cachedMarkersData;
-  List<Misafirhane>? _cachedMarkersOverride;
-  Misafirhane? _cachedMarkersHighlight;
-  bool? _cachedMarkersInRoute;
+
+  // ─── Ana ekran il özet marker önbelleği ───────────────────────────────────
+  RotaDataState? _cachedOverviewCitiesData;
+  List<_OverviewCitySummary>? _cachedOverviewCities;
+  String? _cachedOverviewCitiesFilter;
+  RotaDataState? _cachedOverviewCityMarkersData;
+  List<Marker>? _cachedOverviewCityMarkers;
+  String? _cachedOverviewCityMarkersFilter;
+
+  // ─── Orta zoom görünür alan marker önbelleği ──────────────────────────────
+  Timer? _viewportRefreshDebounce;
 
   // ─── İl listesi önbelleği ─────────────────────────────────────────────────
   List<String>? _cachedIlOptions;
   RotaDataState? _cachedIlOptionsSource;
 
+  late final Stream<RotaDataState> _rotaStream;
+
   @override
   void initState() {
     super.initState();
+    _cachedRotaData = widget.repository.currentState;
+    _rotaStream = widget.repository.watchRoot();
     WidgetsBinding.instance.addObserver(this);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
@@ -208,14 +314,26 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (AdService.adsEnabled) {
-        unawaited(AdService.instance.scheduleLaunchInterstitialPattern());
+        unawaited(AdService.instance.preloadInterstitial());
       }
       unawaited(_maybeOpenHolidaysFromNotification());
+      unawaited(_checkForUpdate());
     });
     unawaited(_reloadFavoritesCache());
-    unawaited(_reloadHistoryCache());
     _mapPreviewDismissSub = _mapController.mapEventStream.listen(_onMapControllerEvent);
     unawaited(_syncLocationUiFromPermissionOnly());
+    _registerNavBridge();
+  }
+
+  void _registerNavBridge() {
+    final bridge = widget.navBridge;
+    if (bridge == null) return;
+    bridge.resetToHome = _resetSearchToHome;
+    bridge.openFavorites = _openFavoritesTab;
+    bridge.openSearch = (ctx, data) =>
+        _openSearchFromBottomNav(ctx, data ?? _cachedRotaData);
+    bridge.openRoutePlan = _openRoutePlanning;
+    bridge.handleSystemBack = _handleSystemBack;
   }
 
   @override
@@ -260,22 +378,44 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   Future<void> _maybeOpenHolidaysFromNotification() async {
     final open = await HolidayNotificationScheduler.consumePendingOpenHolidaysNavigation();
     if (!open || !mounted || !context.mounted) return;
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(builder: (_) => const HolidaysScreen()),
+    await Navigator.of(context).pushNamed(RotalinkShellRoutes.holidays);
+  }
+
+  Future<void> _checkForUpdate() async {
+    if (!mounted || !context.mounted) return;
+    
+    final isUpdateRequired = await VersionCheckService.instance.isUpdateRequired();
+    if (!isUpdateRequired) return;
+    
+    final currentVersion = await VersionCheckService.instance.getCurrentVersionInfo();
+    final message = await VersionCheckService.instance.getUpdateMessage();
+    final storeUrl = await VersionCheckService.instance.getStoreUrl();
+    if (!mounted || !context.mounted) return;
+    
+    await UpdateRequiredDialog.show(
+      context,
+      currentVersion: currentVersion,
+      message: message,
+      storeUrl: storeUrl,
+      onDismiss: () {
+        // Kullanıcı daha sonra dediğinde tekrar kontrol etmemek için
+        // SharedPreferences'a kaydedilebilir (isteğe bağlı)
+      },
     );
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _discoverFlash.dispose();
     _previewPositionTick.dispose();
     _stopLocationStream();
     _dismissAttachedBottomSheet();
     _disposeSearchSheetExtentController();
     _mapPreviewDismissSub?.cancel();
-    AdService.instance.cancelLaunchInterstitialTimer();
+    _viewportRefreshDebounce?.cancel();
+    AdService.instance.disposeInterstitial();
     _searchController.dispose();
+    _searchBarFocusNode.dispose();
     _popupController.dispose();
     _mapLocationState.dispose();
     super.dispose();
@@ -330,49 +470,23 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     );
   }
 
-  Future<void> _handleSearchSheetBackNavigation() async {
-    if (!mounted) return;
-    final c = _searchSheetExtentController;
-
-    if (isSheetVisible && !readyToExit) {
-      await _collapseSearchResultsSheet();
-      if (mounted) setState(() => isSheetVisible = false);
-      return;
-    }
-    if (!isSheetVisible) {
-      if (c != null && c.isAttached) {
-        await _expandSearchResultsSheet();
-        if (mounted) {
-          setState(() {
-            isSheetVisible = true;
-            readyToExit = true;
-          });
-        }
-      } else {
-        final data = _cachedRotaData;
-        final facilities = _markerOverride;
-        if (data != null && facilities != null && facilities.isNotEmpty) {
-          await _openTabbedSearchResults(
-            context,
-            data,
-            facilities,
-            highlightTarget: _searchSheetHighlight,
-            reopenNextBackExitsSearch: true,
-          );
-        } else if (mounted) {
-          resetToInitialState();
-        }
-      }
-      return;
-    }
-    if (isSheetVisible && readyToExit) {
-      resetToInitialState();
+  void _syncSearchPanelOpen(bool open) {
+    ref.read(searchPanelOpenProvider.notifier).state = open;
+    if (!open) {
+      ref.read(searchPanelFacilitiesSourceProvider.notifier).state = const [];
     }
   }
 
-  /// Ana harita ilk açılış / arama sıfırlandı (Geri tuşu 3. adım).
+  void _onSearchBarFocusChanged(bool focused) {
+    ref.read(searchBarFocusedProvider.notifier).state = focused;
+  }
+
+  /// Ana harita ilk açılış / arama sıfırlandı.
   void resetToInitialState() {
     if (!mounted) return;
+    ref.read(facilityTypeFilterProvider.notifier).state = kFacilityFilterAll;
+    ref.read(searchBarFocusedProvider.notifier).state = false;
+    _syncSearchPanelOpen(false);
     _popupController.hideAllPopups();
     _dismissAttachedBottomSheet();
     FocusManager.instance.primaryFocus?.unfocus();
@@ -381,11 +495,12 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
       readyToExit = false;
       isSheetVisible = true;
       _markerOverride = null;
+      _mainMapFocusedCity = null;
       _searchSheetHighlight = null;
       _mapPreviewFacility = null;
       _favoritesBrowseActive = false;
-      _historyBrowseActive = false;
       _clearRouteOnly();
+      _mapCameraUserAdjusted = false;
     });
     setState(() => _searchBarSession++);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -395,6 +510,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
 
   void _closeInlineTabbedSearchPanel() {
     if (!_inlineTabbedSearchOpen) return;
+    _syncSearchPanelOpen(false);
     setState(() {
       _inlineTabbedSearchOpen = false;
       _tabbedSheetFacilities = const [];
@@ -402,48 +518,69 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
       _tabbedSheetHighlight = null;
       _tabbedSheetInitialTab = 0;
       _tabbedSheetGeziYemekHighlight = null;
+      _searchBackPressCount = 0;
     });
     _disposeSearchSheetExtentController();
   }
 
-  void _storyNavigateToCategory({
-    required String city,
-    required int tabIndex,
-    required String itemName,
-  }) {
-    final data = _cachedRotaData;
-    if (data == null || !mounted) return;
-    final facilities = MainMapSearch.perform(
-      query: city,
-      kaynak: MainMapSearch.tesisKaynagiArama(
-        aramaIcinTumTesisler: data.aramaIcinTumTesisler,
-        misafirhaneler: data.misafirhaneler,
-      ),
-      mapMisafirhaneler: data.misafirhaneler,
-    );
-    // Tab 0 (Tesis) için: isimle eşleşen misafirhaneyi vurgula
-    Misafirhane? tesisHighlight;
-    if (tabIndex == 0) {
-      final nameNorm = itemName.toLowerCase().trim();
-      for (final m in facilities) {
-        if (m.isim.toLowerCase().trim() == nameNorm) {
-          tesisHighlight = m;
-          break;
-        }
-      }
+  /// İl araması paneli açıkken geri tuşu adımları.
+  Future<bool> _handleSearchPanelBack() async {
+    if (!_inlineTabbedSearchOpen) return false;
+
+    if (_searchController.text.trim().isEmpty) {
+      _resetSearchToHome();
+      return true;
     }
+
+    _searchBackPressCount++;
+    _lastExitBackAt = null;
+
+    switch (_searchBackPressCount) {
+      case 1:
+        await _collapseSearchResultsSheet();
+        if (mounted) setState(() => isSheetVisible = false);
+        return true;
+      case 2:
+        await _expandSearchResultsSheet();
+        if (mounted) setState(() => isSheetVisible = true);
+        return true;
+      case 3:
+        await _collapseSearchResultsSheet();
+        if (mounted) setState(() => isSheetVisible = false);
+        return true;
+      default:
+        _resetSearchToHome();
+        return true;
+    }
+  }
+
+  /// Arama paneli + harita: ilk açılış görünümüne dön.
+  void _resetSearchToHome() {
+    if (!mounted) return;
+    ref.read(facilityTypeFilterProvider.notifier).state = kFacilityFilterAll;
+    ref.read(searchBarFocusedProvider.notifier).state = false;
+    _syncSearchPanelOpen(false);
+    _popupController.hideAllPopups();
+    FocusManager.instance.primaryFocus?.unfocus();
+    _closeInlineTabbedSearchPanel();
+    _searchController.clear();
     setState(() {
-      _markerOverride = facilities;
-      _searchSheetHighlight = tesisHighlight;
+      _searchBackPressCount = 0;
+      readyToExit = false;
+      isSheetVisible = true;
+      _markerOverride = null;
+      _mainMapFocusedCity = null;
+      _searchSheetHighlight = null;
+      _mapPreviewFacility = null;
+      _favoritesBrowseActive = false;
+      _misafirhaneFacilityPopupOpen = false;
+      _clearRouteOnly();
+      _mapCameraUserAdjusted = false;
     });
-    unawaited(_openTabbedSearchResults(
-      context,
-      data,
-      facilities,
-      highlightTarget: tesisHighlight,
-      initialTabIndex: tabIndex,
-      geziYemekHighlight: tabIndex != 0 ? itemName : null,
-    ));
+    setState(() => _searchBarSession++);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _fitTurkeyOverviewCamera();
+    });
   }
 
   void _dismissAttachedBottomSheet() {
@@ -458,6 +595,27 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
 
   void _onMapControllerEvent(MapEvent e) {
     _onMapEventForPreview(e);
+    _scheduleViewportFacilityRefresh(e);
+  }
+
+  /// Orta zoom'da harita kaydırılınca görünür alan tesis marker'larını günceller.
+  void _scheduleViewportFacilityRefresh(MapEvent e) {
+    if (!_isMainMapOverviewActive ||
+        _mainMapFocusedCity != null ||
+        _zoom < _kOverviewCityZoomThreshold) {
+      return;
+    }
+    final shouldRefresh = e is MapEventMove ||
+        e is MapEventFlingAnimation ||
+        e is MapEventScrollWheelZoom ||
+        e is MapEventDoubleTapZoom;
+    if (!shouldRefresh) return;
+
+    _viewportRefreshDebounce?.cancel();
+    _viewportRefreshDebounce = Timer(const Duration(milliseconds: 120), () {
+      if (!mounted) return;
+      setState(() {});
+    });
   }
 
   void _onMapEventForPreview(MapEvent e) {
@@ -503,8 +661,8 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
       isSheetVisible = true;
       _mapPreviewFacility = null;
       _markerOverride = null;
+      _mainMapFocusedCity = null;
       _favoritesBrowseActive = false;
-      _historyBrowseActive = false;
       _searchSheetHighlight = null;
       _clearRouteOnly();
     });
@@ -528,6 +686,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     setState(() {
       readyToExit = false;
       isSheetVisible = true;
+      _mainMapFocusedCity = null;
     });
     FocusManager.instance.primaryFocus?.unfocus();
     if (_searchController.text.isNotEmpty) {
@@ -572,6 +731,48 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
       m.latitude != 0 &&
       m.longitude != 0 &&
       isValidWgs84LatLng(m.latitude, m.longitude);
+
+  /// RTDB akışından güvenli veri; hata anında son başarılı snapshot kullanılır.
+  RotaDataState? _effectiveRotaData(RotaDataState? snapshotData) {
+    if (snapshotData != null && snapshotData.errorMessage != null) {
+      return _cachedRotaData;
+    }
+    return snapshotData ?? _cachedRotaData;
+  }
+
+  /// Riverpod state build sırasında güncellenmez — kırmızı hata ekranını önler.
+  void _publishRotaDataToProvider(RotaDataState data) {
+    if (identical(ref.read(rotaDataStateProvider), data)) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(rotaDataStateProvider.notifier).state = data;
+    });
+  }
+
+  /// Harita marker/arama için tüm tesis listesi (il başına tek kayıt değil).
+  List<Misafirhane> _allFacilitiesForMap(RotaDataState? snapshotData) {
+    final effective = _effectiveRotaData(snapshotData);
+    if (effective == null) return const [];
+    return effective.aramaIcinTumTesisler;
+  }
+
+  LatLng _overviewCityCenter(String cityKey, List<Misafirhane> facilities) {
+    // Yakın illerde (Kocaeli–Sakarya vb.) tesis kümesi yerine sabit il merkezi kullan.
+    final anchor = _kOverviewCityAnchorPoints[cityKey];
+    if (anchor != null) return anchor;
+
+    final points = facilities
+        .where(_validFacilityCoords)
+        .map((m) => LatLng(m.latitude, m.longitude))
+        .toList();
+    if (points.isEmpty) {
+      return kTurkeyMapFallbackCenter;
+    }
+    if (points.length == 1) {
+      return points.first;
+    }
+    return LatLngBounds.fromPoints(points).center;
+  }
 
   /// [CameraFit.coordinates] tek benzersiz noktada (veya tüm noktalar aynı yerde) sınır
   /// genişliği 0 olunca zoom NaN/sonsuz üretebiliyor; harita çizilemiyor.
@@ -618,9 +819,6 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     final effective = (snapshotData != null && snapshotData.errorMessage != null)
         ? _cachedRotaData
         : (snapshotData ?? _cachedRotaData);
-    if (_historyBrowseActive) {
-      return _resolveSavedAgainstLive(_historyCache, effective);
-    }
     if (_favoritesBrowseActive) {
       return _resolveSavedAgainstLive(_favoritesCache, effective);
     }
@@ -628,62 +826,140 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     return _markerOverride ?? effective.misafirhaneler;
   }
 
+  List<_OverviewCitySummary> _overviewCitySummaries(
+    RotaDataState? snapshotData,
+    String typeFilter,
+  ) {
+    final effective = _effectiveRotaData(snapshotData);
+    if (effective == null) return const [];
+    if (identical(effective, _cachedOverviewCitiesData) &&
+        _cachedOverviewCitiesFilter == typeFilter &&
+        _cachedOverviewCities != null) {
+      return _cachedOverviewCities!;
+    }
+
+    final groups = <String, List<Misafirhane>>{
+      for (final city in _kOverviewCityNames) _normalizeCityKey(city): <Misafirhane>[],
+    };
+    final seenByCity = <String, Set<String>>{
+      for (final city in _kOverviewCityNames) _normalizeCityKey(city): <String>{},
+    };
+
+    // Tüm tesisler üzerinden il bazlı sayım — misafirhaneler yalnızca il başına 1 kayıt içerir.
+    for (final facility in effective.aramaIcinTumTesisler) {
+      if (!facilityMatchesTypeFilter(facility.tip, typeFilter)) continue;
+      final cityKey = _normalizeCityKey(facility.il);
+      if (!_kOverviewCityKeys.contains(cityKey)) continue;
+      final citySeen = seenByCity[cityKey]!;
+      if (!citySeen.add(facility.stableFacilityId)) continue;
+      groups[cityKey]!.add(facility);
+    }
+
+    final summaries = <_OverviewCitySummary>[];
+    for (final city in _kOverviewCityNames) {
+      final cityKey = _normalizeCityKey(city);
+      final facilities = groups[cityKey]!;
+      if (facilities.isEmpty) continue;
+      summaries.add(
+        _OverviewCitySummary(
+          cityName: city,
+          facilities: List<Misafirhane>.unmodifiable(facilities),
+          center: _overviewCityCenter(cityKey, facilities),
+        ),
+      );
+    }
+
+    _cachedOverviewCitiesData = effective;
+    _cachedOverviewCitiesFilter = typeFilter;
+    _cachedOverviewCities = summaries;
+    return summaries;
+  }
+
+  List<Marker> _overviewCityMarkersFor(
+    RotaDataState? snapshotData,
+    String typeFilter,
+  ) {
+    final effective = _effectiveRotaData(snapshotData);
+    if (effective == null) return const [];
+    if (identical(effective, _cachedOverviewCityMarkersData) &&
+        _cachedOverviewCityMarkersFilter == typeFilter &&
+        _cachedOverviewCityMarkers != null) {
+      return _cachedOverviewCityMarkers!;
+    }
+
+    final markers = _overviewCitySummaries(effective, typeFilter)
+        .map(
+          (summary) => Marker(
+            point: summary.center,
+            width: summary.markerSize,
+            height: summary.markerSize,
+            alignment: Alignment.center,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _handleOverviewCityTap(summary),
+              child: CityOverviewMarker(
+                cityName: summary.cityName,
+                facilityCount: summary.facilityCount,
+                size: summary.markerSize,
+              ),
+            ),
+          ),
+        )
+        .toList(growable: false);
+
+    _cachedOverviewCityMarkersData = effective;
+    _cachedOverviewCityMarkersFilter = typeFilter;
+    _cachedOverviewCityMarkers = markers;
+    return markers;
+  }
+
+  List<Misafirhane> _visibleOverviewFacilities(RotaDataState? snapshotData) {
+    final effective = _effectiveRotaData(snapshotData);
+    if (effective == null) return const [];
+
+    LatLngBounds visibleBounds;
+    try {
+      visibleBounds = _mapController.camera.visibleBounds;
+    } catch (_) {
+      return const [];
+    }
+
+    const margin = 0.20;
+    final paddedBounds = LatLngBounds.unsafe(
+      north: math.min(LatLngBounds.maxLatitude, visibleBounds.north + margin),
+      south: math.max(LatLngBounds.minLatitude, visibleBounds.south - margin),
+      east: math.min(LatLngBounds.maxLongitude, visibleBounds.east + margin),
+      west: math.max(LatLngBounds.minLongitude, visibleBounds.west - margin),
+    );
+
+    final seen = <String>{};
+    return effective.aramaIcinTumTesisler
+        .where(_validFacilityCoords)
+        .where((m) => seen.add(m.stableFacilityId))
+        .where((m) => paddedBounds.contains(LatLng(m.latitude, m.longitude)))
+        .toList(growable: false);
+  }
+
+  List<Misafirhane> _mapFacilitiesForCurrentZoom(
+    RotaDataState? snapshotData, {
+    required bool inRoute,
+  }) {
+    if (inRoute) return const [];
+    if (_isMainMapOverviewActive && _zoom < _kOverviewCityZoomThreshold) {
+      return const [];
+    }
+    if (_isMainMapOverviewActive &&
+        _mainMapFocusedCity == null &&
+        _zoom >= _kOverviewCityZoomThreshold) {
+      return _visibleOverviewFacilities(snapshotData);
+    }
+    return _markersSource(snapshotData);
+  }
+
   Future<void> _reloadFavoritesCache() async {
     final list = await _favoritesRepo.load();
     if (!mounted) return;
     setState(() => _favoritesCache = list);
-  }
-
-  Future<void> _reloadHistoryCache() async {
-    final list = await _historyRepo.load();
-    if (!mounted) return;
-    setState(() => _historyCache = list);
-  }
-
-  Future<void> _recordHistoryVisit(Misafirhane m) async {
-    final list = await _historyRepo.recordVisit(m);
-    if (!mounted) return;
-    setState(() => _historyCache = list);
-  }
-
-  List<Marker> _misafirhaneMapMarkers(
-    List<Misafirhane> list,
-    Misafirhane? primaryHighlight,
-  ) {
-    final hl = primaryHighlight;
-    final seen = <String>{};
-    return list
-        .where(_validFacilityCoords)
-        .where((m) => seen.add(m.stableFacilityId))
-        .map(
-          (m) => MisafirhaneMapMarker(
-            misafirhane: m,
-            primaryHighlight: hl != null && m.sameFavoriteIdentity(hl),
-          ),
-        )
-        .toList();
-  }
-
-  /// Önbellekten marker listesi — veri/highlight değişmedikçe yeni nesne oluşturulmaz.
-  List<Marker> _cachedMarkers(
-    RotaDataState? data,
-    List<Misafirhane> display,
-    Misafirhane? highlight,
-    bool inRoute,
-  ) {
-    if (inRoute) return const [];
-    final same = identical(_cachedMarkersData, data) &&
-        identical(_cachedMarkersOverride, _markerOverride) &&
-        _cachedMarkersHighlight == highlight &&
-        _cachedMarkersInRoute == inRoute &&
-        _cachedPopupMarkers != null;
-    if (same) return _cachedPopupMarkers!;
-    _cachedMarkersData = data;
-    _cachedMarkersOverride = _markerOverride;
-    _cachedMarkersHighlight = highlight;
-    _cachedMarkersInRoute = inRoute;
-    _cachedPopupMarkers = _misafirhaneMapMarkers(display, highlight);
-    return _cachedPopupMarkers!;
   }
 
   /// Önbellekten il listesi — veri değişmedikçe yeniden sıralanmaz.
@@ -703,12 +979,6 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   void _onMisafirhanePopupEvent(PopupEvent event, List<Marker> selectedMarkers) {
     _misafirhaneFacilityPopupOpen =
         selectedMarkers.any((m) => m is MisafirhaneMapMarker);
-    for (final m in selectedMarkers) {
-      if (m is MisafirhaneMapMarker) {
-        unawaited(_recordHistoryVisit(m.misafirhane));
-        unawaited(_animateTowardsMisafirhane(m.misafirhane));
-      }
-    }
     if (selectedMarkers.isNotEmpty && mounted && _mapPreviewFacility != null) {
       setState(() => _mapPreviewFacility = null);
     }
@@ -739,13 +1009,109 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     } catch (_) {}
   }
 
+  bool get _isMainMapOverviewActive =>
+      _markerOverride == null &&
+      !_favoritesBrowseActive &&
+      (_activeRouteStops == null || _activeRouteStops!.isEmpty);
+
+  bool get _hasMainMapUiOverlay {
+    if (_inlineTabbedSearchOpen && _searchController.text.trim().isNotEmpty) {
+      return false;
+    }
+    return !_isMainMapOverviewActive ||
+        _attachedBottomSheet != null ||
+        _mainMapFocusedCity != null ||
+        _searchController.text.trim().isNotEmpty ||
+        _mapPreviewFacility != null ||
+        _misafirhaneFacilityPopupOpen;
+  }
+
+  bool get _shouldInterceptMainMapMarkerTap =>
+      _isMainMapOverviewActive && _mainMapFocusedCity == null;
+
+  void _handleMarkerTapOnMainOverview(Marker marker) {
+    if (marker is! MisafirhaneMapMarker) return;
+    final cityKey = _normalizeCityKey(marker.misafirhane.il);
+    _OverviewCitySummary? summary;
+    for (final item in _overviewCitySummaries(
+      _cachedRotaData,
+      ref.read(facilityTypeFilterProvider),
+    )) {
+      if (_normalizeCityKey(item.cityName) == cityKey) {
+        summary = item;
+        break;
+      }
+    }
+    if (summary == null) return;
+    _handleOverviewCityTap(summary);
+  }
+
+  void _handleOverviewCityTap(_OverviewCitySummary summary) {
+    if (summary.facilities.isEmpty) return;
+    final data = _cachedRotaData;
+    if (data == null || !mounted) return;
+
+    _popupController.hideAllPopups();
+    _dismissAttachedBottomSheet();
+
+    _searchController.text = summary.cityName;
+
+    setState(() {
+      _lastExitBackAt = null;
+      _mainMapFocusedCity = null;
+      _markerOverride = summary.facilities;
+      _searchSheetHighlight = null;
+      _mapPreviewFacility = null;
+      _misafirhaneFacilityPopupOpen = false;
+      readyToExit = false;
+      isSheetVisible = true;
+    });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || !context.mounted) return;
+      _fitFacilitiesCamera(summary.facilities);
+      await Future<void>.delayed(const Duration(milliseconds: 140));
+      if (!mounted || !context.mounted) return;
+      await _openTabbedSearchResults(
+        context,
+        data,
+        summary.facilities,
+      );
+    });
+  }
+
+  void _maybeRestoreOverviewMarkers(double nextZoom) {
+    if (_mainMapFocusedCity == null || nextZoom >= _kOverviewCityZoomThreshold) {
+      return;
+    }
+    _popupController.hideAllPopups();
+    setState(() {
+      _lastExitBackAt = null;
+      _mainMapFocusedCity = null;
+      _markerOverride = null;
+      _searchSheetHighlight = null;
+      _mapPreviewFacility = null;
+      _misafirhaneFacilityPopupOpen = false;
+    });
+  }
+
   void _restoreCameraAfterPreviewClose() {
     if (!mounted) return;
     if (_markerOverride != null && _markerOverride!.isNotEmpty) {
       _fitFacilitiesCamera(_markerOverride!);
       return;
     }
-    if (_favoritesBrowseActive || _historyBrowseActive) {
+    if (_mainMapFocusedCity != null && _mainMapFocusedCity!.trim().isNotEmpty) {
+      final focusedKey = _normalizeCityKey(_mainMapFocusedCity!);
+      final focusedCityFacilities = _allFacilitiesForMap(_cachedRotaData)
+          .where((m) => _normalizeCityKey(m.il) == focusedKey)
+          .toList();
+      if (focusedCityFacilities.any(_validFacilityCoords)) {
+        _fitFacilitiesCamera(focusedCityFacilities);
+        return;
+      }
+    }
+    if (_favoritesBrowseActive) {
       final data = _cachedRotaData;
       final src = _markersSource(data);
       if (src.isNotEmpty) {
@@ -781,28 +1147,31 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
       return;
     }
 
-    if (_markerOverride != null) {
-      await _handleSearchSheetBackNavigation();
+    if (await _handleSearchPanelBack()) {
       return;
     }
 
-    if (_attachedBottomSheet != null) {
-      _dismissAttachedBottomSheet();
+    if (ref.read(searchBarFocusedProvider)) {
+      _lastExitBackAt = null;
+      ref.read(searchBarFocusedProvider.notifier).state = false;
+      FocusManager.instance.primaryFocus?.unfocus();
       return;
     }
 
-    if (_favoritesBrowseActive || _historyBrowseActive) {
-      setState(() {
-        _favoritesBrowseActive = false;
-        _historyBrowseActive = false;
-        _mapPreviewFacility = null;
+    if (_hasMainMapUiOverlay) {
+      _lastExitBackAt = null;
+      resetToInitialState();
+      return;
+    }
+
+    if (_isMainMapOverviewActive &&
+        (_mapCameraUserAdjusted || _zoom >= _kOverviewCityZoomThreshold)) {
+      _lastExitBackAt = null;
+      _mapCameraUserAdjusted = false;
+      setState(() {});
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _fitTurkeyOverviewCamera();
       });
-      _goToInitialMapHome();
-      return;
-    }
-
-    if (_activeRouteStops != null && _activeRouteStops!.isNotEmpty) {
-      _goToInitialMapHome();
       return;
     }
 
@@ -887,8 +1256,8 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
       _tabbedSheetFacilities = const [];
       _tabbedSheetRotaData = null;
       _tabbedSheetHighlight = null;
+      _mainMapFocusedCity = null;
       _favoritesBrowseActive = true;
-      _historyBrowseActive = false;
       _markerOverride = null;
       _searchSheetHighlight = null;
       _clearRouteOnly();
@@ -903,42 +1272,33 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     });
   }
 
-  Future<void> _openHistoryTab(BuildContext context) async {
-    await _reloadHistoryCache();
-    if (!mounted || !context.mounted) return;
-    final display = _resolveSavedAgainstLive(_historyCache, _cachedRotaData);
-    if (!display.any(_validFacilityCoords)) {
+  Future<void> _openSearchFromBottomNav(
+    BuildContext context,
+    RotaDataState? data,
+  ) async {
+    if (data == null) {
       _toast(context, AppStrings.mapDataLoading);
       return;
     }
     _popupController.hideAllPopups();
-    if (_inlineTabbedSearchOpen) {
-      _disposeSearchSheetExtentController();
-    }
     setState(() {
-      _inlineTabbedSearchOpen = false;
-      _tabbedSheetFacilities = const [];
-      _tabbedSheetRotaData = null;
-      _tabbedSheetHighlight = null;
-      _historyBrowseActive = true;
       _favoritesBrowseActive = false;
-      _markerOverride = null;
-      _searchSheetHighlight = null;
-      _clearRouteOnly();
+      _mapPreviewFacility = null;
     });
+
+    // Ara: yalnızca üst arama çubuğuna odaklan; sekmeli alt panel açılmasın.
+    _closeInlineTabbedSearchPanel();
+
+    final query = _searchController.text.trim();
+    if (query.isNotEmpty) {
+      await _performSearch(context, data);
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !context.mounted) return;
-      if (display.isNotEmpty) {
-        _fitFacilitiesCamera(display);
-      }
-      _openMisafirhaneSheet(
-        display,
-        liveHistoryList: true,
-      );
+      if (mounted) _searchBarFocusNode.requestFocus();
     });
   }
 
-  /// Arama sırasında [Geolocator] çağrılmaz; yalnızca izin bayrağı + önbellekteki pin UI’a yansır.
   Future<void> _prepareLocationForSearch() async {
     try {
       if (!mounted) return;
@@ -1169,7 +1529,6 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     if (!mounted) return;
     setState(() {
       _favoritesBrowseActive = false;
-      _historyBrowseActive = false;
       _clearRouteOnly();
       _mapPreviewFacility = null;
     });
@@ -1183,6 +1542,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
       setState(() {
         readyToExit = false;
         isSheetVisible = true;
+        _mainMapFocusedCity = null;
         _markerOverride = null;
         _searchSheetHighlight = null;
       });
@@ -1235,6 +1595,8 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     setState(() {
       readyToExit = false;
       isSheetVisible = true;
+      _searchBackPressCount = 0;
+      _mainMapFocusedCity = null;
       _markerOverride = displayList;
       _mapPreviewFacility = null;
       _searchSheetHighlight = highlightTarget;
@@ -1337,9 +1699,12 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
 
     _allocateSearchSheetExtentController();
     if (!mounted || !context.mounted) return;
+    ref.read(searchPanelFacilitiesSourceProvider.notifier).state =
+        List<Misafirhane>.unmodifiable(sorted);
     setState(() {
       readyToExit = reopenNextBackExitsSearch;
       isSheetVisible = true;
+      _searchBackPressCount = 0;
       _inlineTabbedSearchOpen = true;
       _tabbedSheetFacilities = sorted;
       _tabbedSheetRotaData = data;
@@ -1347,6 +1712,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
       _tabbedSheetInitialTab = initialTabIndex;
       _tabbedSheetGeziYemekHighlight = geziYemekHighlight;
     });
+    _syncSearchPanelOpen(true);
     // Arama sonuçları açılınca izin yoksa otomatik iste (oturumda red yoksa).
     if (mounted &&
         !await SimpleLocationService.isLocationGranted() &&
@@ -1361,33 +1727,22 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        unawaited(_handleSystemBack());
-      },
-      child: Scaffold(
+    return Scaffold(
       key: _scaffoldKey,
       resizeToAvoidBottomInset: false,
       drawer: _buildDrawer(context),
-      /// Kalıcı bottom sheet gövdenin üstünde; alt menü burada kalınca sheet menüyü kapatmaz (tıklanır).
-      bottomNavigationBar: _MainBottomBar(
-        onRoutePlan: () => _openRoutePlanning(context),
-        onHistory: () => unawaited(_openHistoryTab(context)),
-        onFavorites: () => unawaited(_openFavoritesTab(context)),
-        discoverFlash: _discoverFlash,
-      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: StreamBuilder<RotaDataState>(
-              stream: widget.repository.watchRoot(),
+              stream: _rotaStream,
+              initialData: _cachedRotaData ?? widget.repository.currentState,
               builder: (context, snapshot) {
                 final data = snapshot.data;
                 if (data != null && data.errorMessage == null) {
                   _cachedRotaData = data;
+                  _publishRotaDataToProvider(data);
                 }
                 final rotaForUi = (data != null && data.errorMessage != null)
                     ? _cachedRotaData
@@ -1396,37 +1751,53 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                     snapshot.connectionState == ConnectionState.waiting;
                 final inRoute =
                     _activeRouteStops != null && _activeRouteStops!.isNotEmpty;
-                final display = _markersSource(data);
+                final rawDisplay = _markersSource(data);
+                final baseDisplay = _mapFacilitiesForCurrentZoom(
+                  data,
+                  inRoute: inRoute,
+                );
                 final routeMarkers = (inRoute && rotaForUi != null)
                     ? <Marker>[
                         ..._markersForRoute(rotaForUi, _activeRouteStops!),
                         ..._routeLabelMarkers,
                       ]
                     : const <Marker>[];
-                final facilityPopupMarkers = _cachedMarkers(
-                  data, display, _searchSheetHighlight, inRoute,
-                );
-                /// Arama sekmeli sheet açıkken tam görünürken gizlenir; küçültülünce veya
-                /// tamamen kapatılınca FAB tekrar çıkar (listeyi yeniden açmak için).
+                final showOverviewCityMarkers =
+                    !inRoute &&
+                    _isMainMapOverviewActive &&
+                    _zoom < _kOverviewCityZoomThreshold;
+                final showFacilityMarkers = !inRoute && baseDisplay.isNotEmpty;
+                /// Arama sekmeli sheet açıkken tam görünürken gizlenir; aşağı indirilince
+                /// yukarı ok FAB ile tekrar açılabilir.
+                final showExpandSearchPanelFab =
+                    _inlineTabbedSearchOpen && !isSheetVisible;
                 final searchSheetFab = _markerOverride != null &&
                     !inRoute &&
                     !_favoritesBrowseActive &&
-                    !_historyBrowseActive &&
-                    ((!_inlineTabbedSearchOpen && _attachedBottomSheet == null) || !isSheetVisible);
+                    ((!_inlineTabbedSearchOpen && _attachedBottomSheet == null) ||
+                        showExpandSearchPanelFab);
                 final showListFab = inRoute ||
                     _favoritesBrowseActive ||
-                    _historyBrowseActive ||
                     searchSheetFab;
+
+                if (loading &&
+                    _cachedRotaData == null &&
+                    rawDisplay.isEmpty &&
+                    !inRoute) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  );
+                }
 
                 if (snapshot.hasError &&
                     _cachedRotaData == null &&
-                    display.isEmpty &&
+                    rawDisplay.isEmpty &&
                     !inRoute) {
                   return Center(child: Text('Hata: ${snapshot.error}'));
                 }
                 if (data?.errorMessage != null &&
                     _cachedRotaData == null &&
-                    display.isEmpty &&
+                    rawDisplay.isEmpty &&
                     !inRoute) {
                   return Center(child: Text(data!.errorMessage!));
                 }
@@ -1445,9 +1816,12 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
 
                 final mq = MediaQuery.paddingOf(context);
                 final toolbarBottom = mq.top + kToolbarHeight;
-                const storyH = 112.0;
-                final storyRowTop = toolbarBottom + 4;
-                final searchBarTop = storyRowTop + storyH + 4;
+                final searchChromeTop =
+                    toolbarBottom + MainMapSearchChrome.topGapBelowToolbar;
+                final searchChromeActive = ref.watch(isMapSearchChromeActiveProvider);
+                final hideMapOverlayButtons =
+                    searchChromeActive && !showExpandSearchPanelFab;
+                final onboarding = RotalinkShellScope.maybeOf(context)?.onboarding;
 
                 return Stack(
                   clipBehavior: Clip.none,
@@ -1471,7 +1845,31 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                               } else {
                                 _center = kTurkeyMapFallbackCenter;
                               }
-                              _zoom = clampZoom(pos.zoom);
+                              final prevZoom = _zoom;
+                              final nextZoom = clampZoom(pos.zoom);
+                              final wasOverviewZoom =
+                                  prevZoom < _kOverviewCityZoomThreshold;
+                              final isOverviewZoom =
+                                  nextZoom < _kOverviewCityZoomThreshold;
+                              _zoom = nextZoom;
+                              if (hasGesture) {
+                                _maybeRestoreOverviewMarkers(nextZoom);
+                                if (_isMainMapOverviewActive &&
+                                    !_inlineTabbedSearchOpen &&
+                                    _attachedBottomSheet == null &&
+                                    _mainMapFocusedCity == null &&
+                                    _searchController.text.trim().isEmpty &&
+                                    _mapPreviewFacility == null &&
+                                    !_misafirhaneFacilityPopupOpen) {
+                                  _mapCameraUserAdjusted = true;
+                                }
+                              }
+                              // Zoom eşiği geçildiğinde il/tesis marker geçişini tetikle.
+                              if (wasOverviewZoom != isOverviewZoom &&
+                                  _isMainMapOverviewActive &&
+                                  _mainMapFocusedCity == null) {
+                                setState(() {});
+                              }
                             },
                             onTap: (tapPosition, point) {
                               _popupController.hideAllPopups();
@@ -1491,10 +1889,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                             },
                           ),
                           children: [
-                            TileLayer(
-                              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                              userAgentPackageName: 'com.serdarza.rotalink',
-                            ),
+                            const RotalinkTileLayer(),
                             if (_routePolylines.isNotEmpty)
                               PolylineLayer(polylines: _routePolylines),
                             if (inRoute && rotaForUi != null) ...[
@@ -1508,11 +1903,32 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                                   markers: [_userLocationMarker(_userLocationLatLng!)],
                                 ),
                             ] else ...[
-                              PopupMarkerLayer(
-                                options: PopupMarkerLayerOptions(
-                                  markers: facilityPopupMarkers,
-                                  popupController: _popupController,
-                                ),
+                              MapOverviewCityMarkersLayer(
+                                visible: showOverviewCityMarkers,
+                                buildMarkers: (filter) =>
+                                    _overviewCityMarkersFor(rotaForUi, filter),
+                              ),
+                              MapFacilityPopupMarkersLayer(
+                                baseFacilities: baseDisplay,
+                                highlight: _searchSheetHighlight,
+                                visible: showFacilityMarkers,
+                                popupController: _popupController,
+                                onMarkerTap: (
+                                  popupSpec,
+                                  popupState,
+                                  popupController,
+                                ) {
+                                  if (_shouldInterceptMainMapMarkerTap) {
+                                    _handleMarkerTapOnMainOverview(popupSpec.marker);
+                                    return;
+                                  }
+
+                                  if (popupState.selectedPopupSpecs.contains(popupSpec)) {
+                                    popupController.hideAllPopups();
+                                  } else {
+                                    popupController.showPopupsOnlyForSpecs([popupSpec]);
+                                  }
+                                },
                               ),
                               if (_userLocationLatLng != null &&
                                   isValidWgs84LatLng(
@@ -1571,7 +1987,6 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                           '${_tabbedSheetFacilities.length}-${_searchSheetHighlight?.stableFacilityId ?? 'h'}-$_tabbedSheetInitialTab-${_tabbedSheetGeziYemekHighlight ?? ''}',
                         ),
                         sheetExtentController: _searchSheetExtentController!,
-                        facilities: _tabbedSheetFacilities,
                         rotaData: _tabbedSheetRotaData!,
                         mapLocationState: _mapLocationState,
                         highlightTarget: _tabbedSheetHighlight,
@@ -1585,47 +2000,6 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                         onRequestLocationPermission: _onSearchSheetRequestLocation,
                         onClosePanel: _closeInlineTabbedSearchPanel,
                       ),
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      top: storyRowTop,
-                      child: Container(
-                        height: storyH,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Color(0x88000000), Colors.transparent],
-                          ),
-                        ),
-                        child: PremiumStoryRow(
-                          rotaData: rotaForUi,
-                          onNavigateToCategory: _storyNavigateToCategory,
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 16,
-                      right: 16,
-                      top: searchBarTop,
-                      child: CustomSearchBar(
-                        key: ValueKey<int>(_searchBarSession),
-                        controller: _searchController,
-                        ilOptionsSorted: _getIlOptions(rotaForUi),
-                        onSubmitted: rotaForUi != null
-                            ? () => unawaited(_performSearch(context, rotaForUi))
-                            : null,
-                        onSearchCleared: () {
-                          if (!mounted) return;
-                          FocusManager.instance.primaryFocus?.unfocus();
-                          _onMainSearchCleared();
-                          setState(() => _searchBarSession++);
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (mounted) _fitTurkeyOverviewCamera();
-                          });
-                        },
-                      ),
-                    ),
                     ValueListenableBuilder<int>(
                       valueListenable: _previewPositionTick,
                       builder: (__, a, b) {
@@ -1638,7 +2012,8 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                           const estCardH = 52.0;
                           const markerHalf = 20.0;
                           const gapAboveMarker = 8.0;
-                          final minTopBelowSearch = toolbarBottom + 72.0;
+                          final minTopBelowSearch =
+                              toolbarBottom + MainMapSearchChrome.blockHeight + 8;
                           final cardW = math.min(cardWMax, constraints.maxWidth - 16);
 
                           double left;
@@ -1686,87 +2061,122 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                     Positioned(
                       right: 16,
                       bottom: 8,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          if (showListFab)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 10, right: 2),
-                              child: FloatingActionButton(
-                                heroTag: 'fab_list',
-                                backgroundColor: AppColors.primary,
-                                elevation: 12,
-                                onPressed: () async {
-                                  if (inRoute) {
-                                    await _openRouteSummarySheet(
-                                      context,
-                                      _activeRouteStops!,
-                                      totalDistanceM: _routeSummaryDistanceM,
-                                      totalDurationS: _routeSummaryDurationS,
-                                      navWaypoints: rotaForUi != null
-                                          ? waypointsForRouteStops(rotaForUi, _activeRouteStops!)
-                                          : null,
-                                    );
-                                  } else if (_favoritesBrowseActive || _historyBrowseActive) {
-                                    _openMisafirhaneSheet(
-                                      display,
-                                      liveFavoriteList: _favoritesBrowseActive,
-                                      liveHistoryList: _historyBrowseActive,
-                                    );
-                                  } else if (rotaForUi != null) {
-                                    if (_markerOverride != null &&
-                                        _inlineTabbedSearchOpen &&
-                                        (_searchSheetExtentController?.isAttached ?? false)) {
+                      child: AnimatedOpacity(
+                        duration: const Duration(milliseconds: 280),
+                        curve: Curves.easeOutCubic,
+                        opacity: (hideMapOverlayButtons && !showExpandSearchPanelFab)
+                            ? 0
+                            : 1,
+                        child: IgnorePointer(
+                          ignoring: hideMapOverlayButtons && !showExpandSearchPanelFab,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              if (showExpandSearchPanelFab)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 10, right: 2),
+                                  child: FloatingActionButton(
+                                    heroTag: 'fab_expand_search',
+                                    backgroundColor: AppColors.primary,
+                                    elevation: 12,
+                                    onPressed: () async {
                                       await _expandSearchResultsSheet();
                                       if (mounted) {
                                         setState(() => isSheetVisible = true);
                                       }
-                                    } else {
-                                      await _openTabbedSearchResults(
-                                        context,
-                                        rotaForUi,
-                                        display,
-                                        highlightTarget: _searchSheetHighlight,
+                                    },
+                                    tooltip: 'Arama sonuçlarını aç',
+                                    child: const Icon(
+                                      Icons.keyboard_arrow_up_rounded,
+                                      color: AppColors.white,
+                                    ),
+                                  ),
+                                ),
+                              if (showListFab && !showExpandSearchPanelFab)
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 10, right: 2),
+                                  child: FloatingActionButton(
+                                    heroTag: 'fab_list',
+                                    backgroundColor: AppColors.primary,
+                                    elevation: 12,
+                                    onPressed: () async {
+                                      final mapFacilities = ref.read(
+                                        filteredFacilitiesProvider(baseDisplay),
                                       );
-                                    }
-                                  }
-                                },
-                                tooltip: inRoute
-                                    ? AppStrings.routePlanSummaryTitle
-                                    : AppStrings.fabMisafirhaneList,
-                                child: Icon(
-                                  searchSheetFab
-                                      ? Icons.view_list_rounded
-                                      : Icons.keyboard_arrow_up,
-                                  color: AppColors.white,
+                                      if (inRoute) {
+                                        await _openRouteSummarySheet(
+                                          context,
+                                          _activeRouteStops!,
+                                          totalDistanceM: _routeSummaryDistanceM,
+                                          totalDurationS: _routeSummaryDurationS,
+                                          navWaypoints: rotaForUi != null
+                                              ? waypointsForRouteStops(
+                                                  rotaForUi,
+                                                  _activeRouteStops!,
+                                                )
+                                              : null,
+                                        );
+                                      } else if (_favoritesBrowseActive) {
+                                        _openMisafirhaneSheet(
+                                          mapFacilities,
+                                          liveFavoriteList: true,
+                                        );
+                                      } else if (rotaForUi != null) {
+                                        await _openTabbedSearchResults(
+                                          context,
+                                          rotaForUi,
+                                          mapFacilities,
+                                          highlightTarget: _searchSheetHighlight,
+                                        );
+                                      }
+                                    },
+                                    tooltip: inRoute
+                                        ? AppStrings.routePlanSummaryTitle
+                                        : AppStrings.fabMisafirhaneList,
+                                    child: const Icon(
+                                      Icons.view_list_rounded,
+                                      color: AppColors.white,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          if (!showListFab &&
-                              !_inlineTabbedSearchOpen &&
-                              _attachedBottomSheet == null) ...[
-                            Material(
-                              elevation: 6,
-                              shape: const CircleBorder(),
-                              color: AppColors.primary,
-                              child: IconButton(
-                                tooltip: AppStrings.myLocationTooltip,
-                                onPressed: () => unawaited(_goToMyLocation()),
-                                icon: Icon(
-                                  Icons.my_location,
-                                  color: !_mapLocationState.locationPermissionGranted
-                                      ? AppColors.white.withValues(alpha: 0.55)
-                                      : AppColors.white,
+                              if (!showListFab &&
+                                  !_inlineTabbedSearchOpen &&
+                                  _attachedBottomSheet == null) ...[
+                                KamiMapOverlay(
+                                  repository: widget.repository,
+                                  initialData: _cachedRotaData,
+                                  userLocationHint: _userLocationLatLng,
+                                  fabAnchorKey: onboarding?.targetKey(
+                                    OnboardingTarget.kami,
+                                  ),
+                                  onRoutePlan: (outcome) async {
+                                    final data = _cachedRotaData;
+                                    if (data == null) return;
+                                    await _applyRoutePlan(
+                                      context,
+                                      data,
+                                      outcome.stops,
+                                      precomputedSegments: outcome.segments,
+                                    );
+                                  },
                                 ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            _EmergencyFab(
-                              onTap: () => unawaited(showEmergencyBottomSheet(context)),
-                            ),
-                          ],
-                        ],
+                                const IgnorePointer(
+                                  child: SizedBox(
+                                    height: KamiMapOverlay.gapAboveEmergencyFab,
+                                  ),
+                                ),
+                                _EmergencyFab(
+                                  anchorKey: onboarding?.targetKey(
+                                    OnboardingTarget.emergency,
+                                  ),
+                                  onTap: () =>
+                                      unawaited(showEmergencyBottomSheet(context)),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                     Positioned(
@@ -1776,7 +2186,41 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                       child: _RotalinkToolbar(
                         onMenu: () => _scaffoldKey.currentState?.openDrawer(),
                         onTitleTap: _goToInitialMapHome,
+                        menuAnchorKey: onboarding?.targetKey(OnboardingTarget.menu),
+                        trailing: KeyedSubtree(
+                          key: onboarding?.targetKey(OnboardingTarget.weather),
+                          child: MapWeatherChip(
+                            compact: true,
+                            liveGps: _userLocationLatLng,
+                            locationGranted:
+                                _mapLocationState.locationPermissionGranted,
+                            focusedCity: _mainMapFocusedCity,
+                            mapCenter: _center,
+                            rotaData: rotaForUi,
+                          ),
+                        ),
                       ),
+                    ),
+                    MainMapSearchChrome(
+                      anchorKey: onboarding?.targetKey(OnboardingTarget.searchChrome),
+                      top: searchChromeTop,
+                      searchBarSession: _searchBarSession,
+                      controller: _searchController,
+                      ilOptionsSorted: _getIlOptions(rotaForUi),
+                      onSubmitted: rotaForUi != null
+                          ? () => unawaited(_performSearch(context, rotaForUi))
+                          : null,
+                      onSearchCleared: () {
+                        if (!mounted) return;
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        _onMainSearchCleared();
+                        setState(() => _searchBarSession++);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (mounted) _fitTurkeyOverviewCamera();
+                        });
+                      },
+                      focusNode: _searchBarFocusNode,
+                      onFocusChanged: _onSearchBarFocusChanged,
                     ),
                   ],
                 );
@@ -1788,66 +2232,11 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
             RotalinkBannerAd(adsEnabled: AdService.adsEnabled),
         ],
       ),
-    ),
     );
   }
 
   void _toast(BuildContext context, String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-  }
-
-  Future<void> _goToMyLocation() async {
-    if (!mounted) return;
-    await _syncLocationUiFromPermissionOnly();
-    if (!mounted) return;
-    if (!await SimpleLocationService.isLocationGranted()) {
-      await _handleChipTapLocationRequest();
-      return;
-    }
-    if (SimpleLocationService.shouldSuppressPlayServicesLocationActivity) {
-      if (mounted) {
-        _toast(context, AppStrings.locationServicesOffSnack);
-      }
-      return;
-    }
-    if (!mounted) return;
-    try {
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: _kRotalinkLocationSettingsLow,
-      );
-      if (!mounted) return;
-      if (!isValidWgs84LatLng(pos.latitude, pos.longitude)) {
-        if (mounted) {
-          setState(() => _userLocationLatLng = null);
-          try {
-            _mapController.move(kTurkeyMapFallbackCenter, kTurkeyMapFallbackZoom);
-          } catch (_) {}
-          _toast(context, '${AppStrings.locationFailedPrefix}Geçersiz konum.');
-        }
-        return;
-      }
-      final ll = LatLng(pos.latitude, pos.longitude);
-      if (mounted) {
-        setState(() {
-          _userLocationLatLng = ll;
-          _center = ll;
-        });
-      }
-      unawaited(UserLocationCache.save(ll));
-      _mapLocationState.update(ll, true);
-      try {
-        _mapController.move(ll, clampZoom(12));
-      } catch (_) {
-        try {
-          _mapController.move(kTurkeyMapFallbackCenter, kTurkeyMapFallbackZoom);
-        } catch (_) {}
-      }
-    } catch (e) {
-      SimpleLocationService.markSessionPlayServicesLocationPromptDeclined();
-      if (mounted) {
-        _toast(context, AppStrings.locationServicesOffSnack);
-      }
-    }
   }
 
   Future<void> _dialFacilityPhone(BuildContext context, String phone) async {
@@ -1915,7 +2304,6 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
   void _openMisafirhaneSheet(
     List<Misafirhane> items, {
     bool liveFavoriteList = false,
-    bool liveHistoryList = false,
   }) {
     _popupController.hideAllPopups();
     _dismissAttachedBottomSheet();
@@ -1925,9 +2313,6 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
       (sheetCtx) => StatefulBuilder(
           builder: (ctx, setModal) {
             List<Misafirhane> rows() {
-              if (liveHistoryList) {
-                return _resolveSavedAgainstLive(_historyCache, _cachedRotaData);
-              }
               if (liveFavoriteList) {
                 return _resolveSavedAgainstLive(_favoritesCache, _cachedRotaData);
               }
@@ -1962,11 +2347,8 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
               Navigator.pop(sheetCtx);
               if (!mounted) return;
               _showMisafirhanePopupFor(m);
-              if (liveHistoryList || liveFavoriteList) {
+              if (liveFavoriteList) {
                 setState(() {});
-              }
-              if (liveHistoryList) {
-                _fitFacilitiesCamera(rows());
               }
             }
 
@@ -1983,7 +2365,6 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                 _openMisafirhaneSheet(
                   items,
                   liveFavoriteList: liveFavoriteList,
-                  liveHistoryList: liveHistoryList,
                 );
               });
             }
@@ -2198,21 +2579,28 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     _fitLatLngsOrMoveCamera(points, singlePointZoom: 10);
   }
 
-  Future<void> _openRoutePlanning(BuildContext context) async {
-    final outcome = await Navigator.of(context).push<RoutePlanOutcome>(
+  Future<void> _openRoutePlanning() async {
+    final outcome = await pushOnShellNavigator<RoutePlanOutcome>(
       MaterialPageRoute<RoutePlanOutcome>(
-        builder: (_) => RoutePlanScreen(repository: widget.repository),
+        builder: (_) => RoutePlanScreen(
+          repository: widget.repository,
+          embeddedInShell: true,
+        ),
       ),
     );
-    if (!mounted || outcome == null || outcome.stops.isEmpty) return;
+    if (outcome == null || outcome.stops.isEmpty) {
+      widget.navBridge?.onRoutePlanningDismissed?.call();
+      return;
+    }
     final data = _cachedRotaData;
-    if (data == null) return;
+    if (data == null || !mounted) return;
     await _applyRoutePlan(
       context,
       data,
       outcome.stops,
       precomputedSegments: outcome.segments,
     );
+    widget.navBridge?.onRoutePlanningDismissed?.call();
   }
 
   Future<void> _applyRoutePlan(
@@ -2226,10 +2614,9 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
     _popupController.hideAllPopups();
     _dismissAttachedBottomSheet();
     setState(() {
+      _mainMapFocusedCity = null;
       _favoritesBrowseActive = false;
-      _historyBrowseActive = false;
       _markerOverride = null;
-      _searchSheetHighlight = null;
       _activeRouteStops = stops;
       _routePolylines = const [];
       _routeLabelMarkers = const [];
@@ -2332,7 +2719,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
         _toast(context, AppStrings.routePlanSaveEmptyName);
         return;
       }
-      final lites = stops.map((s) => RouteStopLite(city: s.city, days: s.days)).toList();
+      final lites = stops.map(RouteStopLite.fromRouteStop).toList();
       await _savedRoutes.upsert(
         SavedRouteRecord(
           name: name,
@@ -2724,11 +3111,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                   title: AppStrings.drawerHolidays,
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.of(context).push<void>(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const HolidaysScreen(),
-                      ),
-                    );
+                    Navigator.of(context).pushNamed(RotalinkShellRoutes.holidays);
                   },
                 ),
                 _DrawerTile(
@@ -2736,11 +3119,7 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                   title: AppStrings.drawerSuggestion,
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.of(context).push<void>(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const SuggestionScreen(),
-                      ),
-                    );
+                    Navigator.of(context).pushNamed(RotalinkShellRoutes.suggestion);
                   },
                 ),
                 _DrawerTile(
@@ -2753,16 +3132,13 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
                   title: AppStrings.drawerShareApp,
                   onTap: () => unawaited(_shareAppFromDrawer(context)),
                 ),
+                const DrawerSocialSection(),
                 _DrawerTile(
                   icon: Icons.info_outline,
                   title: AppStrings.drawerAbout,
                   onTap: () {
                     Navigator.pop(context);
-                    Navigator.of(context).push<void>(
-                      MaterialPageRoute<void>(
-                        builder: (_) => const AboutScreen(),
-                      ),
-                    );
+                    Navigator.of(context).pushNamed(RotalinkShellRoutes.about);
                   },
                 ),
               ],
@@ -2802,53 +3178,49 @@ class _MainMapScreenState extends State<MainMapScreen> with WidgetsBindingObserv
 
   Future<void> _shareAppFromDrawer(BuildContext context) async {
     Navigator.pop(context);
-    const playStoreUrl =
-        'https://play.google.com/store/apps/details?id=com.serdarza.rotalink';
-    await Share.share(
-      'Rotalink uygulamasını bu linkten indirebilirsiniz:\n$playStoreUrl',
-    );
+    await Share.share(StoreLinks.drawerShareMessage());
   }
 }
 
-/// `bg_toolbar_teal_rounded`: yalnız alt köşeler yuvarlak teal şerit.
+/// Düz teal üst çubuk — yuvarlak köşe yok.
 class _RotalinkToolbar extends StatelessWidget {
   const _RotalinkToolbar({
     required this.onMenu,
     required this.onTitleTap,
+    this.menuAnchorKey,
+    this.trailing,
   });
 
   final VoidCallback onMenu;
   final VoidCallback onTitleTap;
+  final Key? menuAnchorKey;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
     return Material(
-      elevation: 6,
+      elevation: 4,
       color: AppColors.primary,
-      borderRadius: const BorderRadius.only(
-        bottomLeft: Radius.circular(22),
-        bottomRight: Radius.circular(22),
-      ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(4, top, 8, 0),
         child: SizedBox(
           height: kToolbarHeight,
           child: Row(
             children: [
-              IconButton(
-                onPressed: onMenu,
-                tooltip: AppStrings.menuOpen,
-                icon: const Icon(Icons.menu, color: AppColors.white),
+              KeyedSubtree(
+                key: menuAnchorKey,
+                child: IconButton(
+                  onPressed: onMenu,
+                  tooltip: AppStrings.menuOpen,
+                  icon: const Icon(Icons.menu, color: AppColors.white),
+                ),
               ),
               Expanded(
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: InkWell(
                     onTap: onTitleTap,
-                    borderRadius: BorderRadius.circular(10),
-                    splashColor: AppColors.white.withValues(alpha: 0.2),
-                    highlightColor: AppColors.white.withValues(alpha: 0.12),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                       child: Text(
@@ -2863,6 +3235,7 @@ class _RotalinkToolbar extends StatelessWidget {
                   ),
                 ),
               ),
+              if (trailing != null) trailing!,
             ],
           ),
         ),
@@ -2872,13 +3245,19 @@ class _RotalinkToolbar extends StatelessWidget {
 }
 
 class _EmergencyFab extends StatelessWidget {
-  const _EmergencyFab({required this.onTap});
+  const _EmergencyFab({
+    required this.onTap,
+    this.anchorKey,
+  });
 
   final VoidCallback onTap;
+  final Key? anchorKey;
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
+    return KeyedSubtree(
+      key: anchorKey,
+      child: Tooltip(
       message: AppStrings.fabEmergency,
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -2912,201 +3291,25 @@ class _EmergencyFab extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _MainBottomBar extends StatelessWidget {
-  const _MainBottomBar({
-    required this.onRoutePlan,
-    required this.onHistory,
-    required this.onFavorites,
-    required this.discoverFlash,
-  });
-
-  final VoidCallback onRoutePlan;
-  final VoidCallback onHistory;
-  final VoidCallback onFavorites;
-  final ValueNotifier<bool> discoverFlash;
-
-  @override
-  Widget build(BuildContext context) {
-    void openDiscover() {
-      Navigator.of(context).push<void>(
-        MaterialPageRoute<void>(builder: (_) => DiscoverScreen()),
-      );
-    }
-
-    return Material(
-      color: AppColors.white,
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 2),
-          child: Row(
-            children: [
-              _BottomEntry(
-                icon: Icons.history,
-                iconColor: AppColors.bottomNavHistoryTint,
-                label: AppStrings.bottomHistory,
-                onTap: onHistory,
-              ),
-              _BottomEntry(
-                icon: Icons.favorite,
-                iconColor: const Color(0xFFC2185B),
-                label: AppStrings.bottomFavorites,
-                onTap: onFavorites,
-              ),
-              _BottomEntry(
-                icon: Icons.alt_route,
-                iconColor: AppColors.bottomNavRouteTint,
-                label: AppStrings.bottomRoutePlan,
-                onTap: onRoutePlan,
-              ),
-              _FlashEntry(
-                icon: Icons.card_giftcard,
-                iconColor: AppColors.bottomNavDiscoverTint,
-                label: AppStrings.bottomDiscover,
-                onTap: openDiscover,
-                flashNotifier: discoverFlash,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
 }
 
-class _BottomEntry extends StatelessWidget {
-  const _BottomEntry({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.onTap,
+class _OverviewCitySummary {
+  const _OverviewCitySummary({
+    required this.cityName,
+    required this.facilities,
+    required this.center,
   });
 
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final VoidCallback onTap;
+  final String cityName;
+  final List<Misafirhane> facilities;
+  final LatLng center;
 
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(4, 2, 4, 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, color: iconColor, size: 24),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+  int get facilityCount => facilities.length;
 
-class _FlashEntry extends StatefulWidget {
-  const _FlashEntry({
-    required this.icon,
-    required this.iconColor,
-    required this.label,
-    required this.onTap,
-    required this.flashNotifier,
-  });
-  final IconData icon;
-  final Color iconColor;
-  final String label;
-  final VoidCallback onTap;
-  final ValueNotifier<bool> flashNotifier;
-
-  @override
-  State<_FlashEntry> createState() => _FlashEntryState();
-}
-
-class _FlashEntryState extends State<_FlashEntry>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl;
-
-  @override
-  void initState() {
-    super.initState();
-    _ctrl = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    widget.flashNotifier.addListener(_onFlash);
-  }
-
-  void _onFlash() {
-    if (!mounted) return;
-    if (widget.flashNotifier.value) {
-      _ctrl.repeat(reverse: true);
-    } else {
-      _ctrl.stop();
-      _ctrl.animateTo(0, duration: Duration.zero);
-    }
-  }
-
-  @override
-  void dispose() {
-    widget.flashNotifier.removeListener(_onFlash);
-    _ctrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: AnimatedBuilder(
-        animation: _ctrl,
-        builder: (ctx, child) => ColoredBox(
-          color: Color.lerp(
-            Colors.transparent,
-            const Color(0x66FFD600),
-            _ctrl.value,
-          )!,
-          child: child,
-        ),
-        child: InkWell(
-          onTap: widget.onTap,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(4, 2, 4, 8),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(widget.icon, color: widget.iconColor, size: 24),
-                const SizedBox(height: 4),
-                Text(
-                  widget.label,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  double get markerSize => facilityCount >= 100 ? 30 : 26;
 }
 
 class _DrawerTile extends StatelessWidget {

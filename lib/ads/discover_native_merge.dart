@@ -70,7 +70,10 @@ abstract final class DiscoverNativeMerge {
       count,
       (_) => loadOneNative(),
     );
-    final results = await Future.wait(futures);
+    final results = await Future.wait(futures).timeout(
+      const Duration(seconds: 15),
+      onTimeout: () => List<NativeAd?>.filled(count, null),
+    );
     return results.whereType<NativeAd>().toList();
   }
 }

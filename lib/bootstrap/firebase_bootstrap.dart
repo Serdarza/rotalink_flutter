@@ -6,7 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-import '../data/firebase_rota_repository.dart';
+import '../services/map_tile_cache_service.dart';
 
 /// Kotlin `MyApplication` / `build.gradle` içindeki Firebase parçalarına denk başlatma.
 ///
@@ -18,24 +18,33 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }
 
-/// [Firebase.initializeApp] ve isteğe bağlı servis ön yükleme.
+/// Kritik yol: yalnızca [Firebase.initializeApp].
+/// Messaging / Analytics / Remote Config arka planda ısınır — açılışı bloklamaz.
 Future<FirebaseApp> initializeFirebase() async {
   final app = await Firebase.initializeApp();
 
-  FirebaseRotaRepository.configureOfflinePersistence();
-
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  await FirebaseMessaging.instance.setAutoInitEnabled(true);
 
-  await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
-
-  unawaited(_primeRemoteConfig());
-
+  unawaited(MapTileCacheService.instance.ensureInitialized());
+  unawaited(_warmFirebaseServices());
   return app;
 }
 
+Future<void> _warmFirebaseServices() async {
+  try {
+    await FirebaseMessaging.instance.setAutoInitEnabled(true);
+  } catch (_) {}
+
+  try {
+    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+  } catch (_) {}
+
+  unawaited(primeRemoteConfig());
+}
+
 /// Kotlin `MainActivity` içindeki `latest_version_code` varsayılanı ile uyumlu ön yükleme.
-Future<void> _primeRemoteConfig() async {
+/// Ayrıca reklam bekleme süresi için Remote Config başlatır.
+Future<void> primeRemoteConfig() async {
   try {
     final info = await PackageInfo.fromPlatform();
     final build = int.tryParse(info.buildNumber) ?? 1;
@@ -43,12 +52,13 @@ Future<void> _primeRemoteConfig() async {
     final rc = FirebaseRemoteConfig.instance;
     await rc.setConfigSettings(
       RemoteConfigSettings(
-        fetchTimeout: const Duration(seconds: 10),
+        fetchTimeout: const Duration(seconds: 5),
         minimumFetchInterval: const Duration(hours: 1),
       ),
     );
     await rc.setDefaults(<String, dynamic>{
       'latest_version_code': build.toString(),
+      'reklam_bekleme_suresi': 5, // dakika cinsinden
     });
     await rc.fetchAndActivate();
   } catch (_) {

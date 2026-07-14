@@ -37,6 +37,18 @@ class GeziYemekItem {
     );
   }
 
+  Map<String, dynamic> toJson() => {
+        'il': il,
+        'isim': isim,
+        'adres': adres,
+        'aciklama': aciklama,
+        if (enlem != null) 'enlem': enlem,
+        if (boylam != null) 'boylam': boylam,
+        if (tur != null) 'tur': tur,
+        if (accommodationInfo != null) 'accommodationInfo': accommodationInfo,
+        if (day != null) 'day': day,
+      };
+
   static GeziYemekItem? tryParse(dynamic raw) {
     if (raw is! Map) return null;
     final m = raw.map((k, v) => MapEntry(k.toString(), v));
