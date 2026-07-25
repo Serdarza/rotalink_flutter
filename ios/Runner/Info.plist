@@ -139,8 +139,6 @@
 		<string>Sesli arama için mikrofon izni gerekir.</string>
 		<key>NSSpeechRecognitionUsageDescription</key>
 		<string>Konuşmanızı metne çevirmek için konuşma tanıma izni gerekir.</string>
-		<key>NSUserTrackingUsageDescription</key>
-		<string>İzniniz, uygulamada gördüğünüz reklamların ilgi alanlarınıza uygun olmasını sağlar. İzin vermezseniz reklamlar yine gösterilir, yalnızca kişiselleştirilmez.</string>
 		<key>UISupportedInterfaceOrientations~ipad</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>
