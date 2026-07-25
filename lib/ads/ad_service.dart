@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
+import 'package:flutter/widgets.dart' show AppLifecycleState;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../billing/pro_service.dart';
 import 'ad_unit_ids.dart';
+import 'discover_native_ad_pool.dart';
+import 'rewarded_unlock_result.dart';
 
 /// Geçiş (interstitial) reklam zamanlayıcısı.
 ///
@@ -25,14 +29,84 @@ class AdService {
   static const Duration _loadFailRetry = Duration(minutes: 1);
 
   InterstitialAd? _interstitial;
+  RewardedAd? _rewarded;
   Timer? _scheduler;
   Completer<void>? _loading;
+  Completer<void>? _rewardedLoading;
 
   DateTime? _sessionStartedAt;
   DateTime? _lastShownAt;
+  DateTime? _suppressUntil;
   int _intervalMinutes = _defaultIntervalMinutes;
   bool _schedulerRunning = false;
   bool _initialized = false;
+  bool _isForeground = true;
+  bool _awaitingReturnFromExternal = false;
+  /// Ödüllü reklam açıkken geçiş üstüne binmesin.
+  bool _rewardedShowing = false;
+
+  /// Maps / telefon / tarayıcı gibi dış uygulamaya çıkmadan önce çağır.
+  /// Geri dönüşte geçiş reklamı hemen basılmaz; kullanıcı uygulamaya döner.
+  void notifyLeavingToExternalApp() {
+    _awaitingReturnFromExternal = true;
+    _isForeground = false;
+    debugPrint('AdService: external leave — interstitial suppressed on return');
+  }
+
+  /// [WidgetsBindingObserver] üzerinden bağla.
+  void onAppLifecycle(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        _isForeground = true;
+        if (_awaitingReturnFromExternal) {
+          _awaitingReturnFromExternal = false;
+          // Harita vb. dönüşünde reklam şoku olmasın
+          _suppressUntil =
+              DateTime.now().add(const Duration(seconds: 90));
+          debugPrint('AdService: returned from external — suppress 90s');
+        }
+        if (_schedulerRunning) {
+          _armScheduler(reason: 'app_resumed');
+        }
+        break;
+      case AppLifecycleState.inactive:
+        // Geçiş reklamı gösterilirken de inactive olur; dokunma.
+        break;
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        _isForeground = false;
+        break;
+    }
+  }
+
+  /// Pro (reklamsız) abonelik etkinse hiçbir reklam gösterilmez.
+  bool get _proActive => ProService.instance.isAdFree;
+
+  /// Abonelik satın alındığında / bittiğinde reklam planını günceller.
+  void onProStatusChanged() {
+    if (!_proActive) {
+      if (_initialized) {
+        unawaited(preloadInterstitial());
+        unawaited(preloadRewarded());
+        startInterstitialScheduler();
+      }
+      return;
+    }
+    stopScheduler();
+    disposeInterstitial();
+    disposeRewarded();
+    DiscoverNativeAdPool.instance.disposeAll();
+    debugPrint('AdService: Pro etkin — tüm reklamlar kapatıldı');
+  }
+
+  bool get _isSuppressed {
+    final until = _suppressUntil;
+    if (until == null) return false;
+    if (DateTime.now().isBefore(until)) return true;
+    _suppressUntil = null;
+    return false;
+  }
 
   int get intervalMinutes => _intervalMinutes;
 
@@ -56,29 +130,29 @@ class AdService {
 
     _sessionStartedAt ??= DateTime.now();
 
+    // İçerik derecesi (G/PG/…) yalnızca AdMob panelinden — uygulama güncellemesi gerekmez.
     await MobileAds.instance.initialize();
-    await MobileAds.instance.updateRequestConfiguration(
-      RequestConfiguration(
-        maxAdContentRating: MaxAdContentRating.pg,
-        tagForChildDirectedTreatment: TagForChildDirectedTreatment.no,
-        tagForUnderAgeOfConsent: TagForUnderAgeOfConsent.no,
-      ),
-    );
+
+    if (_proActive) {
+      debugPrint('AdService: Pro etkin — reklam ön yüklemesi atlandı');
+      return;
+    }
 
     unawaited(preloadInterstitial());
+    unawaited(preloadRewarded());
     startInterstitialScheduler();
   }
 
   /// Zamanlayıcıyı başlatır (idempotent). Açılışta hemen reklam göstermez.
   void startInterstitialScheduler() {
-    if (!adsEnabled || kIsWeb) return;
+    if (!adsEnabled || kIsWeb || _proActive) return;
     _sessionStartedAt ??= DateTime.now();
     _schedulerRunning = true;
     _armScheduler(reason: 'start');
   }
 
   void _armScheduler({required String reason}) {
-    if (!_schedulerRunning || !adsEnabled || kIsWeb) return;
+    if (!_schedulerRunning || !adsEnabled || kIsWeb || _proActive) return;
     _scheduler?.cancel();
 
     final wait = _delayUntilNextShow();
@@ -97,14 +171,22 @@ class AdService {
     final now = DateTime.now();
     final anchor = _lastShownAt ?? _sessionStartedAt ?? now;
     final elapsed = now.difference(anchor);
-    if (elapsed >= interval) {
-      // Hâlâ açılış anı gibi hissettirmemek için çok kısa tampon.
-      return const Duration(seconds: 3);
+    var wait = elapsed >= interval
+        ? const Duration(seconds: 3)
+        : interval - elapsed;
+
+    final until = _suppressUntil;
+    if (until != null && until.isAfter(now)) {
+      final suppressLeft = until.difference(now);
+      if (suppressLeft > wait) wait = suppressLeft;
     }
-    return interval - elapsed;
+    return wait;
   }
 
   bool _canShowInterstitial() {
+    if (_proActive) return false;
+    if (!_isForeground || _isSuppressed || _rewardedShowing) return false;
+
     final interval = Duration(minutes: _intervalMinutes);
     final now = DateTime.now();
 
@@ -116,6 +198,12 @@ class AdService {
   }
 
   Future<void> _onSchedulerTick() async {
+    // Arka plan / dış uygulama / ödüllü reklam: geçiş üstüne binmesin.
+    if (!_isForeground || _isSuppressed || _rewardedShowing) {
+      _armScheduler(reason: 'deferred_not_ready');
+      return;
+    }
+
     final shown = await showInterstitialIfReady(force: true);
     if (!shown) {
       // Yüklenemediyse aralığın tamamını beklemek yerine kısa süre sonra dene.
@@ -127,7 +215,7 @@ class AdService {
   }
 
   Future<void> preloadInterstitial() async {
-    if (!adsEnabled || kIsWeb) return;
+    if (!adsEnabled || kIsWeb || _proActive) return;
     if (_interstitial != null) return;
     if (_loading != null) return _loading!.future;
 
@@ -187,7 +275,8 @@ class AdService {
   /// Hazırsa gösterir. [force] yalnızca zamanlayıcı için; yine de süre dolmuş olmalı.
   /// Dönüş: reklam gerçekten gösterime verildi mi.
   Future<bool> showInterstitialIfReady({bool force = false}) async {
-    if (!adsEnabled || kIsWeb) return false;
+    if (!adsEnabled || kIsWeb || _proActive) return false;
+    if (!_isForeground || _isSuppressed || _rewardedShowing) return false;
 
     if (!_canShowInterstitial()) {
       if (!force) return false;
@@ -198,6 +287,8 @@ class AdService {
     if (_interstitial == null) {
       await preloadInterstitial();
     }
+    if (!_isForeground || _isSuppressed || _rewardedShowing) return false;
+
     final ad = _interstitial;
     if (ad == null) return false;
 
@@ -212,6 +303,116 @@ class AdService {
   void disposeInterstitial() {
     _interstitial?.dispose();
     _interstitial = null;
+  }
+
+  // ─── Ödüllü (Rewarded) — fiyat kilidi ──────────────────────────────────────
+
+  Future<void> preloadRewarded() async {
+    if (!adsEnabled || kIsWeb || _proActive) return;
+    if (_rewarded != null) return;
+    if (_rewardedLoading != null) return _rewardedLoading!.future;
+
+    final done = Completer<void>();
+    _rewardedLoading = done;
+
+    RewardedAd.load(
+      adUnitId: AdUnitIds.rewarded,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          _rewarded?.dispose();
+          _rewarded = ad;
+          if (!done.isCompleted) done.complete();
+          _rewardedLoading = null;
+        },
+        onAdFailedToLoad: (err) {
+          _rewarded = null;
+          if (!done.isCompleted) done.complete();
+          _rewardedLoading = null;
+          debugPrint('AdService: rewarded load failed: $err');
+        },
+      ),
+    );
+
+    return done.future.timeout(
+      const Duration(seconds: 20),
+      onTimeout: () {
+        if (!done.isCompleted) done.complete();
+        _rewardedLoading = null;
+      },
+    );
+  }
+
+  /// Fiyat kilidi için ödüllü reklam.
+  ///
+  /// Ödüllü açıkken geçiş basılmaz; bittikten sonra GitHub
+  /// `reklam_bekleme_suresi` kadar beklenir.
+  Future<RewardedUnlockResult> showRewardedForPriceUnlock() async {
+    // Pro aboneler için fiyat kilidi yok.
+    if (!adsEnabled || kIsWeb || _proActive) return RewardedUnlockResult.bypass;
+
+    if (_rewarded == null) {
+      await preloadRewarded();
+    }
+    final ad = _rewarded;
+    if (ad == null) return RewardedUnlockResult.unavailable;
+
+    final result = Completer<RewardedUnlockResult>();
+    var earned = false;
+    var failedToShow = false;
+    _rewardedShowing = true;
+    _scheduler?.cancel();
+
+    void finishRewarded(RewardedUnlockResult value) {
+      _rewardedShowing = false;
+      _lastShownAt = DateTime.now();
+      unawaited(preloadRewarded());
+      _armScheduler(reason: 'rewarded_finished');
+      if (!result.isCompleted) result.complete(value);
+    }
+
+    ad.fullScreenContentCallback = FullScreenContentCallback(
+      onAdDismissedFullScreenContent: (RewardedAd dismissed) {
+        dismissed.dispose();
+        if (identical(_rewarded, dismissed)) {
+          _rewarded = null;
+        }
+        if (failedToShow) {
+          finishRewarded(RewardedUnlockResult.unavailable);
+        } else if (earned) {
+          finishRewarded(RewardedUnlockResult.earned);
+        } else {
+          finishRewarded(RewardedUnlockResult.dismissed);
+        }
+      },
+      onAdFailedToShowFullScreenContent: (RewardedAd failed, AdError err) {
+        failed.dispose();
+        if (identical(_rewarded, failed)) {
+          _rewarded = null;
+        }
+        debugPrint('AdService: rewarded failed to show: $err');
+        failedToShow = true;
+        finishRewarded(RewardedUnlockResult.unavailable);
+      },
+    );
+
+    try {
+      await ad.show(
+        onUserEarnedReward: (AdWithoutView _, RewardItem reward) {
+          earned = true;
+        },
+      );
+    } catch (e) {
+      debugPrint('AdService: rewarded show threw: $e');
+      finishRewarded(RewardedUnlockResult.unavailable);
+    }
+
+    return result.future;
+  }
+
+  void disposeRewarded() {
+    _rewarded?.dispose();
+    _rewarded = null;
   }
 
   /// Uygulama kapanırken veya test için zamanlayıcıyı tamamen durdurur.

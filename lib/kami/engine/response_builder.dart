@@ -20,6 +20,7 @@ class KamiResultCard {
     this.description = '',
     this.address = '',
     this.section = '',
+    this.overnightFacility,
     this.tapAction = KamiResultCardTap.none,
   });
 
@@ -36,6 +37,9 @@ class KamiResultCard {
   /// Grup başlığı (rota / hafta sonu için).
   final String section;
 
+  /// Doluyken tesis gecelik fiyat kutusu gösterilir (yalnızca konaklama).
+  final Misafirhane? overnightFacility;
+
   /// Arama listesi ile aynı: gezi/tesis/sosyal → Haritalar; yemek → Görseller.
   final KamiResultCardTap tapAction;
 
@@ -48,6 +52,8 @@ class KamiResultCard {
         'description': description,
         'address': address,
         'section': section,
+        if (overnightFacility != null)
+          'overnightFacility': overnightFacility!.toJson(),
         'tapAction': tapAction.name,
       };
 
@@ -92,6 +98,7 @@ class KamiResultCard {
       description: (m['description'] ?? '').toString(),
       address: (m['address'] ?? '').toString(),
       section: section,
+      overnightFacility: Misafirhane.tryParse(m['overnightFacility']),
       tapAction: _resolveTapAction(m['tapAction'], section),
     );
   }
@@ -148,6 +155,7 @@ abstract final class KamiResponseBuilder {
           city: city,
           address: m.adres.trim(),
           description: desc,
+          overnightFacility: m,
           section: section.isNotEmpty
               ? section
               : sectionForCity(city, 'Kamu misafirhaneleri'),

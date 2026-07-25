@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../ads/ad_unit_ids.dart';
+import '../billing/pro_service.dart';
 
 /// Kotlin `activity_main` altındaki `AdView` (BANNER, `9417170109`).
+///
+/// Pro abonelikte banner hiç yüklenmez; abonelik oturum içinde
+/// etkinleşirse mevcut banner anında kaldırılır.
 class RotalinkBannerAd extends StatefulWidget {
   const RotalinkBannerAd({super.key, this.adsEnabled = true});
 
@@ -19,10 +23,18 @@ class _RotalinkBannerAdState extends State<RotalinkBannerAd> {
   bool _loaded = false;
   bool _failed = false;
 
+  bool get _adsAllowed =>
+      widget.adsEnabled && !kIsWeb && !ProService.instance.isAdFree;
+
   @override
   void initState() {
     super.initState();
-    if (!widget.adsEnabled || kIsWeb) return;
+    ProService.instance.isPro.addListener(_onProChanged);
+    _loadIfAllowed();
+  }
+
+  void _loadIfAllowed() {
+    if (!_adsAllowed || _banner != null) return;
     _banner = BannerAd(
       adUnitId: AdUnitIds.banner,
       size: AdSize.banner,
@@ -39,15 +51,29 @@ class _RotalinkBannerAdState extends State<RotalinkBannerAd> {
     )..load();
   }
 
+  void _onProChanged() {
+    if (!mounted) return;
+    if (ProService.instance.isAdFree) {
+      _banner?.dispose();
+      _banner = null;
+      _loaded = false;
+      setState(() {});
+    } else {
+      _loadIfAllowed();
+      setState(() {});
+    }
+  }
+
   @override
   void dispose() {
+    ProService.instance.isPro.removeListener(_onProChanged);
     _banner?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.adsEnabled || kIsWeb) {
+    if (!_adsAllowed) {
       return const SizedBox.shrink();
     }
     if (_failed || _banner == null) {

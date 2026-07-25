@@ -1,15 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import '../data/app_rating_prefs.dart';
 import '../ads/discover_native_ad_pool.dart';
+import '../billing/pro_service.dart';
 import '../data/campaign_repository.dart';
+import '../data/facility_address_repository.dart';
+import '../data/facility_image_repository.dart';
+import '../data/facility_price_repository.dart';
+import '../data/gezi_yemek_repository.dart';
 import '../data/firebase_rota_repository.dart';
 import '../l10n/app_strings.dart';
 import '../theme/app_colors.dart';
+import '../theme/system_ui.dart';
 import 'rotalink_main_shell.dart';
 
 /// Tam ekran kurumsal renk; ortada başlık + alt slogan. İkon / logo yok.
@@ -22,7 +27,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _entrance;
   late final Animation<double> _fade;
 
@@ -33,19 +39,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
     _entrance = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 450),
+      duration: const Duration(milliseconds: 140),
     );
     _fade = CurvedAnimation(parent: _entrance, curve: Curves.easeOut);
 
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarIconBrightness: Brightness.light,
-      ),
-    );
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FlutterNativeSplash.remove();
@@ -54,26 +52,44 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _runSplashSequence() async {
-    await _entrance.forward();
-    // İlk kurulumda GitHub'dan indir; önbellek varsa anında geç.
-    await Future.wait([
+    // Kısa marka anı + veri (çoğu zaman ConnectivityGate'te başlamış olur).
+    unawaited(_entrance.forward());
+    await Future.wait<void>([
       widget.repository.ensureLocalDataReady(),
-      CampaignRepository.instance.ensureLocalDataReady(),
+      Future<void>.delayed(const Duration(milliseconds: 220)),
     ]);
-    final campaignCount = CampaignRepository.instance.currentCampaigns.length;
-    if (campaignCount > 0) {
-      unawaited(DiscoverNativeAdPool.instance.ensureAds(campaignCount));
-    }
-    await Future<void>.delayed(const Duration(milliseconds: 220));
+
+    // Overlay / kampanya: ana ekranı bekletmesin.
+    unawaited(_warmSecondaryData());
+
     if (!mounted) return;
     _goMain();
+  }
+
+  Future<void> _warmSecondaryData() async {
+    await Future.wait<void>([
+      CampaignRepository.instance.ensureLocalDataReady(),
+      FacilityPriceRepository.instance.ensureLocalDataReady(),
+      FacilityImageRepository.instance.ensureLocalDataReady(),
+      FacilityAddressRepository.instance.ensureLocalDataReady(),
+      GeziYemekRepository.instance.ensureLocalDataReady(),
+    ]);
+    final campaignCount = CampaignRepository.instance.currentCampaigns.length;
+    if (campaignCount > 0 && !ProService.instance.isAdFree) {
+      unawaited(DiscoverNativeAdPool.instance.ensureAds(campaignCount));
+    }
   }
 
   void _goMain() {
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => RotalinkMainShell(repository: widget.repository),
+      PageRouteBuilder<void>(
+        pageBuilder: (_, animation, __) =>
+            RotalinkMainShell(repository: widget.repository),
+        transitionDuration: const Duration(milliseconds: 180),
+        transitionsBuilder: (_, animation, __, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
       ),
     );
   }

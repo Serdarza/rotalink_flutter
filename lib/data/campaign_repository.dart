@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
@@ -27,7 +28,7 @@ class CampaignRepository {
   Future<void> ensureLocalDataReady() async {
     if (await KampanyaLocalCache.hasCache()) {
       await _loadFromLocalCache();
-      await _maybeSyncIfRemoteVersionChanged();
+      unawaited(_maybeSyncIfRemoteVersionChanged());
       return;
     }
     if (!await NetworkService.instance.isConnected()) return;

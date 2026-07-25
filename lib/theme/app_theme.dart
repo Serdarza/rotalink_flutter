@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'system_ui.dart';
 
 /// `themes.xml` + `colors.xml` — Material 3 üzerinde marka renkleri.
 ThemeData buildRotalinkTheme() {
@@ -25,6 +26,7 @@ ThemeData buildRotalinkTheme() {
       centerTitle: false,
       backgroundColor: AppColors.primary,
       foregroundColor: AppColors.white,
+      systemOverlayStyle: RotalinkSystemUi.lightIcons,
       titleTextStyle: TextStyle(
         fontFamily: 'Roboto',
         color: AppColors.white,

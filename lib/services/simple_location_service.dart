@@ -1,5 +1,4 @@
-import 'dart:io' show Platform;
-
+import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 
 /// Kullanıcı tarafından tetiklenen izin isteğinin sonucu.
@@ -7,12 +6,11 @@ enum PermissionRequestOutcome {
   /// İzin verildi — mesafe hesaplamasına geç.
   granted,
 
-  /// Kullanıcı bu oturumda izni reddetti — bir daha otomatik sorma.
+  /// Kullanıcı izni reddetti.
   denied,
 
-  /// İzin kalıcı reddedildi. Sistem ayarlar menüsü açıldı.
-  /// Çağıran taraf [WidgetsBindingObserver] ile uygulamaya dönüşü izlemeli.
-  openedSettings,
+  /// Kalıcı red — sistem popup bir daha çıkmaz; ayarlar gerekir.
+  deniedForever,
 }
 
 /// Konum izni yönetimi — tamamen oturum bazlı, yalnızca [Geolocator] kullanır.
@@ -20,22 +18,12 @@ enum PermissionRequestOutcome {
 /// iOS'ta hem [permission_handler] hem [geolocator] kullanmak iki ayrı
 /// CLLocationManager oluşturur ve izin diyaloğunun sessizce iptal edilmesine
 /// yol açar. Tüm konum izni işlemlerini [Geolocator] ile yapmak bu çakışmayı önler.
-///
-/// Kullanım:
-///   - Anlık izin kontrolü:                           [isLocationGranted]
-///   - Chip / konum butonu dokunuşu (tam zincir):     [requestFromUserTap]
-///   - Otomatik tetikleme (arama vb.):                [ensureLocationPermissionFromUserAction]
-///   - Oturum bloğu kontrolü:                         [isLocationPermissionDeclinedByUser]
 class SimpleLocationService {
   SimpleLocationService._();
 
-  // ─── Oturum bayrakları (bellek; uygulama kapanınca sıfırlanır) ────────────
-
   static bool _declinedThisSession = false;
   static bool _gpsUnavailableThisSession = false;
-  static Future<bool>? _inFlightRequest;
-
-  // ─── GPS erişimi ──────────────────────────────────────────────────────────
+  static Future<PermissionRequestOutcome>? _inFlightRequest;
 
   static bool get shouldSuppressPlayServicesLocationActivity =>
       _gpsUnavailableThisSession;
@@ -43,110 +31,76 @@ class SimpleLocationService {
   static void markSessionPlayServicesLocationPromptDeclined() =>
       _gpsUnavailableThisSession = true;
 
-  // ─── Ana API ──────────────────────────────────────────────────────────────
+  static void clearSessionGpsSuppression() =>
+      _gpsUnavailableThisSession = false;
 
-  /// Konum izni verilmiş mi? [Geolocator.checkPermission] tabanlı.
   static Future<bool> isLocationGranted() async {
     final p = await Geolocator.checkPermission();
     return p == LocationPermission.always || p == LocationPermission.whileInUse;
   }
 
-  /// İzin durumunu kontrol et. İzin zaten verilmişse her zaman `false` döner.
   static Future<bool> isLocationPermissionDeclinedByUser() async {
     if (await isLocationGranted()) return false;
     return _declinedThisSession;
   }
 
-  /// Oturum bloğunu sıfırlar; bir sonraki [ensureLocationPermissionFromUserAction]
-  /// çağrısı yeniden sistem penceresini gösterebilir.
+  /// Oturum bloğunu sıfırlar; bir sonraki istek sistem penceresini yeniden deneyebilir.
   static Future<void> prepareForUserInitiatedPermissionDialog() async {
     _declinedThisSession = false;
     _inFlightRequest = null;
   }
 
-  /// İzin iste. Oturum bloğuna uyar: kullanıcı bu oturumda zaten reddettiyse
-  /// diyalog göstermeden `false` döner.
-  static Future<bool> ensureLocationPermissionFromUserAction() {
-    return _inFlightRequest ??=
-        _requestFlow().whenComplete(() => _inFlightRequest = null);
+  /// Sistem "Konuma izin ver?" penceresini gösterir.
+  /// Arama / chip / otomatik tetik — hepsi bunu kullanır.
+  static Future<PermissionRequestOutcome> requestOsPermissionDialog() {
+    return _inFlightRequest ??= _requestOsPermissionDialogImpl()
+        .whenComplete(() => _inFlightRequest = null);
   }
 
-  // ─── Kullanıcı isteği (chip / konum butonu dokunuşu) ─────────────────────
-
-  /// Tam izin zinciri:
-  ///   1. Zaten verilmişse → [granted]
-  ///   2. Kalıcı red → [Geolocator.openAppSettings] → [openedSettings]
-  ///   3. İlk istek → OS diyaloğu → verilmezse iOS'ta Ayarlar, Android'de [denied]
-  static Future<PermissionRequestOutcome> requestFromUserTap() {
-    _declinedThisSession = false;
-    _inFlightRequest = null;
-    return _userTapFlow();
+  /// Chip / kullanıcı dokunuşu — oturum reddini temizleyip yeniden dener.
+  static Future<PermissionRequestOutcome> requestFromUserTap() async {
+    await prepareForUserInitiatedPermissionDialog();
+    return requestOsPermissionDialog();
   }
 
-  static Future<PermissionRequestOutcome> _userTapFlow() async {
+  /// Eski API uyumu.
+  static Future<bool> ensureLocationPermissionFromUserAction() async {
+    final o = await requestFromUserTap();
+    return o == PermissionRequestOutcome.granted;
+  }
+
+  static Future<PermissionRequestOutcome> _requestOsPermissionDialogImpl() async {
     try {
-      // 1. İzin zaten verilmiş mi?
       var perm = await Geolocator.checkPermission();
+      debugPrint('Rotalink konum: checkPermission=$perm');
+
       if (perm == LocationPermission.always ||
           perm == LocationPermission.whileInUse) {
         _declinedThisSession = false;
         return PermissionRequestOutcome.granted;
       }
 
-      // 2. Kalıcı red → Ayarlar'a yönlendir.
-      if (perm == LocationPermission.deniedForever) {
-        await Geolocator.openAppSettings();
-        return PermissionRequestOutcome.openedSettings;
-      }
-
-      // 3. İlk istek veya normal red → OS diyaloğunu göster.
+      // Sistem runtime izin penceresi.
       perm = await Geolocator.requestPermission();
+      debugPrint('Rotalink konum: requestPermission=$perm');
+
       if (perm == LocationPermission.always ||
           perm == LocationPermission.whileInUse) {
         _declinedThisSession = false;
         return PermissionRequestOutcome.granted;
       }
 
-      // 4. İstek sonrası hâlâ red:
-      //    - Kalıcı red oldu → Ayarlar
-      //    - iOS'ta her red sonrası Ayarlar (sistem diyalog bir daha çıkmaz)
-      if (perm == LocationPermission.deniedForever || Platform.isIOS) {
-        await Geolocator.openAppSettings();
-        return PermissionRequestOutcome.openedSettings;
-      }
-
-      _declinedThisSession = true;
-      return PermissionRequestOutcome.denied;
-    } catch (_) {
-      _declinedThisSession = true;
-      return PermissionRequestOutcome.denied;
-    }
-  }
-
-  // ─── Dahili akış (otomatik tetik) ─────────────────────────────────────────
-
-  static Future<bool> _requestFlow() async {
-    try {
-      if (await isLocationGranted()) {
-        _declinedThisSession = false;
-        return true;
-      }
-      if (_declinedThisSession) return false;
-
-      var perm = await Geolocator.checkPermission();
       if (perm == LocationPermission.deniedForever) {
         _declinedThisSession = true;
-        return false;
+        return PermissionRequestOutcome.deniedForever;
       }
 
-      perm = await Geolocator.requestPermission();
-      final granted = perm == LocationPermission.always ||
-          perm == LocationPermission.whileInUse;
-      _declinedThisSession = !granted;
-      return granted;
-    } catch (_) {
       _declinedThisSession = true;
-      return false;
+      return PermissionRequestOutcome.denied;
+    } catch (e, st) {
+      debugPrint('Rotalink konum izin hatası: $e\n$st');
+      _declinedThisSession = true;
+      return PermissionRequestOutcome.denied;
     }
   }
 }

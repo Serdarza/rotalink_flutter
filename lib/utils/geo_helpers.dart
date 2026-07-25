@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:latlong2/latlong.dart';
 
 import '../models/misafirhane.dart';
@@ -6,8 +8,11 @@ import 'safe_map_coordinates.dart';
 /// Konum izni yokken mesafe satırı — kullanıcı dokunarak izin isteyebilir.
 const String kDistancePermissionNeededLabel = 'Size uzaklık: Konum izni vermeniz gereklidir';
 
-/// Tesis koordinatı (Nominatim) henüz yok; kullanıcı konumu var, mesafe bekleniyor.
-const String kDistanceFacilityPendingLabel = 'Size uzaklık: Yer bilgisi yükleniyor…';
+/// Tesis koordinatı henüz yok; arka planda harita araması sürüyor.
+const String kDistanceFacilityPendingLabel = 'Size uzaklık: Mesafe hesaplanıyor';
+
+/// Eski etiket — UI artık göstermez; arka planda aramaya devam edilir.
+const String kDistanceFacilityNotFoundLabel = 'Size uzaklık: Mesafe hesaplanıyor';
 
 /// İzin var ama konum alınamadı (GPS kapalı, zaman aşımı vb.) — dokunarak yeniden denenebilir.
 const String kDistanceRetryLabel = 'Size uzaklık: Konum alınamadı, tekrar için dokun';
@@ -16,6 +21,38 @@ const String kDistanceRetryLabel = 'Size uzaklık: Konum alınamadı, tekrar iç
 bool isDistancePermissionNeededLabel(String? dist) => dist == kDistancePermissionNeededLabel;
 bool isDistanceTapLabel(String? dist) =>
     dist == kDistancePermissionNeededLabel || dist == kDistanceRetryLabel;
+
+const double _earthRadiusM = 6371000;
+
+/// Liste / chip için hızlı mesafe (ekvatoriyel yaklaşık). Ağ yok, nesne yok.
+/// Türkiye ölçeğinde m/km gösterimi için yeterli doğruluk.
+double distanceMetersFast(
+  double lat1,
+  double lon1,
+  double lat2,
+  double lon2,
+) {
+  final lat1r = lat1 * math.pi / 180;
+  final lat2r = lat2 * math.pi / 180;
+  final dLat = lat2r - lat1r;
+  final dLon = (lon2 - lon1) * math.pi / 180;
+  final x = dLon * math.cos((lat1r + lat2r) * 0.5);
+  final y = dLat;
+  return math.sqrt(x * x + y * y) * _earthRadiusM;
+}
+
+double? distanceMetersBetween(LatLng? a, LatLng? b) {
+  if (a == null || b == null) return null;
+  if (!isValidWgs84LatLng(a.latitude, a.longitude)) return null;
+  if (!isValidWgs84LatLng(b.latitude, b.longitude)) return null;
+  final m = distanceMetersFast(
+    a.latitude,
+    a.longitude,
+    b.latitude,
+    b.longitude,
+  );
+  return m.isFinite ? m : null;
+}
 
 /// İzin yok / kalıcı red veya kullanıcı konumu yoksa [kDistancePermissionNeededLabel]; aksi halde gerçek mesafe veya null.
 String? resolveDistanceRowText({
@@ -58,6 +95,7 @@ String? resolveDistanceRowTextWithOptionalFacility({
       isValidWgs84LatLng(userLocation.latitude, userLocation.longitude);
   // İzin var ama kullanıcı konumu yok — chip kaybolmasın, tıklanabilir kalabilsin.
   if (!userOk) return kDistanceRetryLabel;
+  // Koordinat yok / henüz bulunamadı: "Mesafe hesaplanıyor" (arka planda arama sürer).
   return kDistanceFacilityPendingLabel;
 }
 
@@ -67,8 +105,7 @@ String? formatDistanceChipText(LatLng? user, double lat, double lon) {
   if (lat == 0 && lon == 0) return null;
   if (!isValidWgs84LatLng(lat, lon)) return null;
   if (!isValidWgs84LatLng(user.latitude, user.longitude)) return null;
-  const d = Distance();
-  final m = d.as(LengthUnit.Meter, user, LatLng(lat, lon));
+  final m = distanceMetersFast(user.latitude, user.longitude, lat, lon);
   if (!m.isFinite) return null;
   if (m < 1000) return 'Size uzaklık: ${m.round()} m';
   return 'Size uzaklık: ${(m / 1000).toStringAsFixed(1)} km';
@@ -91,27 +128,29 @@ String? formatDistanceChipTextWithPlaceholder(
 
 List<Misafirhane> sortMisafirhaneByDistance(List<Misafirhane> list, LatLng? user) {
   if (user == null) return List<Misafirhane>.from(list);
-  const d = Distance();
-  final out = List<Misafirhane>.from(list);
-  out.sort((a, b) {
-    double distTo(Misafirhane x) {
-      if (x.latitude == 0 && x.longitude == 0) return double.infinity;
-      if (!isValidWgs84LatLng(x.latitude, x.longitude)) return double.infinity;
-      final v = d.as(LengthUnit.Meter, user, LatLng(x.latitude, x.longitude));
-      return v.isFinite ? v : double.infinity;
-    }
+  final uLat = user.latitude;
+  final uLon = user.longitude;
+  if (!isValidWgs84LatLng(uLat, uLon)) return List<Misafirhane>.from(list);
 
-    return distTo(a).compareTo(distTo(b));
-  });
-  return out;
+  final keyed = <({Misafirhane m, double d})>[];
+  for (final m in list) {
+    var d = double.infinity;
+    if (!(m.latitude == 0 && m.longitude == 0) &&
+        isValidWgs84LatLng(m.latitude, m.longitude)) {
+      final v = distanceMetersFast(uLat, uLon, m.latitude, m.longitude);
+      if (v.isFinite) d = v;
+    }
+    keyed.add((m: m, d: d));
+  }
+  keyed.sort((a, b) => a.d.compareTo(b.d));
+  return [for (final e in keyed) e.m];
 }
 
 double distanceMetersGezi(LatLng? user, double? enlem, double? boylam) {
   if (user == null || enlem == null || boylam == null) return double.infinity;
   if (!isValidWgs84LatLng(enlem, boylam)) return double.infinity;
   if (!isValidWgs84LatLng(user.latitude, user.longitude)) return double.infinity;
-  const d = Distance();
-  final m = d.as(LengthUnit.Meter, user, LatLng(enlem, boylam));
+  final m = distanceMetersFast(user.latitude, user.longitude, enlem, boylam);
   return m.isFinite ? m : double.infinity;
 }
 

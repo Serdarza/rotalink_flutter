@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../ads/ad_service.dart';
 import '../data/firebase_rota_repository.dart';
+import '../models/misafirhane.dart';
 import '../models/route_plan_outcome.dart';
 import '../theme/app_colors.dart';
 import '../utils/maps_launch.dart';
+import '../widgets/facility_overnight_price_box.dart';
 import 'engine/kami_models.dart';
 import 'engine/kami_service.dart';
 import 'engine/location_service.dart';
@@ -182,6 +185,7 @@ Future<void> _kamiOpenGoogleImages(String query) async {
     'https://www.google.com/search?tbm=isch&q=${Uri.encodeComponent(q)}',
   );
   if (await canLaunchUrl(uri)) {
+    AdService.instance.notifyLeavingToExternalApp();
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }
@@ -197,6 +201,7 @@ Future<void> _kamiDialPhone(BuildContext context, String raw) async {
   }
   final uri = Uri(scheme: 'tel', path: p);
   try {
+    AdService.instance.notifyLeavingToExternalApp();
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   } catch (_) {
     if (!context.mounted) return;
@@ -1116,8 +1121,8 @@ class _WeekendCityContentSheet extends StatelessWidget {
                     tabs: [
                       Tab(text: 'Gezi (${detail.gezi.length})'),
                       Tab(text: 'Yemek (${detail.yemek.length})'),
-                      Tab(text: 'Sosyal (${detail.sosyal.length})'),
-                      Tab(text: 'Tesis (${detail.facilities.length})'),
+                      Tab(text: 'Tesisler (${detail.sosyal.length})'),
+                      Tab(text: 'Konaklama (${detail.facilities.length})'),
                     ],
                   ),
                   Expanded(
@@ -1186,6 +1191,7 @@ class _WeekendCityContentSheet extends StatelessWidget {
                                 badge: m.tip.trim().isEmpty
                                     ? 'Tesis'
                                     : m.tip.trim(),
+                                overnightFacility: m,
                                 tapAction: KamiResultCardTap.maps,
                                 dialPhoneOnTap: true,
                               ),
@@ -1260,6 +1266,7 @@ class _CityPlaceTile extends StatelessWidget {
     this.address = '',
     this.phone = '',
     this.badge = '',
+    this.overnightFacility,
     this.tapAction = KamiResultCardTap.none,
     this.dialPhoneOnTap = false,
   });
@@ -1270,6 +1277,8 @@ class _CityPlaceTile extends StatelessWidget {
   final String address;
   final String phone;
   final String badge;
+  /// Doluyken tesis gecelik fiyat kutusu gösterilir (yalnızca konaklama).
+  final Misafirhane? overnightFacility;
   final KamiResultCardTap tapAction;
   final bool dialPhoneOnTap;
 
@@ -1340,6 +1349,23 @@ class _CityPlaceTile extends StatelessWidget {
               ],
             ],
           ),
+          if (overnightFacility != null) ...[
+            if (city.trim().isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                city.trim(),
+                style: TextStyle(
+                  color: AppColors.textPrimary.withValues(alpha: 0.55),
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+            FacilityOvernightPriceBox(
+              facility: overnightFacility!,
+              topSpacing: 8,
+            ),
+          ],
           if (desc.isNotEmpty) ...[
             const SizedBox(height: 8),
             Text(
@@ -1735,6 +1761,11 @@ class _FacilityInfoCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                  if (card.overnightFacility != null)
+                    FacilityOvernightPriceBox(
+                      facility: card.overnightFacility!,
+                      topSpacing: 8,
+                    ),
                 ],
               ),
             ),

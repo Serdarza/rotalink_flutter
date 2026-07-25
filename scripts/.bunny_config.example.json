@@ -1,0 +1,6 @@
+{
+  "storage_zone": "rotalink-media",
+  "storage_password": "BURAYA_STORAGE_ZONE_PASSWORD",
+  "storage_endpoint": "storage.bunnycdn.com",
+  "cdn_base_url": "https://rotalink-media.b-cdn.net"
+}

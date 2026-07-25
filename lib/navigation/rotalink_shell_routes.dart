@@ -5,4 +5,5 @@ abstract final class RotalinkShellRoutes {
   static const String about = '/about';
   static const String holidays = '/holidays';
   static const String suggestion = '/suggestion';
+  static const String pro = '/pro';
 }

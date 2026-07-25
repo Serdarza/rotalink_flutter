@@ -1,0 +1,239 @@
+{
+  "not": "Yalnızca resmi kaynaklarda açıkça 2026 yılı belirtilmiş konaklama tarifeleri eklenmiştir. Kaynak bulunamayan tesisler bilerek yazılmamıştır. Aralıklar oda tiplerine göre min–max gecelik ücrettir. Öğretmenevinde fiyat_kurum_personeli = MEB/öğretmen; fiyat_kamu_personeli = kamu; fiyat_sivil = sivil/diğer. Polisevinde fiyat_kurum_personeli = teşkilat mensubu. Misafirhanelerde kurum/kamu kolonları kaynağa göre eşlenir. Rezervasyonda tesisle teyit edilmelidir.",
+  "tesisler": [
+    {
+      "il": "Amasya",
+      "isim": "Amasya Polisevi",
+      "fiyat_sivil": "1.470 – 3.822 TL",
+      "fiyat_kamu_personeli": "1.050 – 2.730 TL",
+      "fiyat_kurum_personeli": "735 – 1.911 TL",
+      "kaynak": "https://amasya.pol.tr/polisevi",
+      "gecerlilik": "19.01.2026 itibarıyla (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Ankara",
+      "isim": "ODTU Misafirhanesi",
+      "fiyat_sivil": "2.100 – 7.350 TL",
+      "fiyat_kamu_personeli": "1.400 – 4.900 TL",
+      "fiyat_kurum_personeli": "1.400 – 4.900 TL",
+      "kaynak": "https://stm.metu.edu.tr/tr/odtu-misafirhanesi-fiyat-tarifesi",
+      "gecerlilik": "15.01.2026 itibarıyla (%1 konaklama vergisi 01.05.2026’dan itibaren dahil)"
+    },
+    {
+      "il": "Antalya",
+      "isim": "Alanya Meteoroloji Müdürlüğü ve Uluslararası Eğitim Tesisleri",
+      "fiyat_sivil": "1.800 – 2.160 TL",
+      "fiyat_kamu_personeli": "1.200 – 1.440 TL",
+      "fiyat_kurum_personeli": "1.200 – 1.440 TL",
+      "kaynak": "https://antalya.mgm.gov.tr/misafirhane.aspx",
+      "gecerlilik": "2026 yılı Meteoroloji 4. Bölge tarifesi"
+    },
+    {
+      "il": "Antalya",
+      "isim": "Finike Meteoroloji Misafirhanesi",
+      "fiyat_sivil": "1.350 – 1.500 TL",
+      "fiyat_kamu_personeli": "900 – 1.000 TL",
+      "fiyat_kurum_personeli": "900 – 1.000 TL",
+      "kaynak": "https://antalya.mgm.gov.tr/misafirhane.aspx",
+      "gecerlilik": "2026 yılı Meteoroloji 4. Bölge tarifesi"
+    },
+    {
+      "il": "Artvin",
+      "isim": "Artvin Polisevi",
+      "fiyat_sivil": "1.050 – 4.410 TL",
+      "fiyat_kamu_personeli": "750 – 3.150 TL",
+      "fiyat_kurum_personeli": "525 – 2.205 TL",
+      "kaynak": "https://www.artvin.pol.tr/polisevi",
+      "gecerlilik": "2026 yılı oda ve yatak ücretleri"
+    },
+    {
+      "il": "Balıkesir",
+      "isim": "Bandırma Öğretmenevi",
+      "fiyat_sivil": "3.000 – 4.000 TL",
+      "fiyat_kamu_personeli": "1.950 – 2.600 TL",
+      "fiyat_kurum_personeli": "1.650 – 2.200 TL",
+      "kaynak": "https://bandirmaogretmenevi.meb.k12.tr/icerikler/2026yilikonaklamaucretlerimiz_14702833.html",
+      "gecerlilik": "2026 yılı güncel konaklama fiyatları (tek/çift kişilik; kahvaltı dahil)"
+    },
+    {
+      "il": "Denizli",
+      "isim": "Denizli Merkez Öğretmenevi",
+      "fiyat_sivil": "2.100 – 6.800 TL",
+      "fiyat_kamu_personeli": "2.100 – 5.000 TL",
+      "fiyat_kurum_personeli": "1.800 – 4.400 TL",
+      "kaynak": "https://www.denizliogretmenevi.com.tr/fiyat-listesi/",
+      "gecerlilik": "15.05.2026–26.06.2026 ve 27.06.2026–14.01.2027 dönemleri (ek yatak hariç)"
+    },
+    {
+      "il": "Diyarbakır",
+      "isim": "Diyarbakır Polisevi",
+      "fiyat_sivil": "1.498 – 6.713 TL",
+      "fiyat_kamu_personeli": "1.070 – 4.795 TL",
+      "fiyat_kurum_personeli": "749 – 3.357 TL",
+      "kaynak": "https://www.diyarbakir.pol.tr/diyarbakir-polisevi",
+      "gecerlilik": "2026 yılı Bağlar ana hizmet binası (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Düzce",
+      "isim": "Düzce Öğretmenevi",
+      "fiyat_sivil": "1.150 – 3.475 TL",
+      "fiyat_kamu_personeli": "850 – 2.650 TL",
+      "fiyat_kurum_personeli": "700 – 2.238 TL",
+      "kaynak": "https://duzceavniakyologretmenevi.meb.k12.tr/icerikler/2026yilikonaklamahizmetlerifiyatlistesi_17311427.html",
+      "gecerlilik": "2026 yılı (Avni Akyol Öğretmenevi resmi listesi)"
+    },
+    {
+      "il": "Gaziantep",
+      "isim": "Gaziantep Polisevi",
+      "fiyat_sivil": "1.485 – 7.572 TL",
+      "fiyat_kamu_personeli": "1.061 – 5.409 TL",
+      "fiyat_kurum_personeli": "742 – 3.786 TL",
+      "kaynak": "https://www.gaziantep.pol.tr/gaziantep-pol-evi",
+      "gecerlilik": "2026 yılı konaklama fiyat listesi (ek yatak satırları hariç)"
+    },
+    {
+      "il": "Giresun",
+      "isim": "Alucra Öğretmenevi",
+      "fiyat_sivil": "900 – 1.400 TL",
+      "fiyat_kamu_personeli": "700 – 1.200 TL",
+      "fiyat_kurum_personeli": "550 – 900 TL",
+      "kaynak": "https://alucraogretmenevi.meb.k12.tr/icerikler/2026yilikonaklamafiyatcizelgesi_17017330.html",
+      "gecerlilik": "01.01.2026 itibarıyla (kahvaltı dahil)"
+    },
+    {
+      "il": "Karaman",
+      "isim": "Karaman Polisevi",
+      "fiyat_sivil": "1.484 – 7.570 TL",
+      "fiyat_kamu_personeli": "1.060 – 5.408 TL",
+      "fiyat_kurum_personeli": "742 – 3.785 TL",
+      "kaynak": "https://karaman.pol.tr/polis-evi",
+      "gecerlilik": "01.05.2026 itibarıyla (%1 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Kars",
+      "isim": "Kars Polis Evi",
+      "fiyat_sivil": "2.999 – 3.898 TL",
+      "fiyat_kamu_personeli": "2.142 – 2.785 TL",
+      "fiyat_kurum_personeli": "1.499 – 1.949 TL",
+      "kaynak": "https://kars.pol.tr/polis-evi-sube-mudurlugu",
+      "gecerlilik": "2026 yılı ana hizmet binası oda ücretleri (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Kastamonu",
+      "isim": "Kastamonu Polisevi",
+      "fiyat_sivil": "1.190 – 4.165 TL",
+      "fiyat_kamu_personeli": "850 – 2.975 TL",
+      "fiyat_kurum_personeli": "595 – 2.083 TL",
+      "kaynak": "https://www.kastamonu.pol.tr/polisevi-sube-mudurlugu",
+      "gecerlilik": "2026 yılı konaklama fiyat listesi (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Kayseri",
+      "isim": "Kayseri Meteoroloji Misafirhanesi",
+      "fiyat_sivil": "1.161,50 – 1.919 TL",
+      "fiyat_kamu_personeli": "757,50 – 1.262,50 TL",
+      "fiyat_kurum_personeli": "757,50 – 1.262,50 TL",
+      "kaynak": "https://kayseri.mgm.gov.tr/misafirhane.aspx",
+      "gecerlilik": "2026 yılı Meteoroloji 7. Bölge tarifesi"
+    },
+    {
+      "il": "Kırklareli",
+      "isim": "Kırklareli Polisevi ve Yazlık Sosyal Tesisleri",
+      "fiyat_sivil": "1.260 – 3.780 TL",
+      "fiyat_kamu_personeli": "900 – 2.700 TL",
+      "fiyat_kurum_personeli": "630 – 1.890 TL",
+      "kaynak": "https://www.kirklareli.pol.tr/polis-evi",
+      "gecerlilik": "2026 konaklama fiyat listesi (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Mardin",
+      "isim": "Mardin Polisevi",
+      "fiyat_sivil": "1.485 – 7.572 TL",
+      "fiyat_kamu_personeli": "1.061 – 5.409 TL",
+      "fiyat_kurum_personeli": "742 – 3.786 TL",
+      "kaynak": "https://www.mardin.pol.tr/polisevi-sube-mudurlugu",
+      "gecerlilik": "19.01.2026 itibarıyla"
+    },
+    {
+      "il": "Nevşehir",
+      "isim": "Nevşehir Polisevi",
+      "fiyat_sivil": "1.400 – 4.300 TL",
+      "fiyat_kamu_personeli": "1.000 – 3.070 TL",
+      "fiyat_kurum_personeli": "700 – 2.150 TL",
+      "kaynak": "https://www.nevsehir.pol.tr/polis-evi",
+      "gecerlilik": "19.01.2026 itibarıyla (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Siirt",
+      "isim": "Siirt Polisevi",
+      "fiyat_sivil": "1.071 – 3.213 TL",
+      "fiyat_kamu_personeli": "765 – 2.295 TL",
+      "fiyat_kurum_personeli": "536 – 1.607 TL",
+      "kaynak": "https://www.siirt.pol.tr/siirt-polisevi-2026-yili-fiyat-listesi",
+      "gecerlilik": "19.01.2026 itibarıyla (konaklama vergisi dahil)"
+    },
+    {
+      "il": "Sinop",
+      "isim": "Sinop Polisevi",
+      "fiyat_sivil": "1.260 – 5.145 TL",
+      "fiyat_kamu_personeli": "900 – 3.675 TL",
+      "fiyat_kurum_personeli": "630 – 2.573 TL",
+      "kaynak": "https://www.sinop.pol.tr/polisevi-sube-mudurlugu-fiyat-listesi",
+      "gecerlilik": "2026 yılı listesi; sayfada %2 konaklama vergisi HARİÇ belirtilmiştir (üzerine ayrıca vergi alınır)"
+    },
+    {
+      "il": "Çankırı",
+      "isim": "Çankırı Öğretmenevi",
+      "fiyat_sivil": "1.150 – 2.300 TL",
+      "fiyat_kamu_personeli": "1.000 – 1.800 TL",
+      "fiyat_kurum_personeli": "1.000 – 1.800 TL",
+      "kaynak": "https://cankiriogretmenevi.meb.k12.tr/icerikler/2026yilikonaklamaucretlerimiz_9021041.html",
+      "gecerlilik": "1 Temmuz 2026 itibarıyla (ÜYE/KAMU aynı tarife; DİĞER = sivil)"
+    },
+    {
+      "il": "Çorum",
+      "isim": "Çorum Merkez Öğretmenevi",
+      "fiyat_sivil": "1.600 – 3.600 TL",
+      "fiyat_kamu_personeli": "1.300 – 3.000 TL",
+      "fiyat_kurum_personeli": "1.000 – 2.400 TL",
+      "kaynak": "https://corumogretmenevi.com.tr/fiyatlistesi.php",
+      "gecerlilik": "02 Şubat 2026 – 30 Haziran 2026"
+    },
+    {
+      "il": "Çorum",
+      "isim": "İskilip Öğretmenevi",
+      "fiyat_sivil": "1.100 – 2.900 TL",
+      "fiyat_kamu_personeli": "950 – 2.400 TL",
+      "fiyat_kurum_personeli": "650 – 1.900 TL",
+      "kaynak": "https://www.iskilipogretmenevi.com.tr/fiyatlistesi.php",
+      "gecerlilik": "01.01.2026 itibarıyla (kahvaltı dahil)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "Bağcılar Öğretmenevi ASO",
+      "fiyat_sivil": "1.800 – 4.500 TL",
+      "fiyat_kamu_personeli": "1.500 – 3.900 TL",
+      "fiyat_kurum_personeli": "1.200 – 3.000 TL",
+      "kaynak": "https://bagcilarogretmeneviaso.meb.k12.tr/icerikler/1temmuz2026itibariylakonaklamaucretleri_13904929.html",
+      "gecerlilik": "1 Temmuz 2026 itibarıyla (kahvaltı ve KDV dahil)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "İzmir Metoroloji Bölge Müdürlüğü Misafirhanesi",
+      "fiyat_sivil": "1.050 – 1.250 TL",
+      "fiyat_kamu_personeli": "695 – 820 TL",
+      "fiyat_kurum_personeli": "695 – 820 TL",
+      "kaynak": "https://izmir.mgm.gov.tr/misafirhane.aspx",
+      "gecerlilik": "2026 yılı Meteoroloji 2. Bölge tarifesi"
+    },
+    {
+      "il": "Şanlıurfa",
+      "isim": "Şanlıurfa Polisevi",
+      "fiyat_sivil": "1.470 – 5.145 TL",
+      "fiyat_kamu_personeli": "1.050 – 3.675 TL",
+      "fiyat_kurum_personeli": "735 – 2.573 TL",
+      "kaynak": "https://www.sanliurfa.pol.tr/sanliurfa-polisevi-sube-mudurlugu",
+      "gecerlilik": "19.01.2026 itibarıyla (%2 konaklama vergisi dahil)"
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../ads/ad_service.dart';
 import '../ads/discover_native_merge.dart';
+import '../billing/pro_service.dart';
 import '../widgets/rotalink_banner_ad.dart';
 import '../l10n/app_strings.dart';
 import '../models/campaign.dart';
@@ -42,17 +43,35 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
   @override
   void initState() {
     super.initState();
+    ProService.instance.isPro.addListener(_onProChanged);
     unawaited(_loadNative());
   }
 
+  void _onProChanged() {
+    if (!mounted) return;
+    if (ProService.instance.isAdFree) {
+      _nativeAd?.dispose();
+      setState(() => _nativeAd = null);
+    }
+  }
+
   Future<void> _loadNative() async {
-    if (!AdService.adsEnabled || kIsWeb) return;
+    if (!AdService.adsEnabled ||
+        kIsWeb ||
+        ProService.instance.isAdFree) {
+      return;
+    }
     final ad = await DiscoverNativeMerge.loadOneNative();
-    if (mounted) setState(() => _nativeAd = ad);
+    if (!mounted || ProService.instance.isAdFree) {
+      ad?.dispose();
+      return;
+    }
+    setState(() => _nativeAd = ad);
   }
 
   @override
   void dispose() {
+    ProService.instance.isPro.removeListener(_onProChanged);
     _nativeAd?.dispose();
     super.dispose();
   }

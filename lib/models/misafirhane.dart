@@ -1,4 +1,9 @@
+import 'facility_price_entry.dart';
+
 /// Kotlin `Misafirhane` ile aynı alanlar; JSON anahtarları esnek okunur.
+///
+/// Fiyat / görsel / adres-ilçe ana tesis JSON'undan ayrı overlay dosyalarından
+/// [il]+[isim] ile gelir.
 class Misafirhane {
   const Misafirhane({
     required this.isim,
@@ -8,6 +13,15 @@ class Misafirhane {
     required this.latitude,
     required this.longitude,
     required this.tip,
+    this.ilce = '',
+    this.hasFiyatBilgisi = false,
+    this.fiyatSivil,
+    this.fiyatKamuPersoneli,
+    this.fiyatKurumPersoneli,
+    this.fiyatSivilDefined = false,
+    this.fiyatKamuDefined = false,
+    this.fiyatKurumDefined = false,
+    this.imageUrls = const [],
   });
 
   final String isim;
@@ -18,16 +32,104 @@ class Misafirhane {
   final double longitude;
   final String tip;
 
+  /// İlçe — `tesisler_adres.json` veya master.
+  final String ilce;
+
+  /// `fiyatlar.json` eşleşmesinde fiyat alanlarından en az biri tanımlıysa true.
+  final bool hasFiyatBilgisi;
+
+  /// Tanımlı ve `null` → "Kalamaz"; string → fiyat metni.
+  final String? fiyatSivil;
+  final String? fiyatKamuPersoneli;
+  final String? fiyatKurumPersoneli;
+
+  final bool fiyatSivilDefined;
+  final bool fiyatKamuDefined;
+  final bool fiyatKurumDefined;
+
+  /// `tesisler_gorseller.json` — en fazla 3 URL.
+  final List<String> imageUrls;
+
   String get stableFacilityId => '$il\u0001$isim';
 
   /// Kotlin `MisafirhaneAdapter` eşlemesi: `isim` + `il`.
   bool sameFavoriteIdentity(Misafirhane other) =>
       isim.trim() == other.isim.trim() && il.trim() == other.il.trim();
 
+  Misafirhane copyWithoutPrices() => Misafirhane(
+        isim: isim,
+        il: il,
+        ilce: ilce,
+        adres: adres,
+        telefon: telefon,
+        latitude: latitude,
+        longitude: longitude,
+        tip: tip,
+        imageUrls: imageUrls,
+      );
+
+  Misafirhane copyWithPriceEntry(FacilityPriceEntry e) => Misafirhane(
+        isim: isim,
+        il: il,
+        ilce: ilce,
+        adres: adres,
+        telefon: telefon,
+        latitude: latitude,
+        longitude: longitude,
+        tip: tip,
+        hasFiyatBilgisi: e.hasFiyatBilgisi,
+        fiyatSivil: e.fiyatSivil,
+        fiyatKamuPersoneli: e.fiyatKamuPersoneli,
+        fiyatKurumPersoneli: e.fiyatKurumPersoneli,
+        fiyatSivilDefined: e.fiyatSivilDefined,
+        fiyatKamuDefined: e.fiyatKamuDefined,
+        fiyatKurumDefined: e.fiyatKurumDefined,
+        imageUrls: imageUrls,
+      );
+
+  Misafirhane copyWithImageUrls(List<String> urls) => Misafirhane(
+        isim: isim,
+        il: il,
+        ilce: ilce,
+        adres: adres,
+        telefon: telefon,
+        latitude: latitude,
+        longitude: longitude,
+        tip: tip,
+        hasFiyatBilgisi: hasFiyatBilgisi,
+        fiyatSivil: fiyatSivil,
+        fiyatKamuPersoneli: fiyatKamuPersoneli,
+        fiyatKurumPersoneli: fiyatKurumPersoneli,
+        fiyatSivilDefined: fiyatSivilDefined,
+        fiyatKamuDefined: fiyatKamuDefined,
+        fiyatKurumDefined: fiyatKurumDefined,
+        imageUrls: List<String>.unmodifiable(urls.take(3)),
+      );
+
+  Misafirhane copyWithAddress({String? adres, String? ilce}) => Misafirhane(
+        isim: isim,
+        il: il,
+        ilce: (ilce ?? this.ilce).trim(),
+        adres: (adres ?? this.adres).trim(),
+        telefon: telefon,
+        latitude: latitude,
+        longitude: longitude,
+        tip: tip,
+        hasFiyatBilgisi: hasFiyatBilgisi,
+        fiyatSivil: fiyatSivil,
+        fiyatKamuPersoneli: fiyatKamuPersoneli,
+        fiyatKurumPersoneli: fiyatKurumPersoneli,
+        fiyatSivilDefined: fiyatSivilDefined,
+        fiyatKamuDefined: fiyatKamuDefined,
+        fiyatKurumDefined: fiyatKurumDefined,
+        imageUrls: imageUrls,
+      );
+
   /// Yerel depolama (`favorites` prefs) için düz JSON.
   Map<String, dynamic> toJson() => {
         'isim': isim,
         'il': il,
+        'ilce': ilce,
         'adres': adres,
         'telefon': telefon,
         'latitude': latitude,
@@ -45,10 +147,13 @@ class Misafirhane {
     final lat = _dbl(m, const ['latitude', 'enlem', 'lat']);
     final lon = _dbl(m, const ['longitude', 'boylam', 'lng', 'lon']);
     final tip = _str(m, const ['tip', 'tesis_tipi', 'type', 'facility_type']);
+    final ilce = _str(m, const ['ilce', 'ilce_adi', 'district', 'ilçe']);
     if (isim.isEmpty && il.isEmpty) return null;
+
     return Misafirhane(
       isim: isim,
       il: il,
+      ilce: ilce,
       adres: adres,
       telefon: telefon,
       latitude: lat,

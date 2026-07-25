@@ -15,6 +15,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../ads/ad_service.dart';
+import '../billing/pro_service.dart';
 import '../constants/store_links.dart';
 import '../data/app_rating_prefs.dart';
 import '../data/favorites_repository.dart';
@@ -39,6 +40,7 @@ import '../services/version_check_service.dart';
 import '../widgets/update_required_dialog.dart';
 import '../services/simple_location_service.dart';
 import '../theme/app_colors.dart';
+import '../theme/system_ui.dart';
 import '../utils/geo_helpers.dart';
 import '../utils/maps_launch.dart';
 import '../utils/misafirhane_compact_sheet_height.dart';
@@ -47,6 +49,7 @@ import '../utils/safe_map_coordinates.dart';
 import '../utils/main_map_search.dart';
 import '../widgets/app_rating_dialog.dart';
 import '../widgets/distance_permission_chip.dart';
+import '../widgets/facility_detail_card.dart';
 import '../kami/kami_overlay.dart';
 import '../widgets/emergency_bottom_sheet.dart';
 import '../providers/facility_filter_provider.dart';
@@ -70,13 +73,13 @@ import 'yorum_screen.dart';
 /// Yüksek doğruluk istemez; aksi halde Google Play "Konum doğruluğu" penceresi sık tetiklenir.
 const _kRotalinkLocationSettingsLow = LocationSettings(
   accuracy: LocationAccuracy.low,
-  timeLimit: Duration(seconds: 15),
+  timeLimit: Duration(seconds: 12),
 );
 
-/// Canlı konum akışı: pil tasarrufu için düşük doğruluk + 50 metre eşliği.
+/// Canlı konum: ~25 m veya yeni fix → mesafe satırları güncellenir.
 const _kLocationStreamSettings = LocationSettings(
   accuracy: LocationAccuracy.low,
-  distanceFilter: 50,
+  distanceFilter: 25,
 );
 
 const double _kOverviewCityZoomThreshold = 8;
@@ -220,6 +223,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   /// `null` ise henüz il odaklı görünüm yoktur.
   String? _mainMapFocusedCity;
 
+  /// Aktif aramada baskın il — hava durumu bu ile göre gösterilir.
+  String? _weatherSearchCity;
+
   /// Önizleme kapanırken kısa çıkış animasyonu (harita kaydırma / dokunuş ile tetiklenir).
   bool _previewClosing = false;
 
@@ -237,18 +243,26 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   /// Arama sonucu sekmeli panel ([DraggableScrollableSheet]) görünür mü.
   bool isSheetVisible = true;
 
-  /// Geri tuşu: 1↓ 2↑ 3 uyarı 4 ana ekran (il araması paneli açıkken).
+  /// Geri tuşu sayacı (arama sekmesi):
+  /// 1↓ küçült → 2↑ tekrar aç → 3↓ küçült → 4 ana ekran.
   int _searchBackPressCount = 0;
 
-  /// Geri tuşu: önce paneli gizle → tekrar aç + çıkış hazır → ana ekran sıfırlama.
+  /// Geri tuşu / arama paneli durumu.
   bool readyToExit = false;
 
   /// Yalnızca açık arama sonuçları paneline bağlı; her açılışta yenilenir.
   DraggableScrollableController? _searchSheetExtentController;
 
-  /// Arama sonuçları (Tesis/Gezi/…) paneli harita [Stack] içinde — Scaffold bottom sheet değil.
+  /// Arama sonuçları paneli — detay kartı geri tuşu için.
+  final GlobalKey<MisafirhaneSearchResultsPanelState> _searchResultsPanelKey =
+      GlobalKey<MisafirhaneSearchResultsPanelState>();
+
+  /// Favori / kompakt liste sheet'inde detay açıksa kapatmak için.
+  VoidCallback? _closeCompactFacilityDetail;
+  bool _compactFacilityDetailOpen = false;
+
+  /// Arama sonuçları (Konaklama/Gezi/…) paneli harita [Stack] içinde — Scaffold bottom sheet değil.
   bool _inlineTabbedSearchOpen = false;
-  List<Misafirhane> _tabbedSheetFacilities = const [];
   RotaDataState? _tabbedSheetRotaData;
   Misafirhane? _tabbedSheetHighlight;
   int _tabbedSheetInitialTab = 0;
@@ -297,23 +311,14 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     _cachedRotaData = widget.repository.currentState;
     _rotaStream = widget.repository.watchRoot();
     WidgetsBinding.instance.addObserver(this);
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-        systemNavigationBarColor: Colors.white,
-        systemNavigationBarIconBrightness: Brightness.dark,
-      ),
-    );
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     PackageInfo.fromPlatform().then((p) {
       if (mounted) {
         setState(() => _versionLabel = '${p.version}+${p.buildNumber}');
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (AdService.adsEnabled) {
+      if (AdService.adsEnabled && !ProService.instance.isAdFree) {
         unawaited(AdService.instance.preloadInterstitial());
       }
       unawaited(_maybeOpenHolidaysFromNotification());
@@ -338,6 +343,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    AdService.instance.onAppLifecycle(state);
     if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
       _stopLocationStream(); // Arka planda stream durdur — pil tasarrufu
     }
@@ -351,9 +357,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   // ─── Konum stream yönetimi ──────────────────────────────────────────────────
 
   /// İzin ve GPS varsa sürekli konum güncellemesi başlatır.
-  /// Her 50 metrede bir [_mapLocationState] güncellenir → listeler yeniden çizilir.
+  /// Konum değişince [_mapLocationState] güncellenir → arama listesinde mesafe yenilenir.
   void _startLocationStream() {
-    _locationStreamSub?.cancel();
+    if (_locationStreamSub != null) return;
     _locationStreamSub = Geolocator.getPositionStream(
       locationSettings: _kLocationStreamSettings,
     ).listen(
@@ -365,7 +371,19 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
         unawaited(UserLocationCache.save(ll));
         _mapLocationState.update(ll, true);
       },
-      onError: (_) => _stopLocationStream(),
+      onError: (_) {
+        _stopLocationStream();
+        // Kısa süre sonra yeniden dene — tek hatada mesafe sonsuza kadar donmasın.
+        Future<void>.delayed(const Duration(seconds: 8), () {
+          if (!mounted) return;
+          unawaited(() async {
+            if (await SimpleLocationService.isLocationGranted() &&
+                await Geolocator.isLocationServiceEnabled()) {
+              _startLocationStream();
+            }
+          }());
+        });
+      },
       cancelOnError: false,
     );
   }
@@ -513,7 +531,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     _syncSearchPanelOpen(false);
     setState(() {
       _inlineTabbedSearchOpen = false;
-      _tabbedSheetFacilities = const [];
       _tabbedSheetRotaData = null;
       _tabbedSheetHighlight = null;
       _tabbedSheetInitialTab = 0;
@@ -523,7 +540,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     _disposeSearchSheetExtentController();
   }
 
-  /// İl araması paneli açıkken geri tuşu adımları.
+  /// Arama paneli geri yığını:
+  /// detay → liste ↓ → FAB ↑ tekrar liste → liste ↓ → ana ekran.
   Future<bool> _handleSearchPanelBack() async {
     if (!_inlineTabbedSearchOpen) return false;
 
@@ -532,23 +550,33 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       return true;
     }
 
-    _searchBackPressCount++;
     _lastExitBackAt = null;
+
+    // Konaklama detay kartı (sayacı tüketmez)
+    if (_searchResultsPanelKey.currentState?.closeDetailIfOpen() ?? false) {
+      return true;
+    }
+
+    _searchBackPressCount++;
 
     switch (_searchBackPressCount) {
       case 1:
+        // Sekmeyi aşağı indir → FAB çıksın
         await _collapseSearchResultsSheet();
         if (mounted) setState(() => isSheetVisible = false);
         return true;
       case 2:
+        // FAB varken ana menüye gitme → sekmeyi tekrar aç
         await _expandSearchResultsSheet();
         if (mounted) setState(() => isSheetVisible = true);
         return true;
       case 3:
+        // Tekrar aşağı indir → FAB
         await _collapseSearchResultsSheet();
         if (mounted) setState(() => isSheetVisible = false);
         return true;
       default:
+        // Bundan sonra ana ekran
         _resetSearchToHome();
         return true;
     }
@@ -585,12 +613,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   void _dismissAttachedBottomSheet() {
     _closeInlineTabbedSearchPanel();
-    final c = _attachedBottomSheet;
-    if (c == null) return;
-    _attachedBottomSheet = null;
-    try {
-      c.close();
-    } catch (_) {}
+    _closeAttachedBottomSheetOnly();
   }
 
   void _onMapControllerEvent(MapEvent e) {
@@ -662,10 +685,32 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       _mapPreviewFacility = null;
       _markerOverride = null;
       _mainMapFocusedCity = null;
+      _weatherSearchCity = null;
       _favoritesBrowseActive = false;
       _searchSheetHighlight = null;
       _clearRouteOnly();
     });
+  }
+
+  /// Arama sonuçlarındaki baskın il (önce vurgulanan tesis, yoksa en çok tekrar eden il).
+  String? _dominantCityOf(List<Misafirhane> list, Misafirhane? highlight) {
+    final hlCity = highlight?.il.trim();
+    if (hlCity != null && hlCity.isNotEmpty) return hlCity;
+    if (list.isEmpty) return null;
+    final counts = <String, int>{};
+    String? best;
+    var bestCount = 0;
+    for (final m in list) {
+      final il = m.il.trim();
+      if (il.isEmpty) continue;
+      final n = (counts[il] ?? 0) + 1;
+      counts[il] = n;
+      if (n > bestCount) {
+        bestCount = n;
+        best = il;
+      }
+    }
+    return best;
   }
 
   /// Arama çubuğu metni ve odak — harita durumundan bağımsız UI sıfırlama.
@@ -1147,6 +1192,17 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       return;
     }
 
+    // Favori / kompakt liste: detay → liste → sheet kapat
+    if (_attachedBottomSheet != null) {
+      _lastExitBackAt = null;
+      if (_compactFacilityDetailOpen && _closeCompactFacilityDetail != null) {
+        _closeCompactFacilityDetail!();
+        return;
+      }
+      _closeAttachedBottomSheetOnly();
+      return;
+    }
+
     if (await _handleSearchPanelBack()) {
       return;
     }
@@ -1176,6 +1232,17 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     }
 
     await _handleDoubleBackExit();
+  }
+
+  void _closeAttachedBottomSheetOnly() {
+    _closeCompactFacilityDetail = null;
+    _compactFacilityDetailOpen = false;
+    final c = _attachedBottomSheet;
+    if (c == null) return;
+    _attachedBottomSheet = null;
+    try {
+      c.close();
+    } catch (_) {}
   }
 
   Future<void> _handleDoubleBackExit() async {
@@ -1253,7 +1320,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     }
     setState(() {
       _inlineTabbedSearchOpen = false;
-      _tabbedSheetFacilities = const [];
       _tabbedSheetRotaData = null;
       _tabbedSheetHighlight = null;
       _mainMapFocusedCity = null;
@@ -1379,52 +1445,94 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     }
   }
 
-  /// Mesafe satırı chip dokunuşu: GPS → İzin → Kalıcı Red → Ayarlar zinciri.
+  /// Mesafe satırı chip dokunuşu → sistem konum izin popup'ı.
   Future<void> _onSearchSheetRequestLocation() async {
-    await _handleChipTapLocationRequest();
+    await _requestLocationWithSystemDialog(fromUserTap: true);
   }
 
-  /// Chip dokunuşunda tam akış:
-  ///   1. İzin → OS diyalog (veya kalıcı redde Ayarlar)
-  ///   2. İzin verildi ama GPS kapalı → GPS ayarları
-  ///   3. Her ikisi hazır → konum al + stream başlat
-  Future<void> _handleChipTapLocationRequest() async {
-    // 1. İzin önce: OS izin diyalogı (kalıcı redde openAppSettings).
-    final outcome = await SimpleLocationService.requestFromUserTap();
+  /// Sistem konum izin penceresini açar; verilirse GPS konumunu alır.
+  Future<void> _requestLocationWithSystemDialog({
+    required bool fromUserTap,
+  }) async {
+    if (!mounted) return;
+    SimpleLocationService.clearSessionGpsSuppression();
+    if (fromUserTap) {
+      await SimpleLocationService.prepareForUserInitiatedPermissionDialog();
+    }
+
+    // setState / sheet animasyonu bitince iste — aksi halde Android popup çıkmayabilir.
+    await Future<void>.delayed(Duration.zero);
+    if (!mounted) return;
+
+    final outcome = await SimpleLocationService.requestOsPermissionDialog();
     if (!mounted) return;
 
     switch (outcome) {
-      case PermissionRequestOutcome.openedSettings:
-        _pendingLocationCheckAfterSettings = true;
+      case PermissionRequestOutcome.granted:
+        await _applyLocationAfterPermissionGranted();
+        await _refreshSearchSheetAfterLocation();
         return;
       case PermissionRequestOutcome.denied:
+        await _syncLocationUiFromPermissionOnly();
         return;
-      case PermissionRequestOutcome.granted:
-        break;
+      case PermissionRequestOutcome.deniedForever:
+        await _syncLocationUiFromPermissionOnly();
+        // Sistem popup bir daha çıkmaz; kullanıcı dokunuşunda ayarlar yolu.
+        if (fromUserTap && mounted) {
+          final go = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text(AppStrings.locationPermissionDialogTitle),
+              content: const Text(
+                AppStrings.locationPermissionDialogDeniedForeverBody,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('İptal'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text(
+                    AppStrings.locationServicesOffDialogOpenSettings,
+                  ),
+                ),
+              ],
+            ),
+          );
+          if (go == true && mounted) {
+            _pendingLocationCheckAfterSettings = true;
+            await Geolocator.openAppSettings();
+          }
+        }
+        return;
     }
-
-    // 2. İzin verildi — GPS kontrolü.
-    final gpsOn = await Geolocator.isLocationServiceEnabled();
-    if (!gpsOn) {
-      _pendingLocationCheckAfterSettings = true;
-      await Geolocator.openLocationSettings();
-      return;
-    }
-
-    // 3. Her ikisi hazır → konum al + stream.
-    await _applyLocationAfterPermissionGranted();
-    await _reopenSearchSheetIfLocationGranted();
   }
 
   Future<void> _applyLocationAfterPermissionGranted() async {
-    if (SimpleLocationService.shouldSuppressPlayServicesLocationActivity) {
-      _stopLocationStream();
-      if (mounted) {
-        _toast(context, AppStrings.locationServicesOffSnack);
+    SimpleLocationService.clearSessionGpsSuppression();
+
+    // 1) Hızlı önizleme: lastKnown
+    try {
+      final last = await Geolocator.getLastKnownPosition();
+      if (last != null &&
+          isValidWgs84LatLng(last.latitude, last.longitude) &&
+          mounted) {
+        final ll = LatLng(last.latitude, last.longitude);
+        _userLocationLatLng = ll;
+        unawaited(UserLocationCache.save(ll));
+        if (await Geolocator.isLocationServiceEnabled()) {
+          _startLocationStream();
+        }
+        final granted = await SimpleLocationService.isLocationGranted();
+        if (mounted) {
+          _mapLocationState.update(ll, granted);
+          setState(() {});
+        }
       }
-      await _syncLocationUiFromPermissionOnly();
-      return;
-    }
+    } catch (_) {}
+
+    // 2) Güncel GPS — GPS kapalı olsa bile dene (bazı cihazlarda sistem diyaloğu açılır).
     try {
       final pos = await Geolocator.getCurrentPosition(
         locationSettings: _kRotalinkLocationSettingsLow,
@@ -1434,13 +1542,48 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
         final ll = LatLng(pos.latitude, pos.longitude);
         _userLocationLatLng = ll;
         unawaited(UserLocationCache.save(ll));
-        _startLocationStream(); // Konum alındı → sürekli güncelleme başlat
+        _startLocationStream();
+        final granted = await SimpleLocationService.isLocationGranted();
+        if (mounted) {
+          _mapLocationState.update(ll, granted);
+          setState(() {});
+        }
       }
     } catch (_) {
-      SimpleLocationService.markSessionPlayServicesLocationPromptDeclined();
-      _stopLocationStream();
-      if (mounted) {
-        _toast(context, AppStrings.locationServicesOffSnack);
+      if (_userLocationLatLng == null) {
+        _stopLocationStream();
+        if (mounted && !await Geolocator.isLocationServiceEnabled()) {
+          // GPS kapalı: kullanıcıya sor (otomatik ayar açma yok).
+          final go = await showDialog<bool>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              title: const Text(AppStrings.locationServicesOffDialogTitle),
+              content: const Text(AppStrings.locationServicesOffDialogBody),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: const Text('İptal'),
+                ),
+                FilledButton(
+                  onPressed: () => Navigator.pop(ctx, true),
+                  child: const Text(
+                    AppStrings.locationServicesOffDialogOpenSettings,
+                  ),
+                ),
+              ],
+            ),
+          );
+          if (go == true && mounted) {
+            _pendingLocationCheckAfterSettings = true;
+            await Geolocator.openLocationSettings();
+          }
+        } else if (mounted) {
+          _toast(context, AppStrings.locationServicesOffSnack);
+        }
+      } else {
+        if (await Geolocator.isLocationServiceEnabled()) {
+          _startLocationStream();
+        }
       }
     }
     await _syncLocationUiFromPermissionOnly();
@@ -1449,35 +1592,40 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   Future<void> _ensureLocationPermissionAndLocationForLists({
     bool fromDistanceChip = false,
   }) async {
-    // Kural 2: İzin + GPS var → sessizce hesapla.
+    // İzin + GPS + mevcut konum varsa sessizce yenile.
     if (await SimpleLocationService.isLocationGranted() &&
-        await Geolocator.isLocationServiceEnabled()) {
+        await Geolocator.isLocationServiceEnabled() &&
+        _userLocationLatLng != null) {
       await _applyLocationAfterPermissionGranted();
-      await _reopenSearchSheetIfLocationGranted();
+      await _refreshSearchSheetAfterLocation();
       return;
     }
 
-    // Chip dokunuşu: GPS → İzin → Ayarlar tam zinciri.
-    if (fromDistanceChip) {
-      await _handleChipTapLocationRequest();
-      return;
-    }
+    await _requestLocationWithSystemDialog(fromUserTap: fromDistanceChip);
+  }
 
-    // Otomatik tetik (arama vb.): İzin var ama GPS kapalı → bu oturumda bir kez GPS ekranı aç.
-    if (await SimpleLocationService.isLocationGranted() &&
-        !await Geolocator.isLocationServiceEnabled() &&
-        !_pendingLocationCheckAfterSettings) {
-      _pendingLocationCheckAfterSettings = true;
-      await Geolocator.openLocationSettings();
-      return;
-    }
-
-    // Otomatik tetik: oturum bloğuna uyar.
-    if (await SimpleLocationService.isLocationPermissionDeclinedByUser()) return;
-    await SimpleLocationService.ensureLocationPermissionFromUserAction();
+  /// İzin/konum alındıktan sonra arama panelini kapatmadan mesafeleri yenile.
+  Future<void> _refreshSearchSheetAfterLocation() async {
+    await _syncLocationUiFromPermissionOnly();
     if (!mounted) return;
     if (!await SimpleLocationService.isLocationGranted()) return;
-    await _applyLocationAfterPermissionGranted();
+
+    final user = _userLocationLatLng;
+    final granted = true;
+
+    if (_inlineTabbedSearchOpen) {
+      final source = ref.read(searchPanelFacilitiesSourceProvider);
+      if (source.isNotEmpty) {
+        final sorted = sortMisafirhaneByDistance(source, user);
+        ref.read(searchPanelFacilitiesSourceProvider.notifier).state =
+            List<Misafirhane>.unmodifiable(sorted);
+      }
+      _mapLocationState.update(user, granted);
+      if (mounted) setState(() {});
+      return;
+    }
+
+    // Eski modal sheet yolu (inline panel yoksa).
     await _reopenSearchSheetIfLocationGranted();
   }
 
@@ -1490,16 +1638,15 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     final highlight = _searchSheetHighlight;
     if (data == null || facilities == null || facilities.isEmpty) return;
     if (_inlineTabbedSearchOpen) {
-      _closeInlineTabbedSearchPanel();
-      await Future<void>.delayed(Duration.zero);
-      if (!mounted || !context.mounted) return;
-    } else {
-      final ctrl = _attachedBottomSheet;
-      if (ctrl == null) return;
-      ctrl.close();
-      await ctrl.closed;
-      if (!mounted || !context.mounted) return;
+      // Inline panel zaten açıksa kapatıp açma — yerinde yenile.
+      await _refreshSearchSheetAfterLocation();
+      return;
     }
+    final ctrl = _attachedBottomSheet;
+    if (ctrl == null) return;
+    ctrl.close();
+    await ctrl.closed;
+    if (!mounted || !context.mounted) return;
     await _openTabbedSearchResults(
       context,
       data,
@@ -1543,6 +1690,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
         readyToExit = false;
         isSheetVisible = true;
         _mainMapFocusedCity = null;
+        _weatherSearchCity = null;
         _markerOverride = null;
         _searchSheetHighlight = null;
       });
@@ -1564,6 +1712,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       setState(() {
         readyToExit = false;
         isSheetVisible = true;
+        _weatherSearchCity = null;
         _markerOverride = const [];
         _mapPreviewFacility = null;
         _searchSheetHighlight = null;
@@ -1595,8 +1744,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     setState(() {
       readyToExit = false;
       isSheetVisible = true;
-      _searchBackPressCount = 0;
       _mainMapFocusedCity = null;
+      _weatherSearchCity = _dominantCityOf(displayList, highlightTarget);
       _markerOverride = displayList;
       _mapPreviewFacility = null;
       _searchSheetHighlight = highlightTarget;
@@ -1688,7 +1837,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     if (_inlineTabbedSearchOpen) {
       setState(() {
         _inlineTabbedSearchOpen = false;
-        _tabbedSheetFacilities = const [];
         _tabbedSheetRotaData = null;
         _tabbedSheetHighlight = null;
       });
@@ -1706,19 +1854,20 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       isSheetVisible = true;
       _searchBackPressCount = 0;
       _inlineTabbedSearchOpen = true;
-      _tabbedSheetFacilities = sorted;
       _tabbedSheetRotaData = data;
       _tabbedSheetHighlight = resolvedHighlight;
       _tabbedSheetInitialTab = initialTabIndex;
       _tabbedSheetGeziYemekHighlight = geziYemekHighlight;
     });
     _syncSearchPanelOpen(true);
-    // Arama sonuçları açılınca izin yoksa otomatik iste (oturumda red yoksa).
-    if (mounted &&
-        !await SimpleLocationService.isLocationGranted() &&
-        !await SimpleLocationService.isLocationPermissionDeclinedByUser()) {
-      unawaited(_ensureLocationPermissionAndLocationForLists());
-    }
+    // Arama açılınca her zaman sistem konum izin popup'ını dene (oturum reddi engellemesin).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(() async {
+        await SimpleLocationService.prepareForUserInitiatedPermissionDialog();
+        await _ensureLocationPermissionAndLocationForLists();
+      }());
+    });
     } catch (e, st) {
       _disposeSearchSheetExtentController();
       debugPrint('Arama sonuç sheet: $e\n$st');
@@ -1877,9 +2026,17 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                                   isSheetVisible &&
                                   (_searchSheetExtentController?.isAttached ?? false)) {
                                 unawaited(() async {
+                                  _searchResultsPanelKey.currentState
+                                      ?.closeDetailIfOpen();
                                   await _collapseSearchResultsSheet();
                                   if (mounted) {
-                                    setState(() => isSheetVisible = false);
+                                    setState(() {
+                                      isSheetVisible = false;
+                                      // Haritaya dokununca küçültüldü → sonraki geri sekmeyi açar
+                                      if (_searchBackPressCount < 1) {
+                                        _searchBackPressCount = 1;
+                                      }
+                                    });
                                   }
                                 }());
                               }
@@ -1983,9 +2140,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                         _tabbedSheetRotaData != null &&
                         _searchSheetExtentController != null)
                       MisafirhaneSearchResultsPanel(
-                        key: ValueKey<String>(
-                          '${_tabbedSheetFacilities.length}-${_searchSheetHighlight?.stableFacilityId ?? 'h'}-$_tabbedSheetInitialTab-${_tabbedSheetGeziYemekHighlight ?? ''}',
-                        ),
+                        key: _searchResultsPanelKey,
                         sheetExtentController: _searchSheetExtentController!,
                         rotaData: _tabbedSheetRotaData!,
                         mapLocationState: _mapLocationState,
@@ -2083,10 +2238,14 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                                     onPressed: () async {
                                       await _expandSearchResultsSheet();
                                       if (mounted) {
-                                        setState(() => isSheetVisible = true);
+                                        setState(() {
+                                          isSheetVisible = true;
+                                          // FAB ile açıldı → sonraki geri tekrar küçültsün
+                                          _searchBackPressCount = 0;
+                                        });
                                       }
                                     },
-                                    tooltip: 'Arama sonuçlarını aç',
+                                    tooltip: 'Sonuç listesine dön',
                                     child: const Icon(
                                       Icons.keyboard_arrow_up_rounded,
                                       color: AppColors.white,
@@ -2187,17 +2346,25 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                         onMenu: () => _scaffoldKey.currentState?.openDrawer(),
                         onTitleTap: _goToInitialMapHome,
                         menuAnchorKey: onboarding?.targetKey(OnboardingTarget.menu),
-                        trailing: KeyedSubtree(
-                          key: onboarding?.targetKey(OnboardingTarget.weather),
-                          child: MapWeatherChip(
-                            compact: true,
-                            liveGps: _userLocationLatLng,
-                            locationGranted:
-                                _mapLocationState.locationPermissionGranted,
-                            focusedCity: _mainMapFocusedCity,
-                            mapCenter: _center,
-                            rotaData: rotaForUi,
-                          ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const _ToolbarProButton(),
+                            const SizedBox(width: 8),
+                            KeyedSubtree(
+                              key: onboarding?.targetKey(OnboardingTarget.weather),
+                              child: MapWeatherChip(
+                                compact: true,
+                                liveGps: _userLocationLatLng,
+                                locationGranted:
+                                    _mapLocationState.locationPermissionGranted,
+                                searchedCity: _weatherSearchCity,
+                                focusedCity: _mainMapFocusedCity,
+                                mapCenter: _center,
+                                rotaData: rotaForUi,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -2251,7 +2418,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     }
     final uri = Uri(scheme: 'tel', path: p.replaceAll(RegExp(r'\s'), ''));
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+      AdService.instance.notifyLeavingToExternalApp();
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -2309,6 +2477,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     _dismissAttachedBottomSheet();
     final scaffoldState = _scaffoldKey.currentState;
     if (scaffoldState == null) return;
+    Misafirhane? detailFacility;
+    final listScrollController = ScrollController();
+    double? savedListScrollOffset;
     final ctrl = scaffoldState.showBottomSheet(
       (sheetCtx) => StatefulBuilder(
           builder: (ctx, setModal) {
@@ -2343,15 +2514,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
               }
             }
 
-            Future<void> onRowTap(Misafirhane m) async {
-              Navigator.pop(sheetCtx);
-              if (!mounted) return;
-              _showMisafirhanePopupFor(m);
-              if (liveFavoriteList) {
-                setState(() {});
-              }
-            }
-
             Future<void> requestLocationFromCompactSheet() async {
               await _ensureLocationPermissionAndLocationForLists(
                 fromDistanceChip: true,
@@ -2370,8 +2532,67 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
             }
 
             final list = rows();
-            final sheetH = misafirhaneCompactSheetHeight(ctx);
-            return SizedBox(
+            final detail = detailFacility;
+            final sheetH = detail != null
+                ? misafirhaneCompactDetailSheetHeight(ctx)
+                : misafirhaneCompactSheetHeight(ctx);
+
+            void restoreCompactListScroll(Misafirhane? returnTo) {
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                if (!listScrollController.hasClients) {
+                  await Future<void>.delayed(const Duration(milliseconds: 48));
+                }
+                if (!listScrollController.hasClients) return;
+                final saved = savedListScrollOffset;
+                if (saved != null) {
+                  listScrollController.jumpTo(
+                    saved.clamp(
+                      0.0,
+                      listScrollController.position.maxScrollExtent,
+                    ),
+                  );
+                  return;
+                }
+                if (returnTo == null) return;
+                final idx = list.indexWhere(
+                  (f) => f.sameFavoriteIdentity(returnTo),
+                );
+                if (idx < 0) return;
+                const kApproxItemH = 96.0;
+                final target = (idx * kApproxItemH).clamp(
+                  0.0,
+                  listScrollController.position.maxScrollExtent,
+                );
+                await listScrollController.animateTo(
+                  target,
+                  duration: const Duration(milliseconds: 280),
+                  curve: Curves.easeOutCubic,
+                );
+              });
+            }
+
+            void setCompactDetail(Misafirhane? m) {
+              final previous = detailFacility;
+              if (m != null && listScrollController.hasClients) {
+                savedListScrollOffset = listScrollController.offset;
+              }
+              setModal(() {
+                detailFacility = m;
+                _compactFacilityDetailOpen = m != null;
+                if (m == null) {
+                  _closeCompactFacilityDetail = null;
+                } else {
+                  _closeCompactFacilityDetail = () => setCompactDetail(null);
+                }
+              });
+              if (m == null && previous != null) {
+                restoreCompactListScroll(previous);
+              }
+            }
+
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOutCubic,
               height: sheetH,
               child: Material(
                 color: AppColors.white,
@@ -2379,96 +2600,331 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                   borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: ListView.separated(
-                  physics: const ClampingScrollPhysics(),
-                  padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(ctx).bottom),
-                  itemCount: list.length,
-                  separatorBuilder: (_, _) => const Divider(height: 1),
-                  itemBuilder: (_, i) {
-                    final m = list[i];
-                    final isFav = _favoritesCache.any((f) => f.sameFavoriteIdentity(m));
-                    return ListenableBuilder(
-                      listenable: _mapLocationState,
-                      builder: (context, _) {
-                        return InkWell(
-                          onTap: () => unawaited(onRowTap(m)),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(10, 8, 4, 8),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        m.isim,
-                                        style: const TextStyle(
-                                          color: AppColors.textPrimary,
-                                          fontSize: 14,
-                                          height: 1.15,
-                                        ),
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
+                child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 280),
+                    switchInCurve: Curves.easeOutCubic,
+                    switchOutCurve: Curves.easeInCubic,
+                    transitionBuilder: (child, animation) {
+                      final offset = Tween<Offset>(
+                        begin: const Offset(0.08, 0),
+                        end: Offset.zero,
+                      ).animate(animation);
+                      return FadeTransition(
+                        opacity: animation,
+                        child: SlideTransition(
+                          position: offset,
+                          child: child,
+                        ),
+                      );
+                    },
+                    child: detail != null
+                        ? KeyedSubtree(
+                            key: ValueKey<String>(
+                              'compact-detail-${detail.stableFacilityId}',
+                            ),
+                            child: ListenableBuilder(
+                              listenable: _mapLocationState,
+                              builder: (context, _) {
+                                return FacilityDetailCard(
+                                  misafirhane: detail,
+                                  mapLocationState: _mapLocationState,
+                                  isFavorite: _favoritesCache.any(
+                                    (f) => f.sameFavoriteIdentity(detail),
+                                  ),
+                                  onBack: () => setCompactDetail(null),
+                                  onCall: () => unawaited(
+                                    _dialFacilityPhone(context, detail.telefon),
+                                  ),
+                                  onShare: () =>
+                                      unawaited(_shareFacility(detail)),
+                                  onFavorite: () =>
+                                      unawaited(onHeartToggled(detail)),
+                                  onInspect: () => unawaited(
+                                    openMapSearch(
+                                      context,
+                                      detail.il,
+                                      detail.isim,
                                     ),
-                                    _compactSheetActionColumn(
-                                      icon: Icons.call,
-                                      color: const Color(0xFF2E7D32),
-                                      label: 'Ara',
-                                      onTap: () => unawaited(_dialFacilityPhone(context, m.telefon)),
-                                    ),
-                                    _compactSheetActionColumn(
-                                      icon: Icons.share,
-                                      color: const Color(0xFF039BE5),
-                                      label: 'Paylaş',
-                                      onTap: () => unawaited(_shareFacility(m)),
-                                    ),
-                                    _compactSheetActionColumn(
-                                      icon: isFav ? Icons.favorite : Icons.favorite_border,
-                                      color: const Color(0xFFC2185B),
-                                      label: 'Favori',
-                                      onTap: () => unawaited(onHeartToggled(m)),
-                                    ),
-                                    _compactSheetActionColumn(
-                                      icon: Icons.map_outlined,
-                                      color: AppColors.primary,
-                                      label: 'İncele',
-                                      onTap: () => unawaited(openMapSearch(context, m.il, m.isim)),
-                                    ),
-                                    _compactSheetActionColumn(
-                                      icon: Icons.chat_bubble_outline,
-                                      color: const Color(0xFFE65100),
-                                      label: 'Yorum',
-                                      onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute<void>(
-                                          builder: (_) => YorumScreen(
-                                            facilityId: ReviewRepository.sanitizeFacilityId(m.stableFacilityId),
-                                            facilityName: m.isim,
+                                  ),
+                                  onReview: () => unawaited(
+                                    pushOnShellNavigator<void>(
+                                      MaterialPageRoute<void>(
+                                        builder: (_) => YorumScreen(
+                                          facilityId: ReviewRepository
+                                              .sanitizeFacilityId(
+                                            detail.stableFacilityId,
                                           ),
+                                          facilityName: detail.isim,
                                         ),
                                       ),
                                     ),
-                                  ],
-                                ),
-                                DistancePermissionChip(
-                                  userLocation: _mapLocationState.userLocation,
-                                  locationPermissionGranted:
-                                      _mapLocationState.locationPermissionGranted,
-                                  facilityPoint: LatLng(m.latitude, m.longitude),
-                                  onRequestLocation: requestLocationFromCompactSheet,
-                                  spacingAbove: 4,
-                                  fullWidthSingleLine: true,
-                                ),
-                              ],
+                                  ),
+                                  onShowOnMap: () {
+                                    unawaited(
+                                      openMapSearch(
+                                        context,
+                                        detail.il,
+                                        detail.isim,
+                                      ),
+                                    );
+                                  },
+                                  onRequestLocation:
+                                      requestLocationFromCompactSheet,
+                                );
+                              },
+                            ),
+                          )
+                        : KeyedSubtree(
+                            key: const ValueKey<String>('compact-list'),
+                            child: ListView.separated(
+                              controller: listScrollController,
+                              physics: const ClampingScrollPhysics(),
+                              padding: EdgeInsets.only(
+                                bottom: MediaQuery.paddingOf(ctx).bottom,
+                              ),
+                              itemCount: list.length,
+                              separatorBuilder: (_, _) =>
+                                  const Divider(height: 1),
+                              itemBuilder: (_, i) {
+                                final m = list[i];
+                                final isFav = _favoritesCache.any(
+                                  (f) => f.sameFavoriteIdentity(m),
+                                );
+                                return ListenableBuilder(
+                                  listenable: _mapLocationState,
+                                  builder: (context, _) {
+                                    return Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                      onTap: () => setCompactDetail(m),
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                          10,
+                                          10,
+                                          4,
+                                          10,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          children: [
+                                            Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        m.isim,
+                                                        style: const TextStyle(
+                                                          color: AppColors
+                                                              .textPrimary,
+                                                          fontSize: 14.5,
+                                                          height: 1.2,
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                        ),
+                                                        maxLines: 3,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                      const SizedBox(height: 5),
+                                                      Row(
+                                                        children: [
+                                                          if (m.tip
+                                                              .trim()
+                                                              .isNotEmpty) ...[
+                                                            Flexible(
+                                                              child: Text(
+                                                                m.tip.trim(),
+                                                                maxLines: 1,
+                                                                overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                style: TextStyle(
+                                                                  color: AppColors
+                                                                      .textPrimary
+                                                                      .withValues(
+                                                                    alpha: 0.52,
+                                                                  ),
+                                                                  fontSize: 12,
+                                                                  height: 1.2,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w500,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            const SizedBox(
+                                                              width: 8,
+                                                            ),
+                                                          ],
+                                                          Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .fromLTRB(
+                                                              10,
+                                                              6,
+                                                              8,
+                                                              6,
+                                                            ),
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color: AppColors
+                                                                  .primary
+                                                                  .withValues(
+                                                                alpha: 0.09,
+                                                              ),
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                999,
+                                                              ),
+                                                              border:
+                                                                  Border.all(
+                                                                color: AppColors
+                                                                    .primary
+                                                                    .withValues(
+                                                                  alpha: 0.14,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            child: const Row(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .min,
+                                                              children: [
+                                                                Text(
+                                                                  'Detay',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    color:
+                                                                        AppColors
+                                                                            .primary,
+                                                                    fontSize:
+                                                                        12,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w700,
+                                                                    height: 1,
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  width: 2,
+                                                                ),
+                                                                Icon(
+                                                                  Icons
+                                                                      .arrow_forward_rounded,
+                                                                  size: 14,
+                                                                  color: AppColors
+                                                                      .primary,
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                _compactSheetActionColumn(
+                                                  icon: Icons.call,
+                                                  color:
+                                                      const Color(0xFF2E7D32),
+                                                  label: 'Ara',
+                                                  onTap: () => unawaited(
+                                                    _dialFacilityPhone(
+                                                      context,
+                                                      m.telefon,
+                                                    ),
+                                                  ),
+                                                ),
+                                                _compactSheetActionColumn(
+                                                  icon: Icons.share,
+                                                  color:
+                                                      const Color(0xFF039BE5),
+                                                  label: 'Paylaş',
+                                                  onTap: () => unawaited(
+                                                    _shareFacility(m),
+                                                  ),
+                                                ),
+                                                _compactSheetActionColumn(
+                                                  icon: isFav
+                                                      ? Icons.favorite
+                                                      : Icons.favorite_border,
+                                                  color:
+                                                      const Color(0xFFC2185B),
+                                                  label: 'Favori',
+                                                  onTap: () => unawaited(
+                                                    onHeartToggled(m),
+                                                  ),
+                                                ),
+                                                _compactSheetActionColumn(
+                                                  icon: Icons.map_outlined,
+                                                  color: AppColors.primary,
+                                                  label: 'İncele',
+                                                  onTap: () => unawaited(
+                                                    openMapSearch(
+                                                      context,
+                                                      m.il,
+                                                      m.isim,
+                                                    ),
+                                                  ),
+                                                ),
+                                                _compactSheetActionColumn(
+                                                  icon: Icons
+                                                      .chat_bubble_outline,
+                                                  color:
+                                                      const Color(0xFFE65100),
+                                                  label: 'Yorum',
+                                                  onTap: () => unawaited(
+                                                    pushOnShellNavigator<void>(
+                                                      MaterialPageRoute<void>(
+                                                        builder: (_) =>
+                                                            YorumScreen(
+                                                          facilityId:
+                                                              ReviewRepository
+                                                                  .sanitizeFacilityId(
+                                                            m.stableFacilityId,
+                                                          ),
+                                                          facilityName: m.isim,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            DistancePermissionChip(
+                                              userLocation:
+                                                  _mapLocationState.userLocation,
+                                              locationPermissionGranted:
+                                                  _mapLocationState
+                                                      .locationPermissionGranted,
+                                              facilityPoint: LatLng(
+                                                m.latitude,
+                                                m.longitude,
+                                              ),
+                                              onRequestLocation:
+                                                  requestLocationFromCompactSheet,
+                                              spacingAbove: 4,
+                                              fullWidthSingleLine: true,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    );
+                                  },
+                                );
+                              },
                             ),
                           ),
-                        );
-                      },
-                    );
-                  },
-                ),
+                  ),
               ),
             );
           },
@@ -2479,9 +2935,12 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     );
     _attachedBottomSheet = ctrl;
     ctrl.closed.then((_) {
+      listScrollController.dispose();
       if (!mounted) return;
       if (_attachedBottomSheet != ctrl) return;
       _attachedBottomSheet = null;
+      _closeCompactFacilityDetail = null;
+      _compactFacilityDetailOpen = false;
     });
   }
 
@@ -3098,6 +3557,13 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
+                _DrawerProTile(
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
+                  },
+                ),
+                const Divider(height: 1),
                 _DrawerTile(
                   icon: Icons.wb_sunny_outlined,
                   title: AppStrings.drawerWeather,
@@ -3244,6 +3710,64 @@ class _RotalinkToolbar extends StatelessWidget {
   }
 }
 
+/// Üst çubuk — hava durumunun solunda Pro girişi.
+class _ToolbarProButton extends StatelessWidget {
+  const _ToolbarProButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: ProService.instance.isPro,
+      builder: (context, isPro, _) {
+        return Tooltip(
+          message: isPro ? 'Rotalink Pro' : 'Reklamsız kullan',
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
+              },
+              borderRadius: BorderRadius.circular(14),
+              child: Ink(
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: isPro ? 0.22 : 0.14),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.28),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isPro
+                          ? Icons.verified_outlined
+                          : Icons.workspace_premium_outlined,
+                      color: AppColors.white,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 4),
+                    const Text(
+                      'Pro',
+                      style: TextStyle(
+                        color: AppColors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _EmergencyFab extends StatelessWidget {
   const _EmergencyFab({
     required this.onTap,
@@ -3317,18 +3841,59 @@ class _DrawerTile extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.onTap,
+    this.trailing,
   });
 
   final IconData icon;
   final String title;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: Icon(icon, color: AppColors.primary),
       title: Text(title, style: const TextStyle(color: AppColors.textPrimary)),
+      trailing: trailing,
       onTap: onTap,
+    );
+  }
+}
+
+/// Menüdeki Pro satırı — abonelik durumuna göre etiketi değişir.
+class _DrawerProTile extends StatelessWidget {
+  const _DrawerProTile({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: ProService.instance.isPro,
+      builder: (context, isPro, _) {
+        return _DrawerTile(
+          icon: Icons.workspace_premium_outlined,
+          title: isPro ? 'Rotalink Pro' : 'Reklamsız Kullan',
+          onTap: onTap,
+          trailing: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: isPro
+                  ? const Color(0xFF1B7A4B)
+                  : AppColors.primary.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              isPro ? 'Aktif' : 'Pro',
+              style: TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w700,
+                color: isPro ? AppColors.white : AppColors.primary,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

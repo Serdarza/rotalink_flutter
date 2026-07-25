@@ -6,6 +6,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'ad_unit_ids.dart';
 import 'ad_service.dart';
+import '../billing/pro_service.dart';
 import '../models/campaign.dart';
 
 /// Kotlin [DiscoverActivity.NATIVE_AD_EVERY_N_CAMPAIGNS] / [MAX_NATIVE_ADS_TO_LOAD].
@@ -23,7 +24,10 @@ abstract final class DiscoverNativeMerge {
     List<Campaign> filtered,
     List<NativeAd> loadedAds,
   ) {
-    if (!AdService.adsEnabled || kIsWeb || loadedAds.isEmpty) {
+    if (!AdService.adsEnabled ||
+        kIsWeb ||
+        loadedAds.isEmpty ||
+        ProService.instance.isAdFree) {
       return List<Object>.from(filtered);
     }
     final out = <Object>[];
@@ -38,7 +42,7 @@ abstract final class DiscoverNativeMerge {
   }
 
   static Future<NativeAd?> loadOneNative() {
-    if (kIsWeb) return Future.value();
+    if (kIsWeb || ProService.instance.isAdFree) return Future.value();
     final c = Completer<NativeAd?>();
     late final NativeAd ad;
     ad = NativeAd(
@@ -65,7 +69,9 @@ abstract final class DiscoverNativeMerge {
 
   /// Kotlin [AdMobNativeAdUtils.loadNativeAds] ile aynı: [count] paralel istek, tamamlanınca dön.
   static Future<List<NativeAd>> loadPool(int count) async {
-    if (count <= 0 || kIsWeb) return const [];
+    if (count <= 0 || kIsWeb || ProService.instance.isAdFree) {
+      return const [];
+    }
     final futures = List<Future<NativeAd?>>.generate(
       count,
       (_) => loadOneNative(),

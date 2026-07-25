@@ -200,16 +200,6 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                                   color: AppColors.textPrimary,
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              Text(
-                                'Başlangıçta kalmazsınız. Yol üzerinde mola; varışta konaklama önerilir.',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  height: 1.4,
-                                  color: AppColors.campaignSummaryMuted
-                                      .withValues(alpha: 0.95),
-                                ),
-                              ),
                               const SizedBox(height: 18),
                               if (saved.isNotEmpty) ...[
                                 Text(

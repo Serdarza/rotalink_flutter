@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../ads/ad_service.dart';
 import '../models/misafirhane.dart';
 import '../utils/maps_launch.dart';
 
@@ -75,7 +76,8 @@ class MisafirhaneMarkerInfoPopup extends StatelessWidget {
     }
     final uri = Uri(scheme: 'tel', path: raw.replaceAll(RegExp(r'\s'), ''));
     if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
+      AdService.instance.notifyLeavingToExternalApp();
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Arama başlatılamadı')),

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
@@ -7,6 +8,7 @@ import '../models/misafirhane.dart';
 import '../models/sosyal_item.dart';
 import '../services/network_service.dart';
 import 'github_rota_data_source.dart';
+import 'rota_bundled_data.dart';
 import 'rota_local_cache.dart';
 import 'rota_sync_prefs.dart';
 
@@ -40,20 +42,53 @@ class FirebaseRotaRepository {
 
   RotaDataState? _memoryState;
   Stream<RotaDataState>? _watchRootStream;
+  Future<void>? _readyInFlight;
 
   /// Splash sonrası bellekte hazır veri (StreamBuilder [initialData] için).
   RotaDataState? get currentState => _memoryState;
 
-  /// İlk kurulumda GitHub'dan indirir; sonraki açılışlarda yerel önbellek + günlük kontrol.
+  /// İlk kurulumda GitHub'dan indirir; sonraki açılışlarda yerel önbellek +
+  /// en fazla günde bir sürüm kontrolü (değiştiyse yeniden indirir).
+  /// Aynı anda birden fazla çağrı tek yüklemeyi paylaşır (açılış hızı).
   Future<void> ensureLocalDataReady() async {
+    if (_memoryState != null && _memoryState!.initialLoadCompleted) {
+      return;
+    }
+    final inFlight = _readyInFlight;
+    if (inFlight != null) return inFlight;
+
+    final done = Completer<void>();
+    _readyInFlight = done.future;
+    try {
+      await _ensureLocalDataReadyBody();
+      if (!done.isCompleted) done.complete();
+    } catch (e, st) {
+      _log('ensureLocalDataReady: $e', st);
+      if (!done.isCompleted) done.complete();
+    } finally {
+      _readyInFlight = null;
+    }
+  }
+
+  Future<void> _ensureLocalDataReadyBody() async {
     if (await RotaLocalCache.hasCache()) {
       await _loadFromLocalCache();
-      await _maybeSyncIfRemoteVersionChanged();
+      // Gömülü yedekten yüklendiyse (geçersiz önbellek) uzak veriyi hemen dene.
+      if (_loadedFromBundled) {
+        unawaited(_downloadAndPersistRoot());
+      } else {
+        unawaited(_maybeSyncIfRemoteVersionChanged());
+      }
       _watchRootStream = null;
       return;
     }
-    if (!await NetworkService.instance.isConnected()) return;
-    await _downloadAndPersistRoot();
+    // İlk kurulum: önce uzak; başarısızsa gömülü yedeğe düş (arama boş kalmasın).
+    final ok = await _downloadAndPersistRoot();
+    if (!ok) {
+      await _loadFromBundled();
+      // Ağ geldiğinde bir sonraki sürüm kontrolü uzak veriyi tekrar dener.
+      await RotaSyncPrefs.clearVersion();
+    }
     _watchRootStream = null;
   }
 
@@ -70,34 +105,72 @@ class FirebaseRotaRepository {
     if (await RotaLocalCache.hasCache()) {
       return _loadFromLocalCache();
     }
-    if (!await NetworkService.instance.isConnected()) {
-      return _memoryState = const RotaDataState(initialLoadCompleted: true);
+    final ok = await _downloadAndPersistRoot();
+    if (!ok) {
+      return _loadFromBundled();
     }
-    await _downloadAndPersistRoot();
     return _memoryState ?? const RotaDataState(initialLoadCompleted: true);
   }
+
+  /// Yerel önbellekteki JSON geçerli değilse true (gömülü yedeğe düşüldü).
+  bool _loadedFromBundled = false;
 
   Future<RotaDataState> _loadFromLocalCache() async {
     try {
       final raw = await RotaLocalCache.readJson();
       if (raw == null) {
-        return _memoryState = const RotaDataState(initialLoadCompleted: true);
+        return _loadFromBundled();
       }
+      // Tek parse; bozuk/eksik önbellekte (ör. geçmişte inen hatalı JSON)
+      // istisna → gömülü yedeğe düş, arama boş kalmasın.
       final decoded = jsonDecode(raw);
+      if (!_hasUsableTesis(decoded)) {
+        _log('Yerel önbellek geçersiz/boş; gömülü yedeğe düşülüyor.');
+        return _loadFromBundled();
+      }
+      _loadedFromBundled = false;
       final state = _mapSnapshotToState(decoded).copyWith(
         loadedFromLocalCache: true,
       );
       return _memoryState = state;
     } catch (err, st) {
       _log('Yerel önbellek okunamadı: $err', st);
-      return _memoryState = RotaDataState(
-        initialLoadCompleted: true,
-        errorMessage: kDebugMode ? err.toString() : 'Yerel veri okunamadı.',
-      );
+      return _loadFromBundled();
     }
   }
 
-  /// Günde bir: HEAD isteği ile sürüm kontrolü; değiştiyse tam JSON indirme.
+  static bool _hasUsableTesis(dynamic decoded) {
+    if (decoded is! Map) return false;
+    final tesis = decoded['tesisler'] ?? decoded['misafirhaneler'];
+    return tesis is List && tesis.isNotEmpty;
+  }
+
+  /// Uygulamayla gelen gömülü yedek veritabanını yükler (son çare).
+  Future<RotaDataState> _loadFromBundled() async {
+    try {
+      final raw = await RotaBundledData.load();
+      if (raw == null) {
+        _log('Gömülü yedek veritabanı yok.');
+        return _memoryState = const RotaDataState(initialLoadCompleted: true);
+      }
+      final decoded = jsonDecode(raw);
+      if (!_hasUsableTesis(decoded)) {
+        _log('Gömülü yedek geçersiz.');
+        return _memoryState = const RotaDataState(initialLoadCompleted: true);
+      }
+      _loadedFromBundled = true;
+      _log('Gömülü yedek veritabanı yüklendi.');
+      final state = _mapSnapshotToState(decoded).copyWith(
+        loadedFromLocalCache: true,
+      );
+      return _memoryState = state;
+    } catch (err, st) {
+      _log('Gömülü yedek okunamadı: $err', st);
+      return _memoryState = const RotaDataState(initialLoadCompleted: true);
+    }
+  }
+
+  /// En fazla günde bir: hafif HEAD ile sürüm bak; sadece değiştiyse JSON indir.
   Future<void> _maybeSyncIfRemoteVersionChanged() async {
     if (!await NetworkService.instance.isConnected()) return;
     if (!await RotaSyncPrefs.isCheckDue()) return;
@@ -108,31 +181,34 @@ class FirebaseRotaRepository {
     if (remoteVersion == null) return;
 
     final localVersion = await RotaSyncPrefs.getLocalVersion();
-    if (localVersion == remoteVersion) return;
-
-    if (localVersion == null) {
-      await RotaSyncPrefs.setLocalVersion(remoteVersion);
+    if (localVersion == remoteVersion) {
+      _log('GitHub veritabanı güncel (sürüm aynı); indirme yok.');
       return;
     }
 
+    _log(
+      'GitHub veritabanı güncellendi (yerel: $localVersion → uzak: $remoteVersion); indiriliyor.',
+    );
     await _downloadAndPersistRoot(expectedVersion: remoteVersion);
   }
 
-  Future<void> _downloadAndPersistRoot({String? expectedVersion}) async {
+  /// Uzak veriyi indirip önbelleğe yazar. Başarılıysa true.
+  Future<bool> _downloadAndPersistRoot({String? expectedVersion}) async {
     try {
       if (!await NetworkService.instance.isConnected()) {
         _log('İnternet yok; GitHub veritabanı indirilemedi.');
-        return;
+        return false;
       }
 
       final json = await GithubRotaDataSource.fetchMasterDatabaseFromGitHub();
       if (json == null) {
         _log('GitHub veritabanı boş veya ulaşılamadı.');
-        return;
+        return false;
       }
 
       final decoded = jsonDecode(json);
       await RotaLocalCache.writeJson(json);
+      _loadedFromBundled = false;
       _memoryState = _mapSnapshotToState(decoded);
       _watchRootStream = null;
 
@@ -141,8 +217,10 @@ class FirebaseRotaRepository {
       if (version != null) {
         await RotaSyncPrefs.setLocalVersion(version);
       }
+      return true;
     } catch (e, st) {
       _log('Veritabanı işleme hatası: $e', st);
+      return false;
     }
   }
 

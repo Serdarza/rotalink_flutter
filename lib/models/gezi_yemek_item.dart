@@ -1,4 +1,4 @@
-/// Kotlin [GeziYemekItem] — `geziler` / `yemekler` RTDB listeleri.
+/// Kotlin [GeziYemekItem] — `geziler` / `yemekler` listeleri (+ görseller).
 class GeziYemekItem {
   const GeziYemekItem({
     required this.il,
@@ -10,6 +10,7 @@ class GeziYemekItem {
     this.tur,
     this.accommodationInfo,
     this.day,
+    this.imageUrls = const [],
   });
 
   final String il;
@@ -21,6 +22,9 @@ class GeziYemekItem {
   final String? tur;
   final String? accommodationInfo;
   final int? day;
+
+  /// En fazla 3 görsel URL (Pexels / Wikimedia → JSON).
+  final List<String> imageUrls;
 
   /// Kotlin `copy(tur = ..., accommodationInfo = null, day = ...)`.
   GeziYemekItem forRouteSuggestion({required String turLabel, required int day}) {
@@ -34,6 +38,7 @@ class GeziYemekItem {
       tur: turLabel,
       accommodationInfo: null,
       day: day,
+      imageUrls: imageUrls,
     );
   }
 
@@ -47,13 +52,14 @@ class GeziYemekItem {
         if (tur != null) 'tur': tur,
         if (accommodationInfo != null) 'accommodationInfo': accommodationInfo,
         if (day != null) 'day': day,
+        if (imageUrls.isNotEmpty) 'image_urls': imageUrls,
       };
 
   static GeziYemekItem? tryParse(dynamic raw) {
     if (raw is! Map) return null;
     final m = raw.map((k, v) => MapEntry(k.toString(), v));
-    final il = _str(m, const ['il', 'il_adi', 'province', 'sehir']);
     final isim = _str(m, const ['isim', 'tesis_adi', 'name', 'title']);
+    final il = _str(m, const ['il', 'il_adi', 'province', 'sehir']);
     if (isim.isEmpty && il.isEmpty) return null;
     return GeziYemekItem(
       il: il,
@@ -65,7 +71,28 @@ class GeziYemekItem {
       tur: _strOpt(m, const ['tur', 'type', 'kategori']),
       accommodationInfo: _strOpt(m, const ['accommodationInfo', 'konaklama']),
       day: _intOrNull(m, const ['day', 'gun']),
+      imageUrls: _imageUrls(m),
     );
+  }
+
+  static List<String> _imageUrls(Map<String, dynamic> m) {
+    final out = <String>[];
+    void add(String? s) {
+      final t = s?.trim() ?? '';
+      if (t.isEmpty || out.contains(t) || out.length >= 3) return;
+      out.add(t);
+    }
+
+    final list = m['image_urls'] ?? m['images'] ?? m['gorseller'];
+    if (list is List) {
+      for (final e in list) {
+        add(e?.toString());
+      }
+    }
+    add(m['image_url']?.toString());
+    add(m['gorsel']?.toString());
+    add(m['photo']?.toString());
+    return out;
   }
 
   static String _str(Map<String, dynamic> m, List<String> keys) {

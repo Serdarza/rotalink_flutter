@@ -5,7 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../ads/ad_service.dart';
 import '../models/misafirhane.dart';
+
+void _markLeavingApp() {
+  AdService.instance.notifyLeavingToExternalApp();
+}
 
 /// Paylaşım (metin / WhatsApp vb.) için Google Haritalar araması: **il + misafirhane adı** (Tesis sekmesi).
 String googleMapsShareUrlForMisafirhane(Misafirhane m) {
@@ -41,6 +46,7 @@ Future<void> openInNativeMaps(
 
   Future<bool> tryLaunch(Uri uri) async {
     try {
+      _markLeavingApp();
       return await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
       return false;
@@ -118,6 +124,7 @@ Future<void> openMapSearch(
       _mapSearchLaunchFailed(context);
       return;
     }
+    _markLeavingApp();
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!context.mounted) return;
     if (!ok) _mapSearchLaunchFailed(context);
@@ -146,6 +153,7 @@ Future<void> openGoogleDirectionsWaypoints(
   }
   final uri = Uri.https('www.google.com', '/maps/dir/', params);
   try {
+    _markLeavingApp();
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
       _mapSearchLaunchFailed(context);
@@ -164,6 +172,7 @@ Future<void> openYandexDirectionsWaypoints(
   final rtext = waypoints.map((p) => '${p.latitude},${p.longitude}').join('~');
   final uri = Uri.parse('https://yandex.com/maps/?rtext=$rtext');
   try {
+    _markLeavingApp();
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
       _mapSearchLaunchFailed(context);
@@ -192,6 +201,7 @@ Future<void> openGoogleDirectionsPlaceQueries(
   }
   final uri = Uri.https('www.google.com', '/maps/dir/', params);
   try {
+    _markLeavingApp();
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
       _mapSearchLaunchFailed(context);
@@ -210,6 +220,7 @@ Future<void> openYandexDirectionsPlaceQueries(
   final rtext = placeQueries.map(Uri.encodeComponent).join('~');
   final uri = Uri.parse('https://yandex.com.tr/maps/?rtext=$rtext');
   try {
+    _markLeavingApp();
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
       _mapSearchLaunchFailed(context);
@@ -240,8 +251,10 @@ Future<void> openAppleDirectionsPlaceQueries(
   }
   try {
     final uri = _appleMapsDirectionsUriFromPlaceQueries(placeQueries);
+    _markLeavingApp();
     var ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && Platform.isAndroid) {
+      _markLeavingApp();
       ok = await launchUrl(
         Uri.https('www.google.com', '/maps/dir/', {
           'api': '1',

@@ -11,8 +11,10 @@ import 'ads/ad_service.dart';
 import 'ads/analytics_observer.dart';
 import 'ads/firebase_analytics_service.dart';
 import 'app.dart';
+import 'billing/pro_service.dart';
 import 'bootstrap/firebase_bootstrap.dart';
 import 'services/holiday_notification_scheduler.dart';
+import 'theme/system_ui.dart';
 
 /// AnalyticsObserver — MaterialApp içinde kullanılır; Firebase Analytics
 /// ısınması [runApp] sonrasına bırakılır.
@@ -26,6 +28,8 @@ Future<void> main() async {
   unawaited(
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
   );
+  // API 35+: edge-to-edge; bar rengi deprecated API kullanılmadan.
+  unawaited(RotalinkSystemUi.applyEdgeToEdge());
 
   // Kritik: Firebase Core — harita / RTDB / splash buna ihtiyaç duyar.
   try {
@@ -54,6 +58,14 @@ Future<void> _bootstrapSecondary() async {
   // Bağımsız işler paralel — sıralı await toplam süreyi uzatmasın.
   await Future.wait<void>([
     () async {
+      // Abonelik durumu reklamlardan önce bilinmeli; Pro'da reklam yüklenmez.
+      try {
+        ProService.instance.isPro
+            .addListener(AdService.instance.onProStatusChanged);
+        await ProService.instance.initialize();
+      } catch (e) {
+        debugPrint('Pro abonelik başlatılamadı: $e');
+      }
       try {
         await syncAdCooldown();
         await AdService.instance.initialize();

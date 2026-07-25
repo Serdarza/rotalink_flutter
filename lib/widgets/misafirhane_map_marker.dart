@@ -15,17 +15,17 @@ class MisafirhaneMapMarker extends Marker {
     required bool primaryHighlight,
   }) : super(
           key: ValueKey<String>('mh-popup-${misafirhane.stableFacilityId}'),
-          width: primaryHighlight ? 50.0 : 40.0,
-          height: primaryHighlight ? 50.0 : 40.0,
+          width: 40.0,
+          height: 40.0,
           point: latLngOrFallback(misafirhane.latitude, misafirhane.longitude),
           child: Tooltip(
             message: '${misafirhane.isim}\n${misafirhane.il}',
             child: Icon(
               Icons.location_on,
               color: primaryHighlight
-                  ? const Color(0xFF1976D2)
+                  ? const Color(0xFFF9A825)
                   : AppColors.mapLocationPin,
-              size: primaryHighlight ? 50.0 : 40.0,
+              size: 40.0,
             ),
           ),
         );

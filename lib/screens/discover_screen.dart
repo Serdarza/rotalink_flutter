@@ -7,6 +7,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../ads/ad_service.dart';
 import '../ads/discover_native_ad_pool.dart';
 import '../ads/discover_native_merge.dart';
+import '../billing/pro_service.dart';
 import '../data/campaign_repository.dart';
 import '../l10n/app_strings.dart';
 import '../models/campaign.dart';
@@ -64,6 +65,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   void initState() {
     super.initState();
+    ProService.instance.isPro.addListener(_onProChanged);
     if (widget.repository.isReady) {
       _allCampaigns = widget.repository.currentCampaigns;
       _streamWaiting = false;
@@ -98,6 +100,18 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     );
   }
 
+  void _onProChanged() {
+    if (!mounted) return;
+    if (ProService.instance.isAdFree) {
+      _nativeGen++;
+      _disposeNatives();
+      setState(() {});
+      _discoverBodyTick.value++;
+    } else {
+      _onCampaignsDataChanged();
+    }
+  }
+
   void _disposeNatives() {
     _nativeAds = const [];
   }
@@ -105,9 +119,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   void _onCampaignsDataChanged() {
     if (_loadError != null) return;
 
-    if (!AdService.adsEnabled || kIsWeb) {
+    if (!AdService.adsEnabled ||
+        kIsWeb ||
+        ProService.instance.isAdFree) {
       _disposeNatives();
       if (mounted) {
+        setState(() {});
         _discoverBodyTick.value++;
       }
       return;
@@ -159,6 +176,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   void dispose() {
+    ProService.instance.isPro.removeListener(_onProChanged);
     _nativeGen++;
     _searchDebounce?.cancel();
     _debouncedFilter.dispose();

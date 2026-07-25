@@ -17,6 +17,7 @@ class MapWeatherChip extends StatefulWidget {
     this.compact = false,
     this.liveGps,
     this.locationGranted = false,
+    this.searchedCity,
     this.focusedCity,
     this.mapCenter,
     this.rotaData,
@@ -25,6 +26,7 @@ class MapWeatherChip extends StatefulWidget {
   final bool compact;
   final LatLng? liveGps;
   final bool locationGranted;
+  final String? searchedCity;
   final String? focusedCity;
   final LatLng? mapCenter;
   final RotaDataState? rotaData;
@@ -55,6 +57,7 @@ class _MapWeatherChipState extends State<MapWeatherChip> {
     final depsChanged = oldWidget.liveGps?.latitude != widget.liveGps?.latitude ||
         oldWidget.liveGps?.longitude != widget.liveGps?.longitude ||
         oldWidget.locationGranted != widget.locationGranted ||
+        oldWidget.searchedCity != widget.searchedCity ||
         oldWidget.focusedCity != widget.focusedCity ||
         oldWidget.mapCenter?.latitude != widget.mapCenter?.latitude ||
         oldWidget.mapCenter?.longitude != widget.mapCenter?.longitude ||
@@ -78,6 +81,7 @@ class _MapWeatherChipState extends State<MapWeatherChip> {
     final target = WeatherLocationResolver.resolve(
       liveGps: live,
       cachedGps: _cachedGps,
+      searchedCity: widget.searchedCity,
       focusedCity: widget.focusedCity,
       mapCenter: widget.mapCenter,
       rotaData: widget.rotaData,

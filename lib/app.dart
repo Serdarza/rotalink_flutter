@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'main.dart';
@@ -15,20 +16,24 @@ import 'screens/splash_screen.dart';
 import 'services/holiday_notification_scheduler.dart';
 import 'services/network_service.dart';
 import 'theme/app_theme.dart';
+import 'theme/system_ui.dart';
 
 class RotalinkApp extends StatelessWidget {
   const RotalinkApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: rotalinkNavigatorKey,
-      title: AppStrings.appName,
-      debugShowCheckedModeBanner: false,
-      theme: buildRotalinkTheme(),
-      home: const _ConnectivityGate(),
-      // AnalyticsObserver'ı navigatorObservers'a ekle - ekran izlemeyi etkinleştirir
-      navigatorObservers: [analyticsObserver],
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: RotalinkSystemUi.lightIcons,
+      child: MaterialApp(
+        navigatorKey: rotalinkNavigatorKey,
+        title: AppStrings.appName,
+        debugShowCheckedModeBanner: false,
+        theme: buildRotalinkTheme(),
+        home: const _ConnectivityGate(),
+        // AnalyticsObserver'ı navigatorObservers'a ekle - ekran izlemeyi etkinleştirir
+        navigatorObservers: [analyticsObserver],
+      ),
     );
   }
 }
@@ -80,6 +85,8 @@ class _ConnectivityGateState extends State<_ConnectivityGate> {
     final isReturningUser = launchCount > 1 || hasLocalRota;
 
     if (isReturningUser) {
+      // Native splash sırasında veriyi şimdiden yükle — Flutter splash kısa kalsın.
+      unawaited(_repository.ensureLocalDataReady());
       if (mounted) setState(() => _showSplash = true);
       return;
     }
@@ -89,6 +96,7 @@ class _ConnectivityGateState extends State<_ConnectivityGate> {
     if (!mounted) return;
 
     if (connected) {
+      unawaited(_repository.ensureLocalDataReady());
       setState(() => _showSplash = true);
     } else {
       FlutterNativeSplash.remove();

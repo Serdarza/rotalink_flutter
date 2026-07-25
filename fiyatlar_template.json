@@ -1,0 +1,19 @@
+{
+  "not": "Fiyatlar gecelik oda ücreti aralığıdır. Tesis adları master_database ile birebir aynı olmalı (il + isim).",
+  "tesisler": [
+    {
+      "il": "Düzce",
+      "isim": "Düzce Öğretmenevi",
+      "fiyat_sivil": "1.500 – 2.650 TL",
+      "fiyat_kamu_personeli": "750 – 1.600 TL",
+      "fiyat_kurum_personeli": "750 – 1.600 TL"
+    },
+    {
+      "il": "Düzce",
+      "isim": "Düzce Polis Evi",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": null,
+      "fiyat_kurum_personeli": null
+    }
+  ]
+}

@@ -28,7 +28,7 @@ class DistancePermissionChip extends StatelessWidget {
   final Future<void> Function() onRequestLocation;
   final double spacingAbove;
 
-  /// true: tam genişlik, metin tek satır ([TextOverflow.ellipsis]). Gezi / Yemek / Sosyal satırında ikonların altına uzanır.
+  /// true: metin tek satır ([TextOverflow.ellipsis]). Chip genişliği metne göre kalır.
   final bool fullWidthSingleLine;
 
   @override
@@ -61,27 +61,15 @@ class DistancePermissionChip extends StatelessWidget {
       decoration: isTap ? TextDecoration.underline : TextDecoration.none,
       decorationColor: contentColor,
     );
-    final labelWidget = fullWidthSingleLine
-        ? Expanded(
-            child: Text(
-              label,
-              style: textStyle,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              softWrap: false,
-            ),
-          )
-        : Flexible(
-            child: Text(
-              label,
-              style: textStyle,
-              maxLines: 3,
-              softWrap: true,
-            ),
-          );
+    final labelWidget = Text(
+      label,
+      style: textStyle,
+      maxLines: fullWidthSingleLine ? 1 : 3,
+      overflow: fullWidthSingleLine ? TextOverflow.ellipsis : TextOverflow.clip,
+      softWrap: !fullWidthSingleLine,
+    );
 
     final chip = Container(
-      width: fullWidthSingleLine ? double.infinity : null,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: chipColor,
@@ -91,7 +79,7 @@ class DistancePermissionChip extends StatelessWidget {
             : null,
       ),
       child: Row(
-        mainAxisSize: fullWidthSingleLine ? MainAxisSize.max : MainAxisSize.min,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(iconData, size: 14, color: contentColor),
           const SizedBox(width: 4),
@@ -100,18 +88,27 @@ class DistancePermissionChip extends StatelessWidget {
       ),
     );
 
-    final child = isTap
-        ? InkWell(
-            onTap: () => unawaited(onRequestLocation()),
-            borderRadius: BorderRadius.circular(12),
-            child: chip,
-          )
-        : chip;
+    // Üst Column stretch etse bile chip sadece metin kadar geniş kalsın.
+    Widget child = Align(
+      alignment: Alignment.centerLeft,
+      widthFactor: 1,
+      child: chip,
+    );
+    if (isTap) {
+      child = Align(
+        alignment: Alignment.centerLeft,
+        widthFactor: 1,
+        child: InkWell(
+          onTap: () => unawaited(onRequestLocation()),
+          borderRadius: BorderRadius.circular(12),
+          child: chip,
+        ),
+      );
+    }
 
     if (spacingAbove <= 0) return child;
     return Column(
-      crossAxisAlignment:
-          fullWidthSingleLine ? CrossAxisAlignment.stretch : CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(height: spacingAbove),

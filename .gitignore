@@ -49,3 +49,13 @@ android/key.properties
 android/upload_certificate.pem
 *.jks
 *.keystore
+
+# API keys / görsel çıktı
+.env
+.env.*
+!.env.example
+data_out/
+scripts/.pexels_key
+scripts/.google_places_key
+scripts/.bunny_config.json
+master_database_updated.json

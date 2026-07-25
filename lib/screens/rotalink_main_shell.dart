@@ -15,6 +15,7 @@ import 'about_screen.dart';
 import 'discover_screen.dart';
 import 'holidays_screen.dart';
 import 'main_map_screen.dart';
+import 'pro_screen.dart';
 import 'suggestion_screen.dart';
 
 /// Uygulama ana iskeleti — tüm sayfalarda sabit alt menü.
@@ -48,10 +49,10 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
 
   Future<void> _maybeStartOnboarding() async {
     if (!await OnboardingPrefs.shouldShow()) return;
-    await Future<void>.delayed(const Duration(milliseconds: 900));
+    await Future<void>.delayed(const Duration(milliseconds: 350));
     if (!mounted) return;
     _goHome();
-    await Future<void>.delayed(const Duration(milliseconds: 450));
+    await Future<void>.delayed(const Duration(milliseconds: 180));
     if (!mounted) return;
     _onboarding.start();
   }
@@ -112,14 +113,17 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   Future<void> _handleShellBack() async {
     if (!mounted) return;
 
-    // Üst sayfa (kampanya detayı, keşfet vb.) → bir adım geri.
+    // Üst sayfa (yorum, kampanya, keşfet vb.) → bir adım geri.
     final nav = _bodyNav;
     if (nav != null && nav.canPop()) {
+      // Keşfet vb. sekmeden ana haritaya dönüşte reset; ana harita üstü
+      // (Yorum vb.) kapanınca arama panelini bozma.
+      final leavingSecondaryTab = _selected != RotalinkBottomNavItem.home;
       nav.pop();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final canStillPop = _bodyNav?.canPop() ?? false;
-        if (!canStillPop) {
+        if (!canStillPop && leavingSecondaryTab) {
           setState(() => _selected = RotalinkBottomNavItem.home);
           _navBridge.resetToHome?.call();
         }
@@ -164,6 +168,11 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const SuggestionScreen(),
+        );
+      case RotalinkShellRoutes.pro:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const ProScreen(),
         );
       case RotalinkShellRoutes.home:
       default:

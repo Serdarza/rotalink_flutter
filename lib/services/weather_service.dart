@@ -43,6 +43,12 @@ abstract final class WeatherService {
     required double latitude,
     required double longitude,
   }) async {
+    if (!WeatherApiConfig.isConfigured) {
+      if (kDebugMode) {
+        debugPrint('WeatherService: OWM_API_KEY yok; istek atılmadı.');
+      }
+      return null;
+    }
     final uri = Uri.parse(
       '${WeatherApiConfig.weatherUrl}?lat=$latitude&lon=$longitude'
       '&appid=${WeatherApiConfig.apiKey}&units=metric&lang=tr',

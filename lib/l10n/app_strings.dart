@@ -117,6 +117,16 @@ abstract final class AppStrings {
   static const String locationPermissionNeeded = 'Konum izni gerekli.';
   static const String locationServicesOffSnack =
       'Konum hizmetleri kapalı. Lütfen cihaz ayarlarından GPS\'i açın.';
+  static const String locationServicesOffDialogTitle = 'Konum kapalı';
+  static const String locationServicesOffDialogBody =
+      'Mesafeleri hesaplamak için cihaz konumunu açmanız gerekir.';
+  static const String locationServicesOffDialogOpenSettings = 'Ayarları aç';
+  static const String locationPermissionDialogTitle = 'Konum izni';
+  static const String locationPermissionDialogBody =
+      'Yakındaki tesislerin mesafesini göstermek için konum iznine ihtiyacımız var.';
+  static const String locationPermissionDialogAllow = 'İzin ver';
+  static const String locationPermissionDialogDeniedForeverBody =
+      'Konum izni kapalı. Mesafeleri görmek için uygulama ayarlarından konum iznini açın.';
   static const String locationFailedPrefix = 'Konum alınamadı: ';
 
   static const String suggestionTitle = 'Önerinizi Bize İletin';

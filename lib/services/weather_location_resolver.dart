@@ -8,6 +8,7 @@ import '../utils/search_normalize.dart';
 
 /// Hava durumu sorgusu için konum kaynağı.
 enum WeatherLocationSource {
+  searchedCity('Aranan il'),
   gps('Konumunuz'),
   cachedGps('Son konumunuz'),
   mapCity('Haritadaki il'),
@@ -41,10 +42,25 @@ abstract final class WeatherLocationResolver {
   static WeatherLocationTarget resolve({
     LatLng? liveGps,
     LatLng? cachedGps,
+    String? searchedCity,
     String? focusedCity,
     LatLng? mapCenter,
     RotaDataState? rotaData,
   }) {
+    // Aktif arama varsa aranan ilin havası GPS'in önüne geçer.
+    final searched = searchedCity?.trim();
+    if (searched != null && searched.isNotEmpty) {
+      final searchedLl = _coordsForCity(rotaData, searched);
+      if (searchedLl != null) {
+        return WeatherLocationTarget(
+          latitude: searchedLl.latitude,
+          longitude: searchedLl.longitude,
+          source: WeatherLocationSource.searchedCity,
+          displayName: searched,
+        );
+      }
+    }
+
     if (liveGps != null && isValidWgs84LatLng(liveGps.latitude, liveGps.longitude)) {
       return WeatherLocationTarget(
         latitude: liveGps.latitude,

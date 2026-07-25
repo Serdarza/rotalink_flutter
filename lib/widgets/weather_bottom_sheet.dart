@@ -7,10 +7,10 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 import '../services/simple_location_service.dart';
+import '../services/weather_api_config.dart';
 import '../theme/app_colors.dart';
 
-/// Kotlin [WeatherBottomSheet] ile aynı: OpenWeatherMap 2.5 + Nominatim.
-const _owmApiKey = '6ef5a34093512e8ce92ff4e845063e80';
+/// OpenWeatherMap 2.5 + Nominatim.
 const _weatherUrl = 'https://api.openweathermap.org/data/2.5/weather';
 const _forecastUrl = 'https://api.openweathermap.org/data/2.5/forecast';
 const _nominatimUrl = 'https://nominatim.openstreetmap.org/search';
@@ -143,11 +143,11 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
   }
 
   Uri _weatherUri(double la, double lo) => Uri.parse(
-        '$_weatherUrl?lat=$la&lon=$lo&appid=$_owmApiKey&units=metric&lang=tr',
+        '$_weatherUrl?lat=$la&lon=$lo&appid=${WeatherApiConfig.apiKey}&units=metric&lang=tr',
       );
 
   Uri _forecastUri(double la, double lo) => Uri.parse(
-        '$_forecastUrl?lat=$la&lon=$lo&appid=$_owmApiKey&units=metric&lang=tr',
+        '$_forecastUrl?lat=$la&lon=$lo&appid=${WeatherApiConfig.apiKey}&units=metric&lang=tr',
       );
 
   /// OpenWeather 2.5 genelde `dt_txt` verir; yoksa `dt` ile yerel takvim gününe göre grupla.
