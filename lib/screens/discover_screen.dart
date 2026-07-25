@@ -139,6 +139,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       return;
     }
 
+    // Zaten yeterli reklam varsa yeniden yükleme tetikleme (scroll crash).
     if (_nativeAds.length >= needed) {
       if (mounted) {
         _discoverBodyTick.value++;
@@ -149,7 +150,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     if (DiscoverNativeAdPool.instance.hasAdsFor(_allCampaigns.length)) {
       if (mounted) {
         setState(() {
-          _nativeAds = DiscoverNativeAdPool.instance.snapshot(_allCampaigns.length);
+          _nativeAds =
+              DiscoverNativeAdPool.instance.snapshot(_allCampaigns.length);
         });
         _discoverBodyTick.value++;
       }
@@ -254,19 +256,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           );
         }
         if (item is NativeAd) {
-          return Padding(
-            key: ValueKey<Object>('native-$index-${item.hashCode}'),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: Material(
-              elevation: 2,
-              borderRadius: BorderRadius.circular(16),
-              clipBehavior: Clip.antiAlias,
-              child: SizedBox(
-                height: 320,
-                width: double.infinity,
-                child: AdWidget(ad: item),
-              ),
-            ),
+          return _NativeAdListTile(
+            key: ValueKey<int>(identityHashCode(item)),
+            ad: item,
           );
         }
         return const SizedBox.shrink();
@@ -334,6 +326,40 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               RotalinkBannerAd(adsEnabled: AdService.adsEnabled),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Liste içinde native reklam — keep-alive ile kaydırırken platform view çökmesini azaltır.
+class _NativeAdListTile extends StatefulWidget {
+  const _NativeAdListTile({super.key, required this.ad});
+
+  final NativeAd ad;
+
+  @override
+  State<_NativeAdListTile> createState() => _NativeAdListTileState();
+}
+
+class _NativeAdListTileState extends State<_NativeAdListTile>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Material(
+        elevation: 2,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(
+          height: 320,
+          width: double.infinity,
+          child: AdWidget(ad: widget.ad),
         ),
       ),
     );
