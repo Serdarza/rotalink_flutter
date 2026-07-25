@@ -58,4 +58,6 @@ data_out/
 scripts/.pexels_key
 scripts/.google_places_key
 scripts/.bunny_config.json
-master_database_updated.json
+# Kök dizindeki üretilmiş/yedek veritabanı — ama assets/data/ içindeki gömülü kopya repoda kalmalı (iOS/Codemagic derlemesi için gerekli).
+/master_database_updated.json
+/master_database_updated.json.bak_before_replace
