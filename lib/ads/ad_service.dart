@@ -11,13 +11,8 @@ import 'rewarded_unlock_result.dart';
 
 /// Geçiş (interstitial) reklam zamanlayıcısı.
 ///
-/// Akış:
-/// 1. Uygulama açılır → reklam **hemen çıkmaz**.
-/// 2. GitHub `reklam_ayar.json` veya Firebase Remote Config `reklam_bekleme_suresi` (dakika) kadar beklenir.
-/// 3. İlk geçiş reklamı gösterilir.
-/// 4. Sonraki gösterimler aynı süre aralığıyla devam eder.
-///
-/// Açılışta reklam yok; süre her zaman oturum / son gösterimden ölçülür.
+/// Android ve iOS aynı akışı kullanır (unit ID’ler platforma göre ayrıdır):
+/// banner, native (her 5 içerikte 1, en fazla 12), interstitial, rewarded.
 class AdService {
   AdService._();
   static final AdService instance = AdService._();
@@ -263,6 +258,10 @@ class AdService {
     if (_interstitial != null) return;
     if (_loading != null) return _loading!.future;
 
+    await whenSdkReady();
+    if (_proActive || _interstitial != null) return;
+    if (_loading != null) return _loading!.future;
+
     final done = Completer<void>();
     _loading = done;
 
@@ -354,6 +353,10 @@ class AdService {
   Future<void> preloadRewarded() async {
     if (!adsEnabled || kIsWeb || _proActive) return;
     if (_rewarded != null) return;
+    if (_rewardedLoading != null) return _rewardedLoading!.future;
+
+    await whenSdkReady();
+    if (_proActive || _rewarded != null) return;
     if (_rewardedLoading != null) return _rewardedLoading!.future;
 
     final done = Completer<void>();

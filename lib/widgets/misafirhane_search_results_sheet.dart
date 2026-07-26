@@ -28,6 +28,7 @@ import '../services/nominatim_geocode_cache.dart';
 import '../theme/app_colors.dart';
 import '../utils/geo_helpers.dart';
 import '../utils/maps_launch.dart';
+import '../widgets/rotalink_native_ad_tile.dart';
 import '../utils/safe_map_coordinates.dart';
 import '../utils/search_normalize.dart';
 import 'distance_permission_chip.dart';
@@ -452,20 +453,7 @@ class MisafirhaneSearchResultsPanelState
   }
 
   Widget _nativeAdTile(NativeAd ad) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      child: Material(
-        elevation: 2,
-        borderRadius: BorderRadius.circular(12),
-        clipBehavior: Clip.antiAlias,
-        color: AppColors.white,
-        child: SizedBox(
-          height: 280,
-          width: double.infinity,
-          child: AdWidget(ad: ad),
-        ),
-      ),
-    );
+    return RotalinkNativeAdTile(ad: ad);
   }
 
   GlobalKey _keyForFacility(Misafirhane m) =>

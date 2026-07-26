@@ -1,6 +1,10 @@
 import 'dart:io' show Platform;
 
 /// Android ve iOS için ayrı AdMob reklam birimi kimlikleri.
+///
+/// Formatlar her iki platformda birebir aynıdır (banner, native, interstitial,
+/// rewarded). Unit ID’ler AdMob kuralı gereği platforma göre ayrıdır; uygulama
+/// kodu aynı sıklık / yerleştirme kurallarını kullanır.
 abstract final class AdUnitIds {
   // ─── Android ──────────────────────────────────────────────────────────────
   static const String _androidAppId       = 'ca-app-pub-6478556288740067~6800762661';

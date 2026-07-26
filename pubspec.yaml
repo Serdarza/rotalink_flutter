@@ -2,7 +2,7 @@ name: rotalink_flutter
 description: Rotalink — Flutter (Android + iOS), Kotlin uygulamasıyla aynı veri kaynağı.
 publish_to: 'none'
 
-version: 4.4.5+72
+version: 4.4.6+73
 
 environment:
   sdk: ^3.11.4
@@ -37,19 +37,14 @@ dependencies:
   flutter_local_notifications: ^18.0.1
   timezone: ^0.10.0
   in_app_purchase: ^3.3.0
-  # Abonelik geri yükleme (queryPastPurchases) için doğrudan bağımlılık.
-  in_app_purchase_android: 0.4.0+10
+  # Play Billing Library 8.0+ (Play Console zorunluluğu, 31 Ağu 2026).
+  in_app_purchase_android: 0.5.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
   flutter_launcher_icons: ^0.14.4
-
-# 0.5.x Kotlin Pigeon (Messages.kt) bu projede Java classpath'e düşmüyor
-# (InAppPurchaseApi cannot find symbol). 0.4.0+10 saf Java Messages kullanır.
-dependency_overrides:
-  in_app_purchase_android: 0.4.0+10
 
 flutter:
   config:

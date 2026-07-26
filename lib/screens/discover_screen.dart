@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show ValueListenable, kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -14,6 +14,7 @@ import '../models/campaign.dart';
 import '../theme/app_colors.dart';
 import '../widgets/campaign_smart_icon.dart';
 import '../widgets/rotalink_banner_ad.dart';
+import '../widgets/rotalink_native_ad_tile.dart';
 import 'campaign_detail_screen.dart';
 
 const _headerTop = Color(0xFF005F6B);
@@ -303,7 +304,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             );
           }
           if (item is NativeAd) {
-            return _NativeAdListTile(
+            return RotalinkNativeAdTile(
               key: ValueKey<int>(identityHashCode(item)),
               ad: item,
               scrollingListenable: _listScrolling,
@@ -375,84 +376,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               RotalinkBannerAd(adsEnabled: AdService.adsEnabled),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Liste içinde native reklam.
-///
-/// iOS: AdWidget (Platform View) kaydırma sırasında oluşturulursa crash olur.
-/// Bu yüzden kaydırma bitene kadar placeholder gösterilir; bir kez bağlandıktan
-/// sonra AdWidget bir daha sökülmez (plugin tek bağlama kuralı).
-class _NativeAdListTile extends StatefulWidget {
-  const _NativeAdListTile({
-    super.key,
-    required this.ad,
-    required this.scrollingListenable,
-  });
-
-  final NativeAd ad;
-  final ValueListenable<bool> scrollingListenable;
-
-  @override
-  State<_NativeAdListTile> createState() => _NativeAdListTileState();
-}
-
-class _NativeAdListTileState extends State<_NativeAdListTile>
-    with AutomaticKeepAliveClientMixin {
-  bool _adAttached = false;
-
-  @override
-  bool get wantKeepAlive => true;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.scrollingListenable.addListener(_onScrollingChanged);
-    // İlk karede kaydırma yoksa bağla.
-    WidgetsBinding.instance.addPostFrameCallback((_) => _tryAttach());
-  }
-
-  @override
-  void dispose() {
-    widget.scrollingListenable.removeListener(_onScrollingChanged);
-    super.dispose();
-  }
-
-  void _onScrollingChanged() => _tryAttach();
-
-  void _tryAttach() {
-    if (!mounted || _adAttached) return;
-    if (widget.scrollingListenable.value) return;
-    setState(() => _adAttached = true);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: Material(
-        elevation: 2,
-        borderRadius: BorderRadius.circular(16),
-        clipBehavior: Clip.antiAlias,
-        child: SizedBox(
-          height: 320,
-          width: double.infinity,
-          child: _adAttached
-              ? AdWidget(ad: widget.ad)
-              : const ColoredBox(
-                  color: Color(0xFFF3F4F6),
-                  child: Center(
-                    child: SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
-                ),
         ),
       ),
     );

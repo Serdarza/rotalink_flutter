@@ -64,7 +64,7 @@ abstract final class DiscoverNativeMerge {
       nativeTemplateStyle: NativeTemplateStyle(
         templateType: TemplateType.medium,
         mainBackgroundColor: const Color(0xFFFFFFFF),
-        cornerRadius: 12,
+        cornerRadius: 16,
       ),
     );
     ad.load();

@@ -11,6 +11,7 @@ import '../ads/ad_service.dart';
 import '../ads/discover_native_merge.dart';
 import '../billing/pro_service.dart';
 import '../widgets/rotalink_banner_ad.dart';
+import '../widgets/rotalink_native_ad_tile.dart';
 import '../l10n/app_strings.dart';
 import '../models/campaign.dart';
 import '../theme/app_colors.dart';
@@ -214,16 +215,7 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
             ),
             if (_nativeAd != null) ...[
               const SizedBox(height: 24),
-              Material(
-                elevation: 2,
-                borderRadius: BorderRadius.circular(14),
-                clipBehavior: Clip.antiAlias,
-                child: SizedBox(
-                  height: 300,
-                  width: double.infinity,
-                  child: AdWidget(ad: _nativeAd!),
-                ),
-              ),
+              RotalinkNativeAdTile(ad: _nativeAd!),
             ],
           ],
         ),
