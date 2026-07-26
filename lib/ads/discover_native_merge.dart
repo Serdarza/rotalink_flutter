@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:ui' show Color;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'ad_unit_ids.dart';
@@ -41,8 +41,11 @@ abstract final class DiscoverNativeMerge {
     return out;
   }
 
-  static Future<NativeAd?> loadOneNative() {
-    if (kIsWeb || ProService.instance.isAdFree) return Future.value();
+  static Future<NativeAd?> loadOneNative() async {
+    if (kIsWeb || ProService.instance.isAdFree) return null;
+    await AdService.instance.whenSdkReady();
+    if (ProService.instance.isAdFree) return null;
+
     final c = Completer<NativeAd?>();
     late final NativeAd ad;
     ad = NativeAd(
@@ -52,6 +55,7 @@ abstract final class DiscoverNativeMerge {
           if (!c.isCompleted) c.complete(ad);
         },
         onAdFailedToLoad: (failed, err) {
+          debugPrint('[Native] load fail: ${err.message}');
           failed.dispose();
           if (!c.isCompleted) c.complete(null);
         },
@@ -72,12 +76,15 @@ abstract final class DiscoverNativeMerge {
     if (count <= 0 || kIsWeb || ProService.instance.isAdFree) {
       return const [];
     }
+    await AdService.instance.whenSdkReady();
+    if (ProService.instance.isAdFree) return const [];
+
     final futures = List<Future<NativeAd?>>.generate(
       count,
       (_) => loadOneNative(),
     );
     final results = await Future.wait(futures).timeout(
-      const Duration(seconds: 15),
+      const Duration(seconds: 20),
       onTimeout: () => List<NativeAd?>.filled(count, null),
     );
     return results.whereType<NativeAd>().toList();

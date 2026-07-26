@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show ValueListenable, kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -53,6 +53,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   List<NativeAd> _nativeAds = const [];
   int _nativeGen = 0;
+  int _nativeEmptyRetries = 0;
+  /// Hızlı kaydırırken AdWidget platform view oluşturmayı ertele (iOS crash).
+  final ValueNotifier<bool> _listScrolling = ValueNotifier<bool>(false);
+  Timer? _scrollIdleTimer;
 
   void _onSearchTextChanged() {
     _searchDebounce?.cancel();
@@ -164,7 +168,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   Future<void> _reloadNativeAds(int needed) async {
     final gen = ++_nativeGen;
 
-    final loaded = await DiscoverNativeAdPool.instance.ensureAds(_allCampaigns.length);
+    final loaded =
+        await DiscoverNativeAdPool.instance.ensureAds(_allCampaigns.length);
 
     if (!mounted || gen != _nativeGen) {
       return;
@@ -174,6 +179,33 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       _nativeAds = loaded;
     });
     _discoverBodyTick.value++;
+
+    // İlk istek boş dönerse (SDK/ağ) kısa süre sonra tekrar tetikle.
+    if (loaded.isEmpty &&
+        needed > 0 &&
+        !ProService.instance.isAdFree &&
+        _nativeEmptyRetries < 2) {
+      _nativeEmptyRetries++;
+      Future<void>.delayed(Duration(seconds: 2 * _nativeEmptyRetries), () {
+        if (!mounted || gen != _nativeGen) return;
+        if (_nativeAds.isNotEmpty || ProService.instance.isAdFree) return;
+        unawaited(_reloadNativeAds(needed));
+      });
+    } else if (loaded.isNotEmpty) {
+      _nativeEmptyRetries = 0;
+    }
+  }
+
+  void _onScrollActivity() {
+    if (!_listScrolling.value) {
+      _listScrolling.value = true;
+    }
+    _scrollIdleTimer?.cancel();
+    // Kaydırma bittikten kısa süre sonra platform view oluştur.
+    _scrollIdleTimer = Timer(const Duration(milliseconds: 280), () {
+      if (!mounted) return;
+      _listScrolling.value = false;
+    });
   }
 
   @override
@@ -181,6 +213,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     ProService.instance.isPro.removeListener(_onProChanged);
     _nativeGen++;
     _searchDebounce?.cancel();
+    _scrollIdleTimer?.cancel();
+    _listScrolling.dispose();
     _debouncedFilter.dispose();
     _discoverBodyTick.dispose();
     _campaignSub?.cancel();
@@ -237,32 +271,47 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       );
     }
     final ime = MediaQuery.viewInsetsOf(context).bottom;
-    return ListView.builder(
-      padding: EdgeInsets.fromLTRB(0, 8, 0, 8 + ime),
-      itemCount: merged.length,
-      itemBuilder: (context, index) {
-        final item = merged[index];
-        if (item is Campaign) {
-          final c = item;
-          return _CampaignDiscoverCard(
-            campaign: c,
-            onOpenDetail: () {
-              Navigator.of(context, rootNavigator: false).push<void>(
-                MaterialPageRoute<void>(
-                  builder: (_) => CampaignDetailScreen(campaign: c),
-                ),
-              );
-            },
-          );
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification n) {
+        if (n is ScrollStartNotification || n is ScrollUpdateNotification) {
+          _onScrollActivity();
+        } else if (n is ScrollEndNotification) {
+          _onScrollActivity();
         }
-        if (item is NativeAd) {
-          return _NativeAdListTile(
-            key: ValueKey<int>(identityHashCode(item)),
-            ad: item,
-          );
-        }
-        return const SizedBox.shrink();
+        return false;
       },
+      child: ListView.builder(
+        padding: EdgeInsets.fromLTRB(0, 8, 0, 8 + ime),
+        itemCount: merged.length,
+        // Offscreen native Platform View sayısını sınırla (iOS).
+        cacheExtent: 400,
+        addAutomaticKeepAlives: true,
+        addRepaintBoundaries: true,
+        itemBuilder: (context, index) {
+          final item = merged[index];
+          if (item is Campaign) {
+            final c = item;
+            return _CampaignDiscoverCard(
+              campaign: c,
+              onOpenDetail: () {
+                Navigator.of(context, rootNavigator: false).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => CampaignDetailScreen(campaign: c),
+                  ),
+                );
+              },
+            );
+          }
+          if (item is NativeAd) {
+            return _NativeAdListTile(
+              key: ValueKey<int>(identityHashCode(item)),
+              ad: item,
+              scrollingListenable: _listScrolling,
+            );
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 
@@ -332,11 +381,20 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 }
 
-/// Liste içinde native reklam — keep-alive ile kaydırırken platform view çökmesini azaltır.
+/// Liste içinde native reklam.
+///
+/// iOS: AdWidget (Platform View) kaydırma sırasında oluşturulursa crash olur.
+/// Bu yüzden kaydırma bitene kadar placeholder gösterilir; bir kez bağlandıktan
+/// sonra AdWidget bir daha sökülmez (plugin tek bağlama kuralı).
 class _NativeAdListTile extends StatefulWidget {
-  const _NativeAdListTile({super.key, required this.ad});
+  const _NativeAdListTile({
+    super.key,
+    required this.ad,
+    required this.scrollingListenable,
+  });
 
   final NativeAd ad;
+  final ValueListenable<bool> scrollingListenable;
 
   @override
   State<_NativeAdListTile> createState() => _NativeAdListTileState();
@@ -344,8 +402,32 @@ class _NativeAdListTile extends StatefulWidget {
 
 class _NativeAdListTileState extends State<_NativeAdListTile>
     with AutomaticKeepAliveClientMixin {
+  bool _adAttached = false;
+
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.scrollingListenable.addListener(_onScrollingChanged);
+    // İlk karede kaydırma yoksa bağla.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tryAttach());
+  }
+
+  @override
+  void dispose() {
+    widget.scrollingListenable.removeListener(_onScrollingChanged);
+    super.dispose();
+  }
+
+  void _onScrollingChanged() => _tryAttach();
+
+  void _tryAttach() {
+    if (!mounted || _adAttached) return;
+    if (widget.scrollingListenable.value) return;
+    setState(() => _adAttached = true);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -359,7 +441,18 @@ class _NativeAdListTileState extends State<_NativeAdListTile>
         child: SizedBox(
           height: 320,
           width: double.infinity,
-          child: AdWidget(ad: widget.ad),
+          child: _adAttached
+              ? AdWidget(ad: widget.ad)
+              : const ColoredBox(
+                  color: Color(0xFFF3F4F6),
+                  child: Center(
+                    child: SizedBox(
+                      width: 22,
+                      height: 22,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
         ),
       ),
     );

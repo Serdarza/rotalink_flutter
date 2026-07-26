@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import '../data/app_rating_prefs.dart';
+import '../ads/ad_service.dart';
 import '../ads/discover_native_ad_pool.dart';
 import '../billing/pro_service.dart';
 import '../data/campaign_repository.dart';
@@ -76,7 +77,11 @@ class _SplashScreenState extends State<SplashScreen>
     ]);
     final campaignCount = CampaignRepository.instance.currentCampaigns.length;
     if (campaignCount > 0 && !ProService.instance.isAdFree) {
-      unawaited(DiscoverNativeAdPool.instance.ensureAds(campaignCount));
+      // AdMob SDK hazır olmadan istek atılmasın (Android/iOS).
+      await AdService.instance.whenSdkReady();
+      if (!ProService.instance.isAdFree) {
+        unawaited(DiscoverNativeAdPool.instance.ensureAds(campaignCount));
+      }
     }
   }
 

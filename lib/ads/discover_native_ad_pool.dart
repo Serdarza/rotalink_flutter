@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../billing/pro_service.dart';
@@ -62,22 +62,49 @@ class DiscoverNativeAdPool {
     return _loadFuture ??= _load(needed);
   }
 
+  /// SDK hazır + boş/eksik sonuçta birkaç kez yeniden dener (Android/iOS).
   Future<List<NativeAd>> _load(int needed) async {
+    await AdService.instance.whenSdkReady();
     final previous = List<NativeAd>.from(_ads);
     try {
-      final loaded = await DiscoverNativeMerge.loadPool(needed);
+      var loaded = <NativeAd>[];
+      for (var attempt = 0; attempt < 3; attempt++) {
+        if (_proActive) break;
+
+        final batch = await DiscoverNativeMerge.loadPool(
+          needed - loaded.length,
+        );
+        if (batch.isNotEmpty) {
+          loaded = [...loaded, ...batch];
+        }
+
+        debugPrint(
+          '[NativePool] attempt ${attempt + 1}: ${loaded.length}/$needed',
+        );
+
+        if (loaded.length >= needed) break;
+        if (attempt < 2) {
+          await Future<void>.delayed(
+            Duration(milliseconds: 700 * (attempt + 1)),
+          );
+        }
+      }
+
       if (_proActive) {
         _scheduleDispose(loaded);
         _scheduleDispose(previous);
         _ads.clear();
         return const [];
       }
-      _ads
-        ..clear()
-        ..addAll(loaded);
-      // Eski reklamları UI bırakana kadar beklet.
-      _scheduleDispose(previous);
-      return List<NativeAd>.from(_ads);
+
+      if (loaded.isNotEmpty) {
+        _ads
+          ..clear()
+          ..addAll(loaded);
+        _scheduleDispose(previous);
+      }
+      // Boş kaldıysa önceki (varsa) korunur; UI tamamen reklamsız kalmasın.
+      return List<NativeAd>.from(_ads.take(needed));
     } finally {
       _loadFuture = null;
     }

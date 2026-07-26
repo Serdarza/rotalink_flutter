@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import '../ads/ad_service.dart';
 import '../ads/ad_unit_ids.dart';
 import '../billing/pro_service.dart';
 
@@ -22,6 +25,7 @@ class _RotalinkBannerAdState extends State<RotalinkBannerAd> {
   BannerAd? _banner;
   bool _loaded = false;
   bool _failed = false;
+  int _loadAttempts = 0;
 
   bool get _adsAllowed =>
       widget.adsEnabled && !kIsWeb && !ProService.instance.isAdFree;
@@ -30,11 +34,15 @@ class _RotalinkBannerAdState extends State<RotalinkBannerAd> {
   void initState() {
     super.initState();
     ProService.instance.isPro.addListener(_onProChanged);
-    _loadIfAllowed();
+    unawaited(_loadIfAllowed());
   }
 
-  void _loadIfAllowed() {
+  Future<void> _loadIfAllowed() async {
     if (!_adsAllowed || _banner != null) return;
+    await AdService.instance.whenSdkReady();
+    if (!mounted || !_adsAllowed || _banner != null) return;
+
+    _loadAttempts++;
     _banner = BannerAd(
       adUnitId: AdUnitIds.banner,
       size: AdSize.banner,
@@ -45,7 +53,18 @@ class _RotalinkBannerAdState extends State<RotalinkBannerAd> {
         },
         onAdFailedToLoad: (ad, err) {
           ad.dispose();
-          if (mounted) setState(() => _failed = true);
+          if (!mounted) return;
+          _banner = null;
+          // İlk başarısızlıktan sonra bir kez daha dene (SDK / ağ gecikmesi).
+          if (_loadAttempts < 2 && _adsAllowed) {
+            Future<void>.delayed(const Duration(seconds: 2), () {
+              if (mounted && _adsAllowed && _banner == null) {
+                unawaited(_loadIfAllowed());
+              }
+            });
+            return;
+          }
+          setState(() => _failed = true);
         },
       ),
     )..load();
@@ -57,9 +76,12 @@ class _RotalinkBannerAdState extends State<RotalinkBannerAd> {
       _banner?.dispose();
       _banner = null;
       _loaded = false;
+      _failed = false;
       setState(() {});
     } else {
-      _loadIfAllowed();
+      _failed = false;
+      _loadAttempts = 0;
+      unawaited(_loadIfAllowed());
       setState(() {});
     }
   }

@@ -7,7 +7,7 @@ import '../l10n/app_strings.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
 
-/// 2026 resmi tatiller — liste, kart tasarımı ve geri sayım.
+/// 2026–2027 resmi tatiller ve idari izinler — liste, kart ve geri sayım.
 class HolidaysScreen extends StatefulWidget {
   const HolidaysScreen({super.key});
 
@@ -80,7 +80,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
 
   static DateTime _dateOnly(DateTime d) => DateTime(d.year, d.month, d.day);
 
-  static _HolidayTiming _holidayTiming(PublicHoliday2026 h, DateTime now) {
+  static _HolidayTiming _holidayTiming(PublicHoliday h, DateTime now) {
     final t = _dateOnly(now);
     final d0 = _dateOnly(h.start);
     final d1 = _dateOnly(h.endInclusive);
@@ -157,7 +157,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     }
   }
 
-  static String _countdownText(PublicHoliday2026 h, DateTime now) {
+  static String _countdownText(PublicHoliday h, DateTime now) {
     final t = _dateOnly(now);
     final d0 = _dateOnly(h.start);
     final d1 = _dateOnly(h.endInclusive);
@@ -170,10 +170,33 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     return n <= 0 ? 'Bugün' : '$n gün kaldı';
   }
 
+  Color _kindChipBg(HolidayKind kind) {
+    switch (kind) {
+      case HolidayKind.milli:
+        return const Color(0xFFE3F2FD);
+      case HolidayKind.dini:
+        return const Color(0xFFF3E5F5);
+      case HolidayKind.idari:
+        return const Color(0xFFFFF3E0);
+    }
+  }
+
+  Color _kindChipFg(HolidayKind kind) {
+    switch (kind) {
+      case HolidayKind.milli:
+        return const Color(0xFF1565C0);
+      case HolidayKind.dini:
+        return const Color(0xFF6A1B9A);
+      case HolidayKind.idari:
+        return const Color(0xFFE65100);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final now = DateTime.now();
+    final holidays = kPublicHolidays;
 
     return Scaffold(
       appBar: AppBar(
@@ -186,153 +209,232 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
           16,
           12 + RotalinkShellScope.scrollBottomPadding(context),
         ),
-        itemCount: kPublicHolidays2026.length,
+        itemCount: holidays.length + 1,
         itemBuilder: (context, index) {
-          final h = kPublicHolidays2026[index];
+          if (index == 0) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F9FC),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFBBDEFB)),
+                ),
+                child: Text(
+                  '2026–2027 milli ve dini tatiller ile açıklanan kamu idari izinleri. '
+                  'İdari izin yalnızca kamu personelini kapsar; özel sektörü bağlamaz. '
+                  'Dini bayram tarihlerinde Diyanet takvimi esas alınır.',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: AppColors.campaignSummaryMuted,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            );
+          }
+
+          final h = holidays[index - 1];
+          final prevYear = index > 1 ? holidays[index - 2].year : null;
+          final showYearHeader = prevYear != h.year;
           final countdown = _countdownText(h, now);
           final timing = _holidayTiming(h, now);
           final style = _cardStyle(timing);
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Card(
-              elevation: 0,
-              shadowColor: Colors.black26,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-                side: BorderSide(
-                  color: style.cardBorder.withValues(alpha: 0.85),
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (showYearHeader)
+                Padding(
+                  padding: EdgeInsets.only(top: index > 1 ? 8 : 0, bottom: 10),
+                  child: Text(
+                    '${h.year} yılı',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
                 ),
-              ),
-              clipBehavior: Clip.antiAlias,
-              // [ListView] + [Row] + [Expanded]: içsel yükseklik 0 olur; kart görünmez.
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(width: 5, color: style.strip),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 14, 16, 14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Card(
+                  elevation: 0,
+                  shadowColor: Colors.black26,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    side: BorderSide(
+                      color: style.cardBorder.withValues(alpha: 0.85),
+                    ),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Container(width: 5, color: style.strip),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(14, 14, 16, 14),
+                            child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                              Container(
-                                width: 46,
-                                height: 46,
-                                decoration: BoxDecoration(
-                                  color: style.iconBg,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: style.dateChipBorder.withValues(alpha: 0.65),
-                                  ),
-                                ),
-                                child: Icon(
-                                  Icons.event_outlined,
-                                  color: style.iconFg,
-                                  size: 24,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
+                                Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      h.name,
-                                      style: theme.textTheme.titleMedium?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: style.titleMuted
-                                            ? AppColors.campaignSummaryMuted
-                                            : AppColors.textPrimary,
-                                        height: 1.25,
+                                    Container(
+                                      width: 46,
+                                      height: 46,
+                                      decoration: BoxDecoration(
+                                        color: style.iconBg,
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: style.dateChipBorder
+                                              .withValues(alpha: 0.65),
+                                        ),
+                                      ),
+                                      child: Icon(
+                                        h.kind == HolidayKind.idari
+                                            ? Icons.work_off_outlined
+                                            : Icons.event_outlined,
+                                        color: style.iconFg,
+                                        size: 24,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 6,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: style.dateChipBg,
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: style.dateChipBorder.withValues(alpha: 0.9),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        h.dateLine,
-                                        style: theme.textTheme.bodyMedium?.copyWith(
-                                          color: style.dateFg,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.1,
-                                        ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            h.name,
+                                            style: theme.textTheme.titleMedium
+                                                ?.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              color: style.titleMuted
+                                                  ? AppColors
+                                                      .campaignSummaryMuted
+                                                  : AppColors.textPrimary,
+                                              height: 1.25,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: style.dateChipBg,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: style.dateChipBorder
+                                                    .withValues(alpha: 0.9),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              h.dateLine,
+                                              style: theme.textTheme.bodyMedium
+                                                  ?.copyWith(
+                                                color: style.dateFg,
+                                                fontWeight: FontWeight.w600,
+                                                letterSpacing: 0.1,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: [
+                                    Chip(
+                                      visualDensity: VisualDensity.compact,
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      label: Text(
+                                        h.kindLabel,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: _kindChipFg(h.kind),
+                                        ),
+                                      ),
+                                      backgroundColor: _kindChipBg(h.kind),
+                                      side: BorderSide(
+                                        color: _kindChipFg(h.kind)
+                                            .withValues(alpha: 0.25),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
+                                    ),
+                                    Chip(
+                                      visualDensity: VisualDensity.compact,
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      label: Text(
+                                        'Süre: ${h.durationLabel}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: style.durationChipFg,
+                                        ),
+                                      ),
+                                      backgroundColor: style.durationChipBg,
+                                      side: BorderSide(
+                                        color: style.dateChipBorder
+                                            .withValues(alpha: 0.45),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
+                                    ),
+                                    Chip(
+                                      visualDensity: VisualDensity.compact,
+                                      materialTapTargetSize:
+                                          MaterialTapTargetSize.shrinkWrap,
+                                      avatar: Icon(
+                                        _countdownIcon(timing),
+                                        size: 16,
+                                        color: style.countdownIcon,
+                                      ),
+                                      label: Text(
+                                        countdown,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          color: style.countdownFg,
+                                        ),
+                                      ),
+                                      backgroundColor: style.countdownBg,
+                                      side: BorderSide(
+                                        color: style.dateChipBorder
+                                            .withValues(alpha: 0.55),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: [
-                              Chip(
-                                visualDensity: VisualDensity.compact,
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                label: Text(
-                                  'Süre: ${h.durationLabel}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: style.durationChipFg,
-                                  ),
-                                ),
-                                backgroundColor: style.durationChipBg,
-                                side: BorderSide(
-                                  color: style.dateChipBorder.withValues(alpha: 0.45),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
-                              ),
-                              Chip(
-                                visualDensity: VisualDensity.compact,
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                avatar: Icon(
-                                  _countdownIcon(timing),
-                                  size: 16,
-                                  color: style.countdownIcon,
-                                ),
-                                label: Text(
-                                  countdown,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: style.countdownFg,
-                                  ),
-                                ),
-                                backgroundColor: style.countdownBg,
-                                side: BorderSide(
-                                  color: style.dateChipBorder.withValues(alpha: 0.55),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 4),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
                 ),
               ),
-            ),
+            ],
           );
         },
       ),

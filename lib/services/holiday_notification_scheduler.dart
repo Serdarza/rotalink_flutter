@@ -142,13 +142,14 @@ class HolidayNotificationScheduler {
   }
 
   static Future<void> scheduleUpcomingHolidayReminders() async {
-    for (var i = 0; i < kPublicHolidays2026.length; i++) {
+    final holidays = kPublicHolidays;
+    for (var i = 0; i < holidays.length; i++) {
       await _plugin.cancel(_idBase + i);
     }
 
     final now = DateTime.now();
-    for (var i = 0; i < kPublicHolidays2026.length; i++) {
-      final h = kPublicHolidays2026[i];
+    for (var i = 0; i < holidays.length; i++) {
+      final h = holidays[i];
       final startDay = DateTime(h.start.year, h.start.month, h.start.day);
       final reminderDay = startDay.subtract(const Duration(days: 7));
       final atNine = DateTime(
@@ -162,11 +163,16 @@ class HolidayNotificationScheduler {
 
       final when = tz.TZDateTime.from(atNine, tz.local);
 
-      final title = '«${h.name}» — 1 hafta kaldı';
+      final isIdari = h.kind == HolidayKind.idari;
+      final title = isIdari
+          ? '«${h.name}» — 1 hafta kaldı'
+          : '«${h.name}» — 1 hafta kaldı';
       const sourceLine = 'Rotalink uygulamasından hatırlatma';
-      final body =
-          'Resmi tatilinize 7 gün kaldı. Tatil: ${h.dateLine}.\n'
-          '$sourceLine — dokunarak uygulamayı açın.';
+      final body = isIdari
+          ? 'Kamu idari izninize 7 gün kaldı. Tarih: ${h.dateLine}.\n'
+              '$sourceLine — dokunarak uygulamayı açın.'
+          : 'Resmi tatilinize 7 gün kaldı. Tatil: ${h.dateLine}.\n'
+              '$sourceLine — dokunarak uygulamayı açın.';
 
       final androidDetails = AndroidNotificationDetails(
         _channelId,

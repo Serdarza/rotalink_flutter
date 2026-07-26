@@ -40,10 +40,39 @@ class AdService {
   int _intervalMinutes = _defaultIntervalMinutes;
   bool _schedulerRunning = false;
   bool _initialized = false;
+  bool _sdkReady = false;
+  Completer<void>? _sdkReadyCompleter;
   bool _isForeground = true;
   bool _awaitingReturnFromExternal = false;
   /// Ödüllü reklam açıkken geçiş üstüne binmesin.
   bool _rewardedShowing = false;
+
+  /// [MobileAds.initialize] tamamlanana kadar bekler.
+  /// Native / banner yüklemeleri SDK hazır olmadan tetiklenmesin.
+  Future<void> whenSdkReady() async {
+    if (!adsEnabled || kIsWeb) return;
+    if (_sdkReady) return;
+    _sdkReadyCompleter ??= Completer<void>();
+    // main bootstrap gecikirse yükleme yine de SDK'yı başlatsın.
+    if (!_initialized) {
+      unawaited(() async {
+        try {
+          await initialize();
+        } catch (_) {}
+      }());
+    }
+    try {
+      await _sdkReadyCompleter!.future.timeout(const Duration(seconds: 8));
+    } catch (_) {
+      _markSdkReady();
+    }
+  }
+
+  void _markSdkReady() {
+    _sdkReady = true;
+    final c = _sdkReadyCompleter ??= Completer<void>();
+    if (!c.isCompleted) c.complete();
+  }
 
   /// Maps / telefon / tarayıcı gibi dış uygulamaya çıkmadan önce çağır.
   /// Geri dönüşte geçiş reklamı hemen basılmaz; kullanıcı uygulamaya döner.
@@ -124,14 +153,29 @@ class AdService {
   }
 
   Future<void> initialize() async {
-    if (!adsEnabled || kIsWeb) return;
-    if (_initialized) return;
+    if (!adsEnabled || kIsWeb) {
+      _markSdkReady();
+      return;
+    }
+    if (_initialized) {
+      await whenSdkReady();
+      return;
+    }
     _initialized = true;
-
+    _sdkReadyCompleter ??= Completer<void>();
     _sessionStartedAt ??= DateTime.now();
 
-    // İçerik derecesi (G/PG/…) yalnızca AdMob panelinden — uygulama güncellemesi gerekmez.
-    await MobileAds.instance.initialize();
+    try {
+      // İçerik derecesi (G/PG/…) yalnızca AdMob panelinden — uygulama güncellemesi gerekmez.
+      await MobileAds.instance.initialize();
+      _markSdkReady();
+    } catch (e) {
+      // Sonraki açılışta yeniden denenebilsin; bekleyen yüklemeler takılı kalmasın.
+      _initialized = false;
+      _markSdkReady();
+      debugPrint('AdService: MobileAds init hatası: $e');
+      rethrow;
+    }
 
     if (_proActive) {
       debugPrint('AdService: Pro etkin — reklam ön yüklemesi atlandı');

@@ -100,7 +100,7 @@ abstract final class AppStrings {
   static const String drawerVersionPrefix = 'Sürüm: ';
 
   static const String drawerWeather = 'Bölgesel Hava Durumu';
-  static const String drawerHolidays = '2026 Resmi Tatiller';
+  static const String drawerHolidays = 'Resmi Tatiller';
   static const String drawerSuggestion = 'Öneri Gönder';
   static const String drawerWebsite = 'Web Sitemize Git';
   static const String drawerShareApp = 'Uygulamayı Paylaş';
