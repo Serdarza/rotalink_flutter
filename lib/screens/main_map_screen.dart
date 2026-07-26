@@ -2431,11 +2431,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   Future<void> _shareFacility(Misafirhane m) async {
     final mapsUrl = googleMapsShareUrlForMisafirhane(m);
-    const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.serdarza.rotalink';
     final text = '${m.isim}\n$mapsUrl\n\n'
         'Telefon: ${m.telefon.isEmpty ? 'Yok' : m.telefon}\n\n'
-        'Rotalink uygulamasını bu linkten indirebilirsiniz.\n'
-        '$playStoreUrl';
+        '${StoreLinks.shareDownloadFooter()}';
     await Share.share(text);
   }
 

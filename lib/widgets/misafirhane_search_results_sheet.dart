@@ -12,6 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../ads/ad_service.dart';
 import '../ads/discover_native_merge.dart';
 import '../billing/pro_service.dart';
+import '../constants/store_links.dart';
 import '../providers/facility_filter_provider.dart';
 import '../navigator_keys.dart';
 import '../screens/yorum_screen.dart';
@@ -240,11 +241,7 @@ class MisafirhaneSearchResultsPanelState
   List<NativeAd> _nativeAdsYemek = [];
   List<NativeAd> _nativeAdsSosyal = [];
 
-  static const _rotalinkStoreUrl =
-      'https://play.google.com/store/apps/details?id=com.serdarza.rotalink';
-
-  static String _shareAppDownloadFooter() =>
-      'Uygulamamızı buradan indirebilirsiniz:\n$_rotalinkStoreUrl';
+  static String _shareAppDownloadFooter() => StoreLinks.shareDownloadFooter();
 
   /// Sosyal satırında ilçe satırı (açıklama ayrı gösterilir).
   static String _sosyalIlceLine(SosyalItem s) {
@@ -990,8 +987,7 @@ class MisafirhaneSearchResultsPanelState
     final mapsUrl = googleMapsShareUrlForMisafirhane(m);
     final text = '${m.isim}\n$mapsUrl\n\n'
         'Telefon: ${m.telefon.isEmpty ? 'Yok' : m.telefon}\n\n'
-        'Rotalink uygulamasını bu linkten indirebilirsiniz.\n'
-        '$_rotalinkStoreUrl';
+        '${_shareAppDownloadFooter()}';
     await Share.share(text);
   }
 

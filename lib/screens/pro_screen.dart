@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../billing/pro_products.dart';
 import '../billing/pro_service.dart';
+import '../constants/store_links.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
 
@@ -128,11 +129,59 @@ class _ProScreenState extends State<ProScreen> {
                     color: Color(0xFF6B7280),
                   ),
                 ),
+                const SizedBox(height: 12),
+                const _LegalLinks(),
               ],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+class _LegalLinks extends StatelessWidget {
+  const _LegalLinks();
+
+  Future<void> _open(String url) async {
+    final uri = Uri.parse(url);
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        TextButton(
+          onPressed: () => unawaited(_open(StoreLinks.privacyPolicy)),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: AppColors.primary,
+          ),
+          child: const Text(
+            'Gizlilik Politikası',
+            style: TextStyle(fontSize: 12, decoration: TextDecoration.underline),
+          ),
+        ),
+        const Text(' · ', style: TextStyle(color: Color(0xFF9CA3AF))),
+        TextButton(
+          onPressed: () => unawaited(_open(StoreLinks.termsOfUse)),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            minimumSize: Size.zero,
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: AppColors.primary,
+          ),
+          child: const Text(
+            'Kullanım Koşulları',
+            style: TextStyle(fontSize: 12, decoration: TextDecoration.underline),
+          ),
+        ),
+      ],
     );
   }
 }

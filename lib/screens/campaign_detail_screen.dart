@@ -10,6 +10,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../ads/ad_service.dart';
 import '../ads/discover_native_merge.dart';
 import '../billing/pro_service.dart';
+import '../constants/store_links.dart';
 import '../widgets/rotalink_banner_ad.dart';
 import '../widgets/rotalink_native_ad_tile.dart';
 import '../l10n/app_strings.dart';
@@ -27,9 +28,6 @@ class CampaignDetailScreen extends StatefulWidget {
 }
 
 class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
-  static const _playStoreUrl =
-      'https://play.google.com/store/apps/details?id=com.serdarza.rotalink';
-
   NativeAd? _nativeAd;
 
   Campaign get campaign => widget.campaign;
@@ -116,8 +114,7 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
     }
     buf
       ..writeln()
-      ..writeln("Rotalink uygulamasını Google Play'den indirebilirsiniz.")
-      ..writeln(_playStoreUrl);
+      ..writeln(StoreLinks.shareDownloadFooter());
     await Share.share(
       buf.toString(),
       subject: campaign.title.trim(),

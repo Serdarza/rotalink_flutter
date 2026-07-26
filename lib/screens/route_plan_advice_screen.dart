@@ -18,6 +18,7 @@ import '../utils/geo_helpers.dart';
 import '../utils/route_facility_lookup.dart';
 import '../utils/safe_map_coordinates.dart';
 import '../utils/search_normalize.dart';
+import '../constants/store_links.dart';
 import '../widgets/route_plan_preview_sheet.dart';
 import '../widgets/rotalink_tile_layer.dart';
 
@@ -302,7 +303,7 @@ class _RoutePlanAdviceScreenState extends State<RoutePlanAdviceScreen> {
 
     buf
       ..writeln()
-      ..writeln('https://play.google.com/store/apps/details?id=com.serdarza.rotalink');
+      ..writeln(StoreLinks.shareDownloadFooter());
     return buf.toString().trim();
   }
 
