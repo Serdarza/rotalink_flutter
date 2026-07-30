@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../constants/store_links.dart';
 import '../l10n/app_strings.dart';
 import '../theme/app_colors.dart';
 
@@ -27,7 +28,7 @@ class _SuggestionScreenState extends State<SuggestionScreen>
 
   bool _mailLaunched = false;
 
-  static const _to = 'rotalinkinfo@gmail.com';
+  static const _to = StoreLinks.supportEmail;
 
   @override
   void initState() {

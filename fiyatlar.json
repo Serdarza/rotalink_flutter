@@ -2,6 +2,24 @@
   "not": "Yalnızca resmi kaynaklarda açıkça 2026 yılı belirtilmiş konaklama tarifeleri eklenmiştir. Kaynak bulunamayan tesisler bilerek yazılmamıştır. Aralıklar oda tiplerine göre min–max gecelik ücrettir. Öğretmenevinde fiyat_kurum_personeli = MEB/öğretmen; fiyat_kamu_personeli = kamu; fiyat_sivil = sivil/diğer. Polisevinde fiyat_kurum_personeli = teşkilat mensubu. Misafirhanelerde kurum/kamu kolonları kaynağa göre eşlenir. Rezervasyonda tesisle teyit edilmelidir.",
   "tesisler": [
     {
+      "il": "Adıyaman",
+      "isim": "Adıyaman Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Ağrı",
+      "isim": "Ağrı Ahmed-i Hani Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
       "il": "Amasya",
       "isim": "Amasya Polisevi",
       "fiyat_sivil": "1.470 – 3.822 TL",
@@ -9,6 +27,15 @@
       "fiyat_kurum_personeli": "735 – 1.911 TL",
       "kaynak": "https://amasya.pol.tr/polisevi",
       "gecerlilik": "19.01.2026 itibarıyla (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Ankara",
+      "isim": "DHMİ Havacılık Akademisi Ankara Esenboğa Eğitim Tesisi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)"
     },
     {
       "il": "Ankara",
@@ -30,6 +57,15 @@
     },
     {
       "il": "Antalya",
+      "isim": "Antalya Havalimanı Misafirhanesi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Antalya",
       "isim": "Finike Meteoroloji Misafirhanesi",
       "fiyat_sivil": "1.350 – 1.500 TL",
       "fiyat_kamu_personeli": "900 – 1.000 TL",
@@ -48,6 +84,24 @@
     },
     {
       "il": "Balıkesir",
+      "isim": "Balıkesir Koca Seyit Havalimanı Misafirhanesi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Balıkesir",
+      "isim": "Balıkesir Merkez Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Balıkesir",
       "isim": "Bandırma Öğretmenevi",
       "fiyat_sivil": "3.000 – 4.000 TL",
       "fiyat_kamu_personeli": "1.950 – 2.600 TL",
@@ -56,130 +110,13 @@
       "gecerlilik": "2026 yılı güncel konaklama fiyatları (tek/çift kişilik; kahvaltı dahil)"
     },
     {
-      "il": "Denizli",
-      "isim": "Denizli Merkez Öğretmenevi",
-      "fiyat_sivil": "2.100 – 6.800 TL",
-      "fiyat_kamu_personeli": "2.100 – 5.000 TL",
-      "fiyat_kurum_personeli": "1.800 – 4.400 TL",
-      "kaynak": "https://www.denizliogretmenevi.com.tr/fiyat-listesi/",
-      "gecerlilik": "15.05.2026–26.06.2026 ve 27.06.2026–14.01.2027 dönemleri (ek yatak hariç)"
-    },
-    {
-      "il": "Diyarbakır",
-      "isim": "Diyarbakır Polisevi",
-      "fiyat_sivil": "1.498 – 6.713 TL",
-      "fiyat_kamu_personeli": "1.070 – 4.795 TL",
-      "fiyat_kurum_personeli": "749 – 3.357 TL",
-      "kaynak": "https://www.diyarbakir.pol.tr/diyarbakir-polisevi",
-      "gecerlilik": "2026 yılı Bağlar ana hizmet binası (%2 konaklama vergisi dahil)"
-    },
-    {
-      "il": "Düzce",
-      "isim": "Düzce Öğretmenevi",
-      "fiyat_sivil": "1.150 – 3.475 TL",
-      "fiyat_kamu_personeli": "850 – 2.650 TL",
-      "fiyat_kurum_personeli": "700 – 2.238 TL",
-      "kaynak": "https://duzceavniakyologretmenevi.meb.k12.tr/icerikler/2026yilikonaklamahizmetlerifiyatlistesi_17311427.html",
-      "gecerlilik": "2026 yılı (Avni Akyol Öğretmenevi resmi listesi)"
-    },
-    {
-      "il": "Gaziantep",
-      "isim": "Gaziantep Polisevi",
-      "fiyat_sivil": "1.485 – 7.572 TL",
-      "fiyat_kamu_personeli": "1.061 – 5.409 TL",
-      "fiyat_kurum_personeli": "742 – 3.786 TL",
-      "kaynak": "https://www.gaziantep.pol.tr/gaziantep-pol-evi",
-      "gecerlilik": "2026 yılı konaklama fiyat listesi (ek yatak satırları hariç)"
-    },
-    {
-      "il": "Giresun",
-      "isim": "Alucra Öğretmenevi",
-      "fiyat_sivil": "900 – 1.400 TL",
-      "fiyat_kamu_personeli": "700 – 1.200 TL",
-      "fiyat_kurum_personeli": "550 – 900 TL",
-      "kaynak": "https://alucraogretmenevi.meb.k12.tr/icerikler/2026yilikonaklamafiyatcizelgesi_17017330.html",
-      "gecerlilik": "01.01.2026 itibarıyla (kahvaltı dahil)"
-    },
-    {
-      "il": "Karaman",
-      "isim": "Karaman Polisevi",
-      "fiyat_sivil": "1.484 – 7.570 TL",
-      "fiyat_kamu_personeli": "1.060 – 5.408 TL",
-      "fiyat_kurum_personeli": "742 – 3.785 TL",
-      "kaynak": "https://karaman.pol.tr/polis-evi",
-      "gecerlilik": "01.05.2026 itibarıyla (%1 konaklama vergisi dahil)"
-    },
-    {
-      "il": "Kars",
-      "isim": "Kars Polis Evi",
-      "fiyat_sivil": "2.999 – 3.898 TL",
-      "fiyat_kamu_personeli": "2.142 – 2.785 TL",
-      "fiyat_kurum_personeli": "1.499 – 1.949 TL",
-      "kaynak": "https://kars.pol.tr/polis-evi-sube-mudurlugu",
-      "gecerlilik": "2026 yılı ana hizmet binası oda ücretleri (%2 konaklama vergisi dahil)"
-    },
-    {
-      "il": "Kastamonu",
-      "isim": "Kastamonu Polisevi",
-      "fiyat_sivil": "1.190 – 4.165 TL",
-      "fiyat_kamu_personeli": "850 – 2.975 TL",
-      "fiyat_kurum_personeli": "595 – 2.083 TL",
-      "kaynak": "https://www.kastamonu.pol.tr/polisevi-sube-mudurlugu",
-      "gecerlilik": "2026 yılı konaklama fiyat listesi (%2 konaklama vergisi dahil)"
-    },
-    {
-      "il": "Kayseri",
-      "isim": "Kayseri Meteoroloji Misafirhanesi",
-      "fiyat_sivil": "1.161,50 – 1.919 TL",
-      "fiyat_kamu_personeli": "757,50 – 1.262,50 TL",
-      "fiyat_kurum_personeli": "757,50 – 1.262,50 TL",
-      "kaynak": "https://kayseri.mgm.gov.tr/misafirhane.aspx",
-      "gecerlilik": "2026 yılı Meteoroloji 7. Bölge tarifesi"
-    },
-    {
-      "il": "Kırklareli",
-      "isim": "Kırklareli Polisevi ve Yazlık Sosyal Tesisleri",
-      "fiyat_sivil": "1.260 – 3.780 TL",
-      "fiyat_kamu_personeli": "900 – 2.700 TL",
-      "fiyat_kurum_personeli": "630 – 1.890 TL",
-      "kaynak": "https://www.kirklareli.pol.tr/polis-evi",
-      "gecerlilik": "2026 konaklama fiyat listesi (%2 konaklama vergisi dahil)"
-    },
-    {
-      "il": "Mardin",
-      "isim": "Mardin Polisevi",
-      "fiyat_sivil": "1.485 – 7.572 TL",
-      "fiyat_kamu_personeli": "1.061 – 5.409 TL",
-      "fiyat_kurum_personeli": "742 – 3.786 TL",
-      "kaynak": "https://www.mardin.pol.tr/polisevi-sube-mudurlugu",
-      "gecerlilik": "19.01.2026 itibarıyla"
-    },
-    {
-      "il": "Nevşehir",
-      "isim": "Nevşehir Polisevi",
-      "fiyat_sivil": "1.400 – 4.300 TL",
-      "fiyat_kamu_personeli": "1.000 – 3.070 TL",
-      "fiyat_kurum_personeli": "700 – 2.150 TL",
-      "kaynak": "https://www.nevsehir.pol.tr/polis-evi",
-      "gecerlilik": "19.01.2026 itibarıyla (%2 konaklama vergisi dahil)"
-    },
-    {
-      "il": "Siirt",
-      "isim": "Siirt Polisevi",
-      "fiyat_sivil": "1.071 – 3.213 TL",
-      "fiyat_kamu_personeli": "765 – 2.295 TL",
-      "fiyat_kurum_personeli": "536 – 1.607 TL",
-      "kaynak": "https://www.siirt.pol.tr/siirt-polisevi-2026-yili-fiyat-listesi",
-      "gecerlilik": "19.01.2026 itibarıyla (konaklama vergisi dahil)"
-    },
-    {
-      "il": "Sinop",
-      "isim": "Sinop Polisevi",
-      "fiyat_sivil": "1.260 – 5.145 TL",
-      "fiyat_kamu_personeli": "900 – 3.675 TL",
-      "fiyat_kurum_personeli": "630 – 2.573 TL",
-      "kaynak": "https://www.sinop.pol.tr/polisevi-sube-mudurlugu-fiyat-listesi",
-      "gecerlilik": "2026 yılı listesi; sayfada %2 konaklama vergisi HARİÇ belirtilmiştir (üzerine ayrıca vergi alınır)"
+      "il": "Bingöl",
+      "isim": "Bingöl Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
     },
     {
       "il": "Çankırı",
@@ -209,8 +146,132 @@
       "gecerlilik": "01.01.2026 itibarıyla (kahvaltı dahil)"
     },
     {
+      "il": "Denizli",
+      "isim": "Denizli Çardak Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Denizli",
+      "isim": "Denizli Merkez Öğretmenevi",
+      "fiyat_sivil": "2.100 – 6.800 TL",
+      "fiyat_kamu_personeli": "2.100 – 5.000 TL",
+      "fiyat_kurum_personeli": "1.800 – 4.400 TL",
+      "kaynak": "https://www.denizliogretmenevi.com.tr/fiyat-listesi/",
+      "gecerlilik": "15.05.2026–26.06.2026 ve 27.06.2026–14.01.2027 dönemleri (ek yatak hariç)"
+    },
+    {
+      "il": "Diyarbakır",
+      "isim": "Diyarbakır Polisevi",
+      "fiyat_sivil": "1.498 – 6.713 TL",
+      "fiyat_kamu_personeli": "1.070 – 4.795 TL",
+      "fiyat_kurum_personeli": "749 – 3.357 TL",
+      "kaynak": "https://www.diyarbakir.pol.tr/diyarbakir-polisevi",
+      "gecerlilik": "2026 yılı Bağlar ana hizmet binası (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Düzce",
+      "isim": "Düzce Öğretmenevi",
+      "fiyat_sivil": "1.150 – 3.475 TL",
+      "fiyat_kamu_personeli": "850 – 2.650 TL",
+      "fiyat_kurum_personeli": "700 – 2.238 TL",
+      "kaynak": "https://duzceavniakyologretmenevi.meb.k12.tr/icerikler/2026yilikonaklamahizmetlerifiyatlistesi_17311427.html",
+      "gecerlilik": "2026 yılı (Avni Akyol Öğretmenevi resmi listesi)"
+    },
+    {
+      "il": "Elazığ",
+      "isim": "Elazığ Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Erzincan",
+      "isim": "DHMİ Havacılık Akademisi Erzincan Eğitim Tesisi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Gaziantep",
+      "isim": "Gaziantep Havalimanı Misafirhanesi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Gaziantep",
+      "isim": "Gaziantep Polisevi",
+      "fiyat_sivil": "1.485 – 7.572 TL",
+      "fiyat_kamu_personeli": "1.061 – 5.409 TL",
+      "fiyat_kurum_personeli": "742 – 3.786 TL",
+      "kaynak": "https://www.gaziantep.pol.tr/gaziantep-pol-evi",
+      "gecerlilik": "2026 yılı konaklama fiyat listesi (ek yatak satırları hariç)"
+    },
+    {
+      "il": "Giresun",
+      "isim": "Alucra Öğretmenevi",
+      "fiyat_sivil": "900 – 1.400 TL",
+      "fiyat_kamu_personeli": "700 – 1.200 TL",
+      "fiyat_kurum_personeli": "550 – 900 TL",
+      "kaynak": "https://alucraogretmenevi.meb.k12.tr/icerikler/2026yilikonaklamafiyatcizelgesi_17017330.html",
+      "gecerlilik": "01.01.2026 itibarıyla (kahvaltı dahil)"
+    },
+    {
+      "il": "Giresun",
+      "isim": "Giresun Öğretmen Evi",
+      "fiyat_sivil": "2.400 TL",
+      "fiyat_kamu_personeli": "2.000 TL",
+      "fiyat_kurum_personeli": "1.900 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Hakkari",
+      "isim": "Hakkari Yüksekova Selahaddin Eyyubi Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Hatay",
+      "isim": "Hatay Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Iğdır",
+      "isim": "Iğdır Şehit Bülent Aydın Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
       "il": "İstanbul",
-      "isim": "Bağcılar Öğretmenevi ASO",
+      "isim": "Adalet Bakanlığı Ord. Prof. Dr. Sulhi Dönmezer İstanbul Eğitim Merkezi Misafirhanesi",
+      "fiyat_sivil": "600 – 900 TL",
+      "fiyat_kamu_personeli": "400 – 600 TL",
+      "fiyat_kurum_personeli": "400 – 600 TL",
+      "gecerlilik": "2026 yılı (tek / 2 kişilik kişi başı; yemek ayrı)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "Bağcılar Öğretmenevi ve Akşam Sanat Okulu",
       "fiyat_sivil": "1.800 – 4.500 TL",
       "fiyat_kamu_personeli": "1.500 – 3.900 TL",
       "fiyat_kurum_personeli": "1.200 – 3.000 TL",
@@ -218,13 +279,604 @@
       "gecerlilik": "1 Temmuz 2026 itibarıyla (kahvaltı ve KDV dahil)"
     },
     {
+      "il": "İstanbul",
+      "isim": "Bahçelievler Abidin Pak Öğretmenevi ve Akşam Sanat Okulu",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "1.300 TL",
+      "fiyat_kurum_personeli": "1.300 TL",
+      "gecerlilik": "2026 yılı yaklaşık (kahvaltı dahil); rezervasyonda teyit edilmeli"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "DHMİ Florya Atatürk Havalimanı Misafirhanesi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "DHMİ Havacılık Akademisi İstanbul Eğitim Tesisi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "Diyanet Evi Sultanahmet",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "1.800 TL",
+      "fiyat_kurum_personeli": "1.800 TL",
+      "gecerlilik": "2026 yılı yaklaşık; rezervasyonda teyit edilmeli"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "DSİ 14. Bölge Misafirhanesi",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "800 – 1.200 TL",
+      "fiyat_kurum_personeli": "800 – 1.200 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "Et ve Süt Kurumu İstanbul Misafirhanesi",
+      "fiyat_sivil": "900 – 1.275 TL",
+      "fiyat_kamu_personeli": "600 – 850 TL",
+      "fiyat_kurum_personeli": "600 – 850 TL",
+      "gecerlilik": "2026 yılı (1–3 kişilik oda; kahvaltı ayrı)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "Fatih Eminönü Cankurtaran Öğretmenevi (ASO)",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "1.100 – 1.500 TL",
+      "fiyat_kurum_personeli": "1.100 – 1.500 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "İlksan Taksim Konukevi",
+      "fiyat_sivil": "1.500 – 2.650 TL",
+      "fiyat_kamu_personeli": "750 – 1.600 TL",
+      "fiyat_kurum_personeli": "750 – 1.600 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "İstanbul Beyoğlu Öğretmen Evi",
+      "fiyat_sivil": "1.500 – 2.650 TL",
+      "fiyat_kamu_personeli": "750 – 1.600 TL",
+      "fiyat_kurum_personeli": "750 – 1.600 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "İstanbul Karayolları 1. Bölge Müdürlüğü Sosyal Tesisleri",
+      "fiyat_sivil": "180 – 1.350 TL",
+      "fiyat_kamu_personeli": "120 – 850 TL",
+      "fiyat_kurum_personeli": "120 – 850 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "Merter Polisevi (PEKOM)",
+      "fiyat_sivil": "1.317 – 2.200 TL",
+      "fiyat_kamu_personeli": "848 – 1.550 TL",
+      "fiyat_kurum_personeli": "848 – 1.550 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "Meteoroloji 1. Bölge Müdürlüğü Misafirhanesi",
+      "fiyat_sivil": "1.425 – 2.100 TL",
+      "fiyat_kamu_personeli": "950 – 1.400 TL",
+      "fiyat_kurum_personeli": "950 – 1.400 TL",
+      "kaynak": "https://istanbul.mgm.gov.tr/misafirhane.aspx",
+      "gecerlilik": "2026 yılı (paylaşımlı – paylaşımsız – VIP)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "PTT Misafirhanesi - Üsküdar",
+      "fiyat_sivil": "180 TL ve üzeri",
+      "fiyat_kamu_personeli": "120 TL ve üzeri",
+      "fiyat_kurum_personeli": "120 TL ve üzeri",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İstanbul",
+      "isim": "Zeytinburnu Öğretmenevi ASO",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "1.100 – 1.400 TL",
+      "fiyat_kurum_personeli": "1.100 – 1.400 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
       "il": "İzmir",
-      "isim": "İzmir Metoroloji Bölge Müdürlüğü Misafirhanesi",
+      "isim": "Alaçatı Öğretmenevi ve Akşam Sanat Okulu",
+      "fiyat_sivil": "3.850 TL",
+      "fiyat_kamu_personeli": "3.050 TL",
+      "fiyat_kurum_personeli": "2.250 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife kaynaklı; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "DHMİ Havacılık Akademisi İzmir Eğitim Tesisi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf"
+    },
+    {
+      "il": "İzmir",
+      "isim": "DHMİ İzmir Adnan Menderes Havalimanı Misafirhanesi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf"
+    },
+    {
+      "il": "İzmir",
+      "isim": "Ege Üniversitesi Konukevi",
+      "fiyat_sivil": "1.400 TL",
+      "fiyat_kamu_personeli": "1.200 TL",
+      "fiyat_kurum_personeli": "900 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife kaynaklı; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "İlksan İzmir Konukevi",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": null,
+      "fiyat_kurum_personeli": "1.300 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "İzmir İl Tarım ve Orman Müdürlüğü Misafirhanesi Bornova",
+      "fiyat_sivil": "1.200 – 1.900 TL",
+      "fiyat_kamu_personeli": "900 – 1.200 TL",
+      "fiyat_kurum_personeli": "900 – 1.200 TL",
+      "kaynak": "https://izmir.tarimorman.gov.tr/Link/22/Misafirhanemiz",
+      "gecerlilik": "01.03.2026 itibarıyla (paylaşımlı kişi başı – tek kişilik; %2 konaklama vergisi hariç)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "İzmir Karaburun-Akdağ Havacılık Akademisi Eğitim Tesisi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "İzmir Karayolları Sosyal Tesisleri",
+      "fiyat_sivil": "1.800 TL",
+      "fiyat_kamu_personeli": "1.050 TL",
+      "fiyat_kurum_personeli": "1.350 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife kaynaklı; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "İzmir Polis Evi Düğün Salonu",
+      "fiyat_sivil": "1.500 TL",
+      "fiyat_kamu_personeli": "1.071 TL",
+      "fiyat_kurum_personeli": "755 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "İzmir PTT 150. Yıl Misafirhanesi",
+      "fiyat_sivil": "1.350 TL",
+      "fiyat_kamu_personeli": "600 TL",
+      "fiyat_kurum_personeli": "1.250 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife kaynaklı; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "İzmir TAKAV Sosyal Tesisleri",
+      "fiyat_sivil": "2.100 TL",
+      "fiyat_kamu_personeli": "1.350 TL",
+      "fiyat_kurum_personeli": "1.450 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "İzmir TCDD Misafirhanesi",
+      "fiyat_sivil": "1.800 TL",
+      "fiyat_kamu_personeli": "1.050 TL",
+      "fiyat_kurum_personeli": "975 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife kaynaklı; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "Karaburun Öğretmenevi",
+      "fiyat_sivil": "4.200 TL",
+      "fiyat_kamu_personeli": "3.200 TL",
+      "fiyat_kurum_personeli": "2.600 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife kaynaklı; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "İzmir",
+      "isim": "Meteoroloji 2. Bölge Müdürlüğü Misafirhanesi",
       "fiyat_sivil": "1.050 – 1.250 TL",
       "fiyat_kamu_personeli": "695 – 820 TL",
       "fiyat_kurum_personeli": "695 – 820 TL",
       "kaynak": "https://izmir.mgm.gov.tr/misafirhane.aspx",
-      "gecerlilik": "2026 yılı Meteoroloji 2. Bölge tarifesi"
+      "gecerlilik": "2026 yılı Meteoroloji 2. Bölge tarifesi (paylaşımlı – paylaşımsız)"
+    },
+    {
+      "il": "Karaman",
+      "isim": "Karaman Polisevi",
+      "fiyat_sivil": "1.484 – 7.570 TL",
+      "fiyat_kamu_personeli": "1.060 – 5.408 TL",
+      "fiyat_kurum_personeli": "742 – 3.785 TL",
+      "kaynak": "https://karaman.pol.tr/polis-evi",
+      "gecerlilik": "01.05.2026 itibarıyla (%1 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Kars",
+      "isim": "Kars Harakani Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Kars",
+      "isim": "Kars Polis Evi",
+      "fiyat_sivil": "2.999 – 3.898 TL",
+      "fiyat_kamu_personeli": "2.142 – 2.785 TL",
+      "fiyat_kurum_personeli": "1.499 – 1.949 TL",
+      "kaynak": "https://kars.pol.tr/polis-evi-sube-mudurlugu",
+      "gecerlilik": "2026 yılı ana hizmet binası oda ücretleri (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Kastamonu",
+      "isim": "Kastamonu Polisevi",
+      "fiyat_sivil": "1.190 – 4.165 TL",
+      "fiyat_kamu_personeli": "850 – 2.975 TL",
+      "fiyat_kurum_personeli": "595 – 2.083 TL",
+      "kaynak": "https://www.kastamonu.pol.tr/polisevi-sube-mudurlugu",
+      "gecerlilik": "2026 yılı konaklama fiyat listesi (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Kayseri",
+      "isim": "Kayseri Havalimanı Misafirhanesi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Kayseri",
+      "isim": "Kayseri Meteoroloji Misafirhanesi",
+      "fiyat_sivil": "1.161,50 – 1.919 TL",
+      "fiyat_kamu_personeli": "757,50 – 1.262,50 TL",
+      "fiyat_kurum_personeli": "757,50 – 1.262,50 TL",
+      "kaynak": "https://kayseri.mgm.gov.tr/misafirhane.aspx",
+      "gecerlilik": "2026 yılı Meteoroloji 7. Bölge tarifesi"
+    },
+    {
+      "il": "Kırklareli",
+      "isim": "Kırklareli Polisevi ve Yazlık Sosyal Tesisleri",
+      "fiyat_sivil": "1.260 – 3.780 TL",
+      "fiyat_kamu_personeli": "900 – 2.700 TL",
+      "fiyat_kurum_personeli": "630 – 1.890 TL",
+      "kaynak": "https://www.kirklareli.pol.tr/polis-evi",
+      "gecerlilik": "2026 konaklama fiyat listesi (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Konya",
+      "isim": "Konya Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Mardin",
+      "isim": "Mardin Polisevi",
+      "fiyat_sivil": "1.485 – 7.572 TL",
+      "fiyat_kamu_personeli": "1.061 – 5.409 TL",
+      "fiyat_kurum_personeli": "742 – 3.786 TL",
+      "kaynak": "https://www.mardin.pol.tr/polisevi-sube-mudurlugu",
+      "gecerlilik": "19.01.2026 itibarıyla"
+    },
+    {
+      "il": "Mardin",
+      "isim": "Mardin Prof. Dr. Aziz Sancar Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Mersin",
+      "isim": "Anamur Öğretmenevi",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "2.000 – 4.500 TL",
+      "fiyat_kurum_personeli": "2.000 – 4.500 TL",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Mersin",
+      "isim": "DHMİ Çukurova Uluslararası Havalimanı Misafirhanesi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf"
+    },
+    {
+      "il": "Mersin",
+      "isim": "Erdemli Öğretmenevi",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "600 TL ve üzeri",
+      "fiyat_kurum_personeli": "600 TL ve üzeri",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Mersin",
+      "isim": "Mersin 67.Şube DSİ-Devlet Su İşleri Misafirhanesi",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "120 – 850 TL",
+      "fiyat_kurum_personeli": "120 – 850 TL",
+      "gecerlilik": "2026 yılı (sivil DSİ tarifesine göre daha yüksek olabilir)"
+    },
+    {
+      "il": "Mersin",
+      "isim": "Mersin Hizmet İçi Eğitim Enstitüsü",
+      "fiyat_sivil": "600 TL",
+      "fiyat_kamu_personeli": "600 TL",
+      "fiyat_kurum_personeli": "600 TL",
+      "gecerlilik": "2026 yılı yaklaşık; rezervasyonda teyit edilmeli"
+    },
+    {
+      "il": "Mersin",
+      "isim": "Mersin Karayolları Merkez Bölge Misafirhanesi",
+      "fiyat_sivil": "700 – 1.050 TL",
+      "fiyat_kamu_personeli": "700 – 1.050 TL",
+      "fiyat_kurum_personeli": "700 – 1.050 TL",
+      "gecerlilik": "2026 yılı (paylaşımlı kişi başı – paylaşımsız)"
+    },
+    {
+      "il": "Mersin",
+      "isim": "Mersin Suphi Öner Öğretmenevi",
+      "fiyat_sivil": "2.500 – 7.000 TL",
+      "fiyat_kamu_personeli": "2.000 – 6.000 TL",
+      "fiyat_kurum_personeli": "2.000 – 6.000 TL",
+      "gecerlilik": "2026 yılı (kahvaltı dahil; oda tipine göre min–max)"
+    },
+    {
+      "il": "Mersin",
+      "isim": "Silifke 62.Şube DSİ-Devlet Su İşleri Misafirhanesi",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "120 – 850 TL",
+      "fiyat_kurum_personeli": "120 – 850 TL",
+      "gecerlilik": "2026 yılı (sivil DSİ tarifesine göre daha yüksek olabilir)"
+    },
+    {
+      "il": "Mersin",
+      "isim": "Silifke Öğretmenevi ve ASO Müdürlüğü",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "300 TL ve üzeri",
+      "fiyat_kurum_personeli": "300 TL ve üzeri",
+      "gecerlilik": "2026 yılı (kullanıcı / resmi tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Mersin",
+      "isim": "Tarsus Öğretmenevi",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "750 – 1.600 TL",
+      "fiyat_kurum_personeli": "750 – 1.600 TL",
+      "gecerlilik": "2026 yılı (sivil oda tipine göre daha yüksek olabilir)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Bodrum Öğretmenevi",
+      "fiyat_sivil": "2.560 – 5.000 TL",
+      "fiyat_kamu_personeli": "2.280 – 4.700 TL",
+      "fiyat_kurum_personeli": "2.000 – 3.900 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Dalaman Ceza İnfaz Kurumu Oteli",
+      "fiyat_sivil": "1.500 – 2.200 TL",
+      "fiyat_kamu_personeli": "1.100 – 1.700 TL",
+      "fiyat_kurum_personeli": "850 – 1.400 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "DSİ 21. Bölge Eğitim Tesisleri Fethiye",
+      "fiyat_sivil": "1.600 – 2.200 TL",
+      "fiyat_kamu_personeli": "1.100 – 1.800 TL",
+      "fiyat_kurum_personeli": "800 – 1.400 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Fethiye Öğretmenevi",
+      "fiyat_sivil": "2.050 – 3.500 TL",
+      "fiyat_kamu_personeli": "1.500 – 2.500 TL",
+      "fiyat_kurum_personeli": "1.250 – 2.000 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Fethiye Polisevi",
+      "fiyat_sivil": "3.900 TL",
+      "fiyat_kamu_personeli": "2.790 TL",
+      "fiyat_kurum_personeli": "1.950 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Köyceğiz Öğretmenevi",
+      "fiyat_sivil": "1.900 – 3.500 TL",
+      "fiyat_kamu_personeli": "1.450 – 2.500 TL",
+      "fiyat_kurum_personeli": "1.150 – 2.000 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Marmaris Öğretmenevi",
+      "fiyat_sivil": "3.000 – 3.500 TL",
+      "fiyat_kamu_personeli": "2.250 – 2.800 TL",
+      "fiyat_kurum_personeli": "1.500 – 2.400 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Marmaris Polisevi",
+      "fiyat_sivil": "3.000 TL",
+      "fiyat_kamu_personeli": "2.142 TL",
+      "fiyat_kurum_personeli": "1.480 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Marmaris Uygulama Oteli",
+      "fiyat_sivil": "1.800 – 2.500 TL",
+      "fiyat_kamu_personeli": "1.500 – 2.100 TL",
+      "fiyat_kurum_personeli": "1.300 – 1.800 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Milas Öğretmenevi",
+      "fiyat_sivil": "1.800 – 3.000 TL",
+      "fiyat_kamu_personeli": "1.400 – 2.400 TL",
+      "fiyat_kurum_personeli": "1.100 – 2.000 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Muğla Dalaman Havalimanı Misafirhanesi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Muğla DSİ Misafirhanesi Yıldıray",
+      "fiyat_sivil": "1.400 – 2.000 TL",
+      "fiyat_kamu_personeli": "950 – 1.600 TL",
+      "fiyat_kurum_personeli": "700 – 1.300 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Muğla Karayolları Misafirhanesi Fethiye",
+      "fiyat_sivil": "714 – 1.071 TL",
+      "fiyat_kamu_personeli": "428 – 850 TL",
+      "fiyat_kurum_personeli": "700 – 1.200 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Muğla Merkez Öğretmenevi",
+      "fiyat_sivil": "1.800 – 3.000 TL",
+      "fiyat_kamu_personeli": "1.400 – 2.500 TL",
+      "fiyat_kurum_personeli": "1.100 – 2.000 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Muğla Milas Bodrum Havalimanı Misafirhanesi",
+      "fiyat_sivil": "1.176 – 1.568 TL",
+      "fiyat_kamu_personeli": "784 – 1.568 TL",
+      "fiyat_kurum_personeli": "784 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 784/1.176 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Muğla Orman Müdürlüğü Misafirhane",
+      "fiyat_sivil": "1.200 – 1.800 TL",
+      "fiyat_kamu_personeli": "850 – 1.500 TL",
+      "fiyat_kurum_personeli": "650 – 1.200 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Muğla Sıtkı Koçman Üniversitesi Sosyal Tesisler Konuk Evi",
+      "fiyat_sivil": "1.650 – 2.200 TL",
+      "fiyat_kamu_personeli": "1.200 – 1.800 TL",
+      "fiyat_kurum_personeli": "900 – 1.500 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Muğla",
+      "isim": "Muğla Tarım İl Müdürlüğü Misafirhanesi Menteşe",
+      "fiyat_sivil": "1.200 – 1.800 TL",
+      "fiyat_kamu_personeli": "850 – 1.400 TL",
+      "fiyat_kurum_personeli": "650 – 1.100 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Nevşehir",
+      "isim": "Nevşehir Polisevi",
+      "fiyat_sivil": "1.400 – 4.300 TL",
+      "fiyat_kamu_personeli": "1.000 – 3.070 TL",
+      "fiyat_kurum_personeli": "700 – 2.150 TL",
+      "kaynak": "https://www.nevsehir.pol.tr/polis-evi",
+      "gecerlilik": "19.01.2026 itibarıyla (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Ordu",
+      "isim": "Ordu Öğretmenevi ve Akşam Sanat Okulu",
+      "fiyat_sivil": "3.800 TL",
+      "fiyat_kamu_personeli": "3.400 TL",
+      "fiyat_kurum_personeli": "2.800 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Rize",
+      "isim": "Rize Öğretmenevi ve Akşam Sanat Okulu",
+      "fiyat_sivil": "4.500 TL",
+      "fiyat_kamu_personeli": "3.600 TL",
+      "fiyat_kurum_personeli": "2.700 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Rize",
+      "isim": "Rize – Artvin Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Samsun",
+      "isim": "Samsun Öğretmenevi",
+      "fiyat_sivil": "3.800 TL",
+      "fiyat_kamu_personeli": "3.100 TL",
+      "fiyat_kurum_personeli": "2.400 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Şanlıurfa",
+      "isim": "Şanlıurfa GAP Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
     },
     {
       "il": "Şanlıurfa",
@@ -234,6 +886,50 @@
       "fiyat_kurum_personeli": "735 – 2.573 TL",
       "kaynak": "https://www.sanliurfa.pol.tr/sanliurfa-polisevi-sube-mudurlugu",
       "gecerlilik": "19.01.2026 itibarıyla (%2 konaklama vergisi dahil)"
+    },
+    {
+      "il": "Siirt",
+      "isim": "Siirt Polisevi",
+      "fiyat_sivil": "1.071 – 3.213 TL",
+      "fiyat_kamu_personeli": "765 – 2.295 TL",
+      "fiyat_kurum_personeli": "536 – 1.607 TL",
+      "kaynak": "https://www.siirt.pol.tr/siirt-polisevi-2026-yili-fiyat-listesi",
+      "gecerlilik": "19.01.2026 itibarıyla (konaklama vergisi dahil)"
+    },
+    {
+      "il": "Sinop",
+      "isim": "Sinop Polisevi",
+      "fiyat_sivil": "1.260 – 5.145 TL",
+      "fiyat_kamu_personeli": "900 – 3.675 TL",
+      "fiyat_kurum_personeli": "630 – 2.573 TL",
+      "kaynak": "https://www.sinop.pol.tr/polisevi-sube-mudurlugu-fiyat-listesi",
+      "gecerlilik": "2026 yılı listesi; sayfada %2 konaklama vergisi HARİÇ belirtilmiştir (üzerine ayrıca vergi alınır)"
+    },
+    {
+      "il": "Şırnak",
+      "isim": "Şırnak Şerafettin Elçi Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Sivas",
+      "isim": "Sivas Nuri Demirağ Havalimanı Misafirhanesi",
+      "fiyat_sivil": "840 – 1.568 TL",
+      "fiyat_kamu_personeli": "560 – 1.568 TL",
+      "fiyat_kurum_personeli": "560 – 1.568 TL",
+      "kaynak": "https://dhmi.gov.tr/Lists/IdariveSosyalslerMudurlugu/Attachments/37/Misafirhane%20%C3%9Ccret%20Tarifesi%202026.pdf",
+      "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
+    },
+    {
+      "il": "Trabzon",
+      "isim": "Trabzon Öğretmenevi",
+      "fiyat_sivil": "3.600 TL",
+      "fiyat_kamu_personeli": "3.200 TL",
+      "fiyat_kurum_personeli": "2.600 TL",
+      "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
     }
   ]
 }

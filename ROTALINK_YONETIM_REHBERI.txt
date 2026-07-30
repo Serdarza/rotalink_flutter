@@ -1,0 +1,502 @@
+================================================================================
+  ROTALINK — TAM YÖNETİM REHBERİ (Uygulama + GitHub)
+  Son güncelleme: 27 Temmuz 2026 | Sürüm örneği: 4.4.7+74
+================================================================================
+
+Bu dosya: veri güncelleme, misafirhane ekleme, mağaza yükleme ve GitHub
+dosyalarının nerede olduğunu tek yerde toplar.
+
+
+================================================================================
+A) GITHUB REPOLARI VE DOSYALAR
+================================================================================
+
+Uygulama veriyi 7 ayrı GitHub dosyasından çeker. Kod değiştirmeden sadece
+GitHub'da JSON güncellersen uygulama güncellenir (internet + önbellek yenilenince).
+
+
+--------------------------------------------------------------------------------
+1. Serdarza/rotalink-data — Ana veri deposu
+--------------------------------------------------------------------------------
+
+GitHub repo: https://github.com/Serdarza/rotalink-data
+
+Dosya                          | Ne işe yarar                    | Config dosyası
+-------------------------------|---------------------------------|----------------------------------
+master_database_updated.json   | Misafirhane, gezi, yemek, sosyal| lib/constants/github_rota_config.dart
+fiyatlar.json                  | Konaklama fiyatları             | lib/constants/github_fiyat_config.dart
+tesisler_adres.json            | Adres + ilçe                    | lib/constants/github_tesis_adres_config.dart
+tesisler_gorseller.json        | Tesis fotoğrafları (max 3)      | lib/constants/github_tesis_gorsel_config.dart
+geziler.json                   | Gezi listesi (görselli)         | lib/constants/github_gezi_yemek_config.dart
+yemekler.json                  | Yemek listesi (görselli)        | lib/constants/github_gezi_yemek_config.dart
+
+Raw URL örnekleri:
+  https://raw.githubusercontent.com/Serdarza/rotalink-data/main/master_database_updated.json
+  https://raw.githubusercontent.com/Serdarza/rotalink-data/main/fiyatlar.json
+  https://raw.githubusercontent.com/Serdarza/rotalink-data/main/tesisler_adres.json
+  https://raw.githubusercontent.com/Serdarza/rotalink-data/main/tesisler_gorseller.json
+  https://raw.githubusercontent.com/Serdarza/rotalink-data/main/geziler.json
+  https://raw.githubusercontent.com/Serdarza/rotalink-data/main/yemekler.json
+
+
+--------------------------------------------------------------------------------
+2. Serdarza/kampanya — Keşfet kampanyaları
+--------------------------------------------------------------------------------
+
+GitHub repo: https://github.com/Serdarza/kampanya
+Dosya: kampanya.json
+Config: lib/constants/github_kampanya_config.dart
+Raw URL: https://raw.githubusercontent.com/Serdarza/kampanya/main/kampanya.json
+
+Şablon (projede: discover_campaigns_template.json):
+
+{
+  "kampanyalar": [
+    {
+      "baslik": "Kampanya başlığı",
+      "aciklama": "Kısa açıklama",
+      "link": "https://ornek.com",
+      "tarih": "2026-06-01T09:00:00Z",
+      "kurum": "Kurum adı"
+    }
+  ]
+}
+
+
+--------------------------------------------------------------------------------
+3. Serdarza/reklam_ayar — Reklam bekleme süresi
+--------------------------------------------------------------------------------
+
+GitHub repo: https://github.com/Serdarza/reklam_ayar
+Dosya: reklam_ayar.json
+Config: lib/constants/github_ad_config.dart
+Raw URL: https://raw.githubusercontent.com/Serdarza/reklam_ayar/main/reklam_ayar.json
+
+{
+  "reklam_bekleme_suresi": 5
+}
+
+(1-60 dakika arası; geçiş reklamı aralığı)
+
+
+--------------------------------------------------------------------------------
+4. Serdarza/versiyon — Zorunlu güncelleme
+--------------------------------------------------------------------------------
+
+GitHub repo: https://github.com/Serdarza/versiyon
+Dosya: versiyon_güncellem.json
+Config: lib/constants/github_app_version_config.dart
+Raw URL: https://raw.githubusercontent.com/Serdarza/versiyon/main/versiyon_güncellem.json
+
+{
+  "android_latest_build": 74,
+  "ios_latest_build": 74,
+  "mesaj": "Yeni sürüm mevcut. Lütfen güncelleyin.",
+  "play_store": "https://play.google.com/store/apps/details?id=com.serdarza.rotalink",
+  "app_store": "https://apps.apple.com/us/app/rotalink-kamu-seyahat-rehberi/id6764678799"
+}
+
+
+================================================================================
+B) GITHUB'DA NEYİ NEREYE EKLERSİN?
+================================================================================
+
+
+--------------------------------------------------------------------------------
+MİSAFİRHANE / TESİS EKLEME
+--------------------------------------------------------------------------------
+
+Dosya: rotalink-data → master_database_updated.json
+
+Kök yapı:
+{
+  "tesisler": [ ... ],
+  "geziler": [ ... ],
+  "yemekler": [ ... ],
+  "sosyal": [ ... ]
+}
+
+(Eski anahtar "misafirhaneler" de kabul edilir.)
+
+Tek tesis örneği:
+{
+  "isim": "Ankara Misafirhanesi",
+  "il": "Ankara",
+  "ilce": "Çankaya",
+  "adres": "Tam adres",
+  "telefon": "0312...",
+  "latitude": 39.92,
+  "longitude": 32.85,
+  "tip": "Misafirhane"
+}
+
+EŞLEŞME KURALI: Fiyat / adres / görsel dosyaları tesisle "il" + "isim" ile
+eşleşir. İsim ve il yazımı birebir tutarlı olmalı.
+
+Ayrıca yap (önerilen):
+  1. fiyatlar.json → fiyat ekle
+  2. tesisler_adres.json → adres/ilçe düzelt
+  3. tesisler_gorseller.json → fotoğraf ekle
+
+Gömülü yedek (uygulama içi):
+  assets/data/master_database_updated.json
+  GitHub erişilemezse kullanılır. GitHub'a attıktan sonra bunu da güncelle
+  ve yeni sürüm çıkar.
+
+
+--------------------------------------------------------------------------------
+FİYAT EKLEME / GÜNCELLEME
+--------------------------------------------------------------------------------
+
+Dosya: rotalink-data → fiyatlar.json
+
+{
+  "tesisler": [
+    {
+      "il": "Ankara",
+      "isim": "Ankara Misafirhanesi",
+      "fiyat_sivil": "250 TL",
+      "fiyat_kamu_personeli": "150 TL",
+      "fiyat_kurum_personeli": "100 TL"
+    }
+  ]
+}
+
+- null veya boş → "Kalamaz"
+- Alan yok → fiyat kayıtlı değil
+- Anahtar alternatifleri: fiyatlar, items (liste kökü)
+
+
+--------------------------------------------------------------------------------
+ADRES / İLÇE GÜNCELLEME
+--------------------------------------------------------------------------------
+
+Dosya: rotalink-data → tesisler_adres.json
+
+{
+  "items": [
+    {
+      "il": "Ankara",
+      "isim": "Ankara Misafirhanesi",
+      "adres": "Güncel adres",
+      "ilce": "Çankaya"
+    }
+  ]
+}
+
+(items, tesisler, adresler anahtarları kabul edilir)
+
+
+--------------------------------------------------------------------------------
+TESİS GÖRSELİ EKLEME
+--------------------------------------------------------------------------------
+
+Dosya: rotalink-data → tesisler_gorseller.json
+
+{
+  "items": [
+    {
+      "il": "Ankara",
+      "isim": "Ankara Misafirhanesi",
+      "image_urls": [
+        "https://....jpg",
+        "https://....jpg"
+      ]
+    }
+  ]
+}
+
+Max 3 URL. Alternatif anahtarlar: images, gorseller, urls
+
+
+--------------------------------------------------------------------------------
+GEZİ / YEMEK EKLEME
+--------------------------------------------------------------------------------
+
+Dosyalar: geziler.json / yemekler.json
+
+[
+  {
+    "il": "Nevşehir",
+    "isim": "Göreme Açık Hava Müzesi",
+    "adres": "...",
+    "aciklama": "...",
+    "enlem": 38.64,
+    "boylam": 34.83,
+    "image_urls": ["https://..."]
+  }
+]
+
+NOT: Şu an kodda gezi/yemek GitHub overlay'i geçici kapalı.
+Dosya: lib/data/gezi_yemek_repository.dart
+Gezi/yemek şimdilik master_database içinden geliyor.
+Ayrı geziler.json / yemekler.json kullanmak için kodu yeniden açmak gerekir.
+
+
+--------------------------------------------------------------------------------
+SOSYAL TESİS EKLEME
+--------------------------------------------------------------------------------
+
+Dosya: master_database_updated.json → "sosyal" listesi
+
+{
+  "il": "İstanbul",
+  "ilce": "Kadıköy",
+  "isim": "Belediye Sosyal Tesis",
+  "adres": "...",
+  "aciklama": "...",
+  "enlem": 41.0,
+  "boylam": 29.0
+}
+
+
+--------------------------------------------------------------------------------
+KAMPANYA EKLEME (Keşfet)
+--------------------------------------------------------------------------------
+
+Dosya: Serdarza/kampanya → kampanya.json
+Uygulama güncellemesi GEREKMEZ; sadece JSON yeterli.
+
+
+--------------------------------------------------------------------------------
+REKLAM SIKLIĞI DEĞİŞTİRME
+--------------------------------------------------------------------------------
+
+Dosya: Serdarza/reklam_ayar → reklam_ayar.json
+Uygulama güncellemesi GEREKMEZ.
+
+
+--------------------------------------------------------------------------------
+ZORUNLU GÜNCELLEME AÇMA
+--------------------------------------------------------------------------------
+
+Dosya: Serdarza/versiyon → versiyon_güncellem.json
+android_latest_build / ios_latest_build değerini mağazadaki build numarasından
+büyük yap. Uygulama güncellemesi GEREKMEZ.
+
+
+================================================================================
+C) UYGULAMA İÇİ DOSYALAR (KOD TARAFI)
+================================================================================
+
+
+--------------------------------------------------------------------------------
+SÜRÜM NUMARASI
+--------------------------------------------------------------------------------
+
+TEK YER: pubspec.yaml → version: 4.4.7+74
+  - 4.4.7 = sürüm adı (versionName / CFBundleShortVersionString)
+  - 74    = build numarası (versionCode / CFBundleVersion)
+
+Android ve iOS otomatik alır; ayrıca yazma.
+
+
+--------------------------------------------------------------------------------
+MİSAFİRHANE / TESİS
+--------------------------------------------------------------------------------
+
+Veri modeli:           lib/models/misafirhane.dart
+Ana harita + pinler:   lib/screens/main_map_screen.dart
+Arama sonuç sheet:     lib/widgets/misafirhane_search_results_sheet.dart
+Tesis detay kartı:     lib/widgets/facility_detail_card.dart
+Harita marker:         lib/widgets/misafirhane_map_marker.dart
+Filtre:                lib/providers/facility_filter_provider.dart
+Fiyat kutusu:          lib/widgets/facility_overnight_price_box.dart
+
+Veri repository'leri:
+  Master DB:   lib/data/firebase_rota_repository.dart
+  Fiyat:       lib/data/facility_price_repository.dart
+  Adres:       lib/data/facility_address_repository.dart
+  Görsel:      lib/data/facility_image_repository.dart
+  Gömülü DB:   assets/data/master_database_updated.json
+
+
+--------------------------------------------------------------------------------
+ABONELİK (PRO)
+--------------------------------------------------------------------------------
+
+Product ID:        lib/billing/pro_products.dart
+  rotalink_pro_monthly
+  rotalink_pro_yearly
+
+Satın alma mantığı: lib/billing/pro_service.dart
+Pro ekranı:         lib/screens/pro_screen.dart
+Play Billing paket: pubspec.yaml → in_app_purchase_android
+
+Mağaza tarafı (kod değil):
+  App Store Connect → Abonelikler
+  Google Play Console → Abonelikler
+
+
+--------------------------------------------------------------------------------
+REKLAMLAR
+--------------------------------------------------------------------------------
+
+Unit ID (Android+iOS): lib/ads/ad_unit_ids.dart
+Geçiş / ödüllü:        lib/ads/ad_service.dart
+Native sıklık:         lib/ads/discover_native_merge.dart (her 5 içerikte 1, max 12)
+Native havuz:          lib/ads/discover_native_ad_pool.dart
+Banner widget:         lib/widgets/rotalink_banner_ad.dart
+Native görünüm:        lib/widgets/rotalink_native_ad_tile.dart
+Reklam bekleme:        lib/ads/ad_config_bootstrap.dart
+
+Android App ID: android/app/src/main/AndroidManifest.xml
+iOS App ID:     ios/Runner/Info.plist → GADApplicationIdentifier
+
+
+--------------------------------------------------------------------------------
+MAĞAZA LİNKLERİ / PAYLAŞIM
+--------------------------------------------------------------------------------
+
+Play + App Store + gizlilik + EULA: lib/constants/store_links.dart
+Puan dialog:                        lib/widgets/app_rating_dialog.dart
+Zorunlu güncelleme:                 lib/services/version_check_service.dart
+
+
+--------------------------------------------------------------------------------
+ANA EKRANLAR
+--------------------------------------------------------------------------------
+
+Açılış:          lib/screens/splash_screen.dart
+Ana kabuk:       lib/screens/rotalink_main_shell.dart
+Harita:          lib/screens/main_map_screen.dart
+Keşfet:          lib/screens/discover_screen.dart
+Rota plan:       lib/screens/route_plan_screen.dart
+Rota tavsiye:    lib/screens/route_plan_advice_screen.dart
+Kampanya detay:  lib/screens/campaign_detail_screen.dart
+Pro:             lib/screens/pro_screen.dart
+Hakkında:        lib/screens/about_screen.dart
+Tatiller:        lib/screens/holidays_screen.dart
+Kami asistan:    lib/kami/kami_page.dart
+
+
+--------------------------------------------------------------------------------
+RENK / TEMA / METİN
+--------------------------------------------------------------------------------
+
+Renkler:        lib/theme/app_colors.dart
+Sabit metinler: lib/l10n/app_strings.dart
+iOS uygulama adı: ios/Runner/Info.plist → CFBundleDisplayName
+Android uygulama adı: android/app/src/main/AndroidManifest.xml
+
+
+--------------------------------------------------------------------------------
+KONUM / İZİNLER
+--------------------------------------------------------------------------------
+
+Konum servisi:     lib/services/simple_location_service.dart
+iOS izin metinleri: ios/Runner/Info.plist
+Android izinler:   android/app/src/main/AndroidManifest.xml
+
+
+--------------------------------------------------------------------------------
+PAKET KİMLİĞİ (DEĞİŞTİRME — mağaza kırılır)
+--------------------------------------------------------------------------------
+
+Android: com.serdarza.rotalink → android/app/build.gradle.kts
+iOS:     com.serdarza.rotalink → ios/Runner.xcodeproj/project.pbxproj
+
+
+================================================================================
+D) GÜNCELLEME AKIŞI — HANGİ DEĞİŞİKLİK NE GEREKTİRİR?
+================================================================================
+
+Değişiklik              | GitHub JSON | App asset güncelle | Yeni sürüm
+------------------------|-------------|--------------------|-----------
+Misafirhane ekle        | Evet        | Önerilir           | Önerilir
+Fiyat güncelle          | Evet        | Hayır              | Hayır
+Adres/görsel güncelle   | Evet        | Hayır              | Hayır
+Kampanya ekle           | Evet        | Hayır              | Hayır
+Reklam süresi           | Evet        | Hayır              | Hayır
+Zorunlu güncelleme      | Evet        | Hayır              | Hayır
+Kod / reklam / abonelik | —           | —                  | EVET
+
+Sadece JSON değişikliği: GitHub'a commit → kullanıcı uygulamayı açınca
+(günde 1 kez sürüm kontrolü) otomatik iner.
+
+
+================================================================================
+E) YENİ SÜRÜM ÇIKARMA CHECKLIST
+================================================================================
+
+[ ] 1. pubspec.yaml → sürüm artır (örn. 4.4.8+75)
+[ ] 2. Gerekirse assets/data/master_database_updated.json güncelle
+[ ] 3. GitHub'a push
+[ ] 4. Android: flutter build appbundle --release → Play Console yükle
+[ ] 5. iOS: Codemagic build → App Store Connect yükle
+[ ] 6. Gerekirse versiyon_güncellem.json build numarasını güncelle
+[ ] 7. App Store: Release This Version (abonelikler için önemli)
+[ ] 8. Play Console: Billing Library 8 uyarısı için güncel AAB kullan
+
+
+================================================================================
+F) APP STORE METİNLERİ (4.4.7 örneği)
+================================================================================
+
+Uygulama adı: Rotalink
+Alt başlık: Kamu Seyahat Rehberi
+
+Tanıtım metni:
+Rotalink, Türkiye'de kamu konaklama ve seyahat planlamasını kolaylaştıran
+rehberdir. Reklamsız deneyim için Rotalink Pro.
+
+Açıklama sonuna ekle:
+Gizlilik Politikası: https://rotalink.tr/gizlilik-politikasi/
+Kullanım Koşulları: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+
+Anahtar kelimeler:
+konaklama,misafirhane,rota,seyahat,kampanya,tesis,gezi,yemek,harita,kamu
+
+
+================================================================================
+G) ABONELİK NOTLARI
+================================================================================
+
+Product ID (kod = mağaza):
+  rotalink_pro_monthly
+  rotalink_pro_yearly
+
+App Store Connect:
+  - Abonelikler bölümünde Approved olmalı
+  - "Uygulama İçi Satın Alımlar" boş olması NORMAL (abonelik ayrı bölüm)
+  - İlk kez: sürüm onay + Release sonrası paketler 15 dk - 24 saat içinde gelir
+  - TestFlight: Ayarlar → App Store → Sandbox Account
+
+Play Console:
+  - in_app_purchase_android 0.5.0 = Billing Library 8.0
+  - Paid Apps Agreement Active olmalı
+
+
+================================================================================
+H) ÖNEMLİ KURALLAR
+================================================================================
+
+1. JSON'da // yorum satırı KULLANMA — uygulama reddeder.
+2. Fiyat/adres/görselde "il" + "isim" master ile AYNI olmalı.
+3. "Uygulama İçi Satın Alımlar" boş = normal. Abonelikler "Abonelikler"de.
+4. GitHub URL değişirse ilgili lib/constants/github_*.dart dosyasını güncelle.
+5. master_database güncellersen assets/data/ kopyasını da güncelle (yedek için).
+6. Pro ekranında Gizlilik + EULA linkleri olmalı (Apple 3.1.2).
+7. iOS Info.plist'te sadece "When In Use" konum izni kalsın (Always kaldırıldı).
+
+
+================================================================================
+I) HIZLI REFERANS — DOSYA YOLLARI
+================================================================================
+
+Sürüm:              pubspec.yaml
+Misafirhane veri:   GitHub rotalink-data/master_database_updated.json
+Misafirhane UI:     lib/widgets/misafirhane_search_results_sheet.dart
+Fiyat:              GitHub rotalink-data/fiyatlar.json
+Kampanya:           GitHub kampanya/kampanya.json
+Reklam süresi:      GitHub reklam_ayar/reklam_ayar.json
+Zorunlu güncelleme: GitHub versiyon/versiyon_güncellem.json
+Abonelik ID:        lib/billing/pro_products.dart
+Reklam ID:          lib/ads/ad_unit_ids.dart
+Mağaza linkleri:    lib/constants/store_links.dart
+Gömülü yedek DB:    assets/data/master_database_updated.json
+
+
+================================================================================
+  Son
+================================================================================

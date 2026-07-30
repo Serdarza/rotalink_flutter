@@ -12,11 +12,12 @@ import '../data/facility_price_repository.dart';
 import '../models/misafirhane.dart';
 import '../services/network_service.dart';
 import '../theme/app_colors.dart';
+import 'facility_price_report_sheet.dart';
 
 /// `fiyatlar.json` kaydını il+isim ile eşleyip gösterir.
 ///
-/// Fiyat varsa: 1 ödüllü reklam = 5 tesis hakkı (oturum).
-/// Eşleşme yoksa: "ücret bilgisi kayıtlı değil" metni çıkar.
+/// Fiyat varsa: her tesis için 1 ödüllü reklam (Pro = reklamsız).
+/// Eşleşme yoksa: "Fiyat Bildir"; açık fiyatta "Yanlış bildir".
 class FacilityOvernightPriceBox extends StatefulWidget {
   const FacilityOvernightPriceBox({
     super.key,
@@ -66,18 +67,6 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
   Future<void> _onUnlockTap() async {
     if (_busy) return;
 
-    // Kalan hak varsa reklam olmadan aç.
-    if (PriceUnlockStore.credits > 0) {
-      final ok = PriceUnlockStore.unlockWithCredit(
-        widget.facility.il,
-        widget.facility.isim,
-      );
-      if (ok) {
-        setState(() {});
-        return;
-      }
-    }
-
     setState(() => _busy = true);
     try {
       final online = await NetworkService.instance.isConnected();
@@ -101,13 +90,12 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
       switch (result) {
         case RewardedUnlockResult.earned:
         case RewardedUnlockResult.bypass:
-          PriceUnlockStore.grantRewardAndUnlock(
+          PriceUnlockStore.unlockFacility(
             widget.facility.il,
             widget.facility.isim,
           );
           setState(() {});
         case RewardedUnlockResult.unavailable:
-          // Reklam çekilemedi → yine kilitleme; yalnızca bu tesis.
           PriceUnlockStore.graceUnlockFacility(
             widget.facility.il,
             widget.facility.isim,
@@ -120,6 +108,18 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  Future<void> _openReport({required bool isCorrection}) async {
+    final priced = _priced;
+    await showFacilityPriceReportSheet(
+      context,
+      facility: widget.facility,
+      isCorrection: isCorrection,
+      currentSivil: priced.fiyatSivil,
+      currentKamu: priced.fiyatKamuPersoneli,
+      currentKurum: priced.fiyatKurumPersoneli,
+    );
   }
 
   void _toast(String message) {
@@ -166,47 +166,70 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.info_outline_rounded,
-                    size: 20,
-                    color: AppColors.primary.withValues(alpha: 0.9),
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(
+                        Icons.info_outline_rounded,
+                        size: 20,
+                        color: AppColors.primary.withValues(alpha: 0.9),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            FacilityPricing.missingPriceTitle,
+                            style: TextStyle(
+                              color: titleColor,
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w700,
+                              height: 1.25,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            FacilityPricing.missingPriceBody,
+                            style: TextStyle(
+                              color: labelColor,
+                              fontSize: 12.5,
+                              height: 1.4,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        FacilityPricing.missingPriceTitle,
-                        style: TextStyle(
-                          color: titleColor,
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w700,
-                          height: 1.25,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        FacilityPricing.missingPriceBody,
-                        style: TextStyle(
-                          color: labelColor,
-                          fontSize: 12.5,
-                          height: 1.4,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => unawaited(_openReport(isCorrection: false)),
+                  icon: const Icon(Icons.campaign_outlined, size: 20),
+                  label: const Text(FacilityPricing.reportPriceButton),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -217,15 +240,6 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
     }
 
     if (!_unlocked) {
-      final hasCredit = PriceUnlockStore.credits > 0;
-      final body = hasCredit
-          ? FacilityPricing.lockedBodyWithCredit(PriceUnlockStore.credits)
-          : FacilityPricing.lockedBodyNoCredit;
-      final buttonLabel = _busy
-          ? FacilityPricing.unlockLoading
-          : (hasCredit
-              ? FacilityPricing.unlockWithCreditButton
-              : FacilityPricing.unlockWithAdButton);
       final buttonIcon = _busy
           ? const SizedBox(
               width: 18,
@@ -235,12 +249,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                 color: Colors.white,
               ),
             )
-          : Icon(
-              hasCredit
-                  ? Icons.lock_open_rounded
-                  : Icons.play_circle_outline_rounded,
-              size: 20,
-            );
+          : const Icon(Icons.play_circle_outline_rounded, size: 20);
 
       return Padding(
         padding: EdgeInsets.only(top: widget.topSpacing),
@@ -287,7 +296,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            body,
+                            FacilityPricing.lockedBodyNoCredit,
                             style: TextStyle(
                               color: labelColor,
                               fontSize: 12.5,
@@ -304,7 +313,11 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                 FilledButton.icon(
                   onPressed: _busy ? null : _onUnlockTap,
                   icon: buttonIcon,
-                  label: Text(buttonLabel),
+                  label: Text(
+                    _busy
+                        ? FacilityPricing.unlockLoading
+                        : FacilityPricing.unlockWithAdButton,
+                  ),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
@@ -336,27 +349,47 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
           border: Border.all(color: border),
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Row(
                 children: [
-                  Text(
-                    'Fiyat bilgisi',
-                    style: TextStyle(
-                      color: titleColor,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w800,
+                  Expanded(
+                    child: Text(
+                      'Fiyat bilgisi',
+                      style: TextStyle(
+                        color: titleColor,
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
-                  const Spacer(),
-                  Tooltip(
-                    message: FacilityPricing.note,
-                    child: Icon(
-                      Icons.info_outline,
-                      size: 16,
-                      color: labelColor,
+                  const SizedBox(width: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => unawaited(_openReport(isCorrection: true)),
+                    icon: const Icon(Icons.edit_outlined, size: 16),
+                    label: const Text(FacilityPricing.reportWrongButton),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(
+                        color: AppColors.primary.withValues(alpha: 0.45),
+                      ),
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.06),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                      minimumSize: Size.zero,
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                 ],

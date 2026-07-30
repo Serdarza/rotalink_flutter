@@ -2,7 +2,7 @@ name: rotalink_flutter
 description: Rotalink — Flutter (Android + iOS), Kotlin uygulamasıyla aynı veri kaynağı.
 publish_to: 'none'
 
-version: 4.4.8+75
+version: 4.4.9+76
 
 environment:
   sdk: ^3.11.4

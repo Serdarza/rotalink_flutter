@@ -17,6 +17,9 @@ abstract final class StoreLinks {
   static const termsOfUse =
       'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
 
+  /// Kullanıcı öneri / fiyat bildirimi.
+  static const supportEmail = 'rotalinkinfo@gmail.com';
+
   static bool get _isApple => !kIsWeb && (Platform.isIOS || Platform.isMacOS);
 
   /// Bu platformdaki mağaza sayfası (puanlama / tek link).

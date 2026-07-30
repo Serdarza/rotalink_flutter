@@ -11,16 +11,30 @@ abstract final class FacilityPricing {
 
   static const missingPriceTitle = 'Ücret bilgisi kayıtlı değil';
   static const missingPriceBody =
-      'Güncel konaklama ücretini öğrenmek için tesisi arayabilirsiniz.';
+      'Bildiğiniz güncel ücreti bize iletebilir veya tesisi arayabilirsiniz.';
+
+  static const reportPriceButton = 'Fiyat Bildir';
+  static const reportWrongButton = 'Fiyatı Güncelle';
+
+  static const reportSheetTitleNew = 'Fiyat Bildir';
+  static const reportSheetTitleCorrection = 'Fiyatı Güncelle';
+  static const reportSheetSubtitle =
+      'Paylaştığınız bilgi incelenir; uygunsa uygulamada güncellenir.';
+  static const reportSivilHint = 'Örn. 1.500 TL veya 1.200 – 2.000 TL';
+  static const reportNoteHint = 'Kaynak, tarih veya kısa açıklama (isteğe bağlı)';
+  static const reportSubmit = 'E-posta ile gönder';
+  static const reportMailFailed = 'E-posta uygulaması açılamadı.';
+  static const reportNeedOnePrice =
+      'En az bir fiyat alanı doldurun.';
+  static const reportDisclaimer =
+      'Bildirimleriniz manuel incelenir; anında yayınlanmaz.';
 
   static const lockedTitle = 'Fiyat bilgisi kilitli';
   static const lockedBodyNoCredit =
-      'Kısa bir reklam izleyerek 5 tesisin fiyat bilgisini açabilirsiniz.';
-  static String lockedBodyWithCredit(int credits) =>
-      'Kalan hakkınız: $credits tesis. Bu tesisin fiyatını açabilirsiniz.';
+      'Bu tesisin fiyatını görmek için kısa bir reklam izleyin. '
+      'Pro ile tüm fiyatlar reklamsız açılır.';
 
-  static const unlockWithCreditButton = 'Fiyatları aç';
-  static const unlockWithAdButton = 'Reklam izle — 5 tesis hakkı kazan';
+  static const unlockWithAdButton = 'Reklam izle — fiyatı aç';
   static const unlockLoading = 'Reklam hazırlanıyor…';
   static const unlockFailed =
       'Reklam şu an yüklenemedi. Lütfen biraz sonra tekrar deneyin.';
@@ -31,3 +45,4 @@ abstract final class FacilityPricing {
   static const unlockDismissed =
       'Reklamı tamamlayınca fiyat bilgisi açılır.';
 }
+
