@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../billing/pro_service.dart';
 import '../data/firebase_rota_repository.dart';
+import '../data/pro_support_banner_prefs.dart';
 import '../navigation/main_map_nav_bridge.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import '../navigation/rotalink_shell_scope.dart';
@@ -10,6 +12,7 @@ import '../navigator_keys.dart';
 import '../onboarding/app_onboarding_controller.dart';
 import '../onboarding/app_onboarding_overlay.dart';
 import '../onboarding/onboarding_prefs.dart';
+import '../widgets/pro_support_banner.dart';
 import '../widgets/rotalink_glass_bottom_nav.dart';
 import 'about_screen.dart';
 import 'discover_screen.dart';
@@ -33,18 +36,66 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   late final AppOnboardingController _onboarding;
   RotalinkBottomNavItem _selected = RotalinkBottomNavItem.home;
 
+  Timer? _proSupportTimer;
+  bool _showProSupportBanner = false;
+  bool _proSupportScheduled = false;
+
   @override
   void initState() {
     super.initState();
     _onboarding = AppOnboardingController(onEnsureHome: _goHome);
     _onboarding.addListener(_onOnboardingChanged);
+    ProService.instance.isPro.addListener(_onProChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_maybeStartOnboarding());
+      _scheduleProSupportBanner();
     });
   }
 
   void _onOnboardingChanged() {
     if (mounted) setState(() {});
+    // Onboarding bittikten sonra bekleyen banner’ı gösterebiliriz.
+    if (!_onboarding.active) {
+      unawaited(_tryShowProSupportBanner());
+    }
+  }
+
+  void _onProChanged() {
+    if (!mounted) return;
+    if (ProService.instance.isAdFree && _showProSupportBanner) {
+      setState(() => _showProSupportBanner = false);
+    }
+  }
+
+  void _scheduleProSupportBanner() {
+    if (_proSupportScheduled) return;
+    _proSupportScheduled = true;
+    _proSupportTimer?.cancel();
+    _proSupportTimer = Timer(const Duration(minutes: 1), () {
+      unawaited(_tryShowProSupportBanner());
+    });
+  }
+
+  Future<void> _tryShowProSupportBanner() async {
+    if (!mounted || _showProSupportBanner) return;
+    if (ProService.instance.isAdFree) return;
+    if (_onboarding.active) return;
+    if (await ProSupportBannerPrefs.wasShownToday()) return;
+    if (!mounted) return;
+
+    await ProSupportBannerPrefs.markShownToday();
+    if (!mounted) return;
+    setState(() => _showProSupportBanner = true);
+  }
+
+  void _dismissProSupportBanner() {
+    if (!_showProSupportBanner) return;
+    setState(() => _showProSupportBanner = false);
+  }
+
+  void _openProFromSupportBanner() {
+    _dismissProSupportBanner();
+    _bodyNav?.pushNamed(RotalinkShellRoutes.pro);
   }
 
   Future<void> _maybeStartOnboarding() async {
@@ -59,6 +110,8 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
 
   @override
   void dispose() {
+    _proSupportTimer?.cancel();
+    ProService.instance.isPro.removeListener(_onProChanged);
     _onboarding.removeListener(_onOnboardingChanged);
     _onboarding.dispose();
     _navBridge.dispose();
@@ -247,6 +300,13 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
             if (_onboarding.active)
               Positioned.fill(
                 child: AppOnboardingOverlay(controller: _onboarding),
+              ),
+            if (_showProSupportBanner && !_onboarding.active)
+              Positioned.fill(
+                child: ProSupportBanner(
+                  onOpenPro: _openProFromSupportBanner,
+                  onDismiss: _dismissProSupportBanner,
+                ),
               ),
           ],
         ),

@@ -23,7 +23,7 @@ class _ProScreenState extends State<ProScreen> {
     _ProBenefit(
       icon: Icons.lock_open_outlined,
       title: 'Konaklama fiyatları',
-      detail: 'Tüm tesislerde ücret bilgisini anında görürsünüz.',
+      detail: 'Fiyat bilgisi olan tesislerde ücretleri anında görürsünüz.',
     ),
     _ProBenefit(
       icon: Icons.map_outlined,
