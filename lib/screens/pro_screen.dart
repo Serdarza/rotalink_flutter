@@ -10,7 +10,7 @@ import '../constants/store_links.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
 
-/// Rotalink Pro — reklamsız kullanım satın alma ekranı.
+/// Rotalink Pro — konaklama fiyatları ve proje desteği.
 class ProScreen extends StatefulWidget {
   const ProScreen({super.key});
 
@@ -21,14 +21,14 @@ class ProScreen extends StatefulWidget {
 class _ProScreenState extends State<ProScreen> {
   static const List<_ProBenefit> _benefits = [
     _ProBenefit(
-      icon: Icons.block_outlined,
-      title: 'Reklamsız kullanım',
-      detail: 'Tüm reklamlar kaldırılır.',
+      icon: Icons.lock_open_outlined,
+      title: 'Konaklama fiyatları',
+      detail: 'Tüm tesislerde ücret bilgisini anında görürsünüz.',
     ),
     _ProBenefit(
-      icon: Icons.lock_open_outlined,
-      title: 'Fiyatlar anında açık',
-      detail: 'Konaklama fiyatlarını görmek için reklam izlemenize gerek kalmaz.',
+      icon: Icons.map_outlined,
+      title: 'Aynı ücretsiz deneyim',
+      detail: 'Harita, arama ve tesis bilgileri herkese açık kalır.',
     ),
     _ProBenefit(
       icon: Icons.favorite_outline,
@@ -224,7 +224,7 @@ class _Header extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isPro ? 'Pro etkin' : 'Reklamsız Rotalink',
+                  isPro ? 'Pro etkin' : 'Rotalink Pro',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 19,
@@ -235,7 +235,7 @@ class _Header extends StatelessWidget {
                 Text(
                   isPro
                       ? 'Desteğiniz için teşekkürler.'
-                      : 'Reklamsız kullanım',
+                      : 'Konaklama fiyatlarını açın',
                   style: const TextStyle(
                     color: Color(0xFFB0E8EE),
                     fontSize: 13,
@@ -593,7 +593,7 @@ class _ActiveCardState extends State<_ActiveCard> {
               ),
               const SizedBox(height: 6),
               Text(
-                '$_planLabel · Reklamlar kapalı',
+                '$_planLabel · Fiyatlar açık',
                 style: TextStyle(
                   fontSize: 13,
                   color: isDark

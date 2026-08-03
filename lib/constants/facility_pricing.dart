@@ -29,20 +29,9 @@ abstract final class FacilityPricing {
   static const reportDisclaimer =
       'Bildirimleriniz manuel incelenir; anında yayınlanmaz.';
 
-  static const lockedTitle = 'Fiyat bilgisi kilitli';
-  static const lockedBodyNoCredit =
-      'Bu tesisin fiyatını görmek için kısa bir reklam izleyin. '
-      'Pro ile tüm fiyatlar reklamsız açılır.';
-
-  static const unlockWithAdButton = 'Reklam izle — fiyatı aç';
-  static const unlockLoading = 'Reklam hazırlanıyor…';
-  static const unlockFailed =
-      'Reklam şu an yüklenemedi. Lütfen biraz sonra tekrar deneyin.';
-  static const unlockOfflineGrace =
-      'İnternet yok. Bu tesisin fiyatı bu kez ücretsiz açıldı.';
-  static const unlockAdUnavailableGrace =
-      'Reklam şu an hazır değil. Bu tesisin fiyatı bu kez ücretsiz açıldı.';
-  static const unlockDismissed =
-      'Reklamı tamamlayınca fiyat bilgisi açılır.';
+  static const lockedTitle = 'Fiyat bilgisi Pro ile açılır';
+  static const lockedBody =
+      'Konaklama ücretlerini görmek için Rotalink Pro’ya geçin. '
+      'Harita, arama ve tesis bilgileri ücretsiz kullanılmaya devam eder.';
+  static const unlockWithProButton = 'Rotalink Pro’ya geç';
 }
-

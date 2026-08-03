@@ -3718,7 +3718,7 @@ class _ToolbarProButton extends StatelessWidget {
       valueListenable: ProService.instance.isPro,
       builder: (context, isPro, _) {
         return Tooltip(
-          message: isPro ? 'Rotalink Pro' : 'Reklamsız kullan',
+          message: isPro ? 'Rotalink Pro' : 'Fiyatları aç — Pro',
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -3871,7 +3871,7 @@ class _DrawerProTile extends StatelessWidget {
       builder: (context, isPro, _) {
         return _DrawerTile(
           icon: Icons.workspace_premium_outlined,
-          title: isPro ? 'Rotalink Pro' : 'Reklamsız Kullan',
+          title: isPro ? 'Rotalink Pro' : 'Rotalink Pro',
           onTap: onTap,
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

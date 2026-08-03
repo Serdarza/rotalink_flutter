@@ -17,7 +17,9 @@ class AdService {
   AdService._();
   static final AdService instance = AdService._();
 
-  static const bool adsEnabled = true;
+  /// Tüm reklam formatları kapalı (banner / native / geçiş / ödüllü).
+  /// Fiyat bilgisi yalnızca [ProService.isAdFree] ile açılır.
+  static const bool adsEnabled = false;
   static const int _defaultIntervalMinutes = 5;
   static const int _minIntervalMinutes = 1;
   static const int _maxIntervalMinutes = 60;

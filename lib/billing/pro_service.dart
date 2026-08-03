@@ -269,7 +269,7 @@ class ProService {
           final kind = purchase.productID == ProProducts.yearly
               ? 'yıllık'
               : 'aylık';
-          _emit('Rotalink Pro ($kind) etkin. Tüm reklamlar kaldırıldı.');
+          _emit('Rotalink Pro ($kind) etkin. Konaklama fiyatları açıldı.');
         }
         return;
 

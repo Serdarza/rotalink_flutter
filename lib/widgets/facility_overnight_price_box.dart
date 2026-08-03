@@ -1,23 +1,19 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
-import '../ads/ad_service.dart';
-import '../ads/price_unlock_store.dart';
-import '../ads/rewarded_unlock_result.dart';
 import '../billing/pro_service.dart';
 import '../constants/facility_pricing.dart';
 import '../data/facility_price_repository.dart';
 import '../models/misafirhane.dart';
-import '../services/network_service.dart';
+import '../navigation/rotalink_shell_routes.dart';
 import '../theme/app_colors.dart';
 import 'facility_price_report_sheet.dart';
 
 /// `fiyatlar.json` kaydını il+isim ile eşleyip gösterir.
 ///
-/// Fiyat varsa: her tesis için 1 ödüllü reklam (Pro = reklamsız).
-/// Eşleşme yoksa: "Fiyat Bildir"; açık fiyatta "Yanlış bildir".
+/// Fiyat satırları yalnızca Rotalink Pro aboneliğinde açılır.
+/// Eşleşme yoksa: "Fiyat Bildir"; Pro'da açık fiyatta "Fiyatı Güncelle".
 class FacilityOvernightPriceBox extends StatefulWidget {
   const FacilityOvernightPriceBox({
     super.key,
@@ -34,15 +30,10 @@ class FacilityOvernightPriceBox extends StatefulWidget {
 }
 
 class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
-  bool _busy = false;
-
   @override
   void initState() {
     super.initState();
     ProService.instance.isPro.addListener(_onProChanged);
-    if (AdService.adsEnabled && !kIsWeb && !ProService.instance.isAdFree) {
-      unawaited(AdService.instance.preloadRewarded());
-    }
   }
 
   @override
@@ -58,56 +49,10 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
   Misafirhane get _priced =>
       FacilityPriceRepository.instance.resolveFacility(widget.facility);
 
-  bool get _unlocked {
-    if (!AdService.adsEnabled || kIsWeb) return true;
-    if (ProService.instance.isAdFree) return true;
-    return PriceUnlockStore.isUnlocked(widget.facility.il, widget.facility.isim);
-  }
+  bool get _unlocked => ProService.instance.isAdFree;
 
-  Future<void> _onUnlockTap() async {
-    if (_busy) return;
-
-    setState(() => _busy = true);
-    try {
-      final online = await NetworkService.instance.isConnected();
-      if (!mounted) return;
-
-      // İnternet yok → kullanıcıyı kilitleme; bu tesisi ücretsiz aç.
-      if (!online) {
-        PriceUnlockStore.graceUnlockFacility(
-          widget.facility.il,
-          widget.facility.isim,
-        );
-        setState(() {});
-        _toast(FacilityPricing.unlockOfflineGrace);
-        return;
-      }
-
-      unawaited(AdService.instance.preloadRewarded());
-      final result = await AdService.instance.showRewardedForPriceUnlock();
-      if (!mounted) return;
-
-      switch (result) {
-        case RewardedUnlockResult.earned:
-        case RewardedUnlockResult.bypass:
-          PriceUnlockStore.unlockFacility(
-            widget.facility.il,
-            widget.facility.isim,
-          );
-          setState(() {});
-        case RewardedUnlockResult.unavailable:
-          PriceUnlockStore.graceUnlockFacility(
-            widget.facility.il,
-            widget.facility.isim,
-          );
-          setState(() {});
-          _toast(FacilityPricing.unlockAdUnavailableGrace);
-        case RewardedUnlockResult.dismissed:
-          _toast(FacilityPricing.unlockDismissed);
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+  Future<void> _openPro() async {
+    await Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
   }
 
   Future<void> _openReport({required bool isCorrection}) async {
@@ -119,16 +64,6 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
       currentSivil: priced.fiyatSivil,
       currentKamu: priced.fiyatKamuPersoneli,
       currentKurum: priced.fiyatKurumPersoneli,
-    );
-  }
-
-  void _toast(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        behavior: SnackBarBehavior.floating,
-      ),
     );
   }
 
@@ -240,17 +175,6 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
     }
 
     if (!_unlocked) {
-      final buttonIcon = _busy
-          ? const SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Colors.white,
-              ),
-            )
-          : const Icon(Icons.play_circle_outline_rounded, size: 20);
-
       return Padding(
         padding: EdgeInsets.only(top: widget.topSpacing),
         child: DecoratedBox(
@@ -296,7 +220,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            FacilityPricing.lockedBodyNoCredit,
+                            FacilityPricing.lockedBody,
                             style: TextStyle(
                               color: labelColor,
                               fontSize: 12.5,
@@ -311,18 +235,12 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                 ),
                 const SizedBox(height: 12),
                 FilledButton.icon(
-                  onPressed: _busy ? null : _onUnlockTap,
-                  icon: buttonIcon,
-                  label: Text(
-                    _busy
-                        ? FacilityPricing.unlockLoading
-                        : FacilityPricing.unlockWithAdButton,
-                  ),
+                  onPressed: () => unawaited(_openPro()),
+                  icon: const Icon(Icons.workspace_premium_outlined, size: 20),
+                  label: const Text(FacilityPricing.unlockWithProButton),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor:
-                        AppColors.primary.withValues(alpha: 0.55),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -375,7 +293,8 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                       side: BorderSide(
                         color: AppColors.primary.withValues(alpha: 0.45),
                       ),
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.06),
+                      backgroundColor:
+                          AppColors.primary.withValues(alpha: 0.06),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 8,
