@@ -119,6 +119,15 @@
       "gecerlilik": "2026 yılı DHMİ resmi tarifesi (kişi başı yatak 560/840 TL – suit 1.568 TL)"
     },
     {
+      "il": "Çanakkale",
+      "isim": "Çanakkale Gençlik Hizmetleri ve Spor Müdürlüğü Güzelyalı Gençlik Kampı",
+      "fiyat_sivil": "1.000 TL",
+      "fiyat_kamu_personeli": null,
+      "fiyat_kurum_personeli": null,
+      "kaynak": "kullanıcı bildirimi",
+      "gecerlilik": "2026 (kullanıcı bildirimi; kamu/kurum resmi listede yok — tesisten teyit edilmeli)"
+    },
+    {
       "il": "Çankırı",
       "isim": "Çankırı Öğretmenevi",
       "fiyat_sivil": "1.150 – 2.300 TL",
