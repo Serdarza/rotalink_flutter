@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../data/facility_address_repository.dart';
-import '../data/facility_image_repository.dart';
 import '../map_location_state.dart';
 import '../models/misafirhane.dart';
 import '../theme/app_colors.dart';
 import 'distance_permission_chip.dart';
 import 'facility_overnight_price_box.dart';
-import 'rotalink_cached_image.dart';
 
 /// Tesis listesinden açılan profesyonel detay kartı (Geri ile listeye dönüş).
 class FacilityDetailCard extends StatelessWidget {
@@ -41,9 +39,8 @@ class FacilityDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final m = FacilityImageRepository.instance.resolveFacility(
-      FacilityAddressRepository.instance.resolveFacility(misafirhane),
-    );
+    final m =
+        FacilityAddressRepository.instance.resolveFacility(misafirhane);
     final tip = m.tip.trim();
     final il = m.il.trim();
     final ilce = m.ilce.trim();
@@ -153,10 +150,6 @@ class FacilityDetailCard extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
               physics: const ClampingScrollPhysics(),
               children: [
-                if (m.imageUrls.isNotEmpty) ...[
-                  _FacilityImageCarousel(urls: m.imageUrls),
-                  const SizedBox(height: 12),
-                ],
                 DecoratedBox(
                   decoration: BoxDecoration(
                     color: cardBg,
@@ -364,104 +357,6 @@ class FacilityDetailCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _FacilityImageCarousel extends StatefulWidget {
-  const _FacilityImageCarousel({required this.urls});
-
-  final List<String> urls;
-
-  @override
-  State<_FacilityImageCarousel> createState() => _FacilityImageCarouselState();
-}
-
-class _FacilityImageCarouselState extends State<_FacilityImageCarousel> {
-  late final PageController _page;
-  int _index = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _page = PageController();
-  }
-
-  @override
-  void dispose() {
-    _page.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final urls = widget.urls.take(3).toList();
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: AspectRatio(
-        aspectRatio: 16 / 9,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            PageView.builder(
-              controller: _page,
-              itemCount: urls.length,
-              onPageChanged: (i) => setState(() => _index = i),
-              itemBuilder: (_, i) {
-                return RotalinkCachedImage(
-                  url: urls[i],
-                  placeholderIcon: Icons.hotel_rounded,
-                );
-              },
-            ),
-            if (urls.length > 1)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 8,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(urls.length, (i) {
-                    final on = i == _index;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 180),
-                      margin: const EdgeInsets.symmetric(horizontal: 3),
-                      width: on ? 14 : 6,
-                      height: 6,
-                      decoration: BoxDecoration(
-                        color: on
-                            ? Colors.white
-                            : Colors.white.withValues(alpha: 0.45),
-                        borderRadius: BorderRadius.circular(99),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            Positioned(
-              top: 8,
-              left: 8,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.45),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  child: Text(
-                    'Konaklama',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

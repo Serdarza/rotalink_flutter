@@ -9,7 +9,6 @@ import '../ads/discover_native_ad_pool.dart';
 import '../billing/pro_service.dart';
 import '../data/campaign_repository.dart';
 import '../data/facility_address_repository.dart';
-import '../data/facility_image_repository.dart';
 import '../data/facility_price_repository.dart';
 import '../data/gezi_yemek_repository.dart';
 import '../data/firebase_rota_repository.dart';
@@ -71,7 +70,6 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.wait<void>([
       CampaignRepository.instance.ensureLocalDataReady(),
       FacilityPriceRepository.instance.ensureLocalDataReady(),
-      FacilityImageRepository.instance.ensureLocalDataReady(),
       FacilityAddressRepository.instance.ensureLocalDataReady(),
       GeziYemekRepository.instance.ensureLocalDataReady(),
     ]);

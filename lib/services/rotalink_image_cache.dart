@@ -5,10 +5,12 @@ abstract final class RotalinkImageCache {
   /// v4: Pexels `fm=jpg` + AVIF Accept yasak (decode hatası).
   static const cacheKey = 'rotalink_media_v4';
 
+  /// Uygulama silinene / veri temizlenene kadar diske kalsın.
+  /// (CacheManager sonsuz süre desteklemez; ~100 yıl = pratikte kalıcı.)
   static final CacheManager manager = CacheManager(
     Config(
       cacheKey,
-      stalePeriod: const Duration(days: 180),
+      stalePeriod: const Duration(days: 36500),
       maxNrOfCacheObjects: 12000,
     ),
   );
