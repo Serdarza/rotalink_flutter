@@ -8,9 +8,11 @@ import '../ads/ad_service.dart';
 import '../ads/discover_native_ad_pool.dart';
 import '../ads/discover_native_merge.dart';
 import '../billing/pro_service.dart';
+import '../data/campaign_filter_prefs.dart';
 import '../data/campaign_repository.dart';
 import '../l10n/app_strings.dart';
 import '../models/campaign.dart';
+import '../models/campaign_insights.dart';
 import '../theme/app_colors.dart';
 import '../widgets/campaign_smart_icon.dart';
 import '../widgets/rotalink_banner_ad.dart';
@@ -45,6 +47,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   final _search = TextEditingController();
   final ValueNotifier<String> _debouncedFilter = ValueNotifier<String>('');
   final ValueNotifier<int> _discoverBodyTick = ValueNotifier<int>(0);
+  final ValueNotifier<CampaignAudience?> _audience =
+      ValueNotifier<CampaignAudience?>(null);
   Timer? _searchDebounce;
   StreamSubscription<List<Campaign>>? _campaignSub;
 
@@ -55,6 +59,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   List<NativeAd> _nativeAds = const [];
   int _nativeGen = 0;
   int _nativeEmptyRetries = 0;
+
   /// Hızlı kaydırırken AdWidget platform view oluşturmayı ertele (iOS crash).
   final ValueNotifier<bool> _listScrolling = ValueNotifier<bool>(false);
   Timer? _scrollIdleTimer;
@@ -71,6 +76,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   void initState() {
     super.initState();
     ProService.instance.isPro.addListener(_onProChanged);
+    unawaited(
+      CampaignFilterPrefs.getAudience().then((a) {
+        if (mounted && a != null) _audience.value = a;
+      }),
+    );
     if (widget.repository.isReady) {
       _allCampaigns = widget.repository.currentCampaigns;
       _streamWaiting = false;
@@ -124,9 +134,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   void _onCampaignsDataChanged() {
     if (_loadError != null) return;
 
-    if (!AdService.adsEnabled ||
-        kIsWeb ||
-        ProService.instance.isAdFree) {
+    if (!AdService.adsEnabled || kIsWeb || ProService.instance.isAdFree) {
       _disposeNatives();
       if (mounted) {
         setState(() {});
@@ -155,8 +163,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     if (DiscoverNativeAdPool.instance.hasAdsFor(_allCampaigns.length)) {
       if (mounted) {
         setState(() {
-          _nativeAds =
-              DiscoverNativeAdPool.instance.snapshot(_allCampaigns.length);
+          _nativeAds = DiscoverNativeAdPool.instance.snapshot(
+            _allCampaigns.length,
+          );
         });
         _discoverBodyTick.value++;
       }
@@ -169,8 +178,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   Future<void> _reloadNativeAds(int needed) async {
     final gen = ++_nativeGen;
 
-    final loaded =
-        await DiscoverNativeAdPool.instance.ensureAds(_allCampaigns.length);
+    final loaded = await DiscoverNativeAdPool.instance.ensureAds(
+      _allCampaigns.length,
+    );
 
     if (!mounted || gen != _nativeGen) {
       return;
@@ -218,6 +228,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     _listScrolling.dispose();
     _debouncedFilter.dispose();
     _discoverBodyTick.dispose();
+    _audience.dispose();
     _campaignSub?.cancel();
     _search.removeListener(_onSearchTextChanged);
     _search.dispose();
@@ -225,25 +236,46 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     super.dispose();
   }
 
-  List<Campaign> _filtered(List<Campaign> all, String query) {
-    final q = query.toLowerCase();
-    if (q.isEmpty) return all;
+  List<Campaign> _filtered(
+    List<Campaign> all,
+    String query,
+    CampaignAudience? audience,
+  ) {
+    final q = foldTr(query);
+    if (q.isEmpty && audience == null) return all;
     return all.where((c) {
-      return c.title.toLowerCase().contains(q) ||
-          c.organization.toLowerCase().contains(q) ||
-          c.summary.toLowerCase().contains(q);
+      if (audience != null && !CampaignInsights.of(c).matches(audience)) {
+        return false;
+      }
+      if (q.isEmpty) return true;
+      return foldTr(c.title).contains(q) ||
+          foldTr(c.organization).contains(q) ||
+          foldTr(c.summary).contains(q) ||
+          c.tags.any((t) => foldTr(t).contains(q));
     }).toList();
+  }
+
+  void _selectAudience(CampaignAudience? a) {
+    if (_audience.value == a) return;
+    _audience.value = a;
+    unawaited(CampaignFilterPrefs.setAudience(a));
   }
 
   String _emptyMessage({
     required bool overlayLoading,
     required List<Campaign> all,
     required List<Campaign> filtered,
+    required CampaignAudience? audience,
+    required String query,
   }) {
     if (_loadError != null) return _loadError!;
     if (overlayLoading) return '';
     if (filtered.isNotEmpty) return '';
     if (all.isEmpty) return 'Henüz kampanya yok.';
+    if (audience != null && query.isEmpty) {
+      return '${audience.label} için şu an kampanya bulunmuyor.\n'
+          'Yeni kampanyalar her gün otomatik eklenir.';
+    }
     return 'Aramana uygun kampanya bulunamadı.';
   }
 
@@ -340,18 +372,28 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                 showBackButton: widget.showBackButton,
                 onBack: () => Navigator.of(context).pop(),
               ),
+              AnimatedBuilder(
+                animation: Listenable.merge([_audience, _discoverBodyTick]),
+                builder: (context, _) => _AudienceFilterBar(
+                  campaigns: _loadError != null ? const [] : _allCampaigns,
+                  selected: _audience.value,
+                  onSelected: _selectAudience,
+                ),
+              ),
               _DisclaimerBanner(),
               Expanded(
                 child: AnimatedBuilder(
                   animation: Listenable.merge([
                     _debouncedFilter,
                     _discoverBodyTick,
+                    _audience,
                   ]),
                   builder: (context, _) {
                     final filterQuery = _debouncedFilter.value;
+                    final audience = _audience.value;
                     final filtered = _loadError != null
                         ? const <Campaign>[]
-                        : _filtered(_allCampaigns, filterQuery);
+                        : _filtered(_allCampaigns, filterQuery, audience);
                     final merged = DiscoverNativeMerge.mergeFiltered(
                       filtered,
                       _nativeAds,
@@ -362,6 +404,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       overlayLoading: overlay,
                       all: _allCampaigns,
                       filtered: filtered,
+                      audience: audience,
+                      query: filterQuery,
                     );
                     return _buildBody(
                       context: context,
@@ -375,6 +419,139 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               ),
               RotalinkBannerAd(adsEnabled: AdService.adsEnabled),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Kamu personeli grubu seçimi: tek dokunuşla filtre, her grupta kampanya sayısı.
+class _AudienceFilterBar extends StatelessWidget {
+  const _AudienceFilterBar({
+    required this.campaigns,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final List<Campaign> campaigns;
+  final CampaignAudience? selected;
+  final ValueChanged<CampaignAudience?> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (campaigns.isEmpty) return const SizedBox(height: 8);
+    final counts = <CampaignAudience, int>{
+      for (final a in CampaignAudience.values)
+        a: campaigns.where((c) => CampaignInsights.of(c).matches(a)).length,
+    };
+    // "Tüm Kamu" yalnızca genel kampanyaları sayar; diğer gruplara da dahil oldukları için
+    // kendi sayısı gruba özel olanlardan küçük olabilir.
+    final visible = CampaignAudience.values
+        .where((a) => (counts[a] ?? 0) > 0 || a == selected)
+        .toList();
+
+    return SizedBox(
+      height: 56,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+        children: [
+          _AudienceChip(
+            label: 'Tümü',
+            icon: Icons.apps_rounded,
+            count: campaigns.length,
+            selected: selected == null,
+            onTap: () => onSelected(null),
+          ),
+          for (final a in visible)
+            _AudienceChip(
+              label: a.label,
+              icon: a.icon,
+              count: counts[a] ?? 0,
+              selected: selected == a,
+              onTap: () => onSelected(selected == a ? null : a),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AudienceChip extends StatelessWidget {
+  const _AudienceChip({
+    required this.label,
+    required this.icon,
+    required this.count,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final int count;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = selected ? AppColors.white : _headerTop;
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: Semantics(
+        button: true,
+        selected: selected,
+        label: '$label, $count kampanya',
+        child: Material(
+          color: selected ? _headerTop : AppColors.white,
+          shape: StadiumBorder(
+            side: BorderSide(
+              color: selected ? _headerTop : const Color(0x33005F6B),
+            ),
+          ),
+          elevation: selected ? 2 : 0,
+          child: InkWell(
+            customBorder: const StadiumBorder(),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon, size: 17, color: fg),
+                  const SizedBox(width: 6),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: fg,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? const Color(0x33FFFFFF)
+                          : const Color(0x14005F6B),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      '$count',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: fg,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -397,7 +574,11 @@ class _DisclaimerBanner extends StatelessWidget {
             child: Text(
               'Kampanyalar bağımsız kaynaklardan derlenmektedir. '
               'Rotalink hiçbir devlet kuruluşunu temsil etmemektedir.',
-              style: TextStyle(fontSize: 11, color: Color(0xFF5D4037), height: 1.4),
+              style: TextStyle(
+                fontSize: 11,
+                color: Color(0xFF5D4037),
+                height: 1.4,
+              ),
             ),
           ),
         ],
@@ -541,6 +722,105 @@ class _DiscoverLoadingBody extends StatelessWidget {
   }
 }
 
+/// İndirim oranı, yeni eklenme ve bitiş tarihi rozetleri (yalnızca metinde varsa).
+class _CampaignBadges extends StatelessWidget {
+  const _CampaignBadges({required this.insights});
+
+  final CampaignInsights insights;
+
+  static String _date(DateTime d) =>
+      '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+
+  @override
+  Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final pct = insights.maxDiscountPercent;
+    final left = insights.daysLeft(now);
+    final badges = <Widget>[
+      if (pct != null)
+        _Badge(
+          text: '%$pct indirim',
+          icon: Icons.local_offer_outlined,
+          fg: const Color(0xFF1B5E20),
+          bg: const Color(0xFFE8F5E9),
+        ),
+      if (insights.isNew(now))
+        const _Badge(
+          text: 'Yeni',
+          icon: Icons.fiber_new_outlined,
+          fg: Color(0xFF0D47A1),
+          bg: Color(0xFFE3F2FD),
+        ),
+      if (left != null && left >= 0)
+        left == 0
+            ? const _Badge(
+                text: 'Bugün son gün',
+                icon: Icons.timer_outlined,
+                fg: Color(0xFFB71C1C),
+                bg: Color(0xFFFFEBEE),
+              )
+            : left <= 7
+            ? _Badge(
+                text: 'Son $left gün',
+                icon: Icons.timer_outlined,
+                fg: const Color(0xFFE65100),
+                bg: const Color(0xFFFFF3E0),
+              )
+            : _Badge(
+                text: 'Son gün ${_date(insights.endDate!)}',
+                icon: Icons.event_outlined,
+                fg: const Color(0xFF546E7A),
+                bg: const Color(0xFFF1F4F6),
+              ),
+    ];
+    if (badges.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Wrap(spacing: 6, runSpacing: 6, children: badges),
+    );
+  }
+}
+
+class _Badge extends StatelessWidget {
+  const _Badge({
+    required this.text,
+    required this.icon,
+    required this.fg,
+    required this.bg,
+  });
+
+  final String text;
+  final IconData icon;
+  final Color fg;
+  final Color bg;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: fg),
+          const SizedBox(width: 4),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: fg,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _CampaignDiscoverCard extends StatelessWidget {
   const _CampaignDiscoverCard({
     required this.campaign,
@@ -594,6 +874,7 @@ class _CampaignDiscoverCard extends StatelessWidget {
                           color: AppColors.textPrimary,
                         ),
                       ),
+                      _CampaignBadges(insights: CampaignInsights.of(campaign)),
                       const SizedBox(height: 6),
                       Text(
                         summary,
