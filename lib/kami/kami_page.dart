@@ -1364,6 +1364,7 @@ class _CityPlaceTile extends StatelessWidget {
             FacilityOvernightPriceBox(
               facility: overnightFacility!,
               topSpacing: 8,
+              compact: true,
             ),
           ],
           if (desc.isNotEmpty) ...[
@@ -1765,6 +1766,7 @@ class _FacilityInfoCard extends StatelessWidget {
                     FacilityOvernightPriceBox(
                       facility: card.overnightFacility!,
                       topSpacing: 8,
+                      compact: true,
                     ),
                 ],
               ),

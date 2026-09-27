@@ -1,4 +1,5 @@
 import '../utils/search_normalize.dart';
+import 'facility_tariff.dart';
 
 /// `fiyatlar.json` içindeki tek tesis fiyat kaydı.
 ///
@@ -14,6 +15,9 @@ class FacilityPriceEntry {
     this.fiyatSivilDefined = false,
     this.fiyatKamuDefined = false,
     this.fiyatKurumDefined = false,
+    this.kaynak,
+    this.gecerlilik,
+    this.tarife,
   });
 
   final String il;
@@ -27,8 +31,19 @@ class FacilityPriceEntry {
   final bool fiyatKamuDefined;
   final bool fiyatKurumDefined;
 
-  bool get hasFiyatBilgisi =>
+  /// Fiyatın alındığı kaynak (genelde URL).
+  final String? kaynak;
+
+  /// Serbest metin geçerlilik bilgisi (ör. "2026 yılı tarifesi").
+  final String? gecerlilik;
+
+  /// Detaylı tarife; yoksa yalnızca özet fiyat alanları gösterilir.
+  final FacilityTariff? tarife;
+
+  bool get hasLegacyFiyat =>
       fiyatSivilDefined || fiyatKamuDefined || fiyatKurumDefined;
+
+  bool get hasFiyatBilgisi => hasLegacyFiyat || tarife != null;
 
   /// Tesis kaydı ile aynı mantık: Türkçe normalize + boşluksuz.
   static String matchKey(String il, String isim) =>
@@ -64,6 +79,9 @@ class FacilityPriceEntry {
       fiyatSivilDefined: sivil.present,
       fiyatKamuDefined: kamu.present,
       fiyatKurumDefined: kurum.present,
+      kaynak: _str(m, const ['kaynak', 'source']).nullIfEmpty,
+      gecerlilik: _str(m, const ['gecerlilik', 'validity']).nullIfEmpty,
+      tarife: FacilityTariff.tryParse(m['tarife']),
     );
   }
 
@@ -94,4 +112,8 @@ class FacilityPriceEntry {
     }
     return '';
   }
+}
+
+extension on String {
+  String? get nullIfEmpty => isEmpty ? null : this;
 }

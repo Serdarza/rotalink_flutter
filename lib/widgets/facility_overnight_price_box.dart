@@ -5,10 +5,13 @@ import 'package:flutter/material.dart';
 import '../billing/pro_service.dart';
 import '../constants/facility_pricing.dart';
 import '../data/facility_price_repository.dart';
+import '../models/facility_price_entry.dart';
+import '../models/facility_tariff.dart';
 import '../models/misafirhane.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import '../theme/app_colors.dart';
 import 'facility_price_report_sheet.dart';
+import 'facility_tariff_view.dart';
 
 /// `fiyatlar.json` kaydını il+isim ile eşleyip gösterir.
 ///
@@ -19,10 +22,14 @@ class FacilityOvernightPriceBox extends StatefulWidget {
     super.key,
     required this.facility,
     this.topSpacing = 0,
+    this.compact = false,
   });
 
   final Misafirhane facility;
   final double topSpacing;
+
+  /// Kart / sohbet görünümü: yalnızca özet; detaylı tarife alt sayfada açılır.
+  final bool compact;
 
   @override
   State<FacilityOvernightPriceBox> createState() =>
@@ -30,6 +37,8 @@ class FacilityOvernightPriceBox extends StatefulWidget {
 }
 
 class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
+  bool _expanded = false;
+
   @override
   void initState() {
     super.initState();
@@ -53,6 +62,49 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
 
   Future<void> _openPro() async {
     await Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
+  }
+
+  static PriceMetaFooter _footerFor(FacilityPriceEntry? entry) =>
+      PriceMetaFooter(
+        gecerlilik: entry?.gecerlilik ?? entry?.tarife?.donem,
+        guncelleme: entry?.tarife?.guncelleme,
+        dogrulama: entry?.tarife?.dogrulama,
+        kaynak: entry?.kaynak,
+      );
+
+  Future<void> _openTariffSheet(Misafirhane priced) async {
+    final entry = priced.fiyatKaydi;
+    final tariff = entry?.tarife;
+    if (tariff == null) return;
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (ctx) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.85,
+        minChildSize: 0.4,
+        maxChildSize: 0.95,
+        builder: (ctx, controller) => ListView(
+          controller: controller,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          children: [
+            Text(
+              priced.isim,
+              style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+            const SizedBox(height: 12),
+            _TariffDetails(tariff: tariff),
+            const SizedBox(height: 4),
+            _footerFor(entry),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _openReport({required bool isCorrection}) async {
@@ -258,6 +310,17 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
       );
     }
 
+    final entry = priced.fiyatKaydi;
+    final tariff = entry?.tarife;
+    final hasLegacy = entry?.hasLegacyFiyat ??
+        (priced.fiyatSivilDefined ||
+            priced.fiyatKamuDefined ||
+            priced.fiyatKurumDefined);
+    final derived = hasLegacy
+        ? const <({String label, double min, double max})>[]
+        : tariff?.derivedRanges() ?? const [];
+    final footer = _footerFor(entry);
+
     return Padding(
       padding: EdgeInsets.only(top: widget.topSpacing),
       child: DecoratedBox(
@@ -275,7 +338,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                 children: [
                   Expanded(
                     child: Text(
-                      'Fiyat bilgisi',
+                      FacilityPricing.currentPricesTitle,
                       style: TextStyle(
                         color: titleColor,
                         fontSize: 13.5,
@@ -323,36 +386,181 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                 ),
               ),
               const SizedBox(height: 10),
-              _PriceRow(
-                label: FacilityPricing.sivilLabel,
-                defined: priced.fiyatSivilDefined,
-                value: priced.fiyatSivil,
-                labelColor: labelColor,
-                valueColor: valueColor,
-                unavailableColor: unavailableColor,
+              if (hasLegacy) ...[
+                _PriceRow(
+                  label: FacilityPricing.sivilLabel,
+                  defined: priced.fiyatSivilDefined,
+                  value: priced.fiyatSivil,
+                  labelColor: labelColor,
+                  valueColor: valueColor,
+                  unavailableColor: unavailableColor,
+                ),
+                const SizedBox(height: 8),
+                _PriceRow(
+                  label: FacilityPricing.kamuLabel,
+                  defined: priced.fiyatKamuDefined,
+                  value: priced.fiyatKamuPersoneli,
+                  labelColor: labelColor,
+                  valueColor: valueColor,
+                  unavailableColor: unavailableColor,
+                ),
+                const SizedBox(height: 8),
+                _PriceRow(
+                  label: FacilityPricing.kurumLabel,
+                  defined: priced.fiyatKurumDefined,
+                  value: priced.fiyatKurumPersoneli,
+                  labelColor: labelColor,
+                  valueColor: valueColor,
+                  unavailableColor: unavailableColor,
+                ),
+              ] else
+                for (final (i, r) in derived.indexed) ...[
+                  if (i > 0) const SizedBox(height: 8),
+                  _PriceRow(
+                    label: r.label,
+                    defined: true,
+                    value: formatTlRange(r.min, r.max),
+                    labelColor: labelColor,
+                    valueColor: valueColor,
+                    unavailableColor: unavailableColor,
+                  ),
+                ],
+              if (tariff != null) ...[
+                const SizedBox(height: 10),
+                _DetailToggle(
+                  label: widget.compact
+                      ? FacilityPricing.showDetailedPrices
+                      : _expanded
+                          ? FacilityPricing.hideDetailedTariff
+                          : FacilityPricing.showDetailedTariff,
+                  expanded: !widget.compact && _expanded,
+                  onTap: widget.compact
+                      ? () => unawaited(_openTariffSheet(priced))
+                      : () => setState(() => _expanded = !_expanded),
+                ),
+                if (!widget.compact)
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: _expanded
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 10),
+                            child: _TariffDetails(tariff: tariff),
+                          )
+                        : const SizedBox(width: double.infinity),
+                  ),
+              ],
+              if (!footer.isEmpty) ...[
+                const SizedBox(height: 10),
+                footer,
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DetailToggle extends StatelessWidget {
+  const _DetailToggle({
+    required this.label,
+    required this.expanded,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool expanded;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.primary.withValues(alpha: 0.08),
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.table_rows_outlined,
+                size: 18,
+                color: AppColors.primary,
               ),
-              const SizedBox(height: 8),
-              _PriceRow(
-                label: FacilityPricing.kamuLabel,
-                defined: priced.fiyatKamuDefined,
-                value: priced.fiyatKamuPersoneli,
-                labelColor: labelColor,
-                valueColor: valueColor,
-                unavailableColor: unavailableColor,
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-              const SizedBox(height: 8),
-              _PriceRow(
-                label: FacilityPricing.kurumLabel,
-                defined: priced.fiyatKurumDefined,
-                value: priced.fiyatKurumPersoneli,
-                labelColor: labelColor,
-                valueColor: valueColor,
-                unavailableColor: unavailableColor,
+              AnimatedRotation(
+                turns: expanded ? 0.5 : 0,
+                duration: const Duration(milliseconds: 200),
+                child: const Icon(
+                  Icons.expand_more_rounded,
+                  color: AppColors.primary,
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Tarife başlığı + dönem ve [FacilityTariffView].
+class _TariffDetails extends StatelessWidget {
+  const _TariffDetails({required this.tariff});
+
+  final FacilityTariff tariff;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baslik = tariff.baslik ?? FacilityPricing.detailedTariffTitle;
+    final sub = [
+      if (tariff.donem != null) tariff.donem!,
+      if (tariff.birim != null) 'Fiyatlar ${tariff.birim}',
+    ].join(' · ');
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          baslik,
+          style: TextStyle(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.92)
+                : AppColors.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        if (sub.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              sub,
+              style: TextStyle(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.62)
+                    : AppColors.textPrimary.withValues(alpha: 0.58),
+                fontSize: 11.5,
+              ),
+            ),
+          ),
+        const SizedBox(height: 10),
+        FacilityTariffView(tariff: tariff),
+      ],
     );
   }
 }

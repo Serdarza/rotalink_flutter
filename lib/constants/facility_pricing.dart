@@ -5,6 +5,12 @@ abstract final class FacilityPricing {
 
   static const unavailableLabel = 'Kalamaz';
 
+  static const currentPricesTitle = 'Güncel fiyatlar';
+  static const detailedTariffTitle = 'Detaylı tarife';
+  static const showDetailedTariff = 'Detaylı tarifeyi göster';
+  static const hideDetailedTariff = 'Detaylı tarifeyi gizle';
+  static const showDetailedPrices = 'Detaylı fiyatları görüntüle';
+
   static const sivilLabel = 'Sivil misafir';
   static const kamuLabel = 'Kamu personeli';
   static const kurumLabel = 'Kurum personeli';

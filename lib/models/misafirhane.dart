@@ -22,6 +22,7 @@ class Misafirhane {
     this.fiyatKamuDefined = false,
     this.fiyatKurumDefined = false,
     this.imageUrls = const [],
+    this.fiyatKaydi,
   });
 
   final String isim;
@@ -46,6 +47,9 @@ class Misafirhane {
   final bool fiyatSivilDefined;
   final bool fiyatKamuDefined;
   final bool fiyatKurumDefined;
+
+  /// Eşleşen iyatlar.json kaydı (kaynak, geçerlilik, detaylı tarife).
+  final FacilityPriceEntry? fiyatKaydi;
 
   /// `tesisler_gorseller.json` — en fazla 3 URL.
   final List<String> imageUrls;
@@ -85,6 +89,7 @@ class Misafirhane {
         fiyatKamuDefined: e.fiyatKamuDefined,
         fiyatKurumDefined: e.fiyatKurumDefined,
         imageUrls: imageUrls,
+        fiyatKaydi: e,
       );
 
   Misafirhane copyWithImageUrls(List<String> urls) => Misafirhane(
@@ -104,6 +109,7 @@ class Misafirhane {
         fiyatKamuDefined: fiyatKamuDefined,
         fiyatKurumDefined: fiyatKurumDefined,
         imageUrls: List<String>.unmodifiable(urls.take(3)),
+        fiyatKaydi: fiyatKaydi,
       );
 
   Misafirhane copyWithAddress({String? adres, String? ilce}) => Misafirhane(
@@ -123,6 +129,7 @@ class Misafirhane {
         fiyatKamuDefined: fiyatKamuDefined,
         fiyatKurumDefined: fiyatKurumDefined,
         imageUrls: imageUrls,
+        fiyatKaydi: fiyatKaydi,
       );
 
   /// Yerel depolama (`favorites` prefs) için düz JSON.
