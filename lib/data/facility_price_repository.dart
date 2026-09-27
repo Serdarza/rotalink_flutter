@@ -31,7 +31,8 @@ class FacilityPriceRepository {
 
   bool _loadedEmpty = false;
 
-  /// Açılışta: önbellek + en fazla günde bir sürüm kontrolü (değiştiyse indir).
+  /// Açılışta: önbellek + en fazla saatte bir sürüm kontrolü (değiştiyse indir).
+  /// Debug derlemede her açılışta kontrol edilir.
   Future<void> ensureLocalDataReady() async {
     if (await FiyatLocalCache.hasCache()) {
       await _loadFromLocalCache();
@@ -59,7 +60,7 @@ class FacilityPriceRepository {
 
   Future<void> _maybeSyncIfRemoteVersionChanged() async {
     if (!await NetworkService.instance.isConnected()) return;
-    if (!await FiyatSyncPrefs.isCheckDue()) return;
+    if (!kDebugMode && !await FiyatSyncPrefs.isCheckDue()) return;
     await FiyatSyncPrefs.markVersionCheckCompleted();
 
     final remoteVersion = await GithubFiyatDataSource.fetchRemoteVersion();
