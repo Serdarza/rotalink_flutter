@@ -5,7 +5,7 @@ import 'campaign.dart';
 /// Keşfet filtresindeki kamu personeli grupları.
 enum CampaignAudience {
   teacher('Öğretmen', Icons.school_outlined),
-  health('Sağlık', Icons.local_hospital_outlined),
+  health('Sağlık', Icons.nightlight_outlined),
   police('Emniyet', Icons.local_police_outlined),
   military('TSK', Icons.military_tech_outlined),
   gendarmerie('Jandarma', Icons.shield_outlined),
