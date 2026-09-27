@@ -61,7 +61,11 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
 
   /// Debug derlemede (flutter run) geliştirici testi için açık; mağaza
   /// (release) derlemesinde `kDebugMode` sabit false olduğundan kilit aynen kalır.
-  bool get _unlocked => kDebugMode || ProService.instance.isAdFree;
+  /// `--dart-define=PRICE_PREVIEW=true` ile debug'da da kilitli önizleme görülür.
+  bool get _unlocked =>
+      (kDebugMode && !_forcePreview) || ProService.instance.isAdFree;
+
+  static const _forcePreview = bool.fromEnvironment('PRICE_PREVIEW');
 
   Future<void> _openPro() async {
     await Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
@@ -289,6 +293,8 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                   ],
                 ),
                 const SizedBox(height: 12),
+                _ProPreview(facility: priced, onTap: () => unawaited(_openPro())),
+                const SizedBox(height: 12),
                 FilledButton.icon(
                   onPressed: () => unawaited(_openPro()),
                   icon: const Icon(Icons.workspace_premium_outlined, size: 20),
@@ -463,6 +469,187 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
         ),
       ),
     );
+  }
+}
+
+/// Kilitli durumda: tesisin gerçek tarife yapısı + maskeli tutarlar
+/// ve Pro ile açılacak içeriğin veriden türetilmiş özeti.
+class _ProPreview extends StatelessWidget {
+  const _ProPreview({required this.facility, required this.onTap});
+
+  final Misafirhane facility;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final labelColor = isDark
+        ? Colors.white.withValues(alpha: 0.62)
+        : AppColors.textPrimary.withValues(alpha: 0.58);
+    final titleColor =
+        isDark ? Colors.white.withValues(alpha: 0.92) : AppColors.textPrimary;
+    final entry = facility.fiyatKaydi;
+    final tariff = entry?.tarife;
+    final firstTable =
+        tariff?.hasTables == true ? tariff!.tablolar.first : null;
+
+    final Widget sample;
+    if (firstTable != null) {
+      sample = FacilityTariffView.preview(tariff: tariff!);
+    } else {
+      final labels = [
+        if (facility.fiyatSivilDefined) FacilityPricing.sivilLabel,
+        if (facility.fiyatKamuDefined) FacilityPricing.kamuLabel,
+        if (facility.fiyatKurumDefined) FacilityPricing.kurumLabel,
+      ];
+      sample = Column(
+        children: [
+          for (final label in labels)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: labelColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const MaskedPrice(),
+                ],
+              ),
+            ),
+        ],
+      );
+    }
+
+    final hiddenRows = tariff == null
+        ? 0
+        : tariff.tablolar.fold<int>(0, (n, t) => n + t.satirlar.length) -
+            (firstTable?.satirlar.take(3).length ?? 0);
+
+    final perks = <String>[
+      if (tariff != null && tariff.hasTables) ...[
+        '${tariff.tablolar.fold<int>(0, (n, t) => n + t.satirlar.length)} '
+            'konaklama tipi için ayrı fiyat',
+        if (firstTable!.kategoriler.length > 1)
+          '${firstTable.kategoriler.map((c) => c.ad).join(' / ')} fiyatları',
+      ] else if (entry?.hasLegacyFiyat ?? false)
+        'Personel türüne göre gecelik fiyatlar',
+      if (tariff != null) ..._tariffPerks(tariff),
+      if (entry?.kaynak != null || entry?.gecerlilik != null)
+        'Fiyat kaynağı ve geçerlilik bilgisi',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                tariff?.baslik ?? FacilityPricing.currentPricesTitle,
+                style: TextStyle(
+                  color: titleColor,
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                FacilityPricing.previewBadge,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: onTap,
+          child: IgnorePointer(child: sample),
+        ),
+        if (hiddenRows > 0)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(
+              '+ $hiddenRows konaklama tipi daha',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: labelColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        if (perks.isNotEmpty) ...[
+          const SizedBox(height: 10),
+          Text(
+            FacilityPricing.proIncludesTitle,
+            style: TextStyle(
+              color: titleColor,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          for (final perk in perks)
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(
+                    Icons.check_rounded,
+                    size: 16,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      perk,
+                      style: TextStyle(
+                        color: labelColor,
+                        fontSize: 12.5,
+                        height: 1.35,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      ],
+    );
+  }
+
+  static List<String> _tariffPerks(FacilityTariff t) {
+    final parts = [
+      if (t.kurallar.isNotEmpty) 'tarife kuralları',
+      if (t.dahil.isNotEmpty) 'fiyata dahil hizmetler',
+      if (t.indirimler.isNotEmpty) 'indirimler',
+      if (t.ekUcretler.isNotEmpty) 'ek ücretler',
+      if (t.girisSaati != null || t.cikisSaati != null) 'giriş/çıkış saatleri',
+    ];
+    if (parts.isEmpty) return const [];
+    final text = parts.length == 1
+        ? parts.single
+        : '${parts.sublist(0, parts.length - 1).join(', ')} ve ${parts.last}';
+    final first = text[0] == 'i' ? 'İ' : text[0].toUpperCase();
+    return ['$first${text.substring(1)}'];
   }
 }
 

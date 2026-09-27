@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -22,10 +24,13 @@ String formatTlRange(double min, double max) =>
     min == max ? formatTl(min) : '${formatTl(min).replaceAll(' TL', '')} – ${formatTl(max)}';
 
 class _TariffPalette {
-  _TariffPalette(BuildContext context)
+  _TariffPalette(BuildContext context, {this.masked = false})
       : isDark = Theme.of(context).brightness == Brightness.dark;
 
   final bool isDark;
+
+  /// Pro önizlemesi: tutarlar yerine bulanık sabit örnek rakam çizilir.
+  final bool masked;
 
   Color get title =>
       isDark ? Colors.white.withValues(alpha: 0.92) : AppColors.textPrimary;
@@ -48,13 +53,36 @@ class _TariffPalette {
 ///
 /// Yalnızca veride bulunan bölümler çizilir.
 class FacilityTariffView extends StatelessWidget {
-  const FacilityTariffView({super.key, required this.tariff});
+  const FacilityTariffView({super.key, required this.tariff})
+      : preview = false;
+
+  /// Pro önizlemesi: gerçek oda tipi / kategori adları, maskeli tutarlar,
+  /// ilk tablonun ilk birkaç satırı; notlar gösterilmez.
+  const FacilityTariffView.preview({super.key, required this.tariff})
+      : preview = true;
+
+  static const _previewRows = 3;
 
   final FacilityTariff tariff;
+  final bool preview;
 
   @override
   Widget build(BuildContext context) {
-    final p = _TariffPalette(context);
+    final p = _TariffPalette(context, masked: preview);
+    if (preview) {
+      final first = tariff.tablolar.firstOrNull;
+      if (first == null) return const SizedBox.shrink();
+      return _TableBlock(
+        table: TariffTable(
+          baslik: first.baslik,
+          donem: first.donem,
+          birim: first.birim,
+          kategoriler: first.kategoriler,
+          satirlar: first.satirlar.take(_previewRows).toList(),
+        ),
+        palette: p,
+      );
+    }
     final hours = [
       if (tariff.girisSaati != null) 'Giriş ${tariff.girisSaati}',
       if (tariff.cikisSaati != null) 'Çıkış ${tariff.cikisSaati}',
@@ -358,6 +386,7 @@ class _PriceText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (palette.masked && price != null) return MaskedPrice(align: align);
     final amount = price?.amount;
     if (amount != null) {
       return Text(
@@ -379,6 +408,32 @@ class _PriceText extends StatelessWidget {
         fontSize: 12,
         fontStyle: price?.text != null ? FontStyle.italic : FontStyle.normal,
         fontWeight: FontWeight.w600,
+      ),
+    );
+  }
+}
+
+/// Gerçek tutar yerine sabit örnek rakamın bulanık hali (veri sızdırmaz).
+class MaskedPrice extends StatelessWidget {
+  const MaskedPrice({super.key, this.align = TextAlign.end});
+
+  final TextAlign align;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: 3.5, sigmaY: 3.5),
+      child: Text(
+        '0.000 TL',
+        textAlign: align,
+        style: TextStyle(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.85)
+              : AppColors.textPrimary,
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }

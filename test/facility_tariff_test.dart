@@ -103,6 +103,37 @@ void main() {
     expect(formatTl(12500), '12.500 TL');
   });
 
+  testWidgets('Pro önizlemesi gerçek tutar göstermez', (tester) async {
+    final t = FacilityTariff.tryParse({
+      'kategoriler': [
+        {'id': 'a', 'ad': 'Öğretmen'},
+        {'id': 'b', 'ad': 'Sivil'},
+      ],
+      'satirlar': [
+        for (var i = 1; i <= 5; i++)
+          {'ad': 'Oda $i', 'fiyatlar': {'a': 1000 * i + 850, 'b': 'Arayınız'}},
+      ],
+      'kurallar': ['Gizli kural'],
+    })!;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SizedBox(
+            width: 330,
+            child: FacilityTariffView.preview(tariff: t),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('Oda 1'), findsOneWidget);
+    expect(find.text('Oda 3'), findsOneWidget);
+    expect(find.text('Oda 4'), findsNothing);
+    expect(find.textContaining('1.850'), findsNothing);
+    expect(find.text('Arayınız'), findsNothing);
+    expect(find.text('• Gizli kural'), findsNothing);
+    expect(find.text('0.000 TL'), findsNWidgets(6));
+  });
+
   testWidgets('dar ekranda kart, geniş ekranda tablo', (tester) async {
     final t = FacilityTariff.tryParse({
       'kategoriler': [

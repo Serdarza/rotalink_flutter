@@ -196,7 +196,15 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final now = DateTime.now();
-    final holidays = kPublicHolidays;
+    final upcoming = <PublicHoliday>[];
+    final past = <PublicHoliday>[];
+    for (final h in kPublicHolidays) {
+      (_holidayTiming(h, now) == _HolidayTiming.past ? past : upcoming).add(h);
+    }
+    upcoming.sort((a, b) => a.start.compareTo(b.start));
+    past.sort((a, b) => b.start.compareTo(a.start));
+    final holidays = [...upcoming, ...past];
+    final firstPastIndex = upcoming.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -235,9 +243,12 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
             );
           }
 
-          final h = holidays[index - 1];
-          final prevYear = index > 1 ? holidays[index - 2].year : null;
-          final showYearHeader = prevYear != h.year;
+          final i = index - 1;
+          final h = holidays[i];
+          final showPastHeader = past.isNotEmpty && i == firstPastIndex;
+          final showYearHeader = i == 0 ||
+              showPastHeader ||
+              holidays[i - 1].year != h.year;
           final countdown = _countdownText(h, now);
           final timing = _holidayTiming(h, now);
           final style = _cardStyle(timing);
@@ -245,9 +256,33 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (showPastHeader)
+                Padding(
+                  padding: EdgeInsets.only(top: i > 0 ? 12 : 0, bottom: 6),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.history_rounded,
+                        size: 20,
+                        color: AppColors.campaignSummaryMuted,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Geçmiş tatiller',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.campaignSummaryMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               if (showYearHeader)
                 Padding(
-                  padding: EdgeInsets.only(top: index > 1 ? 8 : 0, bottom: 10),
+                  padding: EdgeInsets.only(
+                    top: i > 0 && !showPastHeader ? 8 : 0,
+                    bottom: 10,
+                  ),
                   child: Text(
                     '${h.year} yılı',
                     style: theme.textTheme.titleMedium?.copyWith(

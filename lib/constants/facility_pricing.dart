@@ -10,6 +10,8 @@ abstract final class FacilityPricing {
   static const showDetailedTariff = 'Detaylı tarifeyi göster';
   static const hideDetailedTariff = 'Detaylı tarifeyi gizle';
   static const showDetailedPrices = 'Detaylı fiyatları görüntüle';
+  static const previewBadge = 'ÖNİZLEME';
+  static const proIncludesTitle = 'Pro ile bu tesiste görecekleriniz';
 
   static const sivilLabel = 'Sivil misafir';
   static const kamuLabel = 'Kamu personeli';

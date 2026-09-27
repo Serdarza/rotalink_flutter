@@ -1,3 +1,4 @@
+https://github.com/Serdarza/rotalinkgezirehberi/blob/nextjs/public/data/affiliate_ads.json
 ================================================================================
   ROTALINK — TAM YÖNETİM REHBERİ (Uygulama + GitHub)
   Son güncelleme: 27 Temmuz 2026 | Sürüm örneği: 4.4.7+74

@@ -991,6 +991,18 @@ class MisafirhaneSearchResultsPanelState
     await Share.share(text);
   }
 
+  Future<void> _openGoogleImages(String query) async {
+    final q = query.trim();
+    if (q.isEmpty) return;
+    final uri = Uri.parse(
+      'https://www.google.com/search?tbm=isch&q=${Uri.encodeComponent(q)}',
+    );
+    if (await canLaunchUrl(uri)) {
+      AdService.instance.notifyLeavingToExternalApp();
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   Future<void> _shareGeziYemek(GeziYemekItem g) async {
     final name = g.isim.trim();
     final desc = g.aciklama.trim();
@@ -1427,13 +1439,11 @@ class MisafirhaneSearchResultsPanelState
                 ),
                 if (!isGezi)
                   _sosyalActionChip(
-                    icon: Icons.map_rounded,
-                    label: 'Git',
+                    icon: Icons.image_search,
+                    label: 'Gör',
                     onTap: () {
                       if (mapsQuery.isEmpty) return;
-                      unawaited(
-                        openInNativeMaps(context, query: mapsQuery),
-                      );
+                      unawaited(_openGoogleImages(mapsQuery));
                     },
                   ),
                 _sosyalActionChip(
