@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 
 import '../billing/pro_service.dart';
@@ -58,7 +59,9 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
   Misafirhane get _priced =>
       FacilityPriceRepository.instance.resolveFacility(widget.facility);
 
-  bool get _unlocked => ProService.instance.isAdFree;
+  /// Debug derlemede (flutter run) geliştirici testi için açık; mağaza
+  /// (release) derlemesinde `kDebugMode` sabit false olduğundan kilit aynen kalır.
+  bool get _unlocked => kDebugMode || ProService.instance.isAdFree;
 
   Future<void> _openPro() async {
     await Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
