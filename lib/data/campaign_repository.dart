@@ -19,6 +19,9 @@ class CampaignRepository {
 
   List<Campaign>? _memoryCampaigns;
   Future<List<Campaign>>? _resolveInFlight;
+  Future<void>? _syncInFlight;
+  final StreamController<List<Campaign>> _updates =
+      StreamController<List<Campaign>>.broadcast();
 
   List<Campaign> get currentCampaigns => _memoryCampaigns ?? const [];
 
@@ -35,14 +38,14 @@ class CampaignRepository {
     await _downloadAndPersist();
   }
 
-  /// Bellekte hazırsa anında döner; yoksa tek paylaşımlı indirme future'ı kullanılır.
-  Stream<List<Campaign>> watchCampaignsOrdered() {
-    final cached = _memoryCampaigns;
-    if (cached != null) {
-      return Stream.value(cached);
-    }
-    return Stream.fromFuture(_resolveCampaigns());
+  /// Mevcut listeyi hemen, sonra arka planda indirilen her yeni listeyi yayınlar.
+  Stream<List<Campaign>> watchCampaignsOrdered() async* {
+    yield _memoryCampaigns ?? await _resolveCampaigns();
+    yield* _updates.stream;
   }
+
+  /// Aşağı çekerek yenileme: aralığı beklemeden sunucu sürümünü kontrol eder.
+  Future<void> refresh() => _maybeSyncIfRemoteVersionChanged(force: true);
 
   Future<List<Campaign>> _resolveCampaigns() {
     if (_memoryCampaigns != null) {
@@ -79,9 +82,15 @@ class CampaignRepository {
     }
   }
 
-  Future<void> _maybeSyncIfRemoteVersionChanged() async {
+  Future<void> _maybeSyncIfRemoteVersionChanged({bool force = false}) {
+    return _syncInFlight ??= _syncBody(force: force).whenComplete(() {
+      _syncInFlight = null;
+    });
+  }
+
+  Future<void> _syncBody({required bool force}) async {
     if (!await NetworkService.instance.isConnected()) return;
-    if (!await KampanyaSyncPrefs.isCheckDue()) return;
+    if (!force && !await KampanyaSyncPrefs.isCheckDue()) return;
 
     await KampanyaSyncPrefs.markVersionCheckCompleted();
 
@@ -90,11 +99,6 @@ class CampaignRepository {
 
     final localVersion = await KampanyaSyncPrefs.getLocalVersion();
     if (localVersion == remoteVersion) return;
-
-    if (localVersion == null) {
-      await KampanyaSyncPrefs.setLocalVersion(remoteVersion);
-      return;
-    }
 
     await _downloadAndPersist(expectedVersion: remoteVersion);
   }
@@ -114,10 +118,13 @@ class CampaignRepository {
 
       final decoded = jsonDecode(json);
       await KampanyaLocalCache.writeJson(json);
-      _memoryCampaigns = Campaign.parseListFromRoot(decoded);
+      final campaigns = Campaign.parseListFromRoot(decoded);
+      _memoryCampaigns = campaigns;
+      _updates.add(campaigns);
 
       final version =
-          expectedVersion ?? await GithubKampanyaDataSource.fetchRemoteVersion();
+          expectedVersion ??
+          await GithubKampanyaDataSource.fetchRemoteVersion();
       if (version != null) {
         await KampanyaSyncPrefs.setLocalVersion(version);
       }

@@ -313,37 +313,42 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         }
         return false;
       },
-      child: ListView.builder(
-        padding: EdgeInsets.fromLTRB(0, 8, 0, 8 + ime),
-        itemCount: merged.length,
-        // Offscreen native Platform View sayısını sınırla (iOS).
-        cacheExtent: 400,
-        addAutomaticKeepAlives: true,
-        addRepaintBoundaries: true,
-        itemBuilder: (context, index) {
-          final item = merged[index];
-          if (item is Campaign) {
-            final c = item;
-            return _CampaignDiscoverCard(
-              campaign: c,
-              onOpenDetail: () {
-                Navigator.of(context, rootNavigator: false).push<void>(
-                  MaterialPageRoute<void>(
-                    builder: (_) => CampaignDetailScreen(campaign: c),
-                  ),
-                );
-              },
-            );
-          }
-          if (item is NativeAd) {
-            return RotalinkNativeAdTile(
-              key: ValueKey<int>(identityHashCode(item)),
-              ad: item,
-              scrollingListenable: _listScrolling,
-            );
-          }
-          return const SizedBox.shrink();
-        },
+      child: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: widget.repository.refresh,
+        child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(0, 8, 0, 8 + ime),
+          itemCount: merged.length,
+          // Offscreen native Platform View sayısını sınırla (iOS).
+          cacheExtent: 400,
+          addAutomaticKeepAlives: true,
+          addRepaintBoundaries: true,
+          itemBuilder: (context, index) {
+            final item = merged[index];
+            if (item is Campaign) {
+              final c = item;
+              return _CampaignDiscoverCard(
+                campaign: c,
+                onOpenDetail: () {
+                  Navigator.of(context, rootNavigator: false).push<void>(
+                    MaterialPageRoute<void>(
+                      builder: (_) => CampaignDetailScreen(campaign: c),
+                    ),
+                  );
+                },
+              );
+            }
+            if (item is NativeAd) {
+              return RotalinkNativeAdTile(
+                key: ValueKey<int>(identityHashCode(item)),
+                ad: item,
+                scrollingListenable: _listScrolling,
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }

@@ -5,8 +5,8 @@ abstract final class KampanyaSyncPrefs {
   static const _kLocalVersion = 'rotalink_kampanya_data_version';
   static const _kLastCheckMs = 'rotalink_kampanya_last_version_check_ms';
 
-  /// Günde en fazla bir kez sunucu sürümü kontrol edilir.
-  static const checkInterval = Duration(days: 1);
+  /// Sunucu sürümü (yalnızca HEAD isteği) en fazla bu aralıkla kontrol edilir.
+  static const checkInterval = Duration(hours: 3);
 
   static Future<String?> getLocalVersion() async {
     final p = await SharedPreferences.getInstance();
