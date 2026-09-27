@@ -4,7 +4,8 @@ abstract final class FiyatSyncPrefs {
   static const _kLocalVersion = 'rotalink_fiyat_data_version';
   static const _kLastCheckMs = 'rotalink_fiyat_last_version_check_ms';
 
-  static const checkInterval = Duration(days: 1);
+  /// Yalnızca HEAD (etag) kontrolü; dosya değişmediyse gövde indirilmez.
+  static const checkInterval = Duration(hours: 1);
 
   static Future<String?> getLocalVersion() async {
     final p = await SharedPreferences.getInstance();
