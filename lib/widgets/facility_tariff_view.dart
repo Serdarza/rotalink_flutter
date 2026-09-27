@@ -61,7 +61,7 @@ class FacilityTariffView extends StatelessWidget {
   const FacilityTariffView.preview({super.key, required this.tariff})
       : preview = true;
 
-  static const _previewRows = 3;
+  static const previewRows = 2;
 
   final FacilityTariff tariff;
   final bool preview;
@@ -78,7 +78,7 @@ class FacilityTariffView extends StatelessWidget {
           donem: first.donem,
           birim: first.birim,
           kategoriler: first.kategoriler,
-          satirlar: first.satirlar.take(_previewRows).toList(),
+          satirlar: first.satirlar.take(previewRows).toList(),
         ),
         palette: p,
       );

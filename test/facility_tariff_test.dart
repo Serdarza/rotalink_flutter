@@ -126,12 +126,12 @@ void main() {
       ),
     );
     expect(find.text('Oda 1'), findsOneWidget);
-    expect(find.text('Oda 3'), findsOneWidget);
-    expect(find.text('Oda 4'), findsNothing);
+    expect(find.text('Oda 2'), findsOneWidget);
+    expect(find.text('Oda 3'), findsNothing);
     expect(find.textContaining('1.850'), findsNothing);
     expect(find.text('Arayınız'), findsNothing);
     expect(find.text('• Gizli kural'), findsNothing);
-    expect(find.text('0.000 TL'), findsNWidgets(6));
+    expect(find.text('0.000 TL'), findsNWidgets(4));
   });
 
   testWidgets('dar ekranda kart, geniş ekranda tablo', (tester) async {

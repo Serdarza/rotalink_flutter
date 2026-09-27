@@ -530,7 +530,10 @@ class _ProPreview extends StatelessWidget {
     final hiddenRows = tariff == null
         ? 0
         : tariff.tablolar.fold<int>(0, (n, t) => n + t.satirlar.length) -
-            (firstTable?.satirlar.take(3).length ?? 0);
+            (firstTable?.satirlar
+                    .take(FacilityTariffView.previewRows)
+                    .length ??
+                0);
 
     final perks = <String>[
       if (tariff != null && tariff.hasTables) ...[
