@@ -22,8 +22,21 @@
 		<string>$(FLUTTER_BUILD_NAME)</string>
 		<key>CFBundleSignature</key>
 		<string>????</string>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLName</key>
+				<string>com.serdarza.rotalink</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>rotalink</string>
+				</array>
+			</dict>
+		</array>
 		<key>CFBundleVersion</key>
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
+		<key>FlutterDeepLinkingEnabled</key>
+		<false/>
 		<key>GADApplicationIdentifier</key>
 		<string>ca-app-pub-6478556288740067~6588925851</string>
 		<key>SKAdNetworkItems</key>
