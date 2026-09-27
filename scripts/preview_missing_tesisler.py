@@ -222,6 +222,8 @@ def build_il_map(master_ils: list[str]) -> dict[str, str]:
     for k in ("kktc", "kibris", "kuzeykibris", "kuzeykibristurkcumhuriyeti", "lefkosa"):
         m[k] = m.get("kibris", "Kıbrıs")
     m["icel"] = m.get("mersin", "Mersin")
+    for k in ("kmaras", "maras"):
+        m[k] = m.get("kahramanmaras", "Kahramanmaraş")
     return m
 
 
@@ -369,9 +371,9 @@ def same_facility(a: Rec, b: Rec) -> bool:
     d = dist_m(a, b)
     same_cat = a.cat == b.cat
     if a.toks and a.toks == b.toks:
-        return d is None or d < 3000
+        return True
     if a.dist and a.dist == b.dist and same_cat:
-        return d is None or d < 3000
+        return True
     if a.phones() & b.phones():
         return bool(a.dist & b.dist) or (same_cat and (d is None or d < 2000))
     if d is not None and d <= 60 and same_cat:
@@ -413,7 +415,7 @@ def load_sources(parsed: dict, il_map: dict[str, str]) -> tuple[list[Rec], dict]
                         r["statu"], r["latitude"], r["longitude"], r))
     for r in parsed["kamusosyal"]:
         il = map_il(r["il"], il_map)
-        n = norm_text(r["isim"])
+        n = fold_tr(r["isim"])
         if "konaklama bulunmamaktadir" in n or "konaklama yoktur" in n or re.search(r"\bkapali\b|\bkapatildi", n):
             excl["konaklama yok / kapalı (kamusosyal)"].append(r)
             continue
@@ -534,6 +536,14 @@ def main() -> None:
                 "neden": why, "kaynaklar": members,
             })
             continue
+        pins = [(r.lat, r.lng) for r in g if r.lat is not None]
+        spread = max((haversine_m(p[0], p[1], q[0], q[1]) for p in pins for q in pins), default=0.0)
+        if spread > 3000:
+            uncertain.append({
+                "il": il, "aday": entry, "benzer_master": None,
+                "neden": f"kaynaklarda konum çelişkili (~{int(spread / 1000)} km fark)", "kaynaklar": members,
+            })
+            continue
         cats = {r.cat for r in g}
         srcs = {r.src for r in g}
         if "ogretmenevi" in cats and "meb" not in srcs:
@@ -580,7 +590,7 @@ def main() -> None:
     for s in parsed.get("kamusosyal_slug_only", []):
         il = map_il(s["il_slug"], il_map)
         rs = Rec("kamusosyal", s["url"], il, "", s["isim"], "", "", "", "", None, None, s)
-        n = norm_text(s["isim"])
+        n = fold_tr(s["isim"])
         if "konaklama bulunmamaktadir" in n or "konaklama yoktur" in n:
             excluded["konaklama yok / kapalı (kamusosyal)"].append(s)
             continue
