@@ -2,7 +2,7 @@
 """Onaylanmış önizleme kayıtlarını master'daki `tesisler` dizisinin sonuna ekle.
 
 Mevcut metne dokunmaz: yalnızca dizinin kapanışından önce yeni kayıtlar eklenir.
-Kullanım: python scripts/apply_preview_additions.py data_out/preview_additions.json
+Kullanım: python scripts/apply_preview_additions.py data_out/preview_additions.json [hedef.json]
 """
 
 from __future__ import annotations
@@ -18,7 +18,10 @@ FIELDS = ("isim", "tip", "il", "adres", "telefon", "latitude", "longitude")
 
 
 def main() -> None:
+    global MASTER
     src = Path(sys.argv[1])
+    if len(sys.argv) > 2:
+        MASTER = Path(sys.argv[2])
     items = json.loads(src.read_text(encoding="utf-8"))
     for it in items:
         if tuple(it.keys()) != FIELDS:
@@ -58,7 +61,7 @@ def main() -> None:
         if k != "tesisler":
             assert after[k] == before[k], k
 
-    backup = ROOT / "data_out" / "rotalink_data_master_before_apply.json"
+    backup = ROOT / "data_out" / f"before_apply_{MASTER.parent.parent.name}_{MASTER.name}"
     shutil.copyfile(MASTER, backup)
     MASTER.write_bytes(new_txt.encode("utf-8"))
     print(f"Yedek: {backup}")

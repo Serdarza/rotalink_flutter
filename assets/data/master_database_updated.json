@@ -37703,6 +37703,4011 @@
       "telefon": "03923648340",
       "latitude": 35.179171905204164,
       "longitude": 33.90610154766507
+    },
+    {
+      "isim": "Adıyaman Çelikhan Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Adıyaman",
+      "adres": "Cami Mah., Hükümet Cd.,İmam Hatip Lisesi Yanı-Çelikhan/ADIYAMAN",
+      "telefon": "(0416) 451 25 77",
+      "latitude": 38.0327295,
+      "longitude": 38.237273
+    },
+    {
+      "isim": "Adıyaman Tut Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Adıyaman",
+      "adres": "Cumhuriyet Mah., Tut Yolu-Tut/ADIYAMAN",
+      "telefon": "(0416) 441 28 00",
+      "latitude": 37.7981331,
+      "longitude": 37.8952455
+    },
+    {
+      "isim": "Ankara Bala Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Ankara",
+      "adres": "Göztepe Mah., Hükümet Cad.-Bala/ANKARA",
+      "telefon": "(0312) 876 11 81",
+      "latitude": 39.557459,
+      "longitude": 33.1213579
+    },
+    {
+      "isim": "Ankara Beypazarı Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Ankara",
+      "adres": "Kurtuluş Mah., Namazgah Sk., No.:17-Beypazarı/ANKARA",
+      "telefon": "(0312) 763 11 35",
+      "latitude": 40.165879,
+      "longitude": 31.9213269
+    },
+    {
+      "isim": "Ankara Nallıhan Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Ankara",
+      "adres": "Hacıbey Mah., Vatan Cad.-Nallıhan/ANKARA",
+      "telefon": "(0312) 837 27 88",
+      "latitude": 39.9207759,
+      "longitude": 32.8540497
+    },
+    {
+      "isim": "Ankara Haymana Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Ankara",
+      "adres": "Çaldağ Mah., Cumhuriyet Cad., Kurtuluş Sk., No.:20-Haymana/ANKARA",
+      "telefon": "(0312) 658 08 28",
+      "latitude": 39.4333192,
+      "longitude": 32.4946464
+    },
+    {
+      "isim": "Ankara Kızılcahamam Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Ankara",
+      "adres": "Akçay Mah., Ankara Cad., No.:3-Kızılcahamam/ANKARA",
+      "telefon": "(0312) 736 32 06",
+      "latitude": 40.4703399,
+      "longitude": 32.64787
+    },
+    {
+      "isim": "Artvin Şavşat Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Artvin",
+      "adres": "Söğütlü Mah., Haşimoğulları Sk., No.:1-Şavşat/ARTVİN",
+      "telefon": "(0466) 517 18 08",
+      "latitude": 41.2580519,
+      "longitude": 42.3339895
+    },
+    {
+      "isim": "Bilecik Söğüt Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Bilecik",
+      "adres": "Cemal Küflü Caddesi No:10, Söğüt / Bilecik",
+      "telefon": "(0228) 361 35 97",
+      "latitude": 40.0175855,
+      "longitude": 30.1837657
+    },
+    {
+      "isim": "Bingöl Adaklı Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Bingöl",
+      "adres": "Adaklı/BİNGÖL",
+      "telefon": "(0426) 611 24 84",
+      "latitude": 39.228564,
+      "longitude": 40.48267999999999
+    },
+    {
+      "isim": "Bingöl Karlıova Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Bingöl",
+      "adres": "Karıneş Mah., Fatih Cad.-Karlıoğva/BİNGÖL",
+      "telefon": "(0426) 511 20 54",
+      "latitude": 39.2971925,
+      "longitude": 41.0114893
+    },
+    {
+      "isim": "Bursa Gemlik Daniş Ekim Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Bursa",
+      "adres": "Kayhan Mah., Av.Özgür Aksoy Cad., Kalealtı Sk., No.:2-Gemlik/BURSA",
+      "telefon": "(0224) 514 55 66",
+      "latitude": 40.4335475,
+      "longitude": 29.1524825
+    },
+    {
+      "isim": "Bursa Mudanya Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Bursa",
+      "adres": "Eğitim Mah., Anafartalar Cad., İlköğretim Sk., No.:22/A-Mudanya/BURSA",
+      "telefon": "(0224) 544 94 84",
+      "latitude": 40.3520557,
+      "longitude": 28.9291752
+    },
+    {
+      "isim": "Bursa Orhangazi Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Bursa",
+      "adres": "Camiikebir Mah., Yalova Cad., No.:1-Orhangazi/BURSA",
+      "telefon": "(0554) 177 82 80",
+      "latitude": 40.4923408,
+      "longitude": 29.3091385
+    },
+    {
+      "isim": "Çanakkale Gökçeada Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Çanakkale",
+      "adres": "Çınarlı Mah., Kadri Üçok Cad.-Gökçeada/ÇANAKKALE",
+      "telefon": "(0286) 887 33 05",
+      "latitude": 40.1929756,
+      "longitude": 25.9042786
+    },
+    {
+      "isim": "Çankırı Kızılırmak Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Çankırı",
+      "adres": "Yeni Mah., Cumhuriyet Cad., No.:23/1-1-Kızılırmak/ÇANKIRI",
+      "telefon": "(0376) 324 11 05",
+      "latitude": 40.3462176,
+      "longitude": 33.9872263
+    },
+    {
+      "isim": "Çorum Alaca Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Çorum",
+      "adres": "Cumhuriyet Mah., Çorum Cad., No.:35-Alaca/ÇORUM",
+      "telefon": "(0364) 411 26 11",
+      "latitude": 40.1716942,
+      "longitude": 34.8403959
+    },
+    {
+      "isim": "Çorum Bayat Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Çorum",
+      "adres": "Yeni Mahalle, Çorum Caddesi No:56 Bayat / ÇORUM",
+      "telefon": "(0364) 381 21 92",
+      "latitude": 40.64153044893589,
+      "longitude": 34.25939163341059
+    },
+    {
+      "isim": "Diyarbakır Eğil Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Diyarbakır",
+      "adres": "Yenişehir Mah.-Eğil/DİYARBAKIR",
+      "telefon": "(0412) 581 21 10",
+      "latitude": 38.2799828,
+      "longitude": 40.0660819
+    },
+    {
+      "isim": "Elazığ Ağın Yusuf Karabatak Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Elazığ",
+      "adres": "Kaşpınar Köyü Kaşpınar Küme Evleri Öğretmenevi Blok No:30 İç Kapı No:4, Ağın / Elazığ",
+      "telefon": "(0532) 382 15 23",
+      "latitude": 38.9282951,
+      "longitude": 38.7303733
+    },
+    {
+      "isim": "Elazığ Arıcak Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Elazığ",
+      "adres": "Halil Yavuz Mah., Mendüş Mevkii-Arıcak/ELAZIĞ",
+      "telefon": "(0424) 771 23 03",
+      "latitude": 38.5527767,
+      "longitude": 40.1256444
+    },
+    {
+      "isim": "Erzurum Karaçoban Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Erzurum",
+      "adres": "Hacılar Mah., 29.Sk., No.:2-Karaçoban/ERZURUM",
+      "telefon": "(0442) 591 25 25",
+      "latitude": 39.350684,
+      "longitude": 42.11274299999999
+    },
+    {
+      "isim": "Gaziantep İslahiye Sabancı Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Gaziantep",
+      "adres": "Cumhuriyet Mah., Atatürk Blv.-İslahiye/GAZİANTEP",
+      "telefon": "(0552) 806 31 00",
+      "latitude": 37.0195544,
+      "longitude": 36.6280713
+    },
+    {
+      "isim": "Gaziantep Oğuzeli Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Gaziantep",
+      "adres": "Fatih Mah., Çiğdem Sk., No.:12-Oğuzeli/GAZİANTEP",
+      "telefon": "(0538) 213 69 27",
+      "latitude": 36.9549269,
+      "longitude": 37.5157922
+    },
+    {
+      "isim": "Giresun Çamoluk Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Giresun",
+      "adres": "Şehit Üsteğmen Şerif Kurtuluş Mah., Aracı Cad.-Çamoluk/GİRESUN",
+      "telefon": "(0454) 781 51 52",
+      "latitude": 40.1160365,
+      "longitude": 38.7430543
+    },
+    {
+      "isim": "Giresun Doğankent Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Giresun",
+      "adres": "Yeşiltepe Mah., Tek Küme Evleri, No.:1-Doğankent/GİRESUN",
+      "telefon": "(0454) 471 54 54",
+      "latitude": 40.810153,
+      "longitude": 38.916161
+    },
+    {
+      "isim": "Giresun Piraziz Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Giresun",
+      "adres": "Yeni Mah., Bahtiyar Aydın Paşa Blv., No.:13-Piraziz/GİRESUN",
+      "telefon": "(0532) 523 35 06",
+      "latitude": 40.954562,
+      "longitude": 38.119646
+    },
+    {
+      "isim": "Hakkari Şemdinli Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Hakkari",
+      "adres": "Moda Mah., Moda Cad., No.:26-Şemdinli/HAKKARİ",
+      "telefon": "(0438) 411 24 02",
+      "latitude": 37.3053369,
+      "longitude": 44.5726704
+    },
+    {
+      "isim": "İstanbul Beylikdüzü Atatürk Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "İstanbul",
+      "adres": "Cumhuriyet Mah., Derviş Eroğlu Cad., No.:5-Beylikdüzü/İSTANBUL",
+      "telefon": "(0212) 871 30 01",
+      "latitude": 41.0129722,
+      "longitude": 28.6385896
+    },
+    {
+      "isim": "Kastamonu Çatalzeytin Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Kastamonu",
+      "adres": "Sanayi Sitesi Cd., No.: 18/A-Çatalzeytin/KASTAMONU",
+      "telefon": "(0366) 516 19 89",
+      "latitude": 41.951178,
+      "longitude": 34.226706
+    },
+    {
+      "isim": "Kastamonu Doğanyurt Necdet Ruhi Aygün Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Kastamonu",
+      "adres": "Doğanyurt Necdet Ruhi Aygün Öğretmenevi ve Akşam Sanat Okulu",
+      "telefon": "(0366) 843 17 99",
+      "latitude": 42.004299,
+      "longitude": 33.460477
+    },
+    {
+      "isim": "Kırşehir Çiçekdağı Şehit Yücel Yılmaz Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Kırşehir",
+      "adres": "Osman Şevki Mah., Güventürk Cad., No.:29-Çiçekdağı/KIRŞEHİR",
+      "telefon": "(0386) 612 30 40",
+      "latitude": 39.6029449,
+      "longitude": 34.4175941
+    },
+    {
+      "isim": "Konya Yunak Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Konya",
+      "adres": "Yeni Mah., Mithatpaşa Cad., No.:26-Yunak/KONYA",
+      "telefon": "(0332) 851 20 23",
+      "latitude": 38.813171010004,
+      "longitude": 31.73367682413
+    },
+    {
+      "isim": "Kütahya Tavşanlı Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Kütahya",
+      "adres": "Kavaklı Mah.-Tavşanlı/KÜTAHYA",
+      "telefon": "(0274) 614 10 64",
+      "latitude": 39.5498929,
+      "longitude": 29.4890172
+    },
+    {
+      "isim": "Malatya Arapgir Şehit Hüsnü Bilgiç Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Malatya",
+      "adres": "Mehmet Akif Mah., Ömer Baba Cad., No.:9-Arapgir/MALATYA",
+      "telefon": "(0422) 811 47 03",
+      "latitude": 39.0490023,
+      "longitude": 38.4932559
+    },
+    {
+      "isim": "Malatya Doğanyol Tanrıverdi Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Malatya",
+      "adres": "Koldere Mah., Zümrüt Sk.-Doğanyol/MALATYA",
+      "telefon": "(0422) 881 66 66",
+      "latitude": 38.31356181007821,
+      "longitude": 39.0384578704834
+    },
+    {
+      "isim": "Manisa Gördes Ataman-Koç Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Manisa",
+      "adres": "Divan Mah., 23 Nisan Cad., No.:16 -Gördes/MANİSA",
+      "telefon": "(0236) 547 33 47",
+      "latitude": 38.9317582,
+      "longitude": 28.2896934
+    },
+    {
+      "isim": "Kahramanmaraş Ekinözü Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Kahramanmaraş",
+      "adres": "İçmeler Mah., 3076.Sk., No.:1-Ekinözü/KAHRAMANMARAŞ",
+      "telefon": "(0534) 507 16 46",
+      "latitude": 38.047447,
+      "longitude": 37.189056
+    },
+    {
+      "isim": "Mardin Mazıdağı Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Mardin",
+      "adres": "Kayalar Mah., Tur Sk.-Mazıdağı/MARDİN",
+      "telefon": "(0482) 511 14 14",
+      "latitude": 37.4790749,
+      "longitude": 40.4878603
+    },
+    {
+      "isim": "Mardin Ömerli Öğretmenevi ve Akşam Sanat Okulu Müdürlüğü",
+      "tip": "Öğretmenevi",
+      "il": "Mardin",
+      "adres": "Yeni Mah. 3003 Sok. No15 Ömerli/MARDİN",
+      "telefon": "(0543) 896 90 17",
+      "latitude": 37.4065934,
+      "longitude": 40.9523241
+    },
+    {
+      "isim": "Muğla Ula Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Muğla",
+      "adres": "Akyaka Mah.-Ula/MUĞLA",
+      "telefon": "(0539) 775 57 77",
+      "latitude": 37.055701,
+      "longitude": 28.324206
+    },
+    {
+      "isim": "Nevşehir Gülşehir Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Nevşehir",
+      "adres": "Çalışanlar Mahallesi 3001 Sokak No:2, Gülşehir / Nevşehir",
+      "telefon": "(0384) 411 24 11",
+      "latitude": 38.7622326,
+      "longitude": 34.5026572
+    },
+    {
+      "isim": "Rize Çamlıhemşin Yamantürk Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Rize",
+      "adres": "Osman Kurtuluş Cad., No.:13-Çamlıhemşin/RİZE",
+      "telefon": "(0464) 651 70 07",
+      "latitude": 41.049898,
+      "longitude": 41.00373099999999
+    },
+    {
+      "isim": "Sakarya Karasu Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Sakarya",
+      "adres": "Aziziye Mah., 555.Sk., No.:28-Karasu/SAKARYA",
+      "telefon": "(0264) 718 11 26",
+      "latitude": 41.0956091,
+      "longitude": 30.6924623
+    },
+    {
+      "isim": "Sakarya Söğütlü Öğretmenevi ve Akşama Sanat Okulu",
+      "tip": "Öğretmenevi",
+      "il": "Sakarya",
+      "adres": "Camicedit Mah., Atatürk Cad.-Söğütlü/SAKARYA",
+      "telefon": "(0264) 502 24 94",
+      "latitude": 40.903921,
+      "longitude": 30.471664
+    },
+    {
+      "isim": "Sakarya Taraklı Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Sakarya",
+      "adres": "Ulucami Mah., Ankara Cad.-Taraklı/SAKARYA",
+      "telefon": "(0264) 491 30 20",
+      "latitude": 40.39749,
+      "longitude": 30.4956911
+    },
+    {
+      "isim": "Siirt Baykan Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Siirt",
+      "adres": "İnönü Mah., Dr. Taner Özbenli Cad., No.:13-Baykan/SİİRT",
+      "telefon": "(0484) 561 24 91",
+      "latitude": 38.1623333,
+      "longitude": 41.7818468
+    },
+    {
+      "isim": "Sivas Doğanşar Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Sivas",
+      "adres": "Çay Mahallesi, Belediye Sokak No:1 İç Kapı No:3, Doğanşar / Sivas",
+      "telefon": "(0346) 881 23 30",
+      "latitude": 40.214216102918,
+      "longitude": 37.536221985975
+    },
+    {
+      "isim": "Sivas Gölova Selahattin Ayan Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Sivas",
+      "adres": "Fevzi Çakmak Mah., 1.Sk., No.:10-Gölova/SİVAS",
+      "telefon": "(0346) 381 20 58",
+      "latitude": 40.0596827,
+      "longitude": 38.607842
+    },
+    {
+      "isim": "Sivas Koyulhisar Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Sivas",
+      "adres": "Tuğladağı Mah.,4.Cad., No.:30/1-Koyulhisar/SİVAS",
+      "telefon": "(0346) 341 20 58",
+      "latitude": 40.2900662,
+      "longitude": 37.8318176
+    },
+    {
+      "isim": "Trabzon Sürmene İnci Hamitcan Aksoy Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Trabzon",
+      "adres": "Sahil Cad., No.:102-Sürmene/TRABZON",
+      "telefon": "(0462) 747 14 53",
+      "latitude": 40.9124506,
+      "longitude": 40.1187301
+    },
+    {
+      "isim": "Tunceli Pertek Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Tunceli",
+      "adres": "İstiklal Mahallesi, Yaşar Kemal Caddesi No:7/G, Pertek / Tunceli",
+      "telefon": "(0428) 651 32 41",
+      "latitude": 38.8655563,
+      "longitude": 39.327653
+    },
+    {
+      "isim": "Şanlıurfa Karaköprü Onikilier Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Şanlıurfa",
+      "adres": "Akpıyar Mah., 4068 Sk., No.:1-Karaköprü/ŞANLIURFA",
+      "telefon": "(0414) 347 20 30",
+      "latitude": 37.2133071,
+      "longitude": 38.7957004
+    },
+    {
+      "isim": "Yozgat Şefaatli Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Yozgat",
+      "adres": "Fatih Mah., Yozgat Cad., No.:2-Şefaatli/YOZGAT",
+      "telefon": "(0354) 564 15 35",
+      "latitude": 39.5018738,
+      "longitude": 34.7580806
+    },
+    {
+      "isim": "Yozgat Yenifakılı Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Yozgat",
+      "adres": "Yazlak Mah., Hastane Cad., No.:15/1-Yenifakılı/YOZGAT",
+      "telefon": "(0354) 612 18 14",
+      "latitude": 39.2133316,
+      "longitude": 35.0081659
+    },
+    {
+      "isim": "Şırnak İdil Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Şırnak",
+      "adres": "Merkez, İdil / Şırnak",
+      "telefon": "(0486) 551 21 94",
+      "latitude": 37.3388986,
+      "longitude": 41.8964778
+    },
+    {
+      "isim": "Şırnak Uludere Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Şırnak",
+      "adres": "Kılaban Mah., Uludere Yolu-Uludere/ŞIRNAK",
+      "telefon": "(0486) 351 22 23",
+      "latitude": 37.446738,
+      "longitude": 42.8523217
+    },
+    {
+      "isim": "Karabük Eflani Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Karabük",
+      "adres": "Candaroğulları Mah., Lise Cad.-Eflani/KARABÜK",
+      "telefon": "(0370) 461 20 44",
+      "latitude": 41.4267065,
+      "longitude": 32.955615
+    },
+    {
+      "isim": "Osmaniye Düziçi Öğretmenevi",
+      "tip": "Öğretmenevi",
+      "il": "Osmaniye",
+      "adres": "İrfanlı Mah., Ali Lütfü Dağlar Cad., No.:9-Düziçi/OSMANİYE",
+      "telefon": "(0537) 607 00 17",
+      "latitude": 37.2575078,
+      "longitude": 36.4560708
+    },
+    {
+      "isim": "Adana TEDAŞ Misafirhanesi",
+      "tip": "TEDAŞ Misafirhanesi",
+      "il": "Adana",
+      "adres": "Yenidoğan Mahallesi, Yaşar Doğu Caddesi, No:251, Yüreğir / Adana",
+      "telefon": "(0322) 346 09 51",
+      "latitude": 37.0348787,
+      "longitude": 35.3424691
+    },
+    {
+      "isim": "Adıyaman Üniversitesi Turizm Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Adıyaman",
+      "adres": "Altınşehir Mahallesi, 3005 Sokak, No:13-Merkez/ADIYAMAN",
+      "telefon": "(0416) 223 28 64",
+      "latitude": 37.7478544,
+      "longitude": 38.2322909
+    },
+    {
+      "isim": "İller Bankası A.Ş. Antalya Bölge Müdürlüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Antalya",
+      "adres": "Kültür Mah., 1801 Sk., No.:11-Kepez/ANTALYA",
+      "telefon": "(0242) 227 05 12",
+      "latitude": 36.870497,
+      "longitude": 30.736942
+    },
+    {
+      "isim": "Antalya Manavgat Maliye Misafirhanesi",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Antalya",
+      "adres": "Aşağı Pazarcı Mah., 1001.Sk.-Manavgat/ANTALYA",
+      "telefon": "(0242) 742 05 76",
+      "latitude": 36.7843137,
+      "longitude": 31.4508348
+    },
+    {
+      "isim": "Bingöl Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Bingöl",
+      "adres": "Yenişehir Mah., Genç Cad., No.:1/99, Askeri Lojmanlar-Merkez/BİNGÖL",
+      "telefon": "(0426) 213 13 18",
+      "latitude": 38.881256,
+      "longitude": 40.50274599999999
+    },
+    {
+      "isim": "Çankırı Ilgaz Kış Sporları Eğitim Merkezi",
+      "tip": "Orduevi",
+      "il": "Çankırı",
+      "adres": "Ilgaz Dağı, Doruk Mevkii, Ilgaz/Çankırı",
+      "telefon": "(0366) 239 10 01",
+      "latitude": 41.0752229,
+      "longitude": 33.7303783
+    },
+    {
+      "isim": "Denizli Askeri Gazinosu",
+      "tip": "Orduevi",
+      "il": "Denizli",
+      "adres": "Çamarcılar Sokak, 20150 Merkezefendi / Denizli",
+      "telefon": "(0258) 265 54 37",
+      "latitude": 37.7665877,
+      "longitude": 29.0810171
+    },
+    {
+      "isim": "Edirne İpsala 116. Jandarma Tesisleri",
+      "tip": "Orduevi",
+      "il": "Edirne",
+      "adres": "Ahırköy Yolu 1. Km İpsala / EDİRNE",
+      "telefon": "(0284) 616 90 10",
+      "latitude": 40.9003273,
+      "longitude": 26.3724212
+    },
+    {
+      "isim": "Elazığ Askeri Gazinosu",
+      "tip": "Orduevi",
+      "il": "Elazığ",
+      "adres": "Üniversite Mahallesi, Yahya Kemal Caddesi No:105 Merkez / ELAZIĞ",
+      "telefon": "(0424) 218 19 00",
+      "latitude": 38.674816,
+      "longitude": 39.222515
+    },
+    {
+      "isim": "Gümüşhane Jandarma Sosyal Tesis Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Gümüşhane",
+      "adres": "Karaer Mah., Ziya Gökalp Cad., No.:15-Merkez/GÜMÜŞHANE",
+      "telefon": "(0456) 213 20 06",
+      "latitude": 40.4598468,
+      "longitude": 39.4823565
+    },
+    {
+      "isim": "Hakkari Yüksekova Askeri Gazinosu",
+      "tip": "Orduevi",
+      "il": "Hakkari",
+      "adres": "Yüksekova 3. Piyade Tümen Komutanlığı, Yüksekova / Hakkari",
+      "telefon": "(0438) 351 25 30",
+      "latitude": 37.605492,
+      "longitude": 44.337941
+    },
+    {
+      "isim": "İstanbul Pendik Pavli Vardiya Yatakhanesi Şb.Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İstanbul",
+      "adres": "Kaynarca Mah., Sahil Blv., No.: 1-Pendik/İSTANBUL",
+      "telefon": "(0216) 395 19 15",
+      "latitude": 40.8697767,
+      "longitude": 29.2624443
+    },
+    {
+      "isim": "Kocaeli Darıca Yerel Özel Eğitim Merkezi (Kamp)",
+      "tip": "Kamu Misafirhanesi",
+      "il": "Kocaeli",
+      "adres": "Bayramoğlu Mahallesi Darıca / KOCAELİ",
+      "telefon": "(0552) 737 33 76",
+      "latitude": 40.7662989,
+      "longitude": 29.3711157
+    },
+    {
+      "isim": "Kocaeli Kandıra Kefken Kampı",
+      "tip": "Orduevi",
+      "il": "Kocaeli",
+      "adres": "Kefken Sahil, Kandıra / Kocaeli",
+      "telefon": "",
+      "latitude": 41.1736847,
+      "longitude": 30.2325279
+    },
+    {
+      "isim": "Konya Subay Orduevi",
+      "tip": "Orduevi",
+      "il": "Konya",
+      "adres": "Meram, Konya",
+      "telefon": "(0332) 351 75 45",
+      "latitude": 37.8730265,
+      "longitude": 32.495312
+    },
+    {
+      "isim": "Kütahya Hava Er Eğitim K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Kütahya",
+      "adres": "Hava Er Eğitim Tugay K.lığı Yerleşkesi, Perli Mah., Alayunt Sk.-Merkez/KÜTAHYA",
+      "telefon": "(0274) 271 60 70",
+      "latitude": 39.4132012,
+      "longitude": 30.0224274
+    },
+    {
+      "isim": "Muş Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Muş",
+      "adres": "Hürriyet Mah., Atatürk Blv.-Merkez/MUŞ",
+      "telefon": "(0436) 212 25 37",
+      "latitude": 38.740619,
+      "longitude": 41.4962161
+    },
+    {
+      "isim": "Muş Jandarma Sosyal Tesis Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Muş",
+      "adres": "Muş İl Jandarma K.lığı Yerleşkesi, Sütlüce Mah., No.77-Merkez/MUŞ",
+      "telefon": "(0436) 212 57 52",
+      "latitude": 38.734561,
+      "longitude": 41.491038
+    },
+    {
+      "isim": "Niğde Bor Askeri Misafirhanesi (Gazino)",
+      "tip": "Orduevi",
+      "il": "Niğde",
+      "adres": "7. Ana Bakım Merkez Komutanlığı (Şehit Albay Nuri Pamir Kışlası) içi, Bor/Niğde",
+      "telefon": "(0388) 311 71 12",
+      "latitude": 37.8588383,
+      "longitude": 34.5586999
+    },
+    {
+      "isim": "Şanlıurfa Jandarma Sosyal Tesisleri",
+      "tip": "Orduevi",
+      "il": "Şanlıurfa",
+      "adres": "Şehitlik Mah., Şehit Nusret Cad., No.:30/1-Karaköprü/ŞANLIURFA",
+      "telefon": "(0414) 313 15 36",
+      "latitude": 37.1610937,
+      "longitude": 38.7845824
+    },
+    {
+      "isim": "Şırnak Askeri Gazinosu",
+      "tip": "Orduevi",
+      "il": "Şırnak",
+      "adres": "Yeni Mah. Orgeneral Edip Başer Cad., Merkez/Şırnak",
+      "telefon": "(0486) 216 10 03",
+      "latitude": 37.520667,
+      "longitude": 42.458472
+    },
+    {
+      "isim": "Ankara Ticaret Bakanlığı Eğitim Merkezi ve Konukevi",
+      "tip": "Konukevi",
+      "il": "Ankara",
+      "adres": "Balıkhisar Mah., Balıkhisar Köy İçi Küme Evleri, No.: 685-Akyurt/ANKARA",
+      "telefon": "(0312) 398 21 99",
+      "latitude": 40.0985859,
+      "longitude": 32.9817102
+    },
+    {
+      "isim": "Ankara Türk Eğitim-Sen Öğrenci Misafirhanesi",
+      "tip": "Kamu Misafirhanesi",
+      "il": "Ankara",
+      "adres": "Hacı Bayram Mahallesi Kazım Karabekir Caddesi No:136, Altındağ/Ankara",
+      "telefon": "(0312) 502 30 05",
+      "latitude": 39.9511395,
+      "longitude": 32.8553599
+    },
+    {
+      "isim": "Ankara Açık Ceza İnfaz Kurumu Adaletevi Misafirhanesi",
+      "tip": "Adalet Bakanlığı Misafirhanesi",
+      "il": "Ankara",
+      "adres": "Üsküp Cad., No:38-Çankaya/ANKARA",
+      "telefon": "(0312) 467 75 03",
+      "latitude": 39.89257,
+      "longitude": 32.857312
+    },
+    {
+      "isim": "Ankara Türkiye Belediyeler Birliği Konukevi",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Ankara",
+      "adres": "Kızılay Mah., Meşrutiyet Cad. Selanik-2 Sok. No.: 57-Çankaka/ANKARA",
+      "telefon": "(0312) 419 21 33",
+      "latitude": 39.916959,
+      "longitude": 32.858095
+    },
+    {
+      "isim": "Kahramanmaraş Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Kahramanmaraş",
+      "adres": "Hasancıklı Mahallesi, Kayseri-Maraş Yolu Üzeri, 46100 Onikişubat / Kahramanmaraş",
+      "telefon": "(0344) 231 22 77",
+      "latitude": 37.609052,
+      "longitude": 36.779538
+    },
+    {
+      "isim": "Konya Fidanlık Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Konya",
+      "adres": "Meram / Konya",
+      "telefon": "(0332) 327 02 92",
+      "latitude": 37.8226542,
+      "longitude": 32.4237872
+    },
+    {
+      "isim": "Kütahya Belediyesi Misafirhanesi",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Kütahya",
+      "adres": "30 Ağustos Mah., Harun Kahya Cad., No.:4-Merkez/KÜTAHYA",
+      "telefon": "(0539) 847 26 96",
+      "latitude": 39.4085381,
+      "longitude": 30.0015121
+    },
+    {
+      "isim": "Türkiye Diyanet Vakfı Manisa Konukevi",
+      "tip": "Diyanet Misafirhanesi",
+      "il": "Manisa",
+      "adres": "Güzelyurt Mah., İngolstadt Blv., No.:16/A-Yunusemre/MANİSA",
+      "telefon": "(0236) 233 13 43",
+      "latitude": 38.6288721,
+      "longitude": 27.3866607
+    },
+    {
+      "isim": "İzmir Urla Polisevi",
+      "tip": "Polisevi",
+      "il": "İzmir",
+      "adres": "Denizli Mah., Yalı Cad., No.:4-Urla/İZMİR",
+      "telefon": "(0232) 752 08 02",
+      "latitude": 38.393702,
+      "longitude": 26.7484192
+    },
+    {
+      "isim": "Antalya Alanya Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Antalya",
+      "adres": "Cumhuriyet Mahallesi, Ahmet Tokuş Bulvarı No:183, 07400 Alanya / Antalya",
+      "telefon": "",
+      "latitude": 36.5410598,
+      "longitude": 32.0246523
+    },
+    {
+      "isim": "Eskişehir Orman Bölge Müdürlüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Eskişehir",
+      "adres": "Akarbaşı Mahallesi Mustafa Kemal Atatürk Cad. No:53 Odunpazarı/Eskişehir",
+      "telefon": "(0222) 230 37 80",
+      "latitude": 39.7692118,
+      "longitude": 30.5167957
+    },
+    {
+      "isim": "Balıkesir PTT Misafirhanesi",
+      "tip": "PTT Misafirhanesi",
+      "il": "Balıkesir",
+      "adres": "Gümüşçeşme Mahallesi, Kepsut Caddesi No:279, Altıeylül / Balıkesir",
+      "telefon": "(0266) 244 95 57",
+      "latitude": 39.652969,
+      "longitude": 27.9190784
+    },
+    {
+      "isim": "Balıkesir Ayvalık Vilayetler Evi (VE Hotels)",
+      "tip": "Kamu Misafirhanesi",
+      "il": "Balıkesir",
+      "adres": "Küçükköy Mah. Mustafa Kemal Atatürk Blv. No:47 Sarımsaklı / Ayvalık / Balıkesir",
+      "telefon": "(0266) 205 01 85",
+      "latitude": 39.269162,
+      "longitude": 26.6526587
+    },
+    {
+      "isim": "Bingöl Çevre ve Şehircilik İl Müdürlüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Bingöl",
+      "adres": "Şehit Mustafa Gündoğdu Mah., Zeki Ergezen Blv., Düzagaç-Merkez/BİNGÖL",
+      "telefon": "(0426) 213 11 59",
+      "latitude": 38.9020769,
+      "longitude": 40.5016216
+    },
+    {
+      "isim": "Bolu Karayolları 41. Şube Şefliği Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Bolu",
+      "adres": "Kürkçüler Cad, No:1/1A-Merkez/BOLU",
+      "telefon": "(0374) 215 10 79",
+      "latitude": 40.738737,
+      "longitude": 31.5622344
+    },
+    {
+      "isim": "Bursa Çekirge Polis Eğitim ve Dinlenme Tesisi",
+      "tip": "Polisevi",
+      "il": "Bursa",
+      "adres": "Çekirge Mahallesi, Selvinaz Sokak No:5, Osmangazi / Bursa",
+      "telefon": "",
+      "latitude": 40.1953,
+      "longitude": 29.0286
+    },
+    {
+      "isim": "Çankırı İl Özel İdaresi Misafirhanesi",
+      "tip": "İl Özel İdaresi Misafirhanesi",
+      "il": "Çankırı",
+      "adres": "Cumhuriyet Mahallesi, Şehit Nurettin Cinsoy Sokak, 60. Yıl İş Hanı, Merkez / Çankırı",
+      "telefon": "(0376) 213 31 35",
+      "latitude": 40.6005139,
+      "longitude": 33.6145297
+    },
+    {
+      "isim": "Bitlis Tatvan Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Bitlis",
+      "adres": "Aydınlar Mahallesi, Cumhuriyet Caddesi No:12, 13200 Tatvan / Bitlis",
+      "telefon": "(0434) 827 59 50",
+      "latitude": 38.50258,
+      "longitude": 42.279735
+    },
+    {
+      "isim": "Çanakkale Gelibolu Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Çanakkale",
+      "adres": "Alaeddin Mahallesi, Kore Kahramanlar Caddesi, Gelibolu Otogarı No:47, Gelibolu / Çanakkale",
+      "telefon": "(0286) 566 15 67",
+      "latitude": 40.407613,
+      "longitude": 26.6649008
+    },
+    {
+      "isim": "Çorum Polisevi",
+      "tip": "Polisevi",
+      "il": "Çorum",
+      "adres": "İnönü Cad., Emniyet Sk., No.:1-Merkez/ÇORUM",
+      "telefon": "(0364) 224 10 09",
+      "latitude": 40.5472815,
+      "longitude": 34.9519334
+    },
+    {
+      "isim": "Denizli Pamukkale Üniversitesi Sosyal Tesisleri ve Konukevi",
+      "tip": "Üniversite Konukevi",
+      "il": "Denizli",
+      "adres": "Çamlaraltı Mah., Hüseyin Yılmaz Cad., 65/A-Pamukkale/DENİZLİ",
+      "telefon": "(0258) 296 37 51",
+      "latitude": 37.7398443,
+      "longitude": 29.0943016
+    },
+    {
+      "isim": "Şehit Altuğ Verdi Rize Polisevi",
+      "tip": "Polisevi",
+      "il": "Rize",
+      "adres": "Alipaşa Mahallesi, Meydanlar Sokak No:4, Rize Merkez / Rize",
+      "telefon": "",
+      "latitude": 41.0227,
+      "longitude": 40.4628
+    },
+    {
+      "isim": "Siirt Askeri Gazinosu",
+      "tip": "Orduevi",
+      "il": "Siirt",
+      "adres": "Kooperatif Mahallesi, Nihat Aykut Caddesi, Merkez / Siirt",
+      "telefon": "(0484) 223 44 40",
+      "latitude": 37.933333,
+      "longitude": 41.95
+    },
+    {
+      "isim": "Tokat Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Tokat",
+      "adres": "Ali Paşa Mah., Gaziosmanpaşa Blv., 17.Sk.No.:1-Merkez/TOKAT",
+      "telefon": "(0356) 214 31 31",
+      "latitude": 40.3268899,
+      "longitude": 36.554296
+    },
+    {
+      "isim": "Giresun Karayolları 104.Şube Şefliği Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Giresun",
+      "adres": "Teyyaredüzü Mah., Atatürk Blv., No.:349-Merkez/GİRESUN",
+      "telefon": "(0454) 215 16 81",
+      "latitude": 40.911625,
+      "longitude": 38.347476
+    },
+    {
+      "isim": "Giresun Orman Bölge Müdürlüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Giresun",
+      "adres": "Çıtlakkale Mah., Atatürk Blv., No.:135-Merkez/GİRESUN",
+      "telefon": "(0454) 217 06 28",
+      "latitude": 40.9076479,
+      "longitude": 38.363319
+    },
+    {
+      "isim": "Yeşil Giresun Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Giresun",
+      "adres": "Erikliman Mah., Devret Cad., Kültür Sk., No.:4- Merkez/GİRESUN",
+      "telefon": "(0454) 217 14 44",
+      "latitude": 40.9237478,
+      "longitude": 38.3152247
+    },
+    {
+      "isim": "Giresun DSİ Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Giresun",
+      "adres": "Çıtlakkale Mah., Ürün Sk.-Merkez/GİRESUN",
+      "telefon": "(0454) 215 52 82",
+      "latitude": 40.9050311,
+      "longitude": 38.362219
+    },
+    {
+      "isim": "Hakkari Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Hakkari",
+      "adres": "Merzan Mahallesi, Karayolları 114. Şube Şefliği, 30000 Merkez / Hakkari",
+      "telefon": "",
+      "latitude": 37.5754666,
+      "longitude": 43.740989
+    },
+    {
+      "isim": "DSİ 63.Şube Md.lüğü Hatay Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Hatay",
+      "adres": "Kanatlı Mah.,  Atatürk Cad. No.:65-Antakya/HATAY",
+      "telefon": "(0326) 214 40 40",
+      "latitude": 36.2117186,
+      "longitude": 36.159824
+    },
+    {
+      "isim": "Hatay Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Hatay",
+      "adres": "Güzelburç Mahallesi, E-5 Karayolu Üzeri, 31000 Antakya / Hatay",
+      "telefon": "(0326) 225 12 00",
+      "latitude": 36.4132377,
+      "longitude": 36.0027616
+    },
+    {
+      "isim": "Isparta Karayolları 135.Şube Şefliği Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Isparta",
+      "adres": "Sanayi Mah., Doğan Kımıllı Cd., No.:64-Merkez/ISPARTA",
+      "telefon": "(0246) 232 90 94",
+      "latitude": 37.7755638,
+      "longitude": 30.5577709
+    },
+    {
+      "isim": "Isparta Orman Bölge Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Isparta",
+      "adres": "Bahçelievler Mah., 102 Cad., No.:71/A-Merkez/ISPARTA",
+      "telefon": "(0246) 228 53 00",
+      "latitude": 37.7626487,
+      "longitude": 30.55370499999999
+    },
+    {
+      "isim": "İstanbul Beyoğlu PTT Misafirhanesi",
+      "tip": "PTT Misafirhanesi",
+      "il": "İstanbul",
+      "adres": "Tomtom Mah., Yeni Çarşı Cad., No.:4-Beyoğlu/İSTANBUL",
+      "telefon": "(0212) 252 01 40",
+      "latitude": 41.0330744,
+      "longitude": 28.9773007
+    },
+    {
+      "isim": "İzmir Balçova Termal Otel ve Sosyal Tesisleri",
+      "tip": "Kamu Misafirhanesi",
+      "il": "İzmir",
+      "adres": "Vali Hüseyin Öğütcen Caddesi No:16/1 İç Kapı No:1, 35330 Balçova / İzmir",
+      "telefon": "",
+      "latitude": 38.3880624,
+      "longitude": 27.0353145
+    },
+    {
+      "isim": "İzmir Narlıdere Polisevi (Moral Eğitim Merkezi)",
+      "tip": "Polisevi",
+      "il": "İzmir",
+      "adres": "Huzur Mahallesi, Tuna Caddesi No: 80, Narlıdere / İzmir",
+      "telefon": "",
+      "latitude": 38.39114,
+      "longitude": 27.000323
+    },
+    {
+      "isim": "İzmir Tarım ve Orman Bakanlığı Foça Kampı",
+      "tip": "Orman Misafirhanesi",
+      "il": "İzmir",
+      "adres": "İsmetpaşa Mah., Yeni Foça Yolu 2 Km.-Foça/İZMİR",
+      "telefon": "(0232) 812 24 16",
+      "latitude": 38.687147,
+      "longitude": 26.738115
+    },
+    {
+      "isim": "İzmir Yeni Foça Polisevi (Foça)",
+      "tip": "Polisevi",
+      "il": "İzmir",
+      "adres": "Fevzi Çakmak Mahallesi, Oruç Reis Caddesi No:2, Yenifoça, Foça / İzmir",
+      "telefon": "(0232) 814 72 94",
+      "latitude": 38.7445,
+      "longitude": 26.8355
+    },
+    {
+      "isim": "İzmir Bergama Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İzmir",
+      "adres": "Maltepe Mah., Atatürk Blv.-Bergama/İZMİR",
+      "telefon": "(0232) 631 11 72",
+      "latitude": 39.1101228,
+      "longitude": 27.1716107
+    },
+    {
+      "isim": "İzmir Çeşme Polisevi",
+      "tip": "Polisevi",
+      "il": "İzmir",
+      "adres": "İsmet İnönü Mahallesi, 2122. Sokak, 35930 Çeşme / İzmir",
+      "telefon": "(0232) 446 46 80",
+      "latitude": 38.320762,
+      "longitude": 26.31049
+    },
+    {
+      "isim": "İzmir DSİ 2.Bölge Md.lüğü Gümüldür Kampı",
+      "tip": "DSİ Misafirhanesi",
+      "il": "İzmir",
+      "adres": "Cumhuriyet Mah., 6401 Sk., No.: 1, Gümüldür-Menderes/İZMİR",
+      "telefon": "(0232) 793 11 72",
+      "latitude": 38.082292,
+      "longitude": 27.011146
+    },
+    {
+      "isim": "Konya Ereğli Polisevi",
+      "tip": "Polisevi",
+      "il": "Konya",
+      "adres": "Hıdırlı Mahallesi, İsmetpaşa Caddesi No:2, Ereğli / Konya",
+      "telefon": "(0332) 713 25 47",
+      "latitude": 37.5133,
+      "longitude": 34.0467
+    },
+    {
+      "isim": "Kırşehir Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Kırşehir",
+      "adres": "Kırşehir Karayolları İl Md.lüğü Yerleşkesi, Güldiken Mah., Aksaray-Ortaköy Yolu Üzeri-Merkez/KIRŞEHİR",
+      "telefon": "(0386) 262 11 77",
+      "latitude": 39.0979082,
+      "longitude": 34.1670899
+    },
+    {
+      "isim": "Kilis İl Özel İdare Misafirhanesi",
+      "tip": "İl Özel İdaresi Misafirhanesi",
+      "il": "Kilis",
+      "adres": "Ebulüle Mah., Mercidabık Cad., No.:125-Merkez/KİLİS",
+      "telefon": "(0348) 813 99 68",
+      "latitude": 36.7105465,
+      "longitude": 37.11564
+    },
+    {
+      "isim": "Manisa Ege Linyitleri İşletmesi Md.lüğü Misafirhanesi",
+      "tip": "Konukevi",
+      "il": "Manisa",
+      "adres": "Turgutalp Mah., No.:40-Soma/MANİSA",
+      "telefon": "(0236) 613 23 26",
+      "latitude": 39.185113,
+      "longitude": 27.608792
+    },
+    {
+      "isim": "Sakarya Üniversitesi Kırkpınar Turizm Meslek Yüksekokulu Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Sakarya",
+      "adres": "Kırkpınar Mah., Taşkın Sk.-Sapanca/SAKARYA",
+      "telefon": "(0264) 592 25 30",
+      "latitude": 40.6997117,
+      "longitude": 30.2014633
+    },
+    {
+      "isim": "Tekirdağ Çerkezköy Polisevi",
+      "tip": "Polisevi",
+      "il": "Tekirdağ",
+      "adres": "Gazi Mustafa Kemalpaşa Mahallesi, Şehit Erdinç Duran Sokak, Çerkezköy / Tekirdağ",
+      "telefon": "(0282) 726 81 55",
+      "latitude": 41.2824,
+      "longitude": 28.0006
+    },
+    {
+      "isim": "Uşak Polisevi",
+      "tip": "Polisevi",
+      "il": "Uşak",
+      "adres": "İslice Mahallesi, Nuri Şeker Caddesi No:46, Merkez / Uşak",
+      "telefon": "",
+      "latitude": 38.6742,
+      "longitude": 29.4059
+    },
+    {
+      "isim": "Uşak Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Uşak",
+      "adres": "Ünalan Mah., 3.Tuna Sk., No.:19-Merkez/UŞAK",
+      "telefon": "(0276) 227 27 40",
+      "latitude": 38.674822,
+      "longitude": 29.3961647
+    },
+    {
+      "isim": "Van Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Van",
+      "adres": "Eski Elazığ Yolu Üzeri, Edremit / Van",
+      "telefon": "(0432) 312 21 00",
+      "latitude": 38.4025212,
+      "longitude": 43.2135271
+    },
+    {
+      "isim": "Bayburt Baksı Müzesi Konukevi",
+      "tip": "Konukevi",
+      "il": "Bayburt",
+      "adres": "Bayraktar Köyü Çayırlar Mevkii, Merkez / Bayburt",
+      "telefon": "(0531) 662 62 44",
+      "latitude": 40.3851353,
+      "longitude": 40.5665416
+    },
+    {
+      "isim": "Bayburt Loru Han (Kenan Yavuz Etnografya Müzesi Konukevi)",
+      "tip": "Konukevi",
+      "il": "Bayburt",
+      "adres": "Beşpınar Köyü, Demirözü / Bayburt",
+      "telefon": "(0532) 136 41 69",
+      "latitude": 40.030714,
+      "longitude": 39.8553405
+    },
+    {
+      "isim": "Batman Üniversitesi Hasankeyf Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Batman",
+      "adres": "Kültür Mah., 316 Sk., No.: 9-Hasankeyf/BATMAN",
+      "telefon": "(0488) 217 41 83",
+      "latitude": 37.73099,
+      "longitude": 41.4227797
+    },
+    {
+      "isim": "Şırnak Cizre Polisevi (Polis Lokali)",
+      "tip": "Polisevi",
+      "il": "Şırnak",
+      "adres": "Konak Mahallesi Cizre / ŞIRNAK",
+      "telefon": "(0486) 616 10 01",
+      "latitude": 37.3259,
+      "longitude": 42.1917
+    },
+    {
+      "isim": "Şırnak Silopi Polisevi",
+      "tip": "Polisevi",
+      "il": "Şırnak",
+      "adres": "Merkez, Silopi / Şırnak",
+      "telefon": "(0486) 518 46 20",
+      "latitude": 37.2484,
+      "longitude": 42.4695
+    },
+    {
+      "isim": "Kayseri Erciyes Jandarma Kış Eğitim Merkezi K.lığı",
+      "tip": "Orduevi",
+      "il": "Kayseri",
+      "adres": "Hisarcık Mah., Tekir Yaylası, No.:45-Melikgazi/KAYSERİ",
+      "telefon": "(0352) 342 20 88",
+      "latitude": 38.5409639,
+      "longitude": 35.5294194
+    },
+    {
+      "isim": "Antalya Alanya Ümit Altay Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Antalya",
+      "adres": "Konaklı Mahallesi, Atatürk Caddesi No:30, Alanya / Antalya",
+      "telefon": "(0552) 760 04 37",
+      "latitude": 36.5933518,
+      "longitude": 31.857414
+    },
+    {
+      "isim": "Antalya Kemer Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Antalya",
+      "adres": "Yeni Mahalle Dr. Derviş Eroğlu Dörtyol Bulvarı No:5, Kemer / Antalya",
+      "telefon": "(0242) 814 73 46",
+      "latitude": 36.6013405,
+      "longitude": 30.5580594
+    },
+    {
+      "isim": "Antalya Kaş Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Antalya",
+      "adres": "Gökçeören Mahallesi, Gökseki Sokak, Kaş / Antalya",
+      "telefon": "(0552) 704 67 04",
+      "latitude": 36.199311,
+      "longitude": 29.642643
+    },
+    {
+      "isim": "Erzurum Oltu Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Erzurum",
+      "adres": "Yasin Haşimoğlu Mah., Ahmet Yesevi Cad., No.:1-Oltu/ERZURUM",
+      "telefon": "(0442) 816 63 05",
+      "latitude": 40.542285,
+      "longitude": 41.98554559999999
+    },
+    {
+      "isim": "Muğla Bodrum Turgut Reis Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Muğla",
+      "adres": "Akçaalan Mah. Cumhuriyet Bulvarı No:136, PK:48400, Bodrum/Muğla",
+      "telefon": "",
+      "latitude": 37.0197477,
+      "longitude": 27.2802233
+    },
+    {
+      "isim": "Muğla Sıtkı Koçman Üniversitesi Akyaka Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Muğla",
+      "adres": "Akyaka Mah., Hasan Hüseyin Şahin Sk.-Ula/MUĞLA",
+      "telefon": "(0535) 251 86 68",
+      "latitude": 37.0612926,
+      "longitude": 28.3269327
+    },
+    {
+      "isim": "İzmir Selçuk Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "İzmir",
+      "adres": "Atatürk Mahallesi, Kubilay Caddesi No:3, Selçuk / İzmir",
+      "telefon": "(0232) 892 76 70",
+      "latitude": 37.9471727,
+      "longitude": 27.3701829
+    },
+    {
+      "isim": "İzmir Çeşme Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "İzmir",
+      "adres": "Dalyan Mah., 4202.Sk., No.:12-Çeşme/İZMİR",
+      "telefon": "(0506) 047 14 01",
+      "latitude": 38.3479996,
+      "longitude": 26.304552
+    },
+    {
+      "isim": "Aydın Kuşadası Güvercinada Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Aydın",
+      "adres": "Kadınlar Denizi Mahallesi, Hüseyin Can Caddesi, 7. Sokak No:1, Kuşadası/Aydın",
+      "telefon": "(0256) 622 05 35",
+      "latitude": 37.8357922,
+      "longitude": 27.2404799
+    },
+    {
+      "isim": "Muğla Fethiye Şehit Yüzbaşı Özgür Özekin Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Muğla",
+      "adres": "Kesikkapı Mah., Gaffar Okkan Cad., No.:5-Fethiye/MUĞLA",
+      "telefon": "(0252) 614 35 55",
+      "latitude": 36.6238234,
+      "longitude": 29.116309
+    },
+    {
+      "isim": "Afyonkarahisar Emir Murat Özdilek Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Afyonkarahisar",
+      "adres": "Atatürk Bulvarı Ali Çetinkaya Mahallesi No 6 Merkez / AFYONKARAHİSAR",
+      "telefon": "",
+      "latitude": 38.7569707,
+      "longitude": 30.5535116
+    },
+    {
+      "isim": "Diyarbakır Üçkuyu Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Diyarbakır",
+      "adres": "Üçkuyu Mah., Elazığ Bulvarı Ergani Yolu 12.Km.-Yenişehir/DİYARBAKIR",
+      "telefon": "(0530) 579 55 21",
+      "latitude": 37.9851226,
+      "longitude": 40.1480485
+    },
+    {
+      "isim": "Bursa Şehit Erol Olçok Turizm Mesleki ve Teknik Anadolu Lisesi Şehit Abdullah Tayyip Olçok Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Bursa",
+      "adres": "Yeniceabat Cd., No.:116-Osmangazi̇/BURSA",
+      "telefon": "(0543) 248 83 83",
+      "latitude": 40.2548559,
+      "longitude": 29.0468791
+    },
+    {
+      "isim": "Balıkesir Cunda Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Balıkesir",
+      "adres": "Mithatpaşa Mahallesi 20156 Sokak No:26, Lale Adası, Ayvalık/Balıkesir",
+      "telefon": "(0266) 331 40 90",
+      "latitude": 39.3466144,
+      "longitude": 26.6956763
+    },
+    {
+      "isim": "İzmir Alsancak Tarihi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "İzmir",
+      "adres": "Ziya Gökalp Bulvarı, 1434. Sokak No:12, Alsancak / Konak / İzmir",
+      "telefon": "(0232) 463 42 08",
+      "latitude": 38.4348853,
+      "longitude": 27.1476593
+    },
+    {
+      "isim": "Tekirdağ Şarköy Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Tekirdağ",
+      "adres": "Cumhuriyet Mah., Sarıca Paşa Cad., No.:56-Şarköy/TEKİRDAĞ",
+      "telefon": "(0282) 518 06 18",
+      "latitude": 40.6120171,
+      "longitude": 27.1202974
+    },
+    {
+      "isim": "Antalya Lara Polisevi İktisadi İşletmesi",
+      "tip": "Polisevi",
+      "il": "Antalya",
+      "adres": "Güzeloba Mah. Lara Cad. No:218 Muratpaşa/ANTALYA",
+      "telefon": "(0242) 202 67 75",
+      "latitude": 36.8497706,
+      "longitude": 30.827068
+    },
+    {
+      "isim": "Aydın İLKSAN Didim Sosyal Tesisi",
+      "tip": "Kamu Misafirhanesi",
+      "il": "Aydın",
+      "adres": "Altınkum Mahallesi, 83. Sokak No:18, Didim/Aydın",
+      "telefon": "(0256) 813 34 60",
+      "latitude": 37.356542,
+      "longitude": 27.28938
+    },
+    {
+      "isim": "Aydın TKİ Didim Eğitim ve Dinlenme Tesisi",
+      "tip": "Kamu Misafirhanesi",
+      "il": "Aydın",
+      "adres": "Mersindere Mahallesi, Didim Güllübahçe Yolu No:463, Didim/Aydın",
+      "telefon": "(0256) 831 05 58",
+      "latitude": 37.415535,
+      "longitude": 27.223976
+    },
+    {
+      "isim": "Aydın Demiryol-İş Sendikası Didim Eğitim ve Dinlenme Tesisleri",
+      "tip": "TCDD Misafirhanesi",
+      "il": "Aydın",
+      "adres": "Gaye Sitesi Yanı, Yeşilkent-Didim/AYDIN",
+      "telefon": "(0256) 835 39 01",
+      "latitude": 37.35107,
+      "longitude": 27.326326
+    },
+    {
+      "isim": "Aydın TŞOF Didim Eğitim ve Dinlenme Tesisi",
+      "tip": "Kamu Misafirhanesi",
+      "il": "Aydın",
+      "adres": "Altınkum Mahallesi, Karakol Caddesi No:21, Didim/Aydın",
+      "telefon": "",
+      "latitude": 37.3570724,
+      "longitude": 27.2791899
+    },
+    {
+      "isim": "Balıkesir Gazi Mustafa Kemal Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Balıkesir",
+      "adres": "Maltepe Mah. 237. Sok. No:12-14/2, 10020 Karesi / Balıkesir",
+      "telefon": "(0530) 842 18 81",
+      "latitude": 39.673461,
+      "longitude": 27.8868276
+    },
+    {
+      "isim": "İstanbul Anadolu Hakimevi",
+      "tip": "Hakimevi",
+      "il": "İstanbul",
+      "adres": "İnkılap Mah., Dr.Adnan Büyükdeniz Cad., No.:12-Ümraniye/İSTANBUL",
+      "telefon": "(0216) 642 30 30",
+      "latitude": 41.0318096,
+      "longitude": 29.1150175
+    },
+    {
+      "isim": "Ankara Gölbaşı Hakimevi",
+      "tip": "Hakimevi",
+      "il": "Ankara",
+      "adres": "Gaziosmanpaşa Mahallesi, Sahil Caddesi No:32, 06830 Gölbaşı / Ankara",
+      "telefon": "(0312) 485 15 15",
+      "latitude": 39.7843051,
+      "longitude": 32.8035708
+    },
+    {
+      "isim": "Ankara Kızılcahamam Hakimevi",
+      "tip": "Hakimevi",
+      "il": "Ankara",
+      "adres": "Akçay Mah., Erdoğan Yıldırım Cad., No.:5-Kızılcahamam/ANKARA",
+      "telefon": "(0312) 736 61 53",
+      "latitude": 40.4720419,
+      "longitude": 32.649275
+    },
+    {
+      "isim": "Konya Hakimevi",
+      "tip": "Hakimevi",
+      "il": "Konya",
+      "adres": "Sarıyakup Mah., Topraklık Cad., No.:83-Karatay/KONYA",
+      "telefon": "(0332) 352 21 50",
+      "latitude": 37.8673485,
+      "longitude": 32.5097687
+    },
+    {
+      "isim": "Diyarbakır Hakimevi",
+      "tip": "Hakimevi",
+      "il": "Diyarbakır",
+      "adres": "Fatihpaşa Mahallesi, Direkhane Sokağı No:74, Sur / Diyarbakır",
+      "telefon": "(0412) 502 36 39",
+      "latitude": 37.9124053,
+      "longitude": 40.2439938
+    },
+    {
+      "isim": "Eskişehir Hakimevi",
+      "tip": "Hakimevi",
+      "il": "Eskişehir",
+      "adres": "Dede Mah., Yeşil Efendi Sk., No.:24-Odunpazarı/ESKİŞEHİR",
+      "telefon": "(0222) 230 00 10",
+      "latitude": 39.762098,
+      "longitude": 30.526605
+    },
+    {
+      "isim": "Aydın Söke Zirai Üretim İşletmesi Tarımsal Yayım ve Hizmetiçi Eğitim Merkezi Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Aydın",
+      "adres": "Cumhuriyet Mah., Milas Söke Yolu, Yenidoğan Bld.-Söke/AYDIN",
+      "telefon": "(0256) 521 01 54",
+      "latitude": 37.351815,
+      "longitude": 27.29675
+    },
+    {
+      "isim": "Muğla Köyceğiz Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Muğla",
+      "adres": "Yeni Mah., Muğla-Fethiye Yolu Üzeri, No.:746-Köyceğiz/MUĞLA",
+      "telefon": "(0252) 262 47 25",
+      "latitude": 36.972623,
+      "longitude": 28.696921
+    },
+    {
+      "isim": "Antalya Manavgat Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Antalya",
+      "adres": "Sorgun Mahallesi, Titreyengöl Mevkii, 07600 Manavgat / Antalya",
+      "telefon": "(0242) 756 95 75",
+      "latitude": 36.768351,
+      "longitude": 31.439995
+    },
+    {
+      "isim": "Sivas Mihmandar Uygulama Tesisleri",
+      "tip": "Uygulama Oteli",
+      "il": "Sivas",
+      "adres": "Sivas Cumhuriyet Üniversitesi Kampüsü, Kayseri Caddesi No:101, Merkez / Sivas",
+      "telefon": "",
+      "latitude": 39.6979605,
+      "longitude": 37.0179775
+    },
+    {
+      "isim": "Ankara Polisevi",
+      "tip": "Polisevi",
+      "il": "Ankara",
+      "adres": "Karşıyaka Mahallesi Karşıyaka Küme Evleri 228 Ada/1 Parsel No:427 Gölbaşı / Ankara",
+      "telefon": "(0312) 303 69 33",
+      "latitude": 39.7521514,
+      "longitude": 32.7782833
+    },
+    {
+      "isim": "Ankara Bayındır Otel",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Ankara",
+      "adres": "Balgat Mahallesi, 1419. Cadde No:3, Çankaya / Ankara",
+      "telefon": "",
+      "latitude": 39.910668,
+      "longitude": 32.819144
+    },
+    {
+      "isim": "Eskişehir Meteoroloji 3.Bölge Md.lüğü Misafirhanesi",
+      "tip": "Meteoroloji Misafirhanesi",
+      "il": "Eskişehir",
+      "adres": "Yenidoğan Mah., Cumhuriyet Blv., Buluş Sk., No:164-Odunpazarı/ESKİŞEHİR",
+      "telefon": "(0222) 237 57 85",
+      "latitude": 39.7651359,
+      "longitude": 30.5481332
+    },
+    {
+      "isim": "Tekirdağ Çorlu Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Tekirdağ",
+      "adres": "Hıdırağa Mahallesi, Çorlu - Lüleburgaz Yolu Üzeri, Çorlu / Tekirdağ",
+      "telefon": "(0282) 651 10 82",
+      "latitude": 41.183741,
+      "longitude": 27.774658
+    },
+    {
+      "isim": "Diyarbakır Vilayetler Evi (VE Hotels)",
+      "tip": "Kamu Misafirhanesi",
+      "il": "Diyarbakır",
+      "adres": "Dabaoğlu Mahallesi Sögütlü Sk. No:24 Sur / Diyarbakır",
+      "telefon": "",
+      "latitude": 37.9126116,
+      "longitude": 40.2380523
+    },
+    {
+      "isim": "İzmir Seferihisar Jandarma Sosyal Tesis Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İzmir",
+      "adres": "Hıdırlık Mah., Cumhuriyet Blv.-Seferihisar/İZMİR",
+      "telefon": "(0232) 743 57 25",
+      "latitude": 38.1831059,
+      "longitude": 26.8232967
+    },
+    {
+      "isim": "Edirne Keşan Mecidiye Askeri Kampı (MSB Özel Eğitim Merkezi)",
+      "tip": "Orduevi",
+      "il": "Edirne",
+      "adres": "Mecidiye Köyü, Atatürk Mevkii, Keşan / Edirne",
+      "telefon": "(0284) 737 30 01",
+      "latitude": 40.6416,
+      "longitude": 26.5404
+    },
+    {
+      "isim": "Denizli Karayolları 27.Şube Şefliği Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Denizli",
+      "adres": "İncilipınar Mah., Fevzi Çakmak Blv., No.:236-Pamukkale/DENİZLİ",
+      "telefon": "(0258) 212 54 40",
+      "latitude": 37.7621106,
+      "longitude": 29.1028967
+    },
+    {
+      "isim": "Denizli Orman Bölge Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Denizli",
+      "adres": "Kınıklı Mah., Hüseyin Yılmaz Cad., No.:108-Pamukkale/DENİZLİ",
+      "telefon": "(0258) 212 54 55",
+      "latitude": 37.7365126,
+      "longitude": 29.0907642
+    },
+    {
+      "isim": "İzmir Seferihisar Polisevi (Polis Kampı)",
+      "tip": "Polisevi",
+      "il": "İzmir",
+      "adres": "Cumhuriyet, Payamlı, 35465 Seferihisar / İzmir",
+      "telefon": "(0232) 742 77 10",
+      "latitude": 38.072291,
+      "longitude": 26.925749
+    },
+    {
+      "isim": "Osmaniye Sultan Alparslan Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Osmaniye",
+      "adres": "Çardak Köyü Merkez Mevkii, Merkez Sk. No:303, Merkez/Osmaniye",
+      "telefon": "(0328) 802 41 18",
+      "latitude": 37.090357,
+      "longitude": 36.3079338
+    },
+    {
+      "isim": "Ankara Dışkapı Uzman Erbaş Misafirhanesi",
+      "tip": "Orduevi",
+      "il": "Ankara",
+      "adres": "Zübeyde Hanım Mah., Dışkapı Kavşağı-Altındağ/ANKARA",
+      "telefon": "(0312) 310 45 81",
+      "latitude": 39.9534064,
+      "longitude": 32.8556615
+    },
+    {
+      "isim": "Bursa Tapu Kadastro Vakfı Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Bursa",
+      "adres": "Dikkaldırım, 2. Hülya Sk. No.:5-Osmangazi/BURSA",
+      "telefon": "(0224) 233 18 50",
+      "latitude": 40.2060526,
+      "longitude": 29.0165977
+    },
+    {
+      "isim": "Antalya Kaş Meteoroloji Müdürlüğü Misafirhanesi",
+      "tip": "Meteoroloji Misafirhanesi",
+      "il": "Antalya",
+      "adres": "Andifli Mahallesi, 1. Sokak No:2, 07580 Kaş/Antalya",
+      "telefon": "(0242) 836 28 14",
+      "latitude": 36.2001152,
+      "longitude": 29.6499633
+    },
+    {
+      "isim": "Muğla Marmaris Meteoroloji Misafirhanesi",
+      "tip": "Meteoroloji Misafirhanesi",
+      "il": "Muğla",
+      "adres": "Şirinyer Mah., Fatih Sultan Mehmet Cad., No.:22, Armutalan-Marmaris/MUĞLA",
+      "telefon": "(0252) 417 03 71",
+      "latitude": 36.8389555,
+      "longitude": 28.2451068
+    },
+    {
+      "isim": "Muğla Datça Meteoroloji Misafirhanesi",
+      "tip": "Meteoroloji Misafirhanesi",
+      "il": "Muğla",
+      "adres": "Datça Meteoroloji Md.lüğü Yerleşkesi, İskele Mah., Kargı Yolu Cad., No.:24-Datça/MUĞLA",
+      "telefon": "(0252) 712 29 37",
+      "latitude": 36.720628,
+      "longitude": 27.685259
+    },
+    {
+      "isim": "Diyarbakır Meteoroloji 15.Bölge Md.lüğü Misafirhanesi",
+      "tip": "Meteoroloji Misafirhanesi",
+      "il": "Diyarbakır",
+      "adres": "Körhat Mah., 62.Sk., No.:2-Bağlar/DİYARBAKIR",
+      "telefon": "(0412) 235 41 48",
+      "latitude": 37.9094404,
+      "longitude": 40.2126139
+    },
+    {
+      "isim": "Mersin Anamur Meteoroloji Md.lüğü Misafirhanesi",
+      "tip": "Meteoroloji Misafirhanesi",
+      "il": "Mersin",
+      "adres": "Adnan Menderes Blv., No.:21-Anamur/MERSİN",
+      "telefon": "(0324) 814 47 55",
+      "latitude": 36.7800522,
+      "longitude": 34.5999657
+    },
+    {
+      "isim": "Adana Meteoroloji 6. Bölge Müdürlüğü Misafirhanesi",
+      "tip": "Meteoroloji Misafirhanesi",
+      "il": "Adana",
+      "adres": "Yavuzlar Mah. Kışla Cad. No:236-Yüreğir/ADANA",
+      "telefon": "(0322) 321 13 98",
+      "latitude": 37.0036514,
+      "longitude": 35.3428923
+    },
+    {
+      "isim": "Edirne DSİ 114.Şube Md.lüğü İpsala Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Edirne",
+      "adres": "Dörtyol Mevkii-İpsala/EDİRNE",
+      "telefon": "(0284) 616 90 30",
+      "latitude": 40.929232,
+      "longitude": 26.393941
+    },
+    {
+      "isim": "Muğla Datça Hava Radar Mevzi Komutanlığı Sosyal Tesisleri",
+      "tip": "Orduevi",
+      "il": "Muğla",
+      "adres": "İskele Mahallesi, 48900 Datça/Muğla",
+      "telefon": "",
+      "latitude": 36.716869,
+      "longitude": 27.68488
+    },
+    {
+      "isim": "Zonguldak Ereğli Polisevi",
+      "tip": "Polisevi",
+      "il": "Zonguldak",
+      "adres": "Orhanlar, 67320 Ereğli/Zonguldak",
+      "telefon": "(0372) 322 70 32",
+      "latitude": 41.2861111,
+      "longitude": 31.4116667
+    },
+    {
+      "isim": "Balıkesir Ayvalık Jandarma Sosyal Tesisleri",
+      "tip": "Orduevi",
+      "il": "Balıkesir",
+      "adres": "Sakarya, Atatürk Blv. No:169, 10400 Ayvalık/Balıkesir",
+      "telefon": "(0266) 312 39 35",
+      "latitude": 39.322372,
+      "longitude": 26.6936107
+    },
+    {
+      "isim": "Adana İl Sağlık Md.lüğü Misafirhanesi",
+      "tip": "Sağlık Müdürlüğü Misafirhanesi",
+      "il": "Adana",
+      "adres": "Yeni baraj Mahallesi. Hacı Ömer Sabancı Caddesi. 68009 Sokak. No:4. (Eski Numune Hastanesi Arkası)-Seyhan/ADANA",
+      "telefon": "(0322) 227 19 51",
+      "latitude": 37.0189835,
+      "longitude": 35.3219329
+    },
+    {
+      "isim": "Adana Taşköprü Konukevi",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Adana",
+      "adres": "Ulucamii, 25017. Sk. No: 6, 01010-Seyhan/ADANA",
+      "telefon": "(0501) 751 74 64",
+      "latitude": 36.9840223,
+      "longitude": 35.3325278
+    },
+    {
+      "isim": "Adıyaman Devlet Su İşleri Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Adıyaman",
+      "adres": "Turgut Reis, Atatürk Bulv. No:144-Merkez/ADIYAMAN",
+      "telefon": "(0416) 216 43 12",
+      "latitude": 37.7603371,
+      "longitude": 38.2635564
+    },
+    {
+      "isim": "Afyonkarahisar Orman İşletme Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Afyonkarahisar",
+      "adres": "Ali Galip Caddesi Üzeri- Merkez/AFYONKARAHİSAR",
+      "telefon": "(0272) 215 33 32",
+      "latitude": 38.7619338,
+      "longitude": 30.5448225
+    },
+    {
+      "isim": "Afyonkarahisar Karayolları 31.Şube Şefliği ve Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Afyonkarahisar",
+      "adres": "Karşıyaka, Prof. Dr. Abdülkadir Akcan Cd. No:75- Merkez/AFYONKARAHİSAR",
+      "telefon": "(0272) 217 19 10",
+      "latitude": 38.7801998,
+      "longitude": 30.5566758
+    },
+    {
+      "isim": "Afyonkarahisar Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Afyonkarahisar",
+      "adres": "Fatih Mah., Necmettin Erbakan Blv., No.:60/14-Merkez/AFYONKARAHİSAR",
+      "telefon": "(0272) 216 61 55",
+      "latitude": 38.740978,
+      "longitude": 30.5739579
+    },
+    {
+      "isim": "Ağrı TEİAŞ Misafirhanesi",
+      "tip": "TEİAŞ Misafirhanesi",
+      "il": "Ağrı",
+      "adres": "Fatih Mahallesi, Yıldız Sk., No:27-Merkez/AĞRI",
+      "telefon": "",
+      "latitude": 39.7338239,
+      "longitude": 43.0445338
+    },
+    {
+      "isim": "Ağrı İbrahim Çeçen Üniversitesi Misafirhanesi",
+      "tip": "Üniversite Konukevi",
+      "il": "Ağrı",
+      "adres": "Fırat Mahallesi Yeni Üniversite Caddesi No: 2 AE/1-Merkez/AĞRI",
+      "telefon": "(0472) 215 98 63",
+      "latitude": 39.7928954,
+      "longitude": 43.1795757
+    },
+    {
+      "isim": "Ankara Kr.Hvcl.K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Ankara",
+      "adres": "Bahçekapı Mah., Fatih Sultan Mehmet Blv., No.:183/H, Güvercinlik-Etimesgut/ANKARA",
+      "telefon": "(0312) 252 61 10",
+      "latitude": 39.9447865,
+      "longitude": 32.7479797
+    },
+    {
+      "isim": "Ankara 3.Hv.İs.İnş.Tb.K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Ankara",
+      "adres": "İstanbul Yolu Üzeri Ayaş Kavşağı Karşısı-Etimesgut/ANKARA",
+      "telefon": "(0312) 244 85 50",
+      "latitude": 39.963334,
+      "longitude": 32.678159
+    },
+    {
+      "isim": "Ankara Mürted Hava Meydan K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Ankara",
+      "adres": "Mürted Hava Meydan K.lığı Kışlası-Kahramankazan/ANKARA",
+      "telefon": "(0312) 811 11 80",
+      "latitude": 40.099146,
+      "longitude": 32.598602
+    },
+    {
+      "isim": "Ankara 4.Kolordu K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Ankara",
+      "adres": "PTT Evleri Mah., General Eşref Akıncı Kışlası-Mamak/ANKARA",
+      "telefon": "(0312) 369 57 10",
+      "latitude": 39.9124056,
+      "longitude": 33.0563914
+    },
+    {
+      "isim": "Ankara Polatlı Acıkır Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Ankara",
+      "adres": "58.Topçu Tugay K.lığı Kışlası-Polatlı/ANKARA",
+      "telefon": "(0312) 627 12 18",
+      "latitude": 39.6078234,
+      "longitude": 32.0837445
+    },
+    {
+      "isim": "Ankara Dz.K.K.lığı Kh.Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Ankara",
+      "adres": "Dz.K.K.lığı İnönü Blv. No.:1, Bakanlıklar-Çankaya/ANKARA",
+      "telefon": "(0312) 403 33 33",
+      "latitude": 39.9138796,
+      "longitude": 32.8527367
+    },
+    {
+      "isim": "Ankara Jandarma ve Sahil Güvenlik Akademesi Sosyal Tesis Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Ankara",
+      "adres": "Ahlatlıbel, Beytepe-Çankaya/ANKARA",
+      "telefon": "(0312) 464 50 99",
+      "latitude": 39.84079440000001,
+      "longitude": 32.7463686
+    },
+    {
+      "isim": "Ankara Sahil Güvenlik K.lığı Misafirhanesi",
+      "tip": "Orduevi",
+      "il": "Ankara",
+      "adres": "Kavaklıdere Mah., Gülözü Sk.-Çankaya/ANKARA",
+      "telefon": "(0312) 417 50 50",
+      "latitude": 39.9108061,
+      "longitude": 32.8556988
+    },
+    {
+      "isim": "Ankara Kızılay Uzman Erbaş Misafirhanesi",
+      "tip": "Orduevi",
+      "il": "Ankara",
+      "adres": "Kızılay Mah., İzmir-1 Cad., No.: 25/A-Çankaya/ANKARA",
+      "telefon": "(0312) 419 84 06",
+      "latitude": 39.922866,
+      "longitude": 32.853806
+    },
+    {
+      "isim": "Antalya Jandarma Sosyal Tesis Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Antalya",
+      "adres": "Bayındır Mah., Dumlupınar Blv., No.:136-Muratpaşa/ANTALA",
+      "telefon": "(0242) 238 22 07",
+      "latitude": 36.876634,
+      "longitude": 30.660155
+    },
+    {
+      "isim": "Antalya Hava Meydan K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Antalya",
+      "adres": "Antalya Hava Limanı Yanı, Yenigöl Mah., Serik Cad.-Muratpaşa/ANTALA",
+      "telefon": "(0242) 330 32 50",
+      "latitude": 36.9086961,
+      "longitude": 30.7981855
+    },
+    {
+      "isim": "Sahil Güvenlik Antalya Grup K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Antalya",
+      "adres": "SG Antalya Grup K.lığı, Yeni Liman-Konyaaltı/ANTALYA",
+      "telefon": "(0242) 259 13 76",
+      "latitude": 36.8521524,
+      "longitude": 30.6188314
+    },
+    {
+      "isim": "Antalya Sahil Güvenlik Okul K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Antalya",
+      "adres": "Fabrikalar Mah., Dumlupınar Blv., No.: 39-Kepez/ANTALYA",
+      "telefon": "(0242) 335 13 00",
+      "latitude": 36.9127,
+      "longitude": 30.6655
+    },
+    {
+      "isim": "Antalya Alanya Belediyesi Sosyal Tesisleri",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Antalya",
+      "adres": "Saray Mah., Bebek Sk., No.:2-Alanya/ANTALYA",
+      "telefon": "",
+      "latitude": 36.5438392,
+      "longitude": 31.9874327
+    },
+    {
+      "isim": "Artvin Orduevi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Artvin",
+      "adres": "Çarşı Mah., Hürriyet Cad., No.: 130-Merkez/ARTVİN",
+      "telefon": "(0466) 212 23 65",
+      "latitude": 41.1837449,
+      "longitude": 41.8183247
+    },
+    {
+      "isim": "Artvin Orman Bölge Müdürlüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Artvin",
+      "adres": "Çamlık Cad., No.:10-Merkez/ARTVİN",
+      "telefon": "(0532) 372 73 88",
+      "latitude": 41.1812396,
+      "longitude": 41.8125615
+    },
+    {
+      "isim": "Balıkesir Orman işletme Müdürlüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Balıkesir",
+      "adres": "Çayırhisar Mah., Balıkesir Uşak Yolu Üzeri-Altıeylül/BALIKESİR",
+      "telefon": "(0266) 261 60 60",
+      "latitude": 39.5954778,
+      "longitude": 27.9181634
+    },
+    {
+      "isim": "Balıkesir Bakım Okulu ve Eğitim Merkezi K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Balıkesir",
+      "adres": "Bakım Okulu ve Eğitim Merkezi K.lığı Yerleşkesi, Eski İzmir Yolu, Çayırhisar Altıeylül/BALIKESİR",
+      "telefon": "(0266) 221 20 00",
+      "latitude": 39.6335908,
+      "longitude": 27.8842765
+    },
+    {
+      "isim": "Balıkesir 9.Ana Jet Üs K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Balıkesir",
+      "adres": "9.Ana Jet Üs K.lığı Yerleşkesi, H.Basri Çantay Mah., Hava Loj. A.Dural Sitesi.-Merkez/BALIKESİR",
+      "telefon": "(0266) 243 03 76",
+      "latitude": 39.6503893,
+      "longitude": 27.8891127
+    },
+    {
+      "isim": "Balıkesir İl Özel İdaresi Sosyal Tesisleri",
+      "tip": "İl Özel İdaresi Misafirhanesi",
+      "il": "Balıkesir",
+      "adres": "Eski Kuyumcular Mah., Salih Tozan Cad., Mekik Sok., No.:2-Merkez/BALIKESİR",
+      "telefon": "(0266) 241 64 50",
+      "latitude": 39.6465592,
+      "longitude": 27.8820955
+    },
+    {
+      "isim": "Bitlis İl Sağlık Müdürlüğü Misafirhanesi",
+      "tip": "Sağlık Müdürlüğü Misafirhanesi",
+      "il": "Bitlis",
+      "adres": "Hüsrevpaşa Mah., 1208 Sk., No.: 13-Merkez/BİTLİS",
+      "telefon": "(0434) 228 63 00",
+      "latitude": 38.4316017,
+      "longitude": 42.1327139
+    },
+    {
+      "isim": "Bitlis DSİ Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Bitlis",
+      "adres": "Gazi Bey Mah., Ahmet Eren Blv.-Merkez/BİTLİS",
+      "telefon": "(0434) 246 89 56",
+      "latitude": 38.2904631,
+      "longitude": 42.1216969
+    },
+    {
+      "isim": "Bolu Abant İzzet Baysal Üniversistesi Sosyal Tesisleri",
+      "tip": "Üniversite Konukevi",
+      "il": "Bolu",
+      "adres": "Abant İzzet Baysal Üniversitesi Kampüsü-Merkez/BOLU",
+      "telefon": "(0374) 253 40 20",
+      "latitude": 40.714338,
+      "longitude": 31.5130485
+    },
+    {
+      "isim": "Bursa SGK İl Müdürlüğü Misafirhanesi",
+      "tip": "SGK Misafirhanesi",
+      "il": "Bursa",
+      "adres": "Bursa SGK İl Md.lüğü Yerleşkesi, Demirpaşa Mah., İnönü Cad., No.:114-Osmangazi/BURSA",
+      "telefon": "(0224) 600 10 00",
+      "latitude": 40.1919358,
+      "longitude": 29.07311
+    },
+    {
+      "isim": "Bursa PTT Misafirhanesi",
+      "tip": "PTT Misafirhanesi",
+      "il": "Bursa",
+      "adres": "PTT Heykel Şube Yerleşkesi, Nalbantoğlu Mah., Atatürk Cad., No.:79-Osmangazi/BURSA",
+      "telefon": "(0224) 224 18 25",
+      "latitude": 40.183417,
+      "longitude": 29.061605
+    },
+    {
+      "isim": "Bursa Ziraat Bankası Misafirhanesi",
+      "tip": "Konukevi",
+      "il": "Bursa",
+      "adres": "Kükürtlü Mah., Zübeyde Hanım Cad., No.:48-Osmangazi̇/BURSA",
+      "telefon": "(0224) 234 77 37",
+      "latitude": 40.2096013,
+      "longitude": 29.0190726
+    },
+    {
+      "isim": "Bursa TEİAŞ 2.Bölge Md.lüğü Misafirhanesi",
+      "tip": "TEİAŞ Misafirhanesi",
+      "il": "Bursa",
+      "adres": "Fethiye OSB, Sarı Cd.-Ni̇lüfer/BURSA",
+      "telefon": "(0224) 243 13 30",
+      "latitude": 40.237812,
+      "longitude": 28.968621
+    },
+    {
+      "isim": "İstanbul Teknik Üniversitesi Bursa Konukevi",
+      "tip": "Üniversite Konukevi",
+      "il": "Bursa",
+      "adres": "Çamlıca Mah., Özen Sk., No.:3-Ni̇lüfer/BURSA",
+      "telefon": "(0224) 451 17 73",
+      "latitude": 40.1977166,
+      "longitude": 28.9799952
+    },
+    {
+      "isim": "Bursa Dini İhtisas Merkezi Md.lüğü Misafirhanesi ve TDV Sosyal Tesisleri",
+      "tip": "Diyanet Misafirhanesi",
+      "il": "Bursa",
+      "adres": "Doğanköy Mah., Levent Sk., No.: 6-Ni̇lüfer/BURSA",
+      "telefon": "(0224) 249 61 66",
+      "latitude": 40.2554655,
+      "longitude": 28.9264609
+    },
+    {
+      "isim": "Çanakkale Adalet Bakanlığı Gökçeada Kampı",
+      "tip": "Adalet Bakanlığı Misafirhanesi",
+      "il": "Çanakkale",
+      "adres": "Dereköy Mah.-Gökçeada/ÇANAKKALE",
+      "telefon": "(0286) 897 62 47",
+      "latitude": 40.156422,
+      "longitude": 25.779619
+    },
+    {
+      "isim": "Çanakkale Deniz Hava Üs K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Çanakkale",
+      "adres": "Barbaros Mah., Şehit Gürol Cad.-Merkez/ÇANAKKALE",
+      "telefon": "(0286) 212 05 51",
+      "latitude": 40.1396939,
+      "longitude": 26.4143935
+    },
+    {
+      "isim": "Çanakkale TEİAŞ İletim, İşletme ve Bakım Md.lüğü Misafirhanesi",
+      "tip": "TEİAŞ Misafirhanesi",
+      "il": "Çanakkale",
+      "adres": "Barbaros Mah., Şekerpınar Cad.-Merkez/ÇANAKKALE",
+      "telefon": "(0286) 218 08 50",
+      "latitude": 40.1278297,
+      "longitude": 26.4136157
+    },
+    {
+      "isim": "Çanakkale Karayolları 142.Şube Şefliği Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Çanakkale",
+      "adres": "Sarıcaeli Mah., Çanakkale-İzmir Asfaltı Üzeri-Merkez/ÇANAKKALE",
+      "telefon": "(0286) 214 02 11",
+      "latitude": 40.1053569,
+      "longitude": 26.4057258
+    },
+    {
+      "isim": "Çanakkale Çevre ve Şehircilik İl Müdürlüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Çanakkale",
+      "adres": "Çevre ve Şehircilik İl Müdürlüğü Yerleşkesi, Cevat Paşa Mah., Piri Reis Cad.-Merkez/ÇANAKKALE",
+      "telefon": "(0286) 217 11 97",
+      "latitude": 40.153384,
+      "longitude": 26.4147905
+    },
+    {
+      "isim": "Çankırı Belediyesi Sosyal Tesisi",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Çankırı",
+      "adres": "Eski Orduevi Binası, Cumhuriyet Mah., Tevfik Fikret Cad., No.:2-Merkez/ÇANKIRI",
+      "telefon": "(0376) 212 14 00",
+      "latitude": 40.5977456,
+      "longitude": 33.6158994
+    },
+    {
+      "isim": "Çorum Belediyesi Refakatçi Misafirhanesi",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Çorum",
+      "adres": "Mimar Sinan Mah., Yaydiğin-Merkez/ÇORUM",
+      "telefon": "(0364) 666 19 45",
+      "latitude": 40.53053329999999,
+      "longitude": 34.9359283
+    },
+    {
+      "isim": "Çorum Karayolları 73.Şube Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Çorum",
+      "adres": "Mimar Sinan Mah., İnönü Cad., No.:171-Merkez/ÇORUM",
+      "telefon": "(0553) 240 25 81",
+      "latitude": 40.5363908,
+      "longitude": 34.9370891
+    },
+    {
+      "isim": "Denizli TEİAŞ 21.İletim Tesis ve İşletme Grup Md.lüğü Misafirhanesi",
+      "tip": "TEİAŞ Misafirhanesi",
+      "il": "Denizli",
+      "adres": "Akçeşme Mah.,  2015 Sk., No.:3-Merkezefendi/DENİZLİ",
+      "telefon": "(0258) 377 31 44",
+      "latitude": 37.814654,
+      "longitude": 29.063961
+    },
+    {
+      "isim": "Denizli İl Sağlık Md.lüğü Misafirhanesi",
+      "tip": "Sağlık Müdürlüğü Misafirhanesi",
+      "il": "Denizli",
+      "adres": "Sırakapılar Mah., Şehit Albay Karaoğlanoğlu Cad., No.:1/B-Merkezefendi/DENİZLİ",
+      "telefon": "(0258) 262 36 61",
+      "latitude": 37.7827998,
+      "longitude": 29.0778583
+    },
+    {
+      "isim": "Türkiye Diyanet Vakfı Denizli Konukevi",
+      "tip": "Diyanet Misafirhanesi",
+      "il": "Denizli",
+      "adres": "Mehmet Akif Ersoy Mah., 51/6 Sk., No.:16-Merkezefendi/DENİZLİ",
+      "telefon": "(0258) 377 34 44",
+      "latitude": 37.8057579,
+      "longitude": 29.0227159
+    },
+    {
+      "isim": "Denizli Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Denizli",
+      "adres": "Mehmetçik Mah., Lise Cad., No.:1-Pamukkale/DENİZLİ",
+      "telefon": "(0258) 265 21 21",
+      "latitude": 37.767833,
+      "longitude": 29.0816071
+    },
+    {
+      "isim": "Diyarbakır İl Tarım ve Orman Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Diyarbakır",
+      "adres": "Kooperatifler Mah., Rızvan Ağa Cad., Ofis Semti-Yenişehir/DİYARBAKIR",
+      "telefon": "(0412) 229 60 76",
+      "latitude": 37.921376,
+      "longitude": 40.2229424
+    },
+    {
+      "isim": "Diyarbakır TCDD Misafirhanesi",
+      "tip": "TCDD Misafirhanesi",
+      "il": "Diyarbakır",
+      "adres": "Kooperatifler Mah.-Yenişehir/DİYARBAKIR",
+      "telefon": "(0412) 226 63 92",
+      "latitude": 37.9237142,
+      "longitude": 40.2198213
+    },
+    {
+      "isim": "Türkiye Diyanet Vakfı Diyarbakır Konukevi",
+      "tip": "Diyanet Misafirhanesi",
+      "il": "Diyarbakır",
+      "adres": "Şehitlik Mah., Şehitlik Cad., No.:135/1-Yenişehir/DİYARBAKIR",
+      "telefon": "(0501) 747 74 63",
+      "latitude": 37.8961762,
+      "longitude": 40.2240932
+    },
+    {
+      "isim": "Diyarbakır Büyükşehir Belediyesi Kız Öğrenci Misafirhanesi",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Diyarbakır",
+      "adres": "Yenişehir Mah., Yıldız Sk., No.:6-Yenişehir/DİYARBAKIR",
+      "telefon": "(0549) 833 17 47",
+      "latitude": 37.9196451,
+      "longitude": 40.2352317
+    },
+    {
+      "isim": "Diyarbakır 52.Bakım Fabrika Md.üğü Vardiya Yatakhanesi",
+      "tip": "Orduevi",
+      "il": "Diyarbakır",
+      "adres": "Yolboyu, Piriçlik-Kayapınar/DİYARBAKIR",
+      "telefon": "(0412) 323 31 91",
+      "latitude": 37.903416,
+      "longitude": 40.051582
+    },
+    {
+      "isim": "Diyarbakır Gümrük Md.lüğü Misafirhanesi",
+      "tip": "Gümrük Misafirhanesi",
+      "il": "Diyarbakır",
+      "adres": "Medya Mah.-Kayapınar/DİYARBAKIR",
+      "telefon": "(0412) 224 38 25",
+      "latitude": 37.9584101,
+      "longitude": 40.1714691
+    },
+    {
+      "isim": "Diyarbakır Açık Ceza İnfaz Kurumu Misafirhanesi",
+      "tip": "Adalet Bakanlığı Misafirhanesi",
+      "il": "Diyarbakır",
+      "adres": "Adliye Lojmanları Yerleşkesi, Talaytepe Mah., Talaytepe Küme Evleri, 4020/1 Sk.-Kayapınar/DİYARBAKIR",
+      "telefon": "(0412) 258 02 88",
+      "latitude": 37.955804,
+      "longitude": 40.182874
+    },
+    {
+      "isim": "Diyarbakır 8.Ana Jet Üs K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Diyarbakır",
+      "adres": "Körhat Mah., Karacadağ Blv.-Bağlar/DİYARBAKIR",
+      "telefon": "(0412) 234 04 44",
+      "latitude": 37.9103487,
+      "longitude": 40.2093409
+    },
+    {
+      "isim": "Diyarbakır Çevre ve Şehircilik İl Md.lüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Diyarbakır",
+      "adres": "Selahattin Eyyubi Mah., Turgut Özal Blv.-Bağlar/DİYARBAKIR",
+      "telefon": "(0412) 237 14 06",
+      "latitude": 37.9292195,
+      "longitude": 40.2076652
+    },
+    {
+      "isim": "Diyarbakır Silvan Jandarma Komando Alay K.lığı Sosyal Tesis Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Diyarbakır",
+      "adres": "Feridun Mah., Gazi Cad.-Silvan/DİYARBAKIR",
+      "telefon": "(0412) 711 24 35",
+      "latitude": 38.1387442,
+      "longitude": 41.0189505
+    },
+    {
+      "isim": "Diyarbakır Hani Jandarma Komando Tabur K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Diyarbakır",
+      "adres": "Merkez Mah., Salihbey Cad., No.:49-Hani/DİYARBAKIR",
+      "telefon": "(0412) 651 31 01",
+      "latitude": 38.4472646,
+      "longitude": 40.3476673
+    },
+    {
+      "isim": "Diyarbakır Şehit Er Hayri Ayhan Kışlası Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Diyarbakır",
+      "adres": "Yeşilköy Mah., Yeşilköy Küme Evleri-Ergani/DİYARBAKIR",
+      "telefon": "(0412) 611 80 94",
+      "latitude": 38.24988700000001,
+      "longitude": 39.721148
+    },
+    {
+      "isim": "Diyarbakır Bilgekışla Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Diyarbakır",
+      "adres": "Avcısuyu Devegeçidi Kayapınar-Merkez/DİYARBAKIR",
+      "telefon": "(0412) 335 11 11",
+      "latitude": 38.07139340000001,
+      "longitude": 39.990226
+    },
+    {
+      "isim": "Diyarbakır Orman İşletme Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Diyarbakır",
+      "adres": "İskenderpaşa Mah., İnönü Blv.-Merkez/DİYARBAKIR",
+      "telefon": "(0412) 224 83 04",
+      "latitude": 37.9135446,
+      "longitude": 40.232061
+    },
+    {
+      "isim": "Edirne Süloğlu Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Edirne",
+      "adres": "Merkez Mah., Salih Omurtak Cad.-Süloğlu/EDİRNE",
+      "telefon": "(0284) 311 30 35",
+      "latitude": 41.767485,
+      "longitude": 26.911693
+    },
+    {
+      "isim": "Edirne Maliye Kampı",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Edirne",
+      "adres": "Erikli Sahili, Palmiye Sk., No.:1-Keşan/EDİRNE",
+      "telefon": "(0284) 225 30 98",
+      "latitude": 40.6397402,
+      "longitude": 26.4555589
+    },
+    {
+      "isim": "Edirne İstanbul Üniversitesi Enez Kampı",
+      "tip": "Üniversite Konukevi",
+      "il": "Edirne",
+      "adres": "Gaziömerbey Mah., Atatürk Cad., Altınkum Mevkii-Enez/EDİRNE",
+      "telefon": "(0284) 821 44 76",
+      "latitude": 40.6834671,
+      "longitude": 26.0768508
+    },
+    {
+      "isim": "Edirne Trakya Üniversitesi Enez Kampı",
+      "tip": "Üniversite Konukevi",
+      "il": "Edirne",
+      "adres": "Gaziömerbey Mah., Atatürk Cad., 24.Sk., No.:3/A-Enez/EDİRNE",
+      "telefon": "(0284) 223 10 93",
+      "latitude": 40.692009,
+      "longitude": 26.0686191
+    },
+    {
+      "isim": "Edirne Başakşehir Belediyesi Enez Gençlik Kampı",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Edirne",
+      "adres": "Gaziömerbey Mah., Vakıf-Sahil Yolu-Enez/EDİRNE",
+      "telefon": "",
+      "latitude": 40.66402,
+      "longitude": 26.0878296
+    },
+    {
+      "isim": "Edirne İl Özel İdaresi Misafirhanesi",
+      "tip": "İl Özel İdaresi Misafirhanesi",
+      "il": "Edirne",
+      "adres": "Kocasinan Mah., Prof.Dr.Süheyl Ünver Cad., No.:.2-Merkez/EDİRNE",
+      "telefon": "(0284) 235 64 67",
+      "latitude": 41.67712969999999,
+      "longitude": 26.5557145
+    },
+    {
+      "isim": "Edirne TCDD Yatakhanesi",
+      "tip": "TCDD Misafirhanesi",
+      "il": "Edirne",
+      "adres": "Edirne Gar Md.lüğü Yerleşkesi, İstasyon Mah., Açelya Sk., No.:1-Merkez/EDİRNE",
+      "telefon": "(0284) 235 26 73",
+      "latitude": 41.6555675,
+      "longitude": 26.5803379
+    },
+    {
+      "isim": "Elazığ Meteoroloji 13. Bölge Md.lüğü Misafirhanesi",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Elazığ",
+      "adres": "Gölbaşı Mah., Hazar Gölü Yanı-Sivrice/ELAZIĞ",
+      "telefon": "(0424) 224 35 32",
+      "latitude": 38.488861,
+      "longitude": 39.4012151
+    },
+    {
+      "isim": "Elazığ Karayolları 8. Bölge Dinlenme Tesisi ve Konukevi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Elazığ",
+      "adres": "Gölbaşı Mah., Hazar Gölü Yanı-Sivrice/ELAZIĞ",
+      "telefon": "(0424) 234 67 00",
+      "latitude": 38.488861,
+      "longitude": 39.4012151
+    },
+    {
+      "isim": "Elazığ İl Sağlık Md.lüğü Misafirhanesi",
+      "tip": "Sağlık Müdürlüğü Misafirhanesi",
+      "il": "Elazığ",
+      "adres": "Çaydaçıra Mah., Şehit Korgeneral Hulusi Sayın Blv., No.:6/B-Merkez/ELAZIĞ",
+      "telefon": "(0424) 247 98 60",
+      "latitude": 38.6607772,
+      "longitude": 39.1641327
+    },
+    {
+      "isim": "Erzincan Çevre Şehircilik İl Md.lüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Erzincan",
+      "adres": "İzzetpaşa Mah., Fevzi Paşa Sk.-Merkez/ERZİNCAN",
+      "telefon": "(0446) 226 15 00",
+      "latitude": 39.73783359999999,
+      "longitude": 39.5103241
+    },
+    {
+      "isim": "Erzurum Çevre ve Şehircilik İl Md.lüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Erzurum",
+      "adres": "Muratpaşa Mah., Merkezi Yönetim Cad., No.:1-Yakutiye/ERZURUM",
+      "telefon": "(0442) 235 52 01",
+      "latitude": 39.9030451,
+      "longitude": 41.2679935
+    },
+    {
+      "isim": "Erzurum Atatürk Üniversitesi Konukevi-3",
+      "tip": "Üniversite Konukevi",
+      "il": "Erzurum",
+      "adres": "Atalar Mah., Mecidiye Sk., No.:17-Yakutiye/ERZURUM",
+      "telefon": "(0442) 235 13 01",
+      "latitude": 39.929481,
+      "longitude": 41.294965
+    },
+    {
+      "isim": "Hüseyin Turgut Erzurum Eğitim Merkezi Misafirhanesi",
+      "tip": "Adalet Bakanlığı Misafirhanesi",
+      "il": "Erzurum",
+      "adres": "Kurtuluş Mah., Mektep Sk., No.:2-Yakutiye/ERZURUM",
+      "telefon": "(0442) 242 50 65",
+      "latitude": 39.90649570000001,
+      "longitude": 41.2838
+    },
+    {
+      "isim": "Erzurum Teknik Üniversitesi Konukevi",
+      "tip": "Üniversite Konukevi",
+      "il": "Erzurum",
+      "adres": "Ömer Nasuhi Bilmen Mah., Havaalanı Yolu Cad., No.:53-Yakutiye/ERZURUM",
+      "telefon": "(0552) 156 15 43",
+      "latitude": 39.914992,
+      "longitude": 41.2393611
+    },
+    {
+      "isim": "Erzurum Orduevi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Erzurum",
+      "adres": "Gez Mah., Orduevi Sk., No.:10-Yakutiye/ERZURUM",
+      "telefon": "(0442) 235 41 00",
+      "latitude": 39.9062263,
+      "longitude": 41.2608051
+    },
+    {
+      "isim": "Diyanet Akademisi Erzurum Ömer Nasuhi Bilmen Dini Yüksek İhtisas Merkezi Misafirhanesi",
+      "tip": "Diyanet Misafirhanesi",
+      "il": "Erzurum",
+      "adres": "Selçuklu Mah., Semerkent Sk., No.:7-Aziziye/ERZURUM",
+      "telefon": "(0442) 327 33 83",
+      "latitude": 39.91527749999999,
+      "longitude": 41.1952242
+    },
+    {
+      "isim": "Erzurum Ilıca Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Erzurum",
+      "adres": "3.Ulş.Ynt.Mrk.K.lığı-Aziziye/ERZURUM",
+      "telefon": "(0442) 631 30 58",
+      "latitude": 39.94579,
+      "longitude": 41.105188
+    },
+    {
+      "isim": "Eskişehir 1.Ana Jet Üs K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Eskişehir",
+      "adres": "Şeker Mah., Çevre Yolu Kartal Kavşağı, No.:1/A-Tepebaşı/ESKİŞEHİR",
+      "telefon": "(0222) 237 59 00",
+      "latitude": 39.7740586,
+      "longitude": 30.5576923
+    },
+    {
+      "isim": "Eskişehir Çevre ve Şehircilik İl Md.lüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Eskişehir",
+      "adres": "Ertuğrulgazi Mah., Aliya İzzetbegoviç Cad., No.:2-Tepebaşı/ESKİŞEHİR",
+      "telefon": "(0222) 335 35 73",
+      "latitude": 39.7788922,
+      "longitude": 30.484797
+    },
+    {
+      "isim": "Eskişehir Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Eskişehir",
+      "adres": "Yıldıztepe Alarm İstan Tesisleri Sos.Tes.Md.lüğü, Akarbaşı Mah., Şht. Yüzbaşı Tuncer Güngör Cad., No.:22-Odunpazarı/ESKİŞEHİR",
+      "telefon": "(0222) 239 38 70",
+      "latitude": 39.76367920000001,
+      "longitude": 30.5170915
+    },
+    {
+      "isim": "Eskişehir Jandarma Sosyal Tesis Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Eskişehir",
+      "adres": "Arifiye Mah., Atatürk Cad., Müftülük Sk., No.:5-Odunpazarı/ESKİŞEHİR",
+      "telefon": "(0222) 221 11 01",
+      "latitude": 39.7703187,
+      "longitude": 30.516584
+    },
+    {
+      "isim": "Eskişehir Toprak Mahsulleri Ofisi Başmüdürlüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Eskişehir",
+      "adres": "Osmangazi Mah., Basın Şehitleri Cad., No.:156/B-Odunpazarı/ESKİŞEHİR",
+      "telefon": "(0222) 225 58 34",
+      "latitude": 39.7722679,
+      "longitude": 30.48902399999999
+    },
+    {
+      "isim": "Eskişehir Sivrihisar Meydan K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Eskişehir",
+      "adres": "Sivrihisar Hava Meydan K.lığı Yerleşkesi, Bahçecik Mah.-Sivrihisar/ESKİŞEHİR",
+      "telefon": "(0222) 712 54 45",
+      "latitude": 39.4532727,
+      "longitude": 31.3605381
+    },
+    {
+      "isim": "Türkiye Diyanet Vakfı Gaziantep Misafirhanesi",
+      "tip": "Diyanet Misafirhanesi",
+      "il": "Gaziantep",
+      "adres": "Budak Mah., 06111.Cad.,No.:2-Şehitkamil/GAZİANTEP",
+      "telefon": "(0542) 771 31 27",
+      "latitude": 37.0778428,
+      "longitude": 37.3411176
+    },
+    {
+      "isim": "Gaziantep Şehit Karayılan Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Gaziantep",
+      "adres": "Yamaçtepe Mah., Mahmut Tevfik Atay Blv., No.:14, Burç Yolu Üzeri-Şahinbey/GAZİANTEP",
+      "telefon": "(0342) 425 04 02",
+      "latitude": 37.0279476,
+      "longitude": 37.3072354
+    },
+    {
+      "isim": "Hakkari Şemdinli Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Hakkari",
+      "adres": "4.Hudut Tugay K.lığı Yerleşkesi-Şemdinli/HAKKARİ",
+      "telefon": "(0438) 411 31 93",
+      "latitude": 37.3034419,
+      "longitude": 44.57696
+    },
+    {
+      "isim": "Hakkari Derecik Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Hakkari",
+      "adres": "Gürmeşe Mah., Kışla Cad.-Şemdinli/HAKKARİ",
+      "telefon": "(0438) 461 30 13",
+      "latitude": 37.077997,
+      "longitude": 44.2902321
+    },
+    {
+      "isim": "Hakkari DSİ 174.Şube Şefliği Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Hakkari",
+      "adres": "Halife Derviş Mah., Hakkari-Van Blv., No.:102-Merkez/HAKKARİ",
+      "telefon": "(0438) 211 94 35",
+      "latitude": 37.5733992,
+      "longitude": 43.7405524
+    },
+    {
+      "isim": "Hakkari İl Özel İdaresi Misafirhanesi",
+      "tip": "İl Özel İdaresi Misafirhanesi",
+      "il": "Hakkari",
+      "adres": "Hakkari İl Özel İdaresi Yerleşkesi, Sümbül Mah.-Merkez/HAKKARİ",
+      "telefon": "(0438) 211 61 90",
+      "latitude": 37.5638159,
+      "longitude": 43.7487004
+    },
+    {
+      "isim": "Hatay TCDD Arsuz Eğitim ve Dinlenme Tesisi ve Kampı",
+      "tip": "TCDD Misafirhanesi",
+      "il": "Hatay",
+      "adres": "Gözcüler Mah., Cumhuriyet Cad.,-Arsuz/HATAY",
+      "telefon": "(0326) 643 20 09",
+      "latitude": 36.4201939,
+      "longitude": 35.9034306
+    },
+    {
+      "isim": "Hatay Yatırım İzleme ve Koordinasyon Başkanlığı Arsuz Eğitim ve Dinlenme Tesisi",
+      "tip": "Konukevi",
+      "il": "Hatay",
+      "adres": "Gökmeydan Mah., 100.Sk.-Arsuz/HATAY",
+      "telefon": "(0326) 664 98 54",
+      "latitude": 36.4295112,
+      "longitude": 35.9027815
+    },
+    {
+      "isim": "Hatay Defterdarlığı Dinlenme Tesisi ve Kampı",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Hatay",
+      "adres": "Uluçınar Mah., İskender Sayek Cd.-Arsuz/HATAY",
+      "telefon": "(0326) 643 36 36",
+      "latitude": 36.4132652,
+      "longitude": 35.8915782
+    },
+    {
+      "isim": "Hatay Mustafa Kemal Üniversitesi Misafirhanesi",
+      "tip": "Üniversite Konukevi",
+      "il": "Hatay",
+      "adres": "Ürgen Paşa Mah., Atatürk Cad.-Antakya/HATAY",
+      "telefon": "(0326) 221 33 17",
+      "latitude": 36.2191808,
+      "longitude": 36.161562
+    },
+    {
+      "isim": "PTT Hatay Misafirhanesi",
+      "tip": "PTT Misafirhanesi",
+      "il": "Hatay",
+      "adres": "Akevler Mah., Ayşe Fitnat Hanım Cad.-Antakya/HATAY",
+      "telefon": "(0326) 214 27 27",
+      "latitude": 36.2153076,
+      "longitude": 36.155571
+    },
+    {
+      "isim": "Hatay Uluçınar Özel Eğitim Merkezi K.lığı",
+      "tip": "Orduevi",
+      "il": "Hatay",
+      "adres": "Uluçınar Mah., Deniz Cad., No.:10-İskenderun/HATAY",
+      "telefon": "(0326) 643 20 28",
+      "latitude": 36.40572,
+      "longitude": 35.898769
+    },
+    {
+      "isim": "Hatay Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Hatay",
+      "adres": "Kışlasaray Mah., Harbiye Cad.-Merkez/HATAY",
+      "telefon": "(0326) 216 05 58",
+      "latitude": 36.1951673,
+      "longitude": 36.1592635
+    },
+    {
+      "isim": "Isparta Kızaldağ Milli Parkı Konaklama Tesisleri",
+      "tip": "Konukevi",
+      "il": "Isparta",
+      "adres": "Beyköy Köyü-Şarkikaraağaç/ISPARTA",
+      "telefon": "(0544) 316 22 11",
+      "latitude": 38.0576271,
+      "longitude": 31.3808882
+    },
+    {
+      "isim": "Isparta Kara Havacılık Okulu Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Isparta",
+      "adres": "Kılıç Köyü Yenice Mevkii, Isparta-Ankara Yolu 1.Sk.-Keçiborlu/ISPARTA",
+      "telefon": "(0246) 559 20 61",
+      "latitude": 37.877692,
+      "longitude": 30.315415
+    },
+    {
+      "isim": "Mersin Sahil Güvenlik Akdeniz Bölge K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Mersin",
+      "adres": "Üçocak Mah., Mersin Limanı-Akdeniz/MERSİN",
+      "telefon": "(0324) 237 73 93",
+      "latitude": 36.8043081,
+      "longitude": 34.6478897
+    },
+    {
+      "isim": "Mersin Çağ Üniversitesi Yaşar Bayboğan Konukevi",
+      "tip": "Üniversite Konukevi",
+      "il": "Mersin",
+      "adres": "Yenice Mah., Atatürk Blv.-Tarsus/MERSİN",
+      "telefon": "(0324) 651 48 00",
+      "latitude": 36.97257,
+      "longitude": 35.0522
+    },
+    {
+      "isim": "İstanbul Alemdağ Jandarma Tabur K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İstanbul",
+      "adres": "Turgut Özal Cad., Alemdağ J.Komd.Tb.K.lığı-Çekmeköy/İSTANBUL",
+      "telefon": "(0216) 484 32 50",
+      "latitude": 41.0288294,
+      "longitude": 29.2242016
+    },
+    {
+      "isim": "İstanbul Ataşehir TEDAŞ-AYEDAŞ Bölge Misafirhanesi",
+      "tip": "TEDAŞ Misafirhanesi",
+      "il": "İstanbul",
+      "adres": "İçerenköy Mah., Prof.Dr.Ali Nihat Tarlan Cad.-Ataşehir/İSTANBUL",
+      "telefon": "(0216) 572 48 96",
+      "latitude": 40.9673912,
+      "longitude": 29.1070313
+    },
+    {
+      "isim": "İstanbul Piyade Okul K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İstanbul",
+      "adres": "İstasyon Mah., Şehitler Cad.-Tuzla/İSTANBUL",
+      "telefon": "(0216) 395 16 76",
+      "latitude": 40.825451,
+      "longitude": 29.3270577
+    },
+    {
+      "isim": "İstanbul İkmal Maliye Okulu K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İstanbul",
+      "adres": "General Kenan Evren Kışlası, Aydınevler Mah., İnönü Cad., No.:28-Maltepe/İSTANBUL",
+      "telefon": "(0216) 417 57 80",
+      "latitude": 40.9569884,
+      "longitude": 29.1171501
+    },
+    {
+      "isim": "İstanbul Maltepe Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İstanbul",
+      "adres": "Büyükbakkalköy Mah., Özmen Sk., No.:39/2-Maltepe/İSTANBUL",
+      "telefon": "(0216) 376 51 41",
+      "latitude": 40.920385,
+      "longitude": 29.1688788
+    },
+    {
+      "isim": "İstanbul Kara Dikimevi Md.lüğü Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İstanbul",
+      "adres": "Esenkent Mah., Özmen Sk., No.:37-Maltepe/İSTANBUL",
+      "telefon": "(0216) 376 14 40",
+      "latitude": 40.9208201,
+      "longitude": 29.1674828
+    },
+    {
+      "isim": "İstanbul Ümraniye TEİAŞ 4.Bölge Md.lüğü Misafirhanesi",
+      "tip": "TEİAŞ Misafirhanesi",
+      "il": "İstanbul",
+      "adres": "Namık Kemal Mah., Şeker Maslak Sk., No.:9-Ümraniye/İSTANBUL",
+      "telefon": "(0216) 521 58 00",
+      "latitude": 41.022503,
+      "longitude": 29.0846756
+    },
+    {
+      "isim": "İstanbul SGK Üsküdar Misafirhanesi",
+      "tip": "SGK Misafirhanesi",
+      "il": "İstanbul",
+      "adres": "Sultantepe Mah., Paşa Limanı Cad., No.:19-Üsküdar/İSTANBUL",
+      "telefon": "(0216) 343 03 08",
+      "latitude": 41.0300559,
+      "longitude": 29.0181238
+    },
+    {
+      "isim": "İstanbul Vilayetler Birliği Boğaziçi Oteli",
+      "tip": "Konukevi",
+      "il": "İstanbul",
+      "adres": "Tarabya Mah., Haydar Aliyev Cad., No.:110-Sarıyer/İSTANBUL",
+      "telefon": "(0212) 262 69 90",
+      "latitude": 41.1459903,
+      "longitude": 29.0528114
+    },
+    {
+      "isim": "Çaykur İstanbul Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "İstanbul",
+      "adres": "Kazım Karabekir Paşa Mah., Bahçeköy Cad., No.:106-Sarıyer/İSTANBUL",
+      "telefon": "(0212) 242 18 16",
+      "latitude": 41.15844209999999,
+      "longitude": 29.0226939
+    },
+    {
+      "isim": "İstanbul TCDD Fenarbahçe Sosyal Tesisleri",
+      "tip": "TCDD Misafirhanesi",
+      "il": "İstanbul",
+      "adres": "Fenerbahçe Mah., Atlıhan Sk., No.:28-30-Kadıköy/İSTANBUL",
+      "telefon": "(0216) 336 07 67",
+      "latitude": 40.96929069999999,
+      "longitude": 29.0386512
+    },
+    {
+      "isim": "İstanbul Hadımköy Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İstanbul",
+      "adres": "General Kani Akman 1 Kışlası-Esenyurt/İSTANBUL",
+      "telefon": "(0212) 623 23 13",
+      "latitude": 41.0361212,
+      "longitude": 28.6416919
+    },
+    {
+      "isim": "İstanbul MKE Misafirhanesi",
+      "tip": "Konukevi",
+      "il": "İstanbul",
+      "adres": "Ömer Avni Mah., MKE İstanbul Şube Md.lüğü-Beyoğlu/İSTANBUL",
+      "telefon": "(0212) 334 30 60",
+      "latitude": 41.0371034,
+      "longitude": 28.992542
+    },
+    {
+      "isim": "İstanbul Vakıflar 1.Bölge Md.lüğü Misafirhanesi",
+      "tip": "Konukevi",
+      "il": "İstanbul",
+      "adres": "Gümüşsuyu Mah., Kutlu Sk.-Beyoğlu/İSTANBUL",
+      "telefon": "(0212) 243 64 59",
+      "latitude": 41.0345409,
+      "longitude": 28.9875976
+    },
+    {
+      "isim": "İstanbul Boğaz K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İstanbul",
+      "adres": "Anadolu Kavağı Mah.-Beykoz/İSTANBUL",
+      "telefon": "(0216) 320 25 27",
+      "latitude": 41.173816,
+      "longitude": 29.088682
+    },
+    {
+      "isim": "İstanbul Yenilevent Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İstanbul",
+      "adres": "Güzeltepe Mah., Kemerburgaz Yolu Cad., Hasdal Kışlası-Beşiktaş/İSTANBUL",
+      "telefon": "(0212) 321 45 00",
+      "latitude": 41.0422066,
+      "longitude": 29.0067037
+    },
+    {
+      "isim": "İstanbul Hava Harp Okulu K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İstanbul",
+      "adres": "Yeşilyurt Mah., Eski Havaalanı Cad.-Bakırköy/İSTANBUL",
+      "telefon": "(0212) 663 24 90",
+      "latitude": 40.9643848,
+      "longitude": 28.8172927
+    },
+    {
+      "isim": "İzmir Hava Teknik Okl.K.lığı Vardiya Yatakhanesi Md.lüğü ve Gaziemir Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İzmir",
+      "adres": "Hava Teknik Okl.K.lığı Yerleşkesi, Fatih Mah., Ege Cad., No.:3-Gaziemir/İZMİR",
+      "telefon": "(0232) 251 16 00",
+      "latitude": 38.3088138,
+      "longitude": 27.1572541
+    },
+    {
+      "isim": "İzmir Sahil Güvenlik Hava K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İzmir",
+      "adres": "Sahil Güvenlik Hava K.lığı Yerleşkesi, Dokuz Eylül Mah.-Gaziemir/İZMİR",
+      "telefon": "(0232) 281 28 00",
+      "latitude": 38.283064,
+      "longitude": 27.1617805
+    },
+    {
+      "isim": "İzmir Dokuz Eylül Üniversitesi Öğretim Elemanı ve Araştırmacı Konukevi",
+      "tip": "Üniversite Konukevi",
+      "il": "İzmir",
+      "adres": "Dokuz Eylül Üniversitesi Tınaztepe Yerleşkesi-Buca/İZMİR",
+      "telefon": "(0232) 301 78 00",
+      "latitude": 38.3715159,
+      "longitude": 27.2001109
+    },
+    {
+      "isim": "İzmir Buca Açık Ceza İnfaz Kurumu Misafirhanesi",
+      "tip": "Adalet Bakanlığı Misafirhanesi",
+      "il": "İzmir",
+      "adres": "Kırıklar Mah., Karatekeli Cad. No:58/3-Buca/İZMİR",
+      "telefon": "(0232) 487 13 66",
+      "latitude": 38.3077428,
+      "longitude": 27.307271
+    },
+    {
+      "isim": "İzmir Dokuz Eylül Üniversitesi Seferihisar Öğrenci Eğitim ve Dinlenme Tesisleri",
+      "tip": "Üniversite Konukevi",
+      "il": "İzmir",
+      "adres": "Doğanbey Plajı, Payamlı Mah., 5049 Sk.-Seferihisar/İZMİR",
+      "telefon": "(0232) 742 58 52",
+      "latitude": 38.0709939,
+      "longitude": 26.9272625
+    },
+    {
+      "isim": "İzmir Türkiye Diyanet Vakfı Tire Konukevi",
+      "tip": "Diyanet Misafirhanesi",
+      "il": "İzmir",
+      "adres": "Fatih Mah., Hacı Hafız Bekir Hoca Cad., No.:3-Tire/İZMİR",
+      "telefon": "(0232) 512 15 32",
+      "latitude": 38.0952859,
+      "longitude": 27.7239462
+    },
+    {
+      "isim": "İzmir Menemen Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "İzmir",
+      "adres": "Kazımpaşa Mah., Atatürk Cad., No.:56-Menemen/İZMİR",
+      "telefon": "(0232) 231 35 65",
+      "latitude": 38.6076572,
+      "longitude": 27.0732789
+    },
+    {
+      "isim": "İzmir Ilıca PTT Eğitim Merkezi ve Konukevi",
+      "tip": "PTT Misafirhanesi",
+      "il": "İzmir",
+      "adres": "Ilıca Mah., 5133.Sk.-Çeşme/İZMİR",
+      "telefon": "(0232) 723 50 10",
+      "latitude": 38.3070283,
+      "longitude": 26.3619504
+    },
+    {
+      "isim": "Kars İl Sağlık Md.lüğü Misafirhanesi",
+      "tip": "Sağlık Müdürlüğü Misafirhanesi",
+      "il": "Kars",
+      "adres": "Örnek Mah., A.Gaffar Okkan Blv., No.:113-Merkez/KARS",
+      "telefon": "(0474) 213 61 83",
+      "latitude": 40.5863124,
+      "longitude": 43.0907331
+    },
+    {
+      "isim": "Kastamonu İhsangazi Belediye Misafirhanesi",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Kastamonu",
+      "adres": "Kastamonu Cad., Hükümet Konağı Yanı-İhsangazi/KASTAMONU",
+      "telefon": "(0366) 392 10 20",
+      "latitude": 41.2021518,
+      "longitude": 33.5556669
+    },
+    {
+      "isim": "Kastamonu İlbank Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Kastamonu",
+      "adres": "Kuzeykent Mah., Miralay Halitbey Cad., 10/C-Merkez/KASTAMONU",
+      "telefon": "(0366) 215 00 74",
+      "latitude": 41.4142418,
+      "longitude": 33.7846251
+    },
+    {
+      "isim": "Kastamonu Tapu ve Kadastro 19.Bölge Md.lüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Kastamonu",
+      "adres": "Kuzeykent Mah., Karadut Sk., No.: 25/3-Merkez/KASTAMONU",
+      "telefon": "(0366) 280 50 00",
+      "latitude": 41.4281643,
+      "longitude": 33.7944507
+    },
+    {
+      "isim": "Kastamonu Karayolları 15.Bölge Md.lüğü Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Kastamonu",
+      "adres": "İnönü Mah., Alparslan Türkeş Blv.-Merkez/KASTAMONU",
+      "telefon": "(0366) 215 23 35",
+      "latitude": 41.3975321,
+      "longitude": 33.7811925
+    },
+    {
+      "isim": "Kastamonu Jandarma Komando Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Kastamonu",
+      "adres": "Kastamonu J.Komd.Eğt.Mrk.K.lığı Yerleşkesi-Merkez/KASTAMONU",
+      "telefon": "(0366) 215 24 62",
+      "latitude": 41.26497130000001,
+      "longitude": 33.9068162
+    },
+    {
+      "isim": "Kastamonu Azdavay Belediyesi Mehmet Avni İman Sosyal Tesisleri",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Kastamonu",
+      "adres": "Hükümet Cad., Çayboyu Sk.-Azdavay/KASTAMONU",
+      "telefon": "(0366) 717 11 87",
+      "latitude": 41.6413968,
+      "longitude": 33.3016464
+    },
+    {
+      "isim": "Kayseri İl Sağlık Md.lüğü Bölge Eğitim Araştırma ve Uygulama Merkezi Misafirhanesi",
+      "tip": "Sağlık Müdürlüğü Misafirhanesi",
+      "il": "Kayseri",
+      "adres": "Tacettin Veli Mah., Tacettin Blv., No.:28-Melikgazi/KAYSERİ",
+      "telefon": "(0352) 222 62 80",
+      "latitude": 38.7113416,
+      "longitude": 35.4918592
+    },
+    {
+      "isim": "Kayseri Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Kayseri",
+      "adres": "Gültepe Mah., Talas Blv., General Adnan Doğu Kışlası-Melikgazi/KAYSERİ",
+      "telefon": "(0352) 235 98 84",
+      "latitude": 38.7090605,
+      "longitude": 35.5143903
+    },
+    {
+      "isim": "Kayseri 2.Hava Bakım Fabrika Md.lüğü Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Kayseri",
+      "adres": "Erenköy Mah., Erciyes Blv.-Melikgazi/KAYSERİ",
+      "telefon": "(0352) 222 45 45",
+      "latitude": 38.6790189,
+      "longitude": 35.4986528
+    },
+    {
+      "isim": "Kayseri Jandarma Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Kayseri",
+      "adres": "Kiçiköy Mah., Hoca Ahmet Yesevi Cad., No.:1-Melikgazi/KAYSERİ",
+      "telefon": "(0352) 437 58 09",
+      "latitude": 38.7308715,
+      "longitude": 35.59560159999999
+    },
+    {
+      "isim": "Kocaeli Üniversitesi Derbent Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Kocaeli",
+      "adres": "Kocaeli Üniversitesi Turizm İşletmeciliği ve Otelcilik Yüksek Okulu Derbent Yerleşkesi-Kartepe/KOCAELİ",
+      "telefon": "(0262) 353 43 71",
+      "latitude": 40.7082056,
+      "longitude": 30.1012949
+    },
+    {
+      "isim": "Kocaeli Kartepe Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Kocaeli",
+      "adres": "Deniz Hava Üs K.lığı Yerleşkesi, Çamlık Mah., Cengiz Topel Cad.-Kartepe/KOCAELİ",
+      "telefon": "(0262) 371 38 80",
+      "latitude": 40.7450347,
+      "longitude": 30.0524288
+    },
+    {
+      "isim": "Kocaeli Gümrük ve Muhafaza Baş Md.lüğü Misafirhanesi",
+      "tip": "Gümrük Misafirhanesi",
+      "il": "Kocaeli",
+      "adres": "Ömerağa Mah., Ankara Cad., No.: 39-İzmit/KOCAELİ",
+      "telefon": "(0262) 321 06 50",
+      "latitude": 40.765436,
+      "longitude": 29.9116775
+    },
+    {
+      "isim": "Kocaeli Jandarma Sosyal Tesis K.lığı",
+      "tip": "Orduevi",
+      "il": "Kocaeli",
+      "adres": "Kocaeli İl Jandarma K.lığı Yerleşkesi, 42 Evler Mah., Oramiral Salim Dervişoğlu Cad.-İzmit/KOCAELİ",
+      "telefon": "(0262) 335 21 32",
+      "latitude": 40.761919,
+      "longitude": 29.947512
+    },
+    {
+      "isim": "Türkiye Diyanet Vakfı Kocaeli Konukevi",
+      "tip": "Diyanet Misafirhanesi",
+      "il": "Kocaeli",
+      "adres": "Paşadağ Mah., Hastane Cad., No.:112-Başiskele/KOCAELİ",
+      "telefon": "(0262) 344 26 34",
+      "latitude": 40.7061348,
+      "longitude": 29.9768184
+    },
+    {
+      "isim": "Konya 3.Ana Jet Üssü Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Konya",
+      "adres": "Sancak Mah., Taşer Sk.-Selçuklu/KONYA",
+      "telefon": "(0332) 346 04 44",
+      "latitude": 37.9698749,
+      "longitude": 32.5325909
+    },
+    {
+      "isim": "Konya Karapınar Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Konya",
+      "adres": "Zafer Mah., İnönü Cad.-Karapınar/KONYA",
+      "telefon": "(0332) 755 69 28",
+      "latitude": 37.7149909,
+      "longitude": 33.5570822
+    },
+    {
+      "isim": "Konya Ilgın DSİ İşletme Şefliği Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Konya",
+      "adres": "Fahrettin Altay Mah., 170.Sk., No.:28-Ilgın/KONYA",
+      "telefon": "(0332) 882 71 34",
+      "latitude": 38.2826627,
+      "longitude": 31.8957072
+    },
+    {
+      "isim": "Konya Çumra DSİ Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Konya",
+      "adres": "İzzetbey Mah., Cahit Aküzüm Cad., No.:4-Çumra/KONYA",
+      "telefon": "(0332) 447 11 67",
+      "latitude": 37.5713367,
+      "longitude": 32.7845013
+    },
+    {
+      "isim": "Malatya Fırat Gümrük ve Dış Ticaret Bölge Müdürlüğü Misafirhanesi",
+      "tip": "Gümrük Misafirhanesi",
+      "il": "Malatya",
+      "adres": "İkizce Mah., Gezer Mevkii, Malatya-Kayseri Yolu 8.Km.-Yeşilyurt/MALATYA",
+      "telefon": "(0539) 244 93 66",
+      "latitude": 38.3234493,
+      "longitude": 38.1759497
+    },
+    {
+      "isim": "Malatya 2.Ordu K.lığı Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Malatya",
+      "adres": "Cevatpaşa Mah., Endamlı Cad., No.:16-Yeşilyurt/MALATYA",
+      "telefon": "(0422) 336 00 10",
+      "latitude": 38.295459,
+      "longitude": 38.247475
+    },
+    {
+      "isim": "Manisa Orman İşletme Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Manisa",
+      "adres": "Keçili Köy Mah., Mimar Sinan Blv., No.: 288/A-Yunusemre/MANİSA",
+      "telefon": "(0236) 232 36 39",
+      "latitude": 38.590506,
+      "longitude": 27.3546926
+    },
+    {
+      "isim": "Türk Metal Sendikası Manisa Misafirhanesi",
+      "tip": "Sendika Misafirhanesi",
+      "il": "Manisa",
+      "adres": "Yarhasanlar Mah., 2315.Sk., No.:2/A-Merkez/MANİSA",
+      "telefon": "(0236) 237 94 62",
+      "latitude": 38.617995,
+      "longitude": 27.4267162
+    },
+    {
+      "isim": "Kahramanmaraş Çevre ve Şehircilik İl Müdürlüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Kahramanmaraş",
+      "adres": "İstiklal Mah., Prof.Dr.Necmettin Erbakan Blv., No.:36/A-Onikişubat/KAHRAMANMARAŞ",
+      "telefon": "(0344) 223 53 69",
+      "latitude": 37.7702293,
+      "longitude": 36.6957216
+    },
+    {
+      "isim": "Kahramanmaraş İl Sağlık Müdürlüğü Misafirhanesi",
+      "tip": "Sağlık Müdürlüğü Misafirhanesi",
+      "il": "Kahramanmaraş",
+      "adres": "Selçuklu Mah., 58001.Sk., No.:19-Merkez/KAHRAMANMARAŞ",
+      "telefon": "(0344) 215 38 12",
+      "latitude": 37.59155430000001,
+      "longitude": 36.8949441
+    },
+    {
+      "isim": "Muğla Tarım İşletmeleri Genel Md.lüğü Dalaman Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Muğla",
+      "adres": "Tarım İşletmeleri Genel Md.lüğü Dalaman Yerleşkesi, Enver Özdemir Cad., No.:1-Dalaman/MUĞLA",
+      "telefon": "(0252) 692 37 20",
+      "latitude": 36.76662,
+      "longitude": 28.799991
+    },
+    {
+      "isim": "Muğla Dalaman Deniz Hava Üs K.lığı Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Muğla",
+      "adres": "Dalaman Deniz Hava Üs K.lığı Yerleşkesi-Dalaman/MUĞLA",
+      "telefon": "(0252) 792 55 50",
+      "latitude": 36.7675573,
+      "longitude": 28.803935
+    },
+    {
+      "isim": "Muğla Milas Hava Meydan K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Muğla",
+      "adres": "Milas-Bodrum Havalimanı İçi, Milas Hava Meydan K.lığı Yerleşkesi-Milas/MUĞLA",
+      "telefon": "(0252) 523 03 02",
+      "latitude": 37.2509834,
+      "longitude": 27.6667245
+    },
+    {
+      "isim": "Muğla Marmaris Karayolları 26.Şube Şefliği Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Muğla",
+      "adres": "Çamdibi Mah., Ulusal Egemenlik Cad., No.:85-Marmaris/MUĞLA",
+      "telefon": "(0252) 412 12 76",
+      "latitude": 36.8655717,
+      "longitude": 28.2740919
+    },
+    {
+      "isim": "Muğla Datça Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Muğla",
+      "adres": "Hava Radar Kt.K.lığı Lojman Bölgesi, İskele Mah., Kargı Yolu-Datça/MUĞLA",
+      "telefon": "(0252) 712 24 58",
+      "latitude": 36.7218145,
+      "longitude": 27.686688
+    },
+    {
+      "isim": "Muğla Turgutreis Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Muğla",
+      "adres": "Turgutreis Mah., Cumhuriyet Akçaalan Blv., No.:136-Bodrum/MUĞLA",
+      "telefon": "(0252) 382 88 66",
+      "latitude": 37.0036516,
+      "longitude": 27.2720205
+    },
+    {
+      "isim": "Muğla Mumcular Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Muğla",
+      "adres": "Kara Havacılık Eğitim ve Tatbikat Merkezi K.lığı Yerleşkesi, Mumcular-BODRUM",
+      "telefon": "(0252) 372 02 22",
+      "latitude": 37.11055,
+      "longitude": 27.66251
+    },
+    {
+      "isim": "Muş Nusret Sarman Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Muş",
+      "adres": "Yeni Mah. 1405.Sk., No.:7-Merkez/MUŞ",
+      "telefon": "(0436) 212 50 18",
+      "latitude": 38.8542266,
+      "longitude": 41.4369459
+    },
+    {
+      "isim": "Muş DSİ 172.Şube Md.lüğü Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Muş",
+      "adres": "Sunay Mah., Atatürk Blv., No.:75-Merkez/MUŞ",
+      "telefon": "(0436) 216 10 80",
+      "latitude": 38.7445239,
+      "longitude": 41.49912279999999
+    },
+    {
+      "isim": "Muş Havaliamanı DHMİ Misafirhanesi",
+      "tip": "DHMİ Misafirhanesi",
+      "il": "Muş",
+      "adres": "Muş Havalimanı Yerleşkesi-Merkez/MUŞ",
+      "telefon": "(0436) 250 00 00",
+      "latitude": 38.7602352,
+      "longitude": 41.6470315
+    },
+    {
+      "isim": "Muş Karayolları 113.Şube Şefliği Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Muş",
+      "adres": "Sunay Mah., Atatürk Blv., No.:131-Merkez/MUŞ",
+      "telefon": "(0436) 212 16 17",
+      "latitude": 38.7478161,
+      "longitude": 41.5036056
+    },
+    {
+      "isim": "Muş Gıda, Tarım ve Hayvacılık İl Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Muş",
+      "adres": "Kültür Mah., Atatürk Blv.-Merkez/MUŞ",
+      "telefon": "(0436) 212 37 90",
+      "latitude": 38.740619,
+      "longitude": 41.4962161
+    },
+    {
+      "isim": "Muş Şeker Fabrikası Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Muş",
+      "adres": "Muş-Bitlis Yolu 8.Km.-Merkez/MUŞ",
+      "telefon": "(0436) 215 12 80",
+      "latitude": 38.7155257,
+      "longitude": 41.6261741
+    },
+    {
+      "isim": "Muş Hava Meydan K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Muş",
+      "adres": "Muş Hava Meydan K.lığı Lojmanları Yerleşkesi, Hürriyet Mah., Yeni Hükümet Sk.-Merkez/MUŞ",
+      "telefon": "(0436) 245 20 10",
+      "latitude": 38.8542266,
+      "longitude": 41.4369459
+    },
+    {
+      "isim": "Nevşehir Karayolları 67.Şube Şefliği Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Nevşehir",
+      "adres": "2000 Evler Mah., Zübeyde Hanım Cad.-Merkez/NEVŞEHİR",
+      "telefon": "(0384) 215 39 67",
+      "latitude": 38.666164,
+      "longitude": 34.7375284
+    },
+    {
+      "isim": "Niğde İl Tarım ve Orman Müdürlüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Niğde",
+      "adres": "Niğde İl Tarım ve Orman Md.lüğü Yerleşkesi, İlhanlı Mah., Hacı Sabancı Blv., No.: 3/1-Merkez/NİĞDE",
+      "telefon": "(0549) 120 01 51",
+      "latitude": 37.9589687,
+      "longitude": 34.6803833
+    },
+    {
+      "isim": "Niğde Bor Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Niğde",
+      "adres": "Acıgöl Mah., Askeri Fabrika Cad., Fabrika Sk.-Bor/NİĞDE",
+      "telefon": "(0388) 311 75 63",
+      "latitude": 37.8646899,
+      "longitude": 34.5606339
+    },
+    {
+      "isim": "Ordu Adliyesi Misafirhanesi",
+      "tip": "Adalet Bakanlığı Misafirhanesi",
+      "il": "Ordu",
+      "adres": "Karşıyaka Mah., Atatürk Blv., No.:506-Altınordu/ORDU",
+      "telefon": "(0452) 700 20 00",
+      "latitude": 40.9754696,
+      "longitude": 37.9235227
+    },
+    {
+      "isim": "Ordu Diyanet Misafirhanesi",
+      "tip": "Diyanet Misafirhanesi",
+      "il": "Ordu",
+      "adres": "Cumhuriyet Mah., 1356.Sk., No.:109-Altınordu/ORDU",
+      "telefon": "(0452) 777 55 60",
+      "latitude": 40.9731797,
+      "longitude": 37.952526
+    },
+    {
+      "isim": "Ordu 222 No.lu Hv.Rd.Kt.K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Ordu",
+      "adres": "Çınar Mah., Küme Evleri, İbrahim Fırtına Cad.-Perşembe/ORDU",
+      "telefon": "(0452) 500 11 00",
+      "latitude": 41.067089,
+      "longitude": 37.773469
+    },
+    {
+      "isim": "Rize Çaykur Sosyal Tesisleri",
+      "tip": "Orman Misafirhanesi",
+      "il": "Rize",
+      "adres": "İslampaşa Mah., Kurtuluş Sk., No.:14-Merkez/RİZE",
+      "telefon": "(0464) 213 02 11",
+      "latitude": 41.03995099999999,
+      "longitude": 40.5709762
+    },
+    {
+      "isim": "Rize İl Özel İdaresi Misafirhanesi",
+      "tip": "İl Özel İdaresi Misafirhanesi",
+      "il": "Rize",
+      "adres": "Engindere Mah., Niyazi Türkmenbaşı Sk., No.:11-Merkez/RİZE",
+      "telefon": "(0464) 226 09 10",
+      "latitude": 41.0404009,
+      "longitude": 40.5796109
+    },
+    {
+      "isim": "Rize Orman İşletme Md.lüğü Milli Parklar Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Rize",
+      "adres": "İslampaşa Mah., Zincirli Sk., No.:7-Merkez/RİZE",
+      "telefon": "(0464) 213 04 64",
+      "latitude": 41.0389801,
+      "longitude": 40.57730249999999
+    },
+    {
+      "isim": "Adalet Bakanlığı EDB Rize Personel Eğitim Merkezi ve Misafirhanesi",
+      "tip": "Adalet Bakanlığı Misafirhanesi",
+      "il": "Rize",
+      "adres": "Alipaşa Mah., Mustafa Turanlı Sk., No.:89-Merkez/RİZE",
+      "telefon": "(0464) 224 00 11",
+      "latitude": 41.0301135,
+      "longitude": 40.459231
+    },
+    {
+      "isim": "Et ve Süt Kurumu Sakarya Et Kombinası Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Sakarya",
+      "adres": "Sakarya Cad., 2097.Sk., No.:4-Erenler/SAKARYA",
+      "telefon": "(0264) 241 20 62",
+      "latitude": 40.7435059,
+      "longitude": 30.4159123
+    },
+    {
+      "isim": "Samsun Defterdarlığı Bölgesel Eğitim Merkezi ve Misafirhanesi",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Samsun",
+      "adres": "Kalkancı Mah.,Bafra Blv., No.:30-İlkadım/SAMSUN",
+      "telefon": "(0362) 445 01 58",
+      "latitude": 41.3214805,
+      "longitude": 36.3162219
+    },
+    {
+      "isim": "Samsun İl Özel İdaresi Misafirhanesi",
+      "tip": "İl Özel İdaresi Misafirhanesi",
+      "il": "Samsun",
+      "adres": "Kale Mah., Cumhuriyet Cad., No.:2-İlkadım/SAMSUN",
+      "telefon": "(0362) 437 08 09",
+      "latitude": 41.2899377,
+      "longitude": 36.3346202
+    },
+    {
+      "isim": "Samsun Büyükşehir Belediyesi Anakent Sosyal Tesisleri ve Misafirhanesi",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Samsun",
+      "adres": "Yenimahalle Mah., Atatürk Blv.-Canik/SAMSUN",
+      "telefon": "(0362) 228 14 70",
+      "latitude": 41.2749199,
+      "longitude": 36.3595683
+    },
+    {
+      "isim": "Samsun Etibakır A.Ş. Misafirhanesi",
+      "tip": "Konukevi",
+      "il": "Samsun",
+      "adres": "Sanayi Mah., Bakır Sitesi Cad., No.:56-Tekkeköy/SAMSUN",
+      "telefon": "(0362) 256 09 90",
+      "latitude": 41.2300829,
+      "longitude": 36.4619469
+    },
+    {
+      "isim": "Samsun Toprak Mahsulleri Ofisi Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Samsun",
+      "adres": "Kirazlık Mah., Atatürk Blv., No.:1-Tekkeköy/SAMSUN",
+      "telefon": "(0362) 445 16 33",
+      "latitude": 41.2534193,
+      "longitude": 36.3884462
+    },
+    {
+      "isim": "Samsun TEİAŞ 10.Bölge Md.lüğü Misafirhanesi",
+      "tip": "TEİAŞ Misafirhanesi",
+      "il": "Samsun",
+      "adres": "İstiklal Mah., Atatürk Blv., No.:226-Tekkeköy/SAMSUN",
+      "telefon": "(0362) 266 81 40",
+      "latitude": 41.2132689,
+      "longitude": 36.463127
+    },
+    {
+      "isim": "Samsun Çay-Kur Bölge Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Samsun",
+      "adres": "Kale Mah., Bağdat Cad.-Merkez/SAMSUN",
+      "telefon": "(0362) 266 88 00",
+      "latitude": 41.2914288,
+      "longitude": 36.330226
+    },
+    {
+      "isim": "Siirt Çevre ve Şehircilik İl Müdürlüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Siirt",
+      "adres": "Siirt Çevre ve Şehircilik İl Md.lüğü Yerleşkesi, Yeni Mah., Adil Yas Cad.-Merkez/SİİRT",
+      "telefon": "(0484) 223 23 00",
+      "latitude": 37.9320926,
+      "longitude": 41.9447652
+    },
+    {
+      "isim": "Siirt Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Siirt",
+      "adres": "Şehit Astsubay Mansur Aydın Kışlası, Barış Mah., Hükümet Blv.-Merkez/SİİRT",
+      "telefon": "(0484) 224 72 85",
+      "latitude": 37.9272893,
+      "longitude": 41.9290157
+    },
+    {
+      "isim": "Siirt Jandarma Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Siirt",
+      "adres": "Yeni Mah., Cengiz Topel Cad., No.:40-Merkez/SİİRT",
+      "telefon": "(0484) 223 11 77",
+      "latitude": 37.930637,
+      "longitude": 41.9457079
+    },
+    {
+      "isim": "Siirt Kaymakam Suçi Misafirhanesi",
+      "tip": "Konukevi",
+      "il": "Siirt",
+      "adres": "Fatih Mah., 105.Sk., No.:15-Eruh/SİİRT",
+      "telefon": "",
+      "latitude": 37.7485805,
+      "longitude": 42.1789963
+    },
+    {
+      "isim": "Sinop Gençlik ve Spor İl Md.lüğü Sporcu Kampı",
+      "tip": "Gençlik ve Spor Misafirhanesi",
+      "il": "Sinop",
+      "adres": "Gelincik Mah., Yeni Sk., No.:11-Merkez/SİNOP",
+      "telefon": "(0368) 260 52 10",
+      "latitude": 42.022545,
+      "longitude": 35.1382043
+    },
+    {
+      "isim": "Sivas Defterdarlığı Maliye Misafirhanesi",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Sivas",
+      "adres": "Örtülüpınar Mah., Şifahiye Sk.-Merkez/SİVAS",
+      "telefon": "(0346) 223 05 99",
+      "latitude": 39.7478041,
+      "longitude": 37.0144727
+    },
+    {
+      "isim": "Sivas TEİAŞ Misafirhanesi",
+      "tip": "TEİAŞ Misafirhanesi",
+      "il": "Sivas",
+      "adres": "Paşabey Mah., Fevzi Çakmak Cad., No.:15/A-Merkez/SİVAS",
+      "telefon": "(0346) 215 08 03",
+      "latitude": 39.7478218,
+      "longitude": 37.0187621
+    },
+    {
+      "isim": "Ulusal Deniz Emniyeti Başkanlığı Tekirdağ Misafirhanesi",
+      "tip": "Polisevi",
+      "il": "Tekirdağ",
+      "adres": "Dereağzı Mah., 4007.Sk.-Marmaraereğlisi/TEKİRDAĞ",
+      "telefon": "(0282) 623 73 95",
+      "latitude": 40.9742049,
+      "longitude": 27.8725122
+    },
+    {
+      "isim": "Tekirdağ Namık Kemal Üniversitesi Sosyal Tesisleri ve Misafirhanesi",
+      "tip": "Üniversite Konukevi",
+      "il": "Tekirdağ",
+      "adres": "Değirmenaltı Yerleşkesi-Merkez/TEKİRDAĞ",
+      "telefon": "(0282) 293 31 28",
+      "latitude": 40.985411,
+      "longitude": 27.5833352
+    },
+    {
+      "isim": "Tekirdağ Maliye Misafirhanesi",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Tekirdağ",
+      "adres": "İstiklal Mah., Marmara Cad., No.:3-Şarköy/TEKİRDAĞ",
+      "telefon": "(0282) 264 12 66",
+      "latitude": 40.610963,
+      "longitude": 27.111082
+    },
+    {
+      "isim": "Tekirdağ Şarköy Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Tekirdağ",
+      "adres": "İstiklal Mah., Marmara Cad. No:4-Şarköy/TEKİRDAĞ",
+      "telefon": "(0501) 807 33 99",
+      "latitude": 40.61125130000001,
+      "longitude": 27.111369
+    },
+    {
+      "isim": "Tekirdağ Saray Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Tekirdağ",
+      "adres": "Askeri Lojmanlar Bölgesi, Kemalpaşa Mah., Tarık Akan Cad.-Saray/TEKİRDAĞ",
+      "telefon": "(0282) 768 34 43",
+      "latitude": 41.4426728,
+      "longitude": 27.9068055
+    },
+    {
+      "isim": "Tekirdağ Malkara Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Tekirdağ",
+      "adres": "Cami Atik Mah., Atatürk Blv., No.:30-Malkara/TEKİRDAĞ",
+      "telefon": "(0282) 427 29 13",
+      "latitude": 40.8909217,
+      "longitude": 26.9084224
+    },
+    {
+      "isim": "Tekirdağ Hayrabolu Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Tekirdağ",
+      "adres": "Hisar Mah., Alpullu Cad., Esinti Sk.-Hayrabolu/TEKİRDAĞ",
+      "telefon": "(0282) 315 20 07",
+      "latitude": 41.2169469,
+      "longitude": 27.1080828
+    },
+    {
+      "isim": "Tekirdağ Çerkezköy Askeri Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Tekirdağ",
+      "adres": "Fatih Mah., Şehit Teğmen Akın Cad.-Çerkezköy/TEKİRDAĞ",
+      "telefon": "(0282) 725 14 15",
+      "latitude": 41.2803821,
+      "longitude": 28.0361736
+    },
+    {
+      "isim": "Tokat Defterdarlığı Misafirhanesi",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Tokat",
+      "adres": "Soğukpınar Mah., Behzat Cad., Defterdarlık Hizmet Binası-Merkez/TOKAT",
+      "telefon": "(0356) 214 42 10",
+      "latitude": 40.3000971,
+      "longitude": 36.5590413
+    },
+    {
+      "isim": "Tunceli Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Tunceli",
+      "adres": "Cumhuriyet Mah., Yaşar Kemal Cad., No.:1-Merkez/TUNCELİ",
+      "telefon": "(0428) 212 13 25",
+      "latitude": 39.1530459,
+      "longitude": 39.5396506
+    },
+    {
+      "isim": "Tunceli TEDAŞ Misafirhanesi",
+      "tip": "TEDAŞ Misafirhanesi",
+      "il": "Tunceli",
+      "adres": "Atatürk Mah., Tunceli-Elazığ Yolu 7.Km.-Merkez/TUNCELİ",
+      "telefon": "(0428) 213 21 20",
+      "latitude": 39.0761463,
+      "longitude": 39.53388700000001
+    },
+    {
+      "isim": "Tunceli İl Özel İdaresi Munzur Doğa Oteli",
+      "tip": "İl Özel İdaresi Misafirhanesi",
+      "il": "Tunceli",
+      "adres": "Cumhuriyet Mah., Atıl Uzelgün Cad.-Merkez/TUNCELİ",
+      "telefon": "(0555) 183 90 24",
+      "latitude": 39.1052507,
+      "longitude": 39.5460445
+    },
+    {
+      "isim": "Tunceli Munzur Üniversitesi Misafirhanesi",
+      "tip": "Üniversite Konukevi",
+      "il": "Tunceli",
+      "adres": "Aktuluk Mah.,Munzur Üniversitesi Yerleşkesi-Merkez/TUNCELİ",
+      "telefon": "(0501) 011 12 34",
+      "latitude": 39.0458013,
+      "longitude": 39.5174454
+    },
+    {
+      "isim": "Tunceli Hozat Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Tunceli",
+      "adres": "Diyap Ağa Mah., Süleyman Kahraman Cad., No.:28-Hozat/TUNCELİ",
+      "telefon": "(0428) 561 29 65",
+      "latitude": 39.0828312,
+      "longitude": 39.2335706
+    },
+    {
+      "isim": "Şanlıurfa Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Şanlıurfa",
+      "adres": "Akpıyar Mah., Karaköprü Köyü Yolu-Karaköprü/ŞANLIURFA",
+      "telefon": "(0414) 313 15 28",
+      "latitude": 37.2018986,
+      "longitude": 38.7943204
+    },
+    {
+      "isim": "Türkiye Diyanet Vakfı Şanlıurfa Konukevi",
+      "tip": "Diyanet Misafirhanesi",
+      "il": "Şanlıurfa",
+      "adres": "Batıkent Mah., 8012.Sk., No.:9-Eyyübiye/ŞANLIURFA",
+      "telefon": "(0414) 341 02 90",
+      "latitude": 37.1674039,
+      "longitude": 38.7955149
+    },
+    {
+      "isim": "Şanlıurfa Defterdarlık Misafirhanesi",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Şanlıurfa",
+      "adres": "Bamyasuyu Mah., Cumhuriyet Cad.-Merkez/ŞANLIURFA",
+      "telefon": "(0414) 313 35 51",
+      "latitude": 37.1600612,
+      "longitude": 38.7978936
+    },
+    {
+      "isim": "Şanlıurfa Suruç Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Şanlıurfa",
+      "adres": "Süleyman Şah Mah., İstasyon Cad., No.:23-Suruç/ŞANLIURFA",
+      "telefon": "(0414) 611 40 28",
+      "latitude": 36.971704,
+      "longitude": 38.43387
+    },
+    {
+      "isim": "Şanlıurfa Siverek Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Şanlıurfa",
+      "adres": "Bahçelievler Mah., Musafa Remzi Bucak Blv.-Siverek/URFA",
+      "telefon": "(0414) 553 30 81",
+      "latitude": 37.754104,
+      "longitude": 39.317716
+    },
+    {
+      "isim": "Şanlıurfa Ceylanpınar Tarım İşletmesi Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Şanlıurfa",
+      "adres": "Birlik Mah., 296.Sk., No.:17-Ceylanpınar/ŞANLIURFA",
+      "telefon": "(0414) 471 49 74",
+      "latitude": 36.8523609,
+      "longitude": 40.0486763
+    },
+    {
+      "isim": "Uşak Jandarma Sosyal Tesis Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Uşak",
+      "adres": "Elmalıdere Mah., Nuri Şeker Cad.-Merkez/UŞAK",
+      "telefon": "(0276) 223 99 13",
+      "latitude": 38.679817,
+      "longitude": 29.412577
+    },
+    {
+      "isim": "Uşak Orman İşletme Müdürlüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Uşak",
+      "adres": "Karaağaç Mah., İsmet Paşa Cad., No.:92-Merkez/UŞAK",
+      "telefon": "(0276) 227 00 38",
+      "latitude": 38.6729121,
+      "longitude": 29.4062594
+    },
+    {
+      "isim": "Çevre ve Şehircilik Van İl Md.lüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Van",
+      "adres": "Erenkent Mah., 10. Etap Küme Evleri-Edremit/VAN",
+      "telefon": "(0432) 216 30 78",
+      "latitude": 38.4085153,
+      "longitude": 43.2510973
+    },
+    {
+      "isim": "Van Edremit Jandarma Sosyal Tesis Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Van",
+      "adres": "Eski Cami Mah., Sahil Yolu Cad., No.:152-Edremit/VAN",
+      "telefon": "(0432) 312 27 70",
+      "latitude": 38.3984556,
+      "longitude": 43.2364707
+    },
+    {
+      "isim": "Van Karayolları 11. Bölge",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Van",
+      "adres": "Akköprü Mah., Şantiye Yolu Sk., No.:8, D.:11-Edremit/VAN",
+      "telefon": "(0432) 485 10 50",
+      "latitude": 38.5134838,
+      "longitude": 43.3938156
+    },
+    {
+      "isim": "Van DHMİ Misafirhanesi",
+      "tip": "DHMİ Misafirhanesi",
+      "il": "Van",
+      "adres": "Van Ferit Melen Havaalanı Yerleşkesi-Edremit/VAN",
+      "telefon": "(0432) 227 00 01",
+      "latitude": 38.468872,
+      "longitude": 43.3375796
+    },
+    {
+      "isim": "Van Hava Radar K.lığı Vardiya Yatakhanesi Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Van",
+      "adres": "Van Ferit Melen Havaalanı Yerleşkesi-Edremit/VAN",
+      "telefon": "(0432) 451 38 51",
+      "latitude": 38.468872,
+      "longitude": 43.3375796
+    },
+    {
+      "isim": "Van Çaldıran Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Van",
+      "adres": "Şehit J.Bnb.Kıvanç Cesur Mah., İlçe Tabur Küme Evleri-Çaldıran/VAN",
+      "telefon": "(0432) 412 20 87",
+      "latitude": 39.1502588,
+      "longitude": 43.9296647
+    },
+    {
+      "isim": "Van Toprakkale Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Van",
+      "adres": "Akköprü Mah., General Ali İhsan Sabis Kışlası-Merkez/VAN",
+      "telefon": "(0432) 215 19 78",
+      "latitude": 38.5012085,
+      "longitude": 43.3729793
+    },
+    {
+      "isim": "Van Özalp Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Van",
+      "adres": "Mahmudiye Mah., Atatürk Cad.-Özalp/VAN",
+      "telefon": "(0432) 712 23 25",
+      "latitude": 38.655516,
+      "longitude": 43.9895333
+    },
+    {
+      "isim": "Van DSİ Erciş İşletme Bakım Başmühendisliği Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Van",
+      "adres": "Van Yolu Blv., No.:117-Erciş/VAN",
+      "telefon": "(0432) 354 27 12",
+      "latitude": 39.0224013,
+      "longitude": 43.37542270000001
+    },
+    {
+      "isim": "Van Albayrak Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Van",
+      "adres": "Albayrak Mah.-Başkale/VAN",
+      "telefon": "(0432) 672 62 62",
+      "latitude": 38.0476,
+      "longitude": 44.0149
+    },
+    {
+      "isim": "Yozgat Karayolları 65.Şube Şefliği Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Yozgat",
+      "adres": "Çapanoğlu Mah., Cemil Çiçek Blv., No.:251-Merkez/YOZGAT",
+      "telefon": "(0354) 212 10 63",
+      "latitude": 39.7869278,
+      "longitude": 34.7911434
+    },
+    {
+      "isim": "Aksaray İl Jandarma K.lığı Misafirhanesi",
+      "tip": "Orduevi",
+      "il": "Aksaray",
+      "adres": "Tacin Mah., Konya Cad., No.:46-Merkez/AKSARAY",
+      "telefon": "(0382) 215 10 62",
+      "latitude": 38.363423,
+      "longitude": 33.9996033
+    },
+    {
+      "isim": "Bayburt DSİ 225.Şube Md.lüğü Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Bayburt",
+      "adres": "Bayburt-Gümüşhane Yolu Üzeri, Danişment-Merkez/BAYBURT",
+      "telefon": "(0458) 211 48 47",
+      "latitude": 40.2770822,
+      "longitude": 40.1725482
+    },
+    {
+      "isim": "Bayburt İl Sağlık Md.lüğü Misafirhanesi",
+      "tip": "Sağlık Müdürlüğü Misafirhanesi",
+      "il": "Bayburt",
+      "adres": "Zahit Mah., Köşk Ayağı Küme Evleri-Merkez/BAYBURT",
+      "telefon": "(0458) 211 29 06",
+      "latitude": 40.2418258,
+      "longitude": 40.2476089
+    },
+    {
+      "isim": "Tedaş Bayburt Misafirhanesi",
+      "tip": "TEDAŞ Misafirhanesi",
+      "il": "Bayburt",
+      "adres": "Trabzon Yolu Üzeri, Turgut Özal Blv.-Merkez/BAYBURT",
+      "telefon": "(0458) 211 20 31",
+      "latitude": 40.2576439,
+      "longitude": 40.215404
+    },
+    {
+      "isim": "Karaman Çevre ve Şehircilik İl Md.lüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Karaman",
+      "adres": "Karaman Çevre ve Şehircilik İl Md.lüğü Yerleşkesi, Başakşehir Mah., Şehit Fethi Sekin Blv., No.:40-Merkez/KARAMAN",
+      "telefon": "(0338) 213 82 57",
+      "latitude": 37.1555219,
+      "longitude": 33.2599117
+    },
+    {
+      "isim": "Karaman İl Sağlık Md.lüğü Eğitim ve Konaklama Tesisi",
+      "tip": "Sağlık Müdürlüğü Misafirhanesi",
+      "il": "Karaman",
+      "adres": "Gevher Hatun Mah., Şehit Ömer Halisdemir Cad., No.:120/A-Merkez/KARAMAN",
+      "telefon": "(0338) 217 60 16",
+      "latitude": 37.173479,
+      "longitude": 33.25257000000001
+    },
+    {
+      "isim": "Batman Belediyesi Konukevi",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Batman",
+      "adres": "Kültür Mah. Demokrasi Blv.-Merkez/BATMAN",
+      "telefon": "(0488) 221 24 85",
+      "latitude": 37.9191467,
+      "longitude": 41.1348951
+    },
+    {
+      "isim": "Batman Defterdalığı Misafirhanesi",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Batman",
+      "adres": "Ziya Gökalp Mah., Yaşar Kemal Cad., Vergi Dairesi Hizmet Binası Kat:5-Merkez/BATMAN",
+      "telefon": "(0488) 213 28 52",
+      "latitude": 37.8885892,
+      "longitude": 41.1274171
+    },
+    {
+      "isim": "Şırnak Şenoba Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Şırnak",
+      "adres": "Alay Cad., No.:1-Uludere/ŞIRNAK",
+      "telefon": "(0486) 354 40 79",
+      "latitude": 37.4291829,
+      "longitude": 42.8831306
+    },
+    {
+      "isim": "Şırnak Defterdarlığı Misafirhanesi",
+      "tip": "Maliye Misafirhanesi",
+      "il": "Şırnak",
+      "adres": "Atatürk Mah., Zübeyde Hanım Cad., Hükümet Konağı-Merkez/ŞIRNAK",
+      "telefon": "(0486) 216 15 26",
+      "latitude": 37.4944487,
+      "longitude": 42.4874875
+    },
+    {
+      "isim": "Şırnak Jandarma Sosyal Tesis Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Şırnak",
+      "adres": "Yeşilyurt Mah., Uludere Cad., No.:39-Merkez/ŞIRNAK",
+      "telefon": "(0486) 218 10 00",
+      "latitude": 37.5151857,
+      "longitude": 42.4645365
+    },
+    {
+      "isim": "Şırnak Silopi Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Şırnak",
+      "adres": "Şehit Harun Boy Mah., İpek Yolu Cad., 4.Sk., No.:1-Silopi/ŞIRNAK",
+      "telefon": "(0486) 518 40 68",
+      "latitude": 37.249937,
+      "longitude": 42.459483
+    },
+    {
+      "isim": "Şırnak Karayolları Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Şırnak",
+      "adres": "Cumhuriyet Mah.-Cizre/ŞIRNAK",
+      "telefon": "(0486) 616 10 35",
+      "latitude": 37.3325589,
+      "longitude": 42.22308839999999
+    },
+    {
+      "isim": "Şırnak Cizre Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Şırnak",
+      "adres": "Şehit Yb.Melih GÜLOVA Kışlası, Nur Mah., Deniz Cad.-Cizre/ŞIRNAK",
+      "telefon": "(0486) 616 42 25",
+      "latitude": 37.332346,
+      "longitude": 42.185474
+    },
+    {
+      "isim": "Bartın Ulus Kumluca Belediye Oteli",
+      "tip": "Belediye Misafirhanesi",
+      "il": "Bartın",
+      "adres": "Kaldırım Mah., Numan Kahveci Sk., No.: 35-Ulus/BARTIN",
+      "telefon": "(0532) 712 70 45",
+      "latitude": 41.5866286,
+      "longitude": 32.6432856
+    },
+    {
+      "isim": "Bartın Kurucaşile PTT Misafirhanesi",
+      "tip": "PTT Misafirhanesi",
+      "il": "Bartın",
+      "adres": "Liman Mah., İskeke Cad., Kayıkçılar Sk., No.: 18-Kurucaşile/BARTIN",
+      "telefon": "(0378) 518 14 15",
+      "latitude": 41.84481,
+      "longitude": 32.720717
+    },
+    {
+      "isim": "Ardahan Tarım Orman Bakanlığı Arıcılık Md.lüğü Misafirhanesi",
+      "tip": "Orman Misafirhanesi",
+      "il": "Ardahan",
+      "adres": "Halilefendi Mah., Artvin Cad., No.:74-Merkez/ARDAHAN",
+      "telefon": "(0478) 211 31 71",
+      "latitude": 41.1232088,
+      "longitude": 42.6893307
+    },
+    {
+      "isim": "Iğdır İl Sağlık Müdürlüğü Misafirhanesi",
+      "tip": "Sağlık Müdürlüğü Misafirhanesi",
+      "il": "Iğdır",
+      "adres": "Topçular Mah., Hürriyet Cad., 107.Sk., No.24-Merkez/IĞDIR",
+      "telefon": "(0476) 227 75 89",
+      "latitude": 39.92005959999999,
+      "longitude": 44.0436151
+    },
+    {
+      "isim": "Iğdır DSİ Misafirhanesi",
+      "tip": "DSİ Misafirhanesi",
+      "il": "Iğdır",
+      "adres": "Topçular Mah., Orhan Gazi Cad., No.:2-Merkez/IĞDIR",
+      "telefon": "(0476) 227 67 05",
+      "latitude": 39.93003849999999,
+      "longitude": 44.02231159999999
+    },
+    {
+      "isim": "Iğdır Meteoroloji 16. Bölge Md.lüğü Misafirhanesi",
+      "tip": "Meteoroloji Misafirhanesi",
+      "il": "Iğdır",
+      "adres": "14 Kasım Mah., 744. Sk., No.: 6-Merkez/IĞDIR",
+      "telefon": "(0476) 227 59 40",
+      "latitude": 39.9320656,
+      "longitude": 44.0660956
+    },
+    {
+      "isim": "Yalova Çiftlikköy Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Yalova",
+      "adres": "Yalova Hava Meydan K.lığı Yerleşkesi-Çiftlikköy/YALOVA",
+      "telefon": "(0226) 353 20 28",
+      "latitude": 40.67948699999999,
+      "longitude": 29.373802
+    },
+    {
+      "isim": "Yalova Altınova Kışla Gazino Md.lüğü",
+      "tip": "Orduevi",
+      "il": "Yalova",
+      "adres": "Karamürselbey Eğitim Merkezi K.lığı Yerleşkesi, Kaytazdere Mah., Devlet Karayolu Cad., No.:37-Altınova/YALOVA",
+      "telefon": "(0226) 462 83 10",
+      "latitude": 40.6965616,
+      "longitude": 29.5280598
+    },
+    {
+      "isim": "Karabük Safranbolu Cemil Meriç Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Karabük",
+      "adres": "Bağlarbaşı Mah., Kurtuluş Cad., No.:92-Safranbolu/KARABÜK",
+      "telefon": "(0370) 725 52 93",
+      "latitude": 41.2641768,
+      "longitude": 32.6697577
+    },
+    {
+      "isim": "Karabük Karayolları 153.Şube Şefliği Misafirhanesi",
+      "tip": "Karayolları Misafirhanesi",
+      "il": "Karabük",
+      "adres": "Barış Mah., Adnan Menderes Blv., Karabük Cad., No.:1-Safranbolu/KARABÜK",
+      "telefon": "(0370) 712 11 92",
+      "latitude": 41.2406881,
+      "longitude": 32.6757893
+    },
+    {
+      "isim": "Karabük Safranbolu PTT Misafirhanesi",
+      "tip": "PTT Misafirhanesi",
+      "il": "Karabük",
+      "adres": "Yeni Mah., Ünsal Tülbentçi Sk., No.:1-Safranbolu/KARABÜK",
+      "telefon": "(0370) 712 67 33",
+      "latitude": 41.2511545,
+      "longitude": 32.6772792
+    },
+    {
+      "isim": "Osmaniye Çevre ve Şehircilik İl Müdürlüğü Misafirhanesi",
+      "tip": "Çevre ve Şehircilik Misafirhanesi",
+      "il": "Osmaniye",
+      "adres": "Çamlıkevler Mah., Fatih Blv., No.:2-Toprakkale/OSMANİYE",
+      "telefon": "(0328) 816 80 80",
+      "latitude": 37.0481199,
+      "longitude": 36.1735467
+    },
+    {
+      "isim": "Balıkesir Akçay Polisevi",
+      "tip": "Polisevi",
+      "il": "Balıkesir",
+      "adres": "Akçay Mah., Leman Akpınar Cad., No.:21-Edremit/BALIKESİR",
+      "telefon": "(0266) 384 97 78",
+      "latitude": 39.5836412,
+      "longitude": 26.9238356
     }
   ],
   "sosyal": [
