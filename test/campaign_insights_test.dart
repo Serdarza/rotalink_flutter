@@ -63,6 +63,42 @@ void main() {
     expect(i.daysLeft(DateTime(2026, 1, 1)), isNull);
   });
 
+  test('union offers are hidden from groups that cannot join unions', () {
+    final kamuSen = CampaignInsights.of(_c({
+      'kurum': 'Türkiye Kamu-Sen',
+      'baslik': 'Digiturk: Kurumsal İndirim – Türkiye Kamu-Sen Üyelerine Özel',
+      'etiketler': ['Kamu Personeli'],
+    }));
+    expect(kamuSen.isUnionOffer, isTrue);
+    expect(kamuSen.matches(CampaignAudience.teacher), isTrue);
+    expect(kamuSen.matches(CampaignAudience.police), isFalse);
+    expect(kamuSen.matches(CampaignAudience.military), isFalse);
+    expect(kamuSen.matches(CampaignAudience.gendarmerie), isFalse);
+
+    final ets = CampaignInsights.of(_c({
+      'kurum': 'Emniyet Teşkilatı Sendikası',
+      'baslik': 'Anaokulu İndirim Anlaşması',
+      'etiketler': ['Emniyet'],
+    }));
+    expect(ets.matches(CampaignAudience.police), isFalse);
+
+    final egitimGucu = CampaignInsights.of(_c({
+      'kurum': 'Eğitim Gücü Sen',
+      'baslik': 'Sara Dil Kursu ile Üyelerimize Özel İndirim',
+      'etiketler': ['Öğretmen'],
+    }));
+    expect(egitimGucu.isUnionOffer, isTrue);
+    expect(egitimGucu.matches(CampaignAudience.teacher), isTrue);
+
+    final ptt = CampaignInsights.of(_c({
+      'baslik': 'TSK, Jandarma ve Emniyet Mensuplarına PTT Kargo indirimi!',
+      'aciklama': '',
+    }));
+    expect(ptt.isUnionOffer, isFalse);
+    expect(ptt.matches(CampaignAudience.police), isTrue);
+    expect(ptt.matches(CampaignAudience.military), isTrue);
+  });
+
   test('foldTr', () {
     expect(foldTr('ÖĞRETMENLERE  Özel'), 'ogretmenlere ozel');
     expect(foldTr('İBB Çalışanları'), 'ibb calisanlari');

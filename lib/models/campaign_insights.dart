@@ -30,6 +30,7 @@ enum CampaignAudience {
 class CampaignInsights {
   CampaignInsights._({
     required this.audiences,
+    required this.isUnionOffer,
     required this.maxDiscountPercent,
     required this.endDate,
     required this.createdAt,
@@ -37,6 +38,9 @@ class CampaignInsights {
 
   /// Kampanyanın hitap ettiği gruplar. [CampaignAudience.publicGeneral] tüm kamu personelini kapsar.
   final Set<CampaignAudience> audiences;
+
+  /// Sendika / konfederasyon üyelerine özel kampanya.
+  final bool isUnionOffer;
   final int? maxDiscountPercent;
 
   /// Bitiş günü (yerel tarih, saatsiz).
@@ -48,10 +52,20 @@ class CampaignInsights {
   static CampaignInsights of(Campaign c) =>
       _cache[c] ??= CampaignInsights._fromCampaign(c);
 
-  /// Bu gruba seçilen kullanıcı kampanyayı görmeli mi? Genel kamu kampanyaları her grupta görünür.
-  bool matches(CampaignAudience a) =>
-      audiences.contains(a) ||
-      audiences.contains(CampaignAudience.publicGeneral);
+  /// Emniyet, TSK ve Jandarma mensupları sendikaya üye olamaz.
+  static const Set<CampaignAudience> _noUnionMembership = {
+    CampaignAudience.police,
+    CampaignAudience.military,
+    CampaignAudience.gendarmerie,
+  };
+
+  /// Bu gruba seçilen kullanıcı kampanyayı görmeli mi? Genel kamu kampanyaları her grupta
+  /// görünür; sendika kampanyaları sendikaya üye olamayan gruplarda gösterilmez.
+  bool matches(CampaignAudience a) {
+    if (isUnionOffer && _noUnionMembership.contains(a)) return false;
+    return audiences.contains(a) ||
+        audiences.contains(CampaignAudience.publicGeneral);
+  }
 
   bool isNew(DateTime now) {
     final t = createdAt;
@@ -72,6 +86,7 @@ class CampaignInsights {
     final text = '${c.title}\n${c.summary}';
     return CampaignInsights._(
       audiences: _audiences(c),
+      isUnionOffer: _unionPattern.hasMatch(foldTr('${c.organization}\n${c.title}')),
       maxDiscountPercent: _maxDiscount(text),
       endDate: _endDate(text),
       createdAt: c.createdAt,
@@ -79,6 +94,11 @@ class CampaignInsights {
   }
 
   // ---------------------------------------------------------------- kitle
+
+  /// "Sendika", "Konfederasyon", "Kamu-Sen", "Eğitim Gücü Sen", "Hür Sen" …
+  static final RegExp _unionPattern = RegExp(
+    r'sendika|konfederasyon|[a-z][\s-]sen\b',
+  );
 
   static const Map<String, CampaignAudience> _tagMap = {
     'ogretmen': CampaignAudience.teacher,
