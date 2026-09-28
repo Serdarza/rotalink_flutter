@@ -12,6 +12,7 @@ import '../models/misafirhane.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import '../theme/app_colors.dart';
 import 'facility_price_report_sheet.dart';
+import 'free_pro_pass.dart';
 import 'facility_tariff_view.dart';
 
 /// `fiyatlar.json` kaydını il+isim ile eşleyip gösterir.
@@ -94,9 +95,9 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
           children: [
             Text(
               priced.isim,
-              style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                  ),
+              style: Theme.of(
+                ctx,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 12),
             _TariffDetails(tariff: tariff),
@@ -136,12 +137,15 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
     final labelColor = isDark
         ? Colors.white.withValues(alpha: 0.62)
         : AppColors.textPrimary.withValues(alpha: 0.58);
-    final valueColor =
-        isDark ? Colors.white.withValues(alpha: 0.95) : AppColors.textPrimary;
-    final unavailableColor =
-        isDark ? const Color(0xFFFF8A80) : const Color(0xFFC62828);
-    final titleColor =
-        isDark ? Colors.white.withValues(alpha: 0.92) : AppColors.textPrimary;
+    final valueColor = isDark
+        ? Colors.white.withValues(alpha: 0.95)
+        : AppColors.textPrimary;
+    final unavailableColor = isDark
+        ? const Color(0xFFFF8A80)
+        : const Color(0xFFC62828);
+    final titleColor = isDark
+        ? Colors.white.withValues(alpha: 0.92)
+        : AppColors.textPrimary;
 
     if (!priced.hasFiyatBilgisi) {
       return Padding(
@@ -287,7 +291,10 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                _ProPreview(facility: priced, onTap: () => unawaited(_openPro())),
+                _ProPreview(
+                  facility: priced,
+                  onTap: () => unawaited(_openPro()),
+                ),
                 const SizedBox(height: 12),
                 FilledButton.icon(
                   onPressed: () => unawaited(_openPro()),
@@ -306,6 +313,20 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                     ),
                   ),
                 ),
+                if (ProService.instance.canStartFreePass)
+                  TextButton.icon(
+                    onPressed: () =>
+                        unawaited(confirmAndStartFreePass(context)),
+                    icon: const Icon(Icons.timer_outlined, size: 18),
+                    label: const Text('1 saat ücretsiz dene'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      textStyle: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -315,7 +336,8 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
 
     final entry = priced.fiyatKaydi;
     final tariff = entry?.tarife;
-    final hasLegacy = entry?.hasLegacyFiyat ??
+    final hasLegacy =
+        entry?.hasLegacyFiyat ??
         (priced.fiyatSivilDefined ||
             priced.fiyatKamuDefined ||
             priced.fiyatKurumDefined);
@@ -359,8 +381,9 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                       side: BorderSide(
                         color: AppColors.primary.withValues(alpha: 0.45),
                       ),
-                      backgroundColor:
-                          AppColors.primary.withValues(alpha: 0.06),
+                      backgroundColor: AppColors.primary.withValues(
+                        alpha: 0.06,
+                      ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 8,
@@ -434,8 +457,8 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                   label: widget.compact
                       ? FacilityPricing.showDetailedPrices
                       : _expanded
-                          ? FacilityPricing.hideDetailedTariff
-                          : FacilityPricing.showDetailedTariff,
+                      ? FacilityPricing.hideDetailedTariff
+                      : FacilityPricing.showDetailedTariff,
                   expanded: !widget.compact && _expanded,
                   onTap: widget.compact
                       ? () => unawaited(_openTariffSheet(priced))
@@ -454,10 +477,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                         : const SizedBox(width: double.infinity),
                   ),
               ],
-              if (!footer.isEmpty) ...[
-                const SizedBox(height: 10),
-                footer,
-              ],
+              if (!footer.isEmpty) ...[const SizedBox(height: 10), footer],
             ],
           ),
         ),
@@ -480,12 +500,14 @@ class _ProPreview extends StatelessWidget {
     final labelColor = isDark
         ? Colors.white.withValues(alpha: 0.62)
         : AppColors.textPrimary.withValues(alpha: 0.58);
-    final titleColor =
-        isDark ? Colors.white.withValues(alpha: 0.92) : AppColors.textPrimary;
+    final titleColor = isDark
+        ? Colors.white.withValues(alpha: 0.92)
+        : AppColors.textPrimary;
     final entry = facility.fiyatKaydi;
     final tariff = entry?.tarife;
-    final firstTable =
-        tariff?.hasTables == true ? tariff!.tablolar.first : null;
+    final firstTable = tariff?.hasTables == true
+        ? tariff!.tablolar.first
+        : null;
 
     final Widget sample;
     if (firstTable != null) {
@@ -524,10 +546,10 @@ class _ProPreview extends StatelessWidget {
     final hiddenRows = tariff == null
         ? 0
         : tariff.tablolar.fold<int>(0, (n, t) => n + t.satirlar.length) -
-            (firstTable?.satirlar
-                    .take(FacilityTariffView.previewRows)
-                    .length ??
-                0);
+              (firstTable?.satirlar
+                      .take(FacilityTariffView.previewRows)
+                      .length ??
+                  0);
 
     final perks = <String>[
       if (tariff != null && tariff.hasTables) ...[

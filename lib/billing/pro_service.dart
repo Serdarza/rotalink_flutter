@@ -20,13 +20,29 @@ class ProService {
   static const String _keyActive = 'rotalink_pro_active';
   static const String _keyProductId = 'rotalink_pro_product_id';
   static const String _keyExpiryMs = 'rotalink_pro_expiry_ms';
+  static const String _keyFreePassStartMs = 'rotalink_pro_free_pass_start_ms';
+
+  /// Her kullanıcıya bir kereye mahsus verilen ücretsiz Pro süresi.
+  static const Duration freePassDuration = Duration(hours: 1);
 
   /// Arka plan görevleri için: mağazaya sormadan yerel kayıttaki hak sahipliği.
   static bool cachedEntitlementActive(SharedPreferences prefs) {
+    if (_freePassEnd(prefs.getInt(_keyFreePassStartMs)) != null) return true;
     if (!(prefs.getBool(_keyActive) ?? false)) return false;
     final expiryMs = prefs.getInt(_keyExpiryMs);
     return expiryMs == null ||
         DateTime.fromMillisecondsSinceEpoch(expiryMs).isAfter(DateTime.now());
+  }
+
+  /// Başlangıç kaydından hâlâ süren ücretsiz Pro'nun bitişi; bittiyse veya
+  /// saat geri alınmışsa null.
+  static DateTime? _freePassEnd(int? startMs) {
+    if (startMs == null) return null;
+    final start = DateTime.fromMillisecondsSinceEpoch(startMs);
+    final now = DateTime.now();
+    final end = start.add(freePassDuration);
+    if (now.isBefore(start) || !now.isBefore(end)) return null;
+    return end;
   }
 
   /// Mağaza yanıtı beklenirken hak sahipliği kararı için tanınan süre.
@@ -39,9 +55,31 @@ class ProService {
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _sub;
   Timer? _expiryTimer;
+  Timer? _freePassTimer;
 
-  /// Reklamsız hak — `AdService` ve arayüz bunu dinler.
-  final ValueNotifier<bool> isPro = ValueNotifier<bool>(false);
+  final _ProFlag _isPro = _ProFlag(false);
+
+  /// Satın alınmış abonelik. Arayüz bunu dinler; ücretsiz Pro başlayıp
+  /// bitince de dinleyiciler uyarılır, böylece [isAdFree] yeniden okunur.
+  ValueNotifier<bool> get isPro => _isPro;
+
+  /// Süren ücretsiz Pro'nun bitişi (yoksa null).
+  final ValueNotifier<DateTime?> freePassEndsAt = ValueNotifier<DateTime?>(
+    null,
+  );
+
+  bool _freePassUsed = false;
+
+  /// Ücretsiz Pro hakkı daha önce kullanıldı mı (süresi dolmuş olsa da).
+  bool get freePassUsed => _freePassUsed;
+
+  bool get freePassActive {
+    final end = freePassEndsAt.value;
+    return end != null && end.isAfter(DateTime.now());
+  }
+
+  /// Ücretsiz Pro teklif edilebilir mi: hiç kullanılmamış ve abonelik yok.
+  bool get canStartFreePass => !_freePassUsed && !isPro.value;
 
   /// Mevcut dönemin tahmini bitiş anı (geri sayım için).
   final ValueNotifier<DateTime?> expiryAt = ValueNotifier<DateTime?>(null);
@@ -80,7 +118,9 @@ class ProService {
   ///
   /// Aktif abonelik + (varsa) dönem bitişi gelecekte.
   /// Süre dolmuşsa anında false döner ve arka planda hak düşürülür.
-  bool get isAdFree {
+  bool get isAdFree => freePassActive || _subscriptionActive;
+
+  bool get _subscriptionActive {
     if (!isPro.value) return false;
     final end = expiryAt.value;
     if (end != null && !end.isAfter(DateTime.now())) {
@@ -90,11 +130,51 @@ class ProService {
     return true;
   }
 
+  /// Bir kereye mahsus 1 saatlik ücretsiz Pro'yu başlatır.
+  Future<bool> startFreePass() async {
+    if (!canStartFreePass) return false;
+    final now = DateTime.now();
+    _freePassUsed = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_keyFreePassStartMs, now.millisecondsSinceEpoch);
+    } catch (e) {
+      debugPrint('[Pro] ücretsiz Pro kaydedilemedi: $e');
+    }
+    _setFreePassEnd(now.add(freePassDuration));
+    _emit('1 saatlik ücretsiz Pro başladı. Tüm Pro özellikleri açık.');
+    return true;
+  }
+
+  Future<void> _loadFreePass() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final startMs = prefs.getInt(_keyFreePassStartMs);
+      _freePassUsed = startMs != null;
+      _setFreePassEnd(_freePassEnd(startMs));
+    } catch (e) {
+      debugPrint('[Pro] ücretsiz Pro okunamadı: $e');
+    }
+  }
+
+  void _setFreePassEnd(DateTime? end) {
+    _freePassTimer?.cancel();
+    _freePassTimer = null;
+    freePassEndsAt.value = end;
+    if (end != null) {
+      _freePassTimer = Timer(end.difference(DateTime.now()), () {
+        _setFreePassEnd(null);
+      });
+    }
+    _isPro.ping();
+  }
+
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
 
     await _loadCachedEntitlement();
+    await _loadFreePass();
     _scheduleExpiryTimer();
 
     try {
@@ -259,7 +339,9 @@ class ProService {
           if (purchase.pendingCompletePurchase) {
             await _iap.completePurchase(purchase);
           }
-          debugPrint('[Pro] süresi geçmiş işlem yok sayıldı: ${purchase.productID}');
+          debugPrint(
+            '[Pro] süresi geçmiş işlem yok sayıldı: ${purchase.productID}',
+          );
           return;
         }
 
@@ -302,7 +384,8 @@ class ProService {
     required DateTime? expiry,
   }) async {
     final nextExpiry = active ? expiry : null;
-    final changed = isPro.value != active ||
+    final changed =
+        isPro.value != active ||
         _activeProductId != productId ||
         expiryAt.value != nextExpiry;
     isPro.value = active;
@@ -373,7 +456,9 @@ class ProService {
       return;
     }
     // Timer.periodic üst sınırı yok; çok uzun sürelerde (yıllık) güvenli dilimle.
-    final slice = wait > const Duration(days: 1) ? const Duration(days: 1) : wait;
+    final slice = wait > const Duration(days: 1)
+        ? const Duration(days: 1)
+        : wait;
     _expiryTimer = Timer(slice, () {
       if (!isPro.value) return;
       final still = expiryAt.value;
@@ -497,8 +582,16 @@ class ProService {
   void dispose() {
     _expiryTimer?.cancel();
     _expiryTimer = null;
+    _freePassTimer?.cancel();
+    _freePassTimer = null;
     _sub?.cancel();
     _sub = null;
     _messages.close();
   }
+}
+
+class _ProFlag extends ValueNotifier<bool> {
+  _ProFlag(super.value);
+
+  void ping() => notifyListeners();
 }

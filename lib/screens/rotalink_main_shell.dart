@@ -12,6 +12,7 @@ import '../navigator_keys.dart';
 import '../onboarding/app_onboarding_controller.dart';
 import '../onboarding/app_onboarding_overlay.dart';
 import '../onboarding/onboarding_prefs.dart';
+import '../widgets/free_pro_pass.dart';
 import '../widgets/pro_support_banner.dart';
 import '../widgets/rotalink_glass_bottom_nav.dart';
 import 'about_screen.dart';
@@ -39,6 +40,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   Timer? _proSupportTimer;
   bool _showProSupportBanner = false;
   bool _proSupportScheduled = false;
+  bool _freePassWasActive = false;
 
   @override
   void initState() {
@@ -46,6 +48,8 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     _onboarding = AppOnboardingController(onEnsureHome: _goHome);
     _onboarding.addListener(_onOnboardingChanged);
     ProService.instance.isPro.addListener(_onProChanged);
+    ProService.instance.freePassEndsAt.addListener(_onFreePassChanged);
+    _freePassWasActive = ProService.instance.freePassEndsAt.value != null;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_maybeStartOnboarding());
       _scheduleProSupportBanner();
@@ -65,6 +69,29 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     if (ProService.instance.isAdFree && _showProSupportBanner) {
       setState(() => _showProSupportBanner = false);
     }
+  }
+
+  void _onFreePassChanged() {
+    final active = ProService.instance.freePassEndsAt.value != null;
+    final ended = _freePassWasActive && !active;
+    _freePassWasActive = active;
+    if (!mounted) return;
+    setState(() {});
+    if (!ended || ProService.instance.isAdFree) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 8),
+        content: const Text(
+          'Ücretsiz Pro süreniz doldu. Devam etmek için bir plan seçebilirsiniz.',
+        ),
+        action: SnackBarAction(label: 'Planlar', onPressed: _openPro),
+      ),
+    );
+  }
+
+  void _openPro() {
+    _bodyNav?.pushNamed(RotalinkShellRoutes.pro);
   }
 
   void _scheduleProSupportBanner() {
@@ -112,6 +139,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   void dispose() {
     _proSupportTimer?.cancel();
     ProService.instance.isPro.removeListener(_onProChanged);
+    ProService.instance.freePassEndsAt.removeListener(_onFreePassChanged);
     _onboarding.removeListener(_onOnboardingChanged);
     _onboarding.dispose();
     _navBridge.dispose();
@@ -202,10 +230,8 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
       case RotalinkShellRoutes.discover:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => DiscoverScreen(
-            embeddedInShell: true,
-            showBackButton: false,
-          ),
+          builder: (_) =>
+              DiscoverScreen(embeddedInShell: true, showBackButton: false),
         );
       case RotalinkShellRoutes.about:
         return MaterialPageRoute<void>(
@@ -273,10 +299,21 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
           children: [
             Scaffold(
               resizeToAvoidBottomInset: false,
-              body: Navigator(
-                key: rotalinkShellBodyNavigatorKey,
-                initialRoute: RotalinkShellRoutes.home,
-                onGenerateRoute: _onGenerateRoute,
+              body: Stack(
+                children: [
+                  Navigator(
+                    key: rotalinkShellBodyNavigatorKey,
+                    initialRoute: RotalinkShellRoutes.home,
+                    onGenerateRoute: _onGenerateRoute,
+                  ),
+                  if (ProService.instance.freePassActive)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 10,
+                      child: Center(child: FreePassPill(onTap: _openPro)),
+                    ),
+                ],
               ),
               bottomNavigationBar: RotalinkGlassBottomNav(
                 selected: _selected,
@@ -286,14 +323,18 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
                 onRoutePlan: _openRoutePlan,
                 onDiscover: _openDiscoverTab,
                 navTargetKeys: {
-                  OnboardingTarget.navSearch:
-                      _onboarding.targetKey(OnboardingTarget.navSearch),
-                  OnboardingTarget.navDiscover:
-                      _onboarding.targetKey(OnboardingTarget.navDiscover),
-                  OnboardingTarget.navRoute:
-                      _onboarding.targetKey(OnboardingTarget.navRoute),
-                  OnboardingTarget.navFavorites:
-                      _onboarding.targetKey(OnboardingTarget.navFavorites),
+                  OnboardingTarget.navSearch: _onboarding.targetKey(
+                    OnboardingTarget.navSearch,
+                  ),
+                  OnboardingTarget.navDiscover: _onboarding.targetKey(
+                    OnboardingTarget.navDiscover,
+                  ),
+                  OnboardingTarget.navRoute: _onboarding.targetKey(
+                    OnboardingTarget.navRoute,
+                  ),
+                  OnboardingTarget.navFavorites: _onboarding.targetKey(
+                    OnboardingTarget.navFavorites,
+                  ),
                 },
               ),
             ),

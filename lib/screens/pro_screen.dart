@@ -10,6 +10,7 @@ import '../billing/pro_service.dart';
 import '../constants/store_links.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
+import '../widgets/free_pro_pass.dart';
 
 /// Rotalink Pro — ücretli özellikler ve reklamsız uygulamanın geliştirilmesine destek.
 class ProScreen extends StatefulWidget {
@@ -117,6 +118,11 @@ class _ProScreenState extends State<ProScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 _Hero(isPro: isPro),
+                if (!isPro &&
+                    (_pro.canStartFreePass || _pro.freePassActive)) ...[
+                  const SizedBox(height: 14),
+                  const _FreePassCard(),
+                ],
                 const SizedBox(height: 14),
                 _SupportCard(isPro: isPro),
                 const SizedBox(height: 26),
@@ -345,6 +351,101 @@ class _HeroChip extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Bir kereye mahsus 1 saatlik ücretsiz Pro: teklif veya kalan süre.
+class _FreePassCard extends StatelessWidget {
+  const _FreePassCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return FreePassCountdown(
+      builder: (context, remaining) {
+        final active = remaining != null;
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF12324A) : const Color(0xFFEFF8FF),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isDark ? const Color(0xFF28577A) : const Color(0xFFBFE0F7),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    active ? Icons.timer_rounded : Icons.card_giftcard_rounded,
+                    color: AppColors.primary,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      active ? 'Ücretsiz Pro aktif' : '1 saat ücretsiz Pro',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                  if (active)
+                    Text(
+                      formatFreePassRemaining(remaining),
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                active
+                    ? 'Tüm Pro özellikleri açık. Süre bitince Pro özellikleri '
+                          'kapanır; devam etmek için aşağıdan bir plan seçebilirsiniz.'
+                    : 'Tüm Pro özelliklerini bir kereye mahsus 1 saat ücretsiz '
+                          'kullanın. Kart bilgisi gerekmez, süre bitince kendiliğinden '
+                          'kapanır.',
+                style: TextStyle(
+                  fontSize: 13,
+                  height: 1.45,
+                  color: _mutedText(context),
+                ),
+              ),
+              if (!active) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => unawaited(confirmAndStartFreePass(context)),
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  label: const Text('Ücretsiz 1 saati başlat'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(
+                      color: AppColors.primary,
+                      width: 1.4,
+                    ),
+                    minimumSize: const Size.fromHeight(46),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
     );
   }
 }
