@@ -39,11 +39,14 @@ subprojects {
             },
         )
     }
-    plugins.withId("org.jetbrains.kotlin.android") {
+    // Bazı eklentiler (ör. workmanager_android) kendi build.gradle'ında jvmTarget'ı 1.8'e çeker;
+    // değerlendirme sonrası kaydedilen bu ayar onlarınkinden sonra çalışıp Java 17 ile eşitler.
+    val forceKotlinJvm17 = {
         tasks.withType<KotlinCompile>().configureEach {
             compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
         }
     }
+    if (state.executed) forceKotlinJvm17() else afterEvaluate { forceKotlinJvm17() }
 }
 
 tasks.register<Delete>("clean") {
