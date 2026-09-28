@@ -31,7 +31,9 @@ import '../utils/geo_helpers.dart';
 import '../utils/maps_launch.dart';
 import '../widgets/rotalink_native_ad_tile.dart';
 import '../utils/safe_map_coordinates.dart';
+import '../utils/best_value_facility.dart';
 import '../utils/search_normalize.dart';
+import 'best_value_pro_card.dart';
 import 'distance_permission_chip.dart';
 import 'facility_detail_card.dart';
 import 'rotalink_glass_bottom_nav.dart';
@@ -1233,7 +1235,16 @@ class MisafirhaneSearchResultsPanelState
 
     final n = facilities.length;
     final childCount = n * 2 - 1;
+    final bestValue = pickBestValueFacility(facilities);
     return [
+      if (bestValue != null)
+        SliverToBoxAdapter(
+          child: BestValueProCard(
+            key: ValueKey<String>('best-${bestValue.facility.stableFacilityId}'),
+            pick: bestValue,
+            onOpenFacility: () => unawaited(_openFacilityDetail(bestValue.facility)),
+          ),
+        ),
       SliverList(
         delegate: SliverChildBuilderDelegate(
           (ctx, index) {

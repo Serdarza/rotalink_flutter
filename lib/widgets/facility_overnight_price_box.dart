@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 
+import '../billing/price_access.dart';
 import '../billing/pro_service.dart';
 import '../constants/facility_pricing.dart';
 import '../data/facility_price_repository.dart';
@@ -59,13 +59,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
   Misafirhane get _priced =>
       FacilityPriceRepository.instance.resolveFacility(widget.facility);
 
-  /// Debug derlemede (flutter run) geliştirici testi için açık; mağaza
-  /// (release) derlemesinde `kDebugMode` sabit false olduğundan kilit aynen kalır.
-  /// `--dart-define=PRICE_PREVIEW=true` ile debug'da da kilitli önizleme görülür.
-  bool get _unlocked =>
-      (kDebugMode && !_forcePreview) || ProService.instance.isAdFree;
-
-  static const _forcePreview = bool.fromEnvironment('PRICE_PREVIEW');
+  bool get _unlocked => PriceAccess.unlocked;
 
   Future<void> _openPro() async {
     await Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);

@@ -42,4 +42,13 @@ abstract final class FacilityPricing {
       'Konaklama ücretlerini görmek için Rotalink Pro’ya geçin. '
       'Harita, arama ve tesis bilgileri ücretsiz kullanılmaya devam eder.';
   static const unlockWithProButton = 'Rotalink Pro’ya geç';
+
+  static const bestValueTitle = 'Bu aramada en uygun konaklama';
+  static String bestValueTitleIl(String il) => '$il için en uygun konaklama';
+  static const bestValueSingleTitle = 'Fiyatı görülebilen konaklama';
+  static const bestValueUnit = 'tek kişi / gece';
+  static String bestValueCompared(int n) =>
+      'Fiyatı resmî kaynaktan doğrulanmış $n tesis arasında';
+  static const bestValueCta = 'Pro ile en uygun fiyatı gör';
+  static const bestValueOpen = 'Tesisi incele';
 }
