@@ -13,7 +13,9 @@ import '../ads/ad_service.dart';
 import '../ads/discover_native_merge.dart';
 import '../billing/price_access.dart';
 import '../billing/pro_service.dart';
+import '../constants/facility_pricing.dart';
 import '../constants/store_links.dart';
+import '../data/facility_compare_selection.dart';
 import '../data/facility_sort_prefs.dart';
 import '../providers/facility_filter_provider.dart';
 import '../navigator_keys.dart';
@@ -37,6 +39,7 @@ import '../utils/best_value_facility.dart';
 import '../utils/search_normalize.dart';
 import 'best_value_pro_card.dart';
 import 'distance_permission_chip.dart';
+import 'facility_compare_widgets.dart';
 import 'facility_detail_card.dart';
 import 'facility_sort_bar.dart';
 import 'rotalink_glass_bottom_nav.dart';
@@ -245,6 +248,9 @@ class MisafirhaneSearchResultsPanelState
   bool _sortByPrice = false;
   BestValueBasis _priceBasis = BestValueBasis.sivil;
 
+  /// Pro: tek kişi / gece fiyatı için üst limit (TL); null ise bütçe filtresi kapalı.
+  double? _budgetMax;
+
   int _nativeAdGen = 0;
   List<NativeAd> _nativeAdsGezi = [];
   List<NativeAd> _nativeAdsYemek = [];
@@ -271,6 +277,7 @@ class MisafirhaneSearchResultsPanelState
   void initState() {
     super.initState();
     ProService.instance.isPro.addListener(_onProChanged);
+    FacilityCompareSelection.instance.addListener(_onCompareChanged);
     widget.mapLocationState.addListener(_onMapLocationChanged);
     unawaited(_loadFavorites());
     unawaited(_loadSortPrefs());
@@ -335,8 +342,60 @@ class MisafirhaneSearchResultsPanelState
     unawaited(FacilitySortPrefs.save(byPrice: _sortByPrice, basis: basis));
   }
 
+  Future<void> _openBudgetPicker(List<Misafirhane> facilities) async {
+    if (!PriceAccess.unlocked) {
+      unawaited(showProFeatureTeaser(
+        context,
+        icon: Icons.account_balance_wallet_outlined,
+        title: FacilityPricing.budgetTeaserTitle,
+        headline: FacilityPricing.budgetTeaserCount(
+          countFacilitiesWithNightPrice(facilities),
+        ),
+        perks: FacilityPricing.budgetTeaserPerks,
+      ));
+      return;
+    }
+    var basis = _priceBasis;
+    var range = nightPriceRange(facilities, basis);
+    if (range == null) {
+      basis = basis == BestValueBasis.sivil ? BestValueBasis.kamu : BestValueBasis.sivil;
+      range = nightPriceRange(facilities, basis);
+    }
+    if (range == null) return;
+    final picked = await showBudgetPicker(context, range: range, current: _budgetMax);
+    if (!mounted || picked == null) return;
+    setState(() {
+      _budgetMax = picked.isNaN ? null : picked;
+      _priceBasis = basis;
+    });
+    unawaited(FacilitySortPrefs.save(byPrice: _sortByPrice, basis: basis));
+    final scroll = _listScroll;
+    if (scroll != null && scroll.hasClients) scroll.jumpTo(0);
+  }
+
+  void _onCompareChanged() {
+    if (mounted) setState(() {});
+  }
+
+  Widget? _compareBarSliver() {
+    final selected = FacilityCompareSelection.instance.value;
+    if (selected.isEmpty || !PriceAccess.unlocked) return null;
+    return SliverToBoxAdapter(
+      child: FacilityCompareBar(
+        selected: selected,
+        userLocation: widget.mapLocationState.userLocation,
+      ),
+    );
+  }
+
+  void _clearBudget() {
+    if (_budgetMax == null) return;
+    setState(() => _budgetMax = null);
+  }
+
   void _onProChanged() {
     if (!mounted) return;
+    if (!PriceAccess.unlocked) _budgetMax = null;
     if (_sortByPrice && !PriceAccess.unlocked) {
       setState(() => _sortByPrice = false);
     } else if (!_sortByPrice && PriceAccess.unlocked) {
@@ -395,6 +454,7 @@ class MisafirhaneSearchResultsPanelState
   @override
   void dispose() {
     ProService.instance.isPro.removeListener(_onProChanged);
+    FacilityCompareSelection.instance.removeListener(_onCompareChanged);
     widget.mapLocationState.removeListener(_onMapLocationChanged);
     for (final a in _nativeAdsGezi) {
       a.dispose();
@@ -1285,6 +1345,7 @@ class MisafirhaneSearchResultsPanelState
     final hasAnyPrice = countFacilitiesWithNightPrice(facilities) > 0;
     final unlocked = PriceAccess.unlocked;
     final byPrice = _sortByPrice && unlocked && hasAnyPrice;
+    final budget = unlocked && hasAnyPrice ? _budgetMax : null;
     final sortBar = hasAnyPrice
         ? SliverToBoxAdapter(
             child: FacilitySortBar(
@@ -1294,16 +1355,33 @@ class MisafirhaneSearchResultsPanelState
               onSelectDistance: _selectDistanceSort,
               onSelectPrice: () => _selectPriceSort(facilities),
               onBasisChanged: _selectPriceBasis,
+              budgetMax: budget,
+              onBudgetTap: () => unawaited(_openBudgetPicker(facilities)),
+              onBudgetClear: _clearBudget,
             ),
           )
         : null;
+    final compareBar = _compareBarSliver();
 
-    if (byPrice) {
-      final sorted = sortFacilitiesByPrice(facilities, _priceBasis);
-      final priced = sorted.priced;
-      final unpriced = sorted.unpriced;
+    if (byPrice || budget != null) {
+      final split = splitFacilitiesByPrice(
+        facilities,
+        _priceBasis,
+        sortByPrice: byPrice,
+        maxAmount: budget,
+      );
+      final priced = split.priced;
+      final unpriced = split.unpriced;
       return [
         ?sortBar,
+        ?compareBar,
+        if (budget != null && (split.overBudget > 0 || priced.isEmpty))
+          SliverToBoxAdapter(
+            child: FacilityBudgetInfo(
+              hidden: split.overBudget,
+              noneFits: priced.isEmpty,
+            ),
+          ),
         SliverList(
           delegate: SliverChildBuilderDelegate(
             (ctx, index) {
@@ -1335,6 +1413,7 @@ class MisafirhaneSearchResultsPanelState
     final bestValue = pickBestValueFacility(facilities);
     return [
       ?sortBar,
+      ?compareBar,
       if (bestValue != null)
         SliverToBoxAdapter(
           child: BestValueProCard(

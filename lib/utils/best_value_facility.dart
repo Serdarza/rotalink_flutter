@@ -34,21 +34,64 @@ FacilityNightPrice? singleNightPriceFor(Misafirhane m, BestValueBasis basis) {
 /// gelen (yakınlık) sırası korunur.
 ({List<(Misafirhane, FacilityNightPrice)> priced, List<Misafirhane> unpriced})
     sortFacilitiesByPrice(List<Misafirhane> facilities, BestValueBasis basis) {
+  final s = splitFacilitiesByPrice(facilities, basis, sortByPrice: true);
+  return (priced: s.priced, unpriced: s.unpriced);
+}
+
+/// Fiyatı olan / olmayan tesisleri ayırır; [maxAmount] verilirse bu tutarı aşan
+/// fiyatlı tesisler [overBudget] sayısına düşer. [sortByPrice] kapalıysa gelen
+/// sıra korunur.
+({
+  List<(Misafirhane, FacilityNightPrice)> priced,
+  List<Misafirhane> unpriced,
+  int overBudget,
+}) splitFacilitiesByPrice(
+  List<Misafirhane> facilities,
+  BestValueBasis basis, {
+  bool sortByPrice = false,
+  double? maxAmount,
+}) {
   final priced = <(int, Misafirhane, FacilityNightPrice)>[];
   final unpriced = <Misafirhane>[];
+  var overBudget = 0;
   for (final (i, m) in facilities.indexed) {
     final p = singleNightPriceFor(m, basis);
     if (p == null) {
       unpriced.add(m);
+    } else if (maxAmount != null && p.amount > maxAmount) {
+      overBudget++;
     } else {
       priced.add((i, m, p));
     }
   }
-  priced.sort((a, b) {
-    final c = a.$3.amount.compareTo(b.$3.amount);
-    return c != 0 ? c : a.$1.compareTo(b.$1);
-  });
-  return (priced: [for (final e in priced) (e.$2, e.$3)], unpriced: unpriced);
+  if (sortByPrice) {
+    priced.sort((a, b) {
+      final c = a.$3.amount.compareTo(b.$3.amount);
+      return c != 0 ? c : a.$1.compareTo(b.$1);
+    });
+  }
+  return (
+    priced: [for (final e in priced) (e.$2, e.$3)],
+    unpriced: unpriced,
+    overBudget: overBudget,
+  );
+}
+
+/// Seçilen kategoride tek kişi / gece fiyatlarının en düşük ve en yüksek değeri.
+({double min, double max})? nightPriceRange(
+  List<Misafirhane> facilities,
+  BestValueBasis basis,
+) {
+  double? lo;
+  double? hi;
+  for (final m in facilities) {
+    final v = singleNightPriceFor(m, basis)?.amount;
+    if (v == null) continue;
+    if (lo == null || v < lo) lo = v;
+    if (hi == null || v > hi) hi = v;
+  }
+  if (lo == null || hi == null) return null;
+  return (min: lo, max: hi);
 }
 
 /// Sivil veya kamu personeli için tek kişi / gece fiyatı olan tesis sayısı.

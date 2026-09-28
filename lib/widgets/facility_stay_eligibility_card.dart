@@ -4,6 +4,24 @@ import '../constants/facility_stay_rules.dart';
 import '../models/misafirhane.dart';
 import '../theme/app_colors.dart';
 
+Color stayAccessColor(StayAccess a) => switch (a) {
+  StayAccess.allowed => const Color(0xFF2E7D32),
+  StayAccess.conditional => const Color(0xFFE08600),
+  StayAccess.notAllowed => const Color(0xFFC62828),
+};
+
+IconData stayAccessIcon(StayAccess a) => switch (a) {
+  StayAccess.allowed => Icons.check_circle_rounded,
+  StayAccess.conditional => Icons.error_rounded,
+  StayAccess.notAllowed => Icons.cancel_rounded,
+};
+
+String stayCivilBadge(StayAccess a) => switch (a) {
+  StayAccess.allowed => 'Sivillere açık',
+  StayAccess.conditional => 'Siviller şartlı',
+  StayAccess.notAllowed => 'Sivil konaklayamaz',
+};
+
 /// Tesis detayında "Kimler konaklayabilir?" — tesis tipine göre gruplar
 /// ve açılır "Nasıl kalınır?" adımları.
 class FacilityStayEligibilityCard extends StatefulWidget {
@@ -20,27 +38,9 @@ class _FacilityStayEligibilityCardState
     extends State<FacilityStayEligibilityCard> {
   bool _howToOpen = false;
 
-  static const _green = Color(0xFF2E7D32);
-  static const _amber = Color(0xFFE08600);
-  static const _red = Color(0xFFC62828);
-
-  static Color _accessColor(StayAccess a) => switch (a) {
-    StayAccess.allowed => _green,
-    StayAccess.conditional => _amber,
-    StayAccess.notAllowed => _red,
-  };
-
-  static IconData _accessIcon(StayAccess a) => switch (a) {
-    StayAccess.allowed => Icons.check_circle_rounded,
-    StayAccess.conditional => Icons.error_rounded,
-    StayAccess.notAllowed => Icons.cancel_rounded,
-  };
-
-  static String _civilBadge(StayAccess a) => switch (a) {
-    StayAccess.allowed => 'Sivillere açık',
-    StayAccess.conditional => 'Siviller şartlı',
-    StayAccess.notAllowed => 'Sivil konaklayamaz',
-  };
+  static Color _accessColor(StayAccess a) => stayAccessColor(a);
+  static IconData _accessIcon(StayAccess a) => stayAccessIcon(a);
+  static String _civilBadge(StayAccess a) => stayCivilBadge(a);
 
   @override
   Widget build(BuildContext context) {

@@ -26,6 +26,22 @@ class _ProScreenState extends State<ProScreen> {
       detail: 'Fiyat bilgisi olan tesislerde ücretleri anında görürsünüz.',
     ),
     _ProBenefit(
+      icon: Icons.account_balance_wallet_outlined,
+      title: 'Fiyat sıralaması ve bütçe filtresi',
+      detail: 'Tesisleri ucuzdan pahalıya dizin, bütçenizi aşanları gizleyin.',
+    ),
+    _ProBenefit(
+      icon: Icons.compare_arrows_rounded,
+      title: 'Tesis karşılaştırma',
+      detail: '3 tesise kadar fiyat, uzaklık ve konaklama şartlarını yan yana görün.',
+    ),
+    _ProBenefit(
+      icon: Icons.notifications_active_outlined,
+      title: 'Fiyat ve kampanya bildirimleri',
+      detail: 'Favori tesisinizin fiyatı değişince ve mesleğinize yeni kampanya '
+          'gelince haber alın.',
+    ),
+    _ProBenefit(
       icon: Icons.map_outlined,
       title: 'Aynı ücretsiz deneyim',
       detail: 'Harita, arama ve tesis bilgileri herkese açık kalır.',

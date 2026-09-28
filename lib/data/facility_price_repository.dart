@@ -43,6 +43,9 @@ class FacilityPriceRepository {
     await _downloadAndPersist();
   }
 
+  /// Arka plan görevi: indirilen `fiyatlar.json` belleğe alınır; önbelleğe yazılmaz.
+  void applyJsonString(String json) => _applyDecoded(jsonDecode(json));
+
   FacilityPriceEntry? lookup(String il, String isim) {
     final key = FacilityPriceEntry.matchKey(il, isim);
     return _byKey[key];

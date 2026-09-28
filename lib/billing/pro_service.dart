@@ -21,6 +21,14 @@ class ProService {
   static const String _keyProductId = 'rotalink_pro_product_id';
   static const String _keyExpiryMs = 'rotalink_pro_expiry_ms';
 
+  /// Arka plan görevleri için: mağazaya sormadan yerel kayıttaki hak sahipliği.
+  static bool cachedEntitlementActive(SharedPreferences prefs) {
+    if (!(prefs.getBool(_keyActive) ?? false)) return false;
+    final expiryMs = prefs.getInt(_keyExpiryMs);
+    return expiryMs == null ||
+        DateTime.fromMillisecondsSinceEpoch(expiryMs).isAfter(DateTime.now());
+  }
+
   /// Mağaza yanıtı beklenirken hak sahipliği kararı için tanınan süre.
   static const Duration _restoreWindow = Duration(seconds: 4);
 

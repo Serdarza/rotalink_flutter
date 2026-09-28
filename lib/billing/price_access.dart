@@ -11,4 +11,8 @@ abstract final class PriceAccess {
   /// (release) derlemesinde `kDebugMode` sabit false olduğundan kilit aynen kalır.
   static bool get unlocked =>
       (kDebugMode && !_forcePreview) || ProService.instance.isAdFree;
+
+  /// Arka plan görevleri: [ProService] başlatılmadan yerel Pro kaydıyla karar verir.
+  static bool unlockedWithCachedPro(bool cachedPro) =>
+      (kDebugMode && !_forcePreview) || cachedPro;
 }

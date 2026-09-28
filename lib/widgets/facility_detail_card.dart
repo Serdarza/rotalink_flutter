@@ -6,6 +6,7 @@ import '../map_location_state.dart';
 import '../models/misafirhane.dart';
 import '../theme/app_colors.dart';
 import 'distance_permission_chip.dart';
+import 'facility_compare_widgets.dart';
 import 'facility_info_error_report.dart';
 import 'facility_overnight_price_box.dart';
 import 'facility_stay_eligibility_card.dart';
@@ -320,6 +321,11 @@ class FacilityDetailCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 12),
+                FacilityCompareButton(
+                  facility: misafirhane,
+                  userLocation: mapLocationState.userLocation,
                 ),
                 const SizedBox(height: 12),
                 FacilityOvernightPriceBox(

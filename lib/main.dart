@@ -14,6 +14,7 @@ import 'app.dart';
 import 'billing/pro_service.dart';
 import 'bootstrap/firebase_bootstrap.dart';
 import 'services/holiday_notification_scheduler.dart';
+import 'services/pro_update_notifier.dart';
 import 'theme/system_ui.dart';
 
 /// AnalyticsObserver — MaterialApp içinde kullanılır; Firebase Analytics
@@ -86,6 +87,11 @@ Future<void> _bootstrapSecondary() async {
         await HolidayNotificationScheduler.initialize();
       } catch (e) {
         debugPrint('Bildirim zamanlayıcı başlatılamadı: $e');
+      }
+      try {
+        await ProUpdateNotifier.initialize();
+      } catch (e) {
+        debugPrint('Pro güncelleme bildirimleri başlatılamadı: $e');
       }
     }(),
   ]);

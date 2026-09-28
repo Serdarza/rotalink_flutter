@@ -64,4 +64,47 @@ abstract final class FacilityPricing {
     'Sivil veya kamu personeli fiyatına göre sıralayın.',
     'Her tesisin tek kişilik gecelik fiyatı listede yazsın.',
   ];
+
+  static const budgetChip = 'Bütçe';
+  static String budgetChipActive(String amount) => 'En fazla $amount';
+  static const budgetSheetTitle = 'Gecelik bütçeniz';
+  static const budgetSheetBody =
+      'Tek kişi / gece fiyatı bu tutarı aşan tesisler listeden gizlenir. '
+      'Fiyat bilgisi olmayan tesisler altta ayrıca listelenir.';
+  static const budgetApply = 'Uygula';
+  static const budgetClear = 'Bütçeyi kaldır';
+  static String budgetHidden(int n) => 'Bütçenizi aşan $n tesis gizlendi';
+  static const budgetNoneFits = 'Bu bütçeye uygun fiyatlı tesis yok.';
+  static const budgetTeaserTitle = 'Bütçe filtresi Pro’da';
+  static String budgetTeaserCount(int n) =>
+      'Bu aramada $n tesisin fiyatı mevcut.';
+  static const budgetTeaserPerks = [
+    'Gecelik üst limitinizi seçin, bütçenizi aşan tesisler gizlensin.',
+    'Sivil veya kamu personeli fiyatına göre filtreleyin.',
+    'Fiyat sıralamasıyla birlikte kullanın.',
+  ];
+
+  static const compareAdd = 'Karşılaştırmaya ekle';
+  static const compareAdded = 'Karşılaştırmada';
+  static String compareOpen(int n) => 'Karşılaştır ($n)';
+  static const compareClear = 'Temizle';
+  static const compareFull = 'En fazla 3 tesis karşılaştırılabilir.';
+  static const compareNeedTwo = 'Karşılaştırmak için bir tesis daha ekleyin.';
+  static const compareTitle = 'Tesis karşılaştırma';
+  static const compareCheapest = 'En uygun';
+  static const compareNoPrice = 'Fiyat yok';
+  static const compareRowPriceSivil = 'Sivil (tek kişi / gece)';
+  static const compareRowPriceKamu = 'Kamu personeli (tek kişi / gece)';
+  static const compareRowDistance = 'Uzaklık';
+  static const compareRowType = 'Tesis türü';
+  static const compareRowCivil = 'Sivil konaklama';
+  static const compareRowLocation = 'Konum';
+  static const compareRemove = 'Çıkar';
+  static const compareTeaserTitle = 'Tesis karşılaştırma Pro’da';
+  static const compareTeaserHeadline = '3 tesise kadar yan yana karşılaştırın.';
+  static const compareTeaserPerks = [
+    'Sivil ve kamu personeli fiyatlarını aynı tabloda görün.',
+    'En uygun tesis otomatik işaretlensin.',
+    'Uzaklık, tesis türü ve kimlerin kalabileceği tek bakışta.',
+  ];
 }

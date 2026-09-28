@@ -92,6 +92,10 @@
 			<dict><key>SKAdNetworkIdentifier</key><string>97r2b46745.skadnetwork</string></dict>
 			<dict><key>SKAdNetworkIdentifier</key><string>3qcr597p9d.skadnetwork</string></dict>
 		</array>
+		<key>BGTaskSchedulerPermittedIdentifiers</key>
+		<array>
+			<string>com.serdarza.rotalink.proUpdates</string>
+		</array>
 		<key>UIBackgroundModes</key>
 		<array>
 			<string>fetch</string>
