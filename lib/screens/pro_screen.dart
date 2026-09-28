@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../billing/pro_products.dart';
@@ -10,7 +11,7 @@ import '../constants/store_links.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
 
-/// Rotalink Pro — konaklama fiyatları ve proje desteği.
+/// Rotalink Pro — ücretli özellikler ve reklamsız uygulamanın geliştirilmesine destek.
 class ProScreen extends StatefulWidget {
   const ProScreen({super.key});
 
@@ -21,36 +22,40 @@ class ProScreen extends StatefulWidget {
 class _ProScreenState extends State<ProScreen> {
   static const List<_ProBenefit> _benefits = [
     _ProBenefit(
-      icon: Icons.lock_open_outlined,
+      icon: Icons.payments_outlined,
       title: 'Konaklama fiyatları',
-      detail: 'Fiyat bilgisi olan tesislerde ücretleri anında görürsünüz.',
+      detail:
+          'Fiyat bilgisi olan misafirhane ve tesislerde güncel ücretleri '
+          'anında görün.',
     ),
     _ProBenefit(
       icon: Icons.account_balance_wallet_outlined,
       title: 'Fiyat sıralaması ve bütçe filtresi',
-      detail: 'Tesisleri ucuzdan pahalıya dizin, bütçenizi aşanları gizleyin.',
+      detail:
+          'Tesisleri ucuzdan pahalıya dizin, bütçenizi aşanları tek '
+          'dokunuşla gizleyin.',
     ),
     _ProBenefit(
       icon: Icons.compare_arrows_rounded,
       title: 'Tesis karşılaştırma',
-      detail: '3 tesise kadar fiyat, uzaklık ve konaklama şartlarını yan yana görün.',
+      detail:
+          '3 tesise kadar fiyat, uzaklık ve konaklama şartlarını yan yana '
+          'görün.',
     ),
     _ProBenefit(
       icon: Icons.notifications_active_outlined,
       title: 'Fiyat ve kampanya bildirimleri',
-      detail: 'Favori tesisinizin fiyatı değişince ve mesleğinize yeni kampanya '
+      detail:
+          'Favori tesisinizin fiyatı değişince ve mesleğinize yeni kampanya '
           'gelince haber alın.',
     ),
-    _ProBenefit(
-      icon: Icons.map_outlined,
-      title: 'Aynı ücretsiz deneyim',
-      detail: 'Harita, arama ve tesis bilgileri herkese açık kalır.',
-    ),
-    _ProBenefit(
-      icon: Icons.favorite_outline,
-      title: 'Projeye destek',
-      detail: 'Veritabanının güncel tutulmasına katkı sağlarsınız.',
-    ),
+  ];
+
+  static const List<String> _freeFeatures = [
+    'Harita ve arama',
+    'Tesis bilgileri',
+    'Kamu kampanyaları',
+    'Resmî tatiller',
   ];
 
   final ProService _pro = ProService.instance;
@@ -99,6 +104,7 @@ class _ProScreenState extends State<ProScreen> {
   @override
   Widget build(BuildContext context) {
     final bottomInset = RotalinkShellScope.scrollBottomPadding(context);
+    final muted = _mutedText(context);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Rotalink Pro')),
@@ -106,25 +112,31 @@ class _ProScreenState extends State<ProScreen> {
         valueListenable: _pro.isPro,
         builder: (context, isPro, _) {
           return SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(20, 20, 20, 28 + bottomInset),
+            padding: EdgeInsets.fromLTRB(20, 16, 20, 28 + bottomInset),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _Header(isPro: isPro),
-                const SizedBox(height: 24),
+                _Hero(isPro: isPro),
+                const SizedBox(height: 14),
+                _SupportCard(isPro: isPro),
+                const SizedBox(height: 26),
+                const _SectionTitle('Pro ile gelenler'),
+                const SizedBox(height: 12),
                 for (final benefit in _benefits) ...[
-                  _BenefitRow(benefit: benefit),
-                  const SizedBox(height: 14),
+                  _BenefitTile(benefit: benefit),
+                  const SizedBox(height: 10),
                 ],
-                const SizedBox(height: 10),
+                const SizedBox(height: 4),
+                const _FreeFeatures(items: _freeFeatures),
+                const SizedBox(height: 26),
                 if (isPro)
-                  _ActiveCard(
-                    pro: _pro,
-                    onManage: _openManageSubscription,
-                  )
-                else
+                  _ActiveCard(pro: _pro, onManage: _openManageSubscription)
+                else ...[
+                  const _SectionTitle('Planınızı seçin'),
+                  const SizedBox(height: 12),
                   _PlanSection(pro: _pro),
-                const SizedBox(height: 20),
+                ],
+                const SizedBox(height: 14),
                 TextButton(
                   onPressed: _restoring ? null : _onRestore,
                   child: Text(
@@ -133,19 +145,18 @@ class _ProScreenState extends State<ProScreen> {
                         : 'Satın alımlarımı geri yükle',
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
-                  'Abonelik seçtiğiniz dönem sonunda otomatik yenilenir. '
+                  'Ödeme, satın alma onayıyla ${ProProducts.storeName} '
+                  'hesabınızdan alınır. Abonelik, dönem bitmeden en az 24 saat '
+                  'önce iptal edilmezse aynı ücretle otomatik yenilenir. '
                   'Yenilemeyi dilediğiniz zaman ${ProProducts.storeName} hesap '
-                  'ayarlarınızdan iptal edebilirsiniz. İptal, dönem sonuna kadar '
+                  'ayarlarınızdan kapatabilirsiniz; iptal, dönem sonuna kadar '
                   'erişiminizi etkilemez.',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    height: 1.5,
-                    color: Color(0xFF6B7280),
-                  ),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 11.5, height: 1.5, color: muted),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 const _LegalLinks(),
               ],
             ),
@@ -155,6 +166,11 @@ class _ProScreenState extends State<ProScreen> {
     );
   }
 }
+
+Color _mutedText(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark
+    ? Colors.white.withValues(alpha: 0.62)
+    : const Color(0xFF6B7280);
 
 class _LegalLinks extends StatelessWidget {
   const _LegalLinks();
@@ -180,7 +196,10 @@ class _LegalLinks extends StatelessWidget {
           ),
           child: const Text(
             'Gizlilik Politikası',
-            style: TextStyle(fontSize: 12, decoration: TextDecoration.underline),
+            style: TextStyle(
+              fontSize: 12,
+              decoration: TextDecoration.underline,
+            ),
           ),
         ),
         const Text(' · ', style: TextStyle(color: Color(0xFF9CA3AF))),
@@ -194,7 +213,10 @@ class _LegalLinks extends StatelessWidget {
           ),
           child: const Text(
             'Kullanım Koşulları',
-            style: TextStyle(fontSize: 12, decoration: TextDecoration.underline),
+            style: TextStyle(
+              fontSize: 12,
+              decoration: TextDecoration.underline,
+            ),
           ),
         ),
       ],
@@ -202,65 +224,219 @@ class _LegalLinks extends StatelessWidget {
   }
 }
 
-class _Header extends StatelessWidget {
-  const _Header({required this.isPro});
+class _Hero extends StatelessWidget {
+  const _Hero({required this.isPro});
 
   final bool isPro;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [AppColors.primary, Color(0xFF00566B)],
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(
-              Icons.workspace_premium_outlined,
-              color: Colors.white,
-              size: 28,
+          Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(
+                  isPro
+                      ? Icons.verified_rounded
+                      : Icons.workspace_premium_rounded,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  isPro ? 'Pro üyesisiniz' : 'Rotalink Pro',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            isPro
+                ? 'Rotalink\'i desteklediğiniz için teşekkür ederiz. Tüm Pro '
+                      'özellikleri hesabınızda açık.'
+                : 'Konaklamada doğru fiyatı görün, bütçenize uygun tesisi '
+                      'saniyeler içinde bulun.',
+            style: const TextStyle(
+              color: Color(0xFFD7F3F6),
+              fontSize: 14,
+              height: 1.45,
             ),
           ),
-          const SizedBox(width: 16),
+          if (!isPro) ...[
+            const SizedBox(height: 14),
+            const Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _HeroChip(icon: Icons.block_rounded, label: 'Reklamsız'),
+                _HeroChip(
+                  icon: Icons.event_repeat_rounded,
+                  label: 'İstediğiniz zaman iptal',
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroChip extends StatelessWidget {
+  const _HeroChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Reklamsız bağımsız geliştirme: aboneliğin neyi mümkün kıldığı.
+class _SupportCard extends StatelessWidget {
+  const _SupportCard({required this.isPro});
+
+  final bool isPro;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? const Color(0xFFFDA4AF) : const Color(0xFFE11D48);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF3B1620) : const Color(0xFFFFF1F2),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark ? const Color(0xFF6B2536) : const Color(0xFFFECDD3),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 38,
+            height: 38,
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.favorite_rounded, color: accent, size: 20),
+          ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isPro ? 'Pro etkin' : 'Rotalink Pro',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 19,
-                    fontWeight: FontWeight.bold,
+                  isPro
+                      ? 'Desteğiniz Rotalink\'i büyütüyor'
+                      : 'Reklam yok, desteğiniz var',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    color: isDark
+                        ? const Color(0xFFFFE4E6)
+                        : const Color(0xFF881337),
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   isPro
-                      ? 'Desteğiniz için teşekkürler.'
-                      : 'Konaklama fiyatlarını açın',
-                  style: const TextStyle(
-                    color: Color(0xFFB0E8EE),
+                      ? 'Rotalink\'te reklam göstermiyoruz. Aboneliğiniz; tesis '
+                            'bilgilerinin ve fiyatların güncel tutulmasına, yeni '
+                            'özelliklerin geliştirilmesine doğrudan katkı sağlıyor.'
+                      : 'Rotalink\'te reklam göstermiyoruz. Tesis bilgilerini ve '
+                            'fiyatları güncel tutmak, yeni özellikler geliştirmek ve '
+                            'sunucu giderlerini karşılamak Pro üyelerimizin '
+                            'desteğiyle mümkün oluyor.',
+                  style: TextStyle(
                     fontSize: 13,
+                    height: 1.5,
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.75)
+                        : const Color(0xFF9F1239),
                   ),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: const TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.1,
       ),
     );
   }
@@ -278,77 +454,222 @@ class _ProBenefit {
   final String detail;
 }
 
-class _BenefitRow extends StatelessWidget {
-  const _BenefitRow({required this.benefit});
+class _BenefitTile extends StatelessWidget {
+  const _BenefitTile({required this.benefit});
 
   final _ProBenefit benefit;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Row(
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.10)
+              : AppColors.primary.withValues(alpha: 0.14),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: isDark ? 0.22 : 0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(benefit.icon, size: 21, color: AppColors.primary),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  benefit.title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  benefit.detail,
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.4,
+                    color: _mutedText(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FreeFeatures extends StatelessWidget {
+  const _FreeFeatures({required this.items});
+
+  final List<String> items;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = _mutedText(context);
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(benefit.icon, size: 22, color: AppColors.primary),
-        const SizedBox(width: 14),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                benefit.title,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                benefit.detail,
-                style: TextStyle(
-                  fontSize: 13,
-                  height: 1.4,
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.62)
-                      : const Color(0xFF6B7280),
-                ),
-              ),
-            ],
+        Text(
+          'Herkes için ücretsiz kalmaya devam eder',
+          style: TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+            color: muted,
           ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 12,
+          runSpacing: 6,
+          children: [
+            for (final item in items)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle_rounded, size: 15, color: muted),
+                  const SizedBox(width: 4),
+                  Text(item, style: TextStyle(fontSize: 12.5, color: muted)),
+                ],
+              ),
+          ],
         ),
       ],
     );
   }
 }
 
-class _PlanSection extends StatelessWidget {
+class _PlanSection extends StatefulWidget {
   const _PlanSection({required this.pro});
 
   final ProService pro;
 
   @override
+  State<_PlanSection> createState() => _PlanSectionState();
+}
+
+class _PlanSectionState extends State<_PlanSection> {
+  String _selectedId = ProProducts.yearly;
+
+  static String _money(ProductDetails p, double value) {
+    final floored = (value * 100).floorToDouble() / 100;
+    return NumberFormat.currency(
+      locale: 'tr_TR',
+      symbol: p.currencySymbol,
+      decimalDigits: 2,
+    ).format(floored);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<ProductDetails>>(
-      valueListenable: pro.products,
+      valueListenable: widget.pro.products,
       builder: (context, products, _) {
         if (products.isEmpty) {
           return const _PlansUnavailable();
         }
+        ProductDetails? byId(String id) {
+          for (final p in products) {
+            if (p.id == id) return p;
+          }
+          return null;
+        }
+
+        final monthly = byId(ProProducts.monthly);
+        final yearly = byId(ProProducts.yearly);
+        final ordered = [?yearly, ?monthly];
+        final selected = byId(_selectedId) ?? ordered.first;
+
+        int? savingPercent;
+        if (monthly != null && yearly != null && monthly.rawPrice > 0) {
+          final pct = ((1 - yearly.rawPrice / (monthly.rawPrice * 12)) * 100)
+              .floor();
+          if (pct >= 10) savingPercent = pct;
+        }
+
         return ValueListenableBuilder<bool>(
-          valueListenable: pro.purchasePending,
+          valueListenable: widget.pro.purchasePending,
           builder: (context, pending, _) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final product in products) ...[
-                  _PlanCard(
-                    product: product,
-                    highlighted: product.id == ProProducts.yearly,
+                for (final product in ordered) ...[
+                  _PlanOption(
+                    title: product.id == ProProducts.yearly
+                        ? 'Yıllık'
+                        : 'Aylık',
+                    price: product.price,
+                    period: product.id == ProProducts.yearly ? '/ yıl' : '/ ay',
+                    subtitle: product.id == ProProducts.yearly
+                        ? 'Ayda ${_money(product, product.rawPrice / 12)} · 12 ay kesintisiz'
+                        : 'Esnek kullanım, istediğiniz zaman iptal',
+                    badge:
+                        product.id == ProProducts.yearly &&
+                            savingPercent != null
+                        ? '%$savingPercent tasarruf'
+                        : null,
+                    selected: product.id == selected.id,
                     disabled: pending,
-                    onTap: () => unawaited(pro.buy(product)),
+                    onTap: () => setState(() => _selectedId = product.id),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 10),
                 ],
+                const SizedBox(height: 6),
+                SizedBox(
+                  height: 54,
+                  child: FilledButton(
+                    onPressed: pending
+                        ? null
+                        : () => unawaited(widget.pro.buy(selected)),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    child: pending
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.4,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            selected.id == ProProducts.yearly
+                                ? 'Yıllık Pro\'ya geç · ${selected.price}'
+                                : 'Aylık Pro\'ya geç · ${selected.price}',
+                          ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Güvenli ödeme ${ProProducts.storeName} üzerinden yapılır.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: _mutedText(context)),
+                ),
               ],
             );
           },
@@ -358,104 +679,130 @@ class _PlanSection extends StatelessWidget {
   }
 }
 
-class _PlanCard extends StatelessWidget {
-  const _PlanCard({
-    required this.product,
-    required this.highlighted,
+class _PlanOption extends StatelessWidget {
+  const _PlanOption({
+    required this.title,
+    required this.price,
+    required this.period,
+    required this.subtitle,
+    required this.badge,
+    required this.selected,
     required this.disabled,
     required this.onTap,
   });
 
-  final ProductDetails product;
-  final bool highlighted;
+  final String title;
+  final String price;
+  final String period;
+  final String subtitle;
+  final String? badge;
+  final bool selected;
   final bool disabled;
   final VoidCallback onTap;
-
-  String get _periodLabel =>
-      product.id == ProProducts.yearly ? 'yıllık' : 'aylık';
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final border = highlighted
+    final border = selected
         ? AppColors.primary
         : (isDark
-            ? Colors.white.withValues(alpha: 0.14)
-            : AppColors.primary.withValues(alpha: 0.18));
+              ? Colors.white.withValues(alpha: 0.14)
+              : AppColors.primary.withValues(alpha: 0.18));
 
     return Opacity(
       opacity: disabled ? 0.55 : 1,
       child: Material(
-        color: highlighted
-            ? AppColors.primary.withValues(alpha: isDark ? 0.16 : 0.07)
+        color: selected
+            ? AppColors.primary.withValues(alpha: isDark ? 0.16 : 0.06)
             : Colors.transparent,
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: disabled ? null : onTap,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            padding: const EdgeInsets.fromLTRB(14, 16, 16, 16),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: border,
-                width: highlighted ? 1.6 : 1,
-              ),
+              border: Border.all(color: border, width: selected ? 2 : 1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               children: [
+                Icon(
+                  selected
+                      ? Icons.radio_button_checked_rounded
+                      : Icons.radio_button_off_rounded,
+                  color: selected ? AppColors.primary : _mutedText(context),
+                  size: 22,
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
-                            product.id == ProProducts.yearly
-                                ? 'Yıllık'
-                                : 'Aylık',
+                            title,
                             style: const TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
-                          if (highlighted) ...[
-                            const SizedBox(width: 8),
+                          if (badge != null)
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 8,
-                                vertical: 2,
+                                vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.primary,
+                                color: const Color(0xFF16A34A),
                                 borderRadius: BorderRadius.circular(20),
                               ),
-                              child: const Text(
-                                'En avantajlı',
-                                style: TextStyle(
+                              child: Text(
+                                badge!,
+                                style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w800,
                                 ),
                               ),
                             ),
-                          ],
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${product.price} / $_periodLabel',
+                        subtitle,
                         style: TextStyle(
-                          fontSize: 13,
-                          color: isDark
-                              ? Colors.white.withValues(alpha: 0.68)
-                              : const Color(0xFF6B7280),
+                          fontSize: 12.5,
+                          color: _mutedText(context),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.chevron_right, color: AppColors.primary),
+                const SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      price,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    Text(
+                      period,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: _mutedText(context),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -500,10 +847,7 @@ class _PlansUnavailable extends StatelessWidget {
 }
 
 class _ActiveCard extends StatefulWidget {
-  const _ActiveCard({
-    required this.pro,
-    required this.onManage,
-  });
+  const _ActiveCard({required this.pro, required this.onManage});
 
   final ProService pro;
   final VoidCallback onManage;
@@ -535,9 +879,7 @@ class _ActiveCardState extends State<_ActiveCard> {
 
   void _syncRemaining() {
     final end = widget.pro.expiryAt.value;
-    final next = end == null
-        ? Duration.zero
-        : end.difference(DateTime.now());
+    final next = end == null ? Duration.zero : end.difference(DateTime.now());
     final clamped = next.isNegative ? Duration.zero : next;
     if (!mounted) return;
     if (clamped != _remaining) {
@@ -576,9 +918,7 @@ class _ActiveCardState extends State<_ActiveCard> {
             ),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isDark
-                  ? const Color(0xFF2F6B4F)
-                  : const Color(0xFF9AD5B4),
+              color: isDark ? const Color(0xFF2F6B4F) : const Color(0xFF9AD5B4),
             ),
           ),
           child: Column(
@@ -717,9 +1057,7 @@ class _CountdownUnit extends StatelessWidget {
               height: 1.1,
               fontWeight: FontWeight.w800,
               fontFeatures: const [FontFeature.tabularFigures()],
-              color: isDark
-                  ? const Color(0xFFECFDF5)
-                  : const Color(0xFF14532D),
+              color: isDark ? const Color(0xFFECFDF5) : const Color(0xFF14532D),
             ),
           ),
           const SizedBox(height: 4),
