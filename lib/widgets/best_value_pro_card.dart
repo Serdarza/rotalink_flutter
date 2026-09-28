@@ -195,7 +195,7 @@ class _BestValueProCardState extends State<BestValueProCard>
                                           ),
                                     const SizedBox(height: 3),
                                     Text(
-                                      [if (tip.isNotEmpty) tip, basisLabel].join(' · '),
+                                      [if (unlocked && tip.isNotEmpty) tip, basisLabel].join(' · '),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
