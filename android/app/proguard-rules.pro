@@ -1,17 +1,9 @@
-# ── Flutter ──────────────────────────────────────────────────────────────────
--keep class io.flutter.** { *; }
--keep class io.flutter.embedding.** { *; }
+# Flutter, Firebase, Play Services ve AdMob kendi consumer ProGuard kurallarıyla
+# gelir; burada paketin tamamını "-keep" etmek R8 karartmasını devre dışı bırakır
+# (Play Console: "DEX kodu optimizasyonu – kod karartma" uyarısı).
 -dontwarn io.flutter.**
-
-# ── Firebase ─────────────────────────────────────────────────────────────────
--keep class com.google.firebase.** { *; }
--keep class com.google.android.gms.** { *; }
 -dontwarn com.google.firebase.**
 -dontwarn com.google.android.gms.**
-
-# ── AdMob ────────────────────────────────────────────────────────────────────
--keep class com.google.android.gms.ads.** { *; }
--dontwarn com.google.android.gms.ads.**
 
 # ── Kotlin Coroutines ────────────────────────────────────────────────────────
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
