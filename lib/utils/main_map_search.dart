@@ -111,9 +111,11 @@ abstract final class MainMapSearch {
     final words = queryWords(query);
     if (words.isEmpty || displayedFacilities.isEmpty) return null;
 
-    final normIls = displayedFacilities.map((e) => normalizeForSearch(e.il)).toSet();
-    // Yalnızca il adı (tek kelime, tam eşleşme) → liste tüm il; tek tesis vurgusu yok
-    if (normIls.length == 1 && words.length == 1 && words.single == normIls.single) {
+    // Sorgu bir il adının kendisiyse ("Ankara", "Kahraman Maraş") yalnızca il listesi
+    // açılır; adı il adıyla başlayan tesis ya da başka ilde adında il geçen tesis
+    // hedeflenip listede kaydırılmaz.
+    final fullQuery = words.join();
+    if (displayedFacilities.any((m) => normalizeForSearch(m.il) == fullQuery)) {
       return null;
     }
 
