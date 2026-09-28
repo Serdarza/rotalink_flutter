@@ -51,4 +51,17 @@ abstract final class FacilityPricing {
       'Fiyatı resmî kaynaktan doğrulanmış $n tesis arasında';
   static const bestValueCta = 'Pro ile en uygun fiyatı gör';
   static const bestValueOpen = 'Tesisi incele';
+
+  static const sortDistance = 'Yakınlık';
+  static const sortPrice = 'Fiyat: ucuzdan pahalıya';
+  static const unverifiedPrice = 'Teyit gerekli';
+  static String unpricedHeader(int n) => 'Fiyat bilgisi olmayan tesisler ($n)';
+  static const sortTeaserTitle = 'Fiyata göre sıralama Pro’da';
+  static String sortTeaserCount(int n) =>
+      'Bu aramada $n tesisin fiyatı mevcut.';
+  static const sortTeaserPerks = [
+    'Fiyatı olan tesisleri ucuzdan pahalıya tek listede görün.',
+    'Sivil veya kamu personeli fiyatına göre sıralayın.',
+    'Her tesisin tek kişilik gecelik fiyatı listede yazsın.',
+  ];
 }

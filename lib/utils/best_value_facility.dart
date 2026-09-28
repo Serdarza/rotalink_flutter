@@ -6,6 +6,58 @@ import 'search_normalize.dart';
 /// Hangi fiyat kategorisi üzerinden kıyaslandı.
 enum BestValueBasis { sivil, kamu }
 
+/// Tesisin tek kişi / bir gece fiyatı (seçilen kategori).
+class FacilityNightPrice {
+  const FacilityNightPrice({required this.amount, required this.dogrulama});
+
+  final double amount;
+  final TariffVerification? dogrulama;
+
+  bool get confirmed => dogrulama?.isConfirmed == true;
+}
+
+/// Tarifesi olan tesis için tek kişi / bir gecelik en düşük tutar.
+/// Ek yatak, çocuk, öğrenci, aylık, grup gibi satırlar ve oda başı
+/// (tek kişilik olmayan) fiyatlar kıyasa girmez.
+FacilityNightPrice? singleNightPriceFor(Misafirhane m, BestValueBasis basis) {
+  final tariff = FacilityPriceRepository.instance.lookup(m.il, m.isim)?.tarife;
+  if (tariff == null) return null;
+  final amount = _singleNightPrice(
+    tariff,
+    basis == BestValueBasis.sivil ? _sivilCategory : _kamuCategory,
+  );
+  if (amount == null) return null;
+  return FacilityNightPrice(amount: amount, dogrulama: tariff.dogrulama);
+}
+
+/// Fiyat sıralaması: fiyatı olanlar ucuzdan pahalıya, eşitlikte ve fiyatsızlarda
+/// gelen (yakınlık) sırası korunur.
+({List<(Misafirhane, FacilityNightPrice)> priced, List<Misafirhane> unpriced})
+    sortFacilitiesByPrice(List<Misafirhane> facilities, BestValueBasis basis) {
+  final priced = <(int, Misafirhane, FacilityNightPrice)>[];
+  final unpriced = <Misafirhane>[];
+  for (final (i, m) in facilities.indexed) {
+    final p = singleNightPriceFor(m, basis);
+    if (p == null) {
+      unpriced.add(m);
+    } else {
+      priced.add((i, m, p));
+    }
+  }
+  priced.sort((a, b) {
+    final c = a.$3.amount.compareTo(b.$3.amount);
+    return c != 0 ? c : a.$1.compareTo(b.$1);
+  });
+  return (priced: [for (final e in priced) (e.$2, e.$3)], unpriced: unpriced);
+}
+
+/// Sivil veya kamu personeli için tek kişi / gece fiyatı olan tesis sayısı.
+int countFacilitiesWithNightPrice(List<Misafirhane> facilities) => facilities
+    .where((m) =>
+        singleNightPriceFor(m, BestValueBasis.sivil) != null ||
+        singleNightPriceFor(m, BestValueBasis.kamu) != null)
+    .length;
+
 /// Arama sonuçlarında "en uygun konaklama" seçimi.
 class BestValuePick {
   const BestValuePick({
@@ -36,19 +88,16 @@ class BestValuePick {
 /// yalnızca sivil fiyatlar, yoksa kamu personeli fiyatları kıyaslanır; farklı
 /// kategoriler veya oda/kişi birimleri birbirine karıştırılmaz.
 BestValuePick? pickBestValueFacility(List<Misafirhane> facilities) {
-  final repo = FacilityPriceRepository.instance;
   final sivil = <(Misafirhane, double)>[];
   final kamu = <(Misafirhane, double)>[];
   final iller = <String>{};
 
   for (final m in facilities) {
     iller.add(normalizeForSearch(m.il));
-    final tariff = repo.lookup(m.il, m.isim)?.tarife;
-    if (tariff == null || tariff.dogrulama?.isConfirmed != true) continue;
-    final s = _singleNightPrice(tariff, _sivilCategory);
-    if (s != null) sivil.add((m, s));
-    final k = _singleNightPrice(tariff, _kamuCategory);
-    if (k != null) kamu.add((m, k));
+    final s = singleNightPriceFor(m, BestValueBasis.sivil);
+    if (s != null && s.confirmed) sivil.add((m, s.amount));
+    final k = singleNightPriceFor(m, BestValueBasis.kamu);
+    if (k != null && k.confirmed) kamu.add((m, k.amount));
   }
 
   final basis = sivil.isNotEmpty ? BestValueBasis.sivil : BestValueBasis.kamu;
@@ -84,7 +133,6 @@ bool _kamuCategory(TariffCategory c) =>
 String _norm(String s) =>
     s.trim().split(RegExp(r'\s+')).map(normalizeForSearch).join(' ');
 
-/// Tarifedeki tek kişi / bir gece için en düşük tutar (seçilen kategori).
 double? _singleNightPrice(
   FacilityTariff tariff,
   bool Function(TariffCategory) isCategory,
