@@ -318,7 +318,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                     onPressed: () =>
                         unawaited(confirmAndStartFreePass(context)),
                     icon: const Icon(Icons.timer_outlined, size: 18),
-                    label: const Text('1 saat ücretsiz dene'),
+                    label: const Text('15 dakika ücretsiz dene'),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.primary,
                       textStyle: const TextStyle(

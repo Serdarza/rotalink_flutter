@@ -355,7 +355,7 @@ class _HeroChip extends StatelessWidget {
   }
 }
 
-/// Bir kereye mahsus 1 saatlik ücretsiz Pro: teklif veya kalan süre.
+/// Bir kereye mahsus 15 dakikalık ücretsiz Pro: teklif veya kalan süre.
 class _FreePassCard extends StatelessWidget {
   const _FreePassCard();
 
@@ -386,7 +386,7 @@ class _FreePassCard extends StatelessWidget {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      active ? 'Ücretsiz Pro aktif' : '1 saat ücretsiz Pro',
+                      active ? 'Ücretsiz Pro aktif' : '15 dakika ücretsiz Pro',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w800,
@@ -410,7 +410,7 @@ class _FreePassCard extends StatelessWidget {
                 active
                     ? 'Tüm Pro özellikleri açık. Süre bitince Pro özellikleri '
                           'kapanır; devam etmek için aşağıdan bir plan seçebilirsiniz.'
-                    : 'Tüm Pro özelliklerini bir kereye mahsus 1 saat ücretsiz '
+                    : 'Tüm Pro özelliklerini bir kereye mahsus 15 dakika ücretsiz '
                           'kullanın. Kart bilgisi gerekmez, süre bitince kendiliğinden '
                           'kapanır.',
                 style: TextStyle(
@@ -424,7 +424,7 @@ class _FreePassCard extends StatelessWidget {
                 OutlinedButton.icon(
                   onPressed: () => unawaited(confirmAndStartFreePass(context)),
                   icon: const Icon(Icons.play_arrow_rounded),
-                  label: const Text('Ücretsiz 1 saati başlat'),
+                  label: const Text('Ücretsiz 15 dakikayı başlat'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.primary,
                     side: const BorderSide(

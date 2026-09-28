@@ -21,16 +21,16 @@ void main() {
       return SharedPreferences.getInstance();
     }
 
-    test('within the hour', () async {
+    test('within 15 minutes', () async {
       final prefs = await prefsWithStart(
-        DateTime.now().subtract(const Duration(minutes: 30)),
+        DateTime.now().subtract(const Duration(minutes: 10)),
       );
       expect(ProService.cachedEntitlementActive(prefs), isTrue);
     });
 
-    test('after the hour', () async {
+    test('after 15 minutes', () async {
       final prefs = await prefsWithStart(
-        DateTime.now().subtract(const Duration(minutes: 61)),
+        DateTime.now().subtract(const Duration(minutes: 16)),
       );
       expect(ProService.cachedEntitlementActive(prefs), isFalse);
     });

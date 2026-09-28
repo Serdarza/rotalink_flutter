@@ -23,7 +23,7 @@ class ProService {
   static const String _keyFreePassStartMs = 'rotalink_pro_free_pass_start_ms';
 
   /// Her kullanıcıya bir kereye mahsus verilen ücretsiz Pro süresi.
-  static const Duration freePassDuration = Duration(hours: 1);
+  static const Duration freePassDuration = Duration(minutes: 15);
 
   /// Arka plan görevleri için: mağazaya sormadan yerel kayıttaki hak sahipliği.
   static bool cachedEntitlementActive(SharedPreferences prefs) {
@@ -130,7 +130,7 @@ class ProService {
     return true;
   }
 
-  /// Bir kereye mahsus 1 saatlik ücretsiz Pro'yu başlatır.
+  /// Bir kereye mahsus 15 dakikalık ücretsiz Pro'yu başlatır.
   Future<bool> startFreePass() async {
     if (!canStartFreePass) return false;
     final now = DateTime.now();
@@ -142,7 +142,7 @@ class ProService {
       debugPrint('[Pro] ücretsiz Pro kaydedilemedi: $e');
     }
     _setFreePassEnd(now.add(freePassDuration));
-    _emit('1 saatlik ücretsiz Pro başladı. Tüm Pro özellikleri açık.');
+    _emit('15 dakikalık ücretsiz Pro başladı. Tüm Pro özellikleri açık.');
     return true;
   }
 
