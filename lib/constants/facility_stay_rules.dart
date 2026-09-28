@@ -188,8 +188,7 @@ abstract final class FacilityStayRules {
       ),
       StayGroup(
         'Sivil vatandaşlar',
-        'Konaklayamaz. Yalnızca hak sahibinin refakatinde veya resmî davetle '
-            'sınırlı giriş yapılabilir.',
+        'Sivil vatandaşlar askerî tesislerde konaklayamaz.',
         StayAccess.notAllowed,
       ),
     ],

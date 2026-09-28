@@ -39,7 +39,7 @@ class _FacilityStayEligibilityCardState
   static String _civilBadge(StayAccess a) => switch (a) {
     StayAccess.allowed => 'Sivillere açık',
     StayAccess.conditional => 'Siviller şartlı',
-    StayAccess.notAllowed => 'Sivillere kapalı',
+    StayAccess.notAllowed => 'Sivil vatandaş konaklayamaz',
   };
 
   @override
