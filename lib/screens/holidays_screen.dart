@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../constants/public_holidays_2026.dart';
 import '../l10n/app_strings.dart';
 import '../navigation/rotalink_shell_scope.dart';
+import '../services/announcement_notification_scheduler.dart';
 import '../theme/app_colors.dart';
 
 /// 2026–2027 resmi tatiller ve idari izinler — liste, kart ve geri sayım.
@@ -60,6 +61,7 @@ class _HolidayCardStyle {
 
 class _HolidaysScreenState extends State<HolidaysScreen> {
   late final Timer _tick;
+  bool? _announcementsEnabled;
 
   @override
   void initState() {
@@ -67,6 +69,17 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     _tick = Timer.periodic(const Duration(minutes: 1), (_) {
       if (mounted) setState(() {});
     });
+    unawaited(_loadAnnouncementsEnabled());
+  }
+
+  Future<void> _loadAnnouncementsEnabled() async {
+    final enabled = await AnnouncementNotificationScheduler.isEnabled();
+    if (mounted) setState(() => _announcementsEnabled = enabled);
+  }
+
+  Future<void> _toggleAnnouncements(bool value) async {
+    setState(() => _announcementsEnabled = value);
+    await AnnouncementNotificationScheduler.setEnabled(value);
   }
 
   @override
@@ -217,7 +230,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
           16,
           12 + RotalinkShellScope.scrollBottomPadding(context),
         ),
-        itemCount: holidays.length + 1,
+        itemCount: holidays.length + 2,
         itemBuilder: (context, index) {
           if (index == 0) {
             return Padding(
@@ -242,8 +255,44 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
               ),
             );
           }
+          if (index == 1) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFBBDEFB)),
+                ),
+                child: SwitchListTile.adaptive(
+                  value: _announcementsEnabled ?? true,
+                  onChanged: _announcementsEnabled == null
+                      ? null
+                      : _toggleAnnouncements,
+                  secondary: const Icon(
+                    Icons.notifications_active_outlined,
+                    color: Color(0xFF1565C0),
+                  ),
+                  title: Text(
+                    'Duyuru bildirimleri',
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Haftada en fazla bir kez, Perşembe 21:00 civarı tatil, '
+                    'tesis ve kampanya önerileri.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.campaignSummaryMuted,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }
 
-          final i = index - 1;
+          final i = index - 2;
           final h = holidays[i];
           final showPastHeader = past.isNotEmpty && i == firstPastIndex;
           final showYearHeader = i == 0 ||

@@ -35,6 +35,7 @@ import '../models/misafirhane.dart';
 import '../models/route_plan_outcome.dart';
 import '../models/route_stop.dart';
 import '../services/osrm_route_service.dart';
+import '../services/announcement_notification_scheduler.dart';
 import '../services/holiday_notification_scheduler.dart';
 import '../services/version_check_service.dart';
 import '../widgets/update_required_dialog.dart';
@@ -350,6 +351,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     if (state == AppLifecycleState.resumed) {
       unawaited(_refreshLocationStateOnResume());
       unawaited(HolidayNotificationScheduler.scheduleUpcomingHolidayReminders());
+      unawaited(AnnouncementNotificationScheduler.sync(forceFetch: false));
       unawaited(_maybeOpenHolidaysFromNotification());
     }
   }
@@ -394,9 +396,11 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   }
 
   Future<void> _maybeOpenHolidaysFromNotification() async {
+    final route = await HolidayNotificationScheduler.consumePendingRouteFromNotification();
     final open = await HolidayNotificationScheduler.consumePendingOpenHolidaysNavigation();
-    if (!open || !mounted || !context.mounted) return;
-    await Navigator.of(context).pushNamed(RotalinkShellRoutes.holidays);
+    final target = route ?? (open ? RotalinkShellRoutes.holidays : null);
+    if (target == null || !mounted || !context.mounted) return;
+    await Navigator.of(context).pushNamed(target);
   }
 
   Future<void> _checkForUpdate() async {

@@ -19,6 +19,7 @@ import '../models/campaign_insights.dart';
 import '../models/misafirhane.dart';
 import '../utils/best_value_facility.dart';
 import '../widgets/facility_tariff_view.dart' show formatTl;
+import 'announcement_notification_scheduler.dart';
 
 const _taskName = 'com.serdarza.rotalink.proUpdates';
 
@@ -26,6 +27,11 @@ const _taskName = 'com.serdarza.rotalink.proUpdates';
 void rotalinkBackgroundDispatcher() {
   Workmanager().executeTask((task, inputData) async {
     WidgetsFlutterBinding.ensureInitialized();
+    try {
+      await AnnouncementNotificationScheduler.sync(background: true);
+    } catch (e, st) {
+      debugPrint('[Announcements] arka plan hatası: $e\n$st');
+    }
     try {
       await ProUpdateNotifier.runCheck();
     } catch (e, st) {

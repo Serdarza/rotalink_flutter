@@ -13,6 +13,7 @@ import 'ads/firebase_analytics_service.dart';
 import 'app.dart';
 import 'billing/pro_service.dart';
 import 'bootstrap/firebase_bootstrap.dart';
+import 'services/announcement_notification_scheduler.dart';
 import 'services/holiday_notification_scheduler.dart';
 import 'services/pro_update_notifier.dart';
 import 'theme/system_ui.dart';
@@ -88,6 +89,9 @@ Future<void> _bootstrapSecondary() async {
       } catch (e) {
         debugPrint('Bildirim zamanlayıcı başlatılamadı: $e');
       }
+      unawaited(AnnouncementNotificationScheduler.sync().catchError(
+        (Object e) => debugPrint('Duyuru bildirimleri zamanlanamadı: $e'),
+      ));
       try {
         await ProUpdateNotifier.initialize();
       } catch (e) {

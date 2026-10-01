@@ -11,6 +11,7 @@ import '../constants/public_holidays_2026.dart';
 import '../navigator_keys.dart';
 import '../screens/holidays_screen.dart';
 import '../navigation/rotalink_shell_routes.dart';
+import 'announcement_notification_scheduler.dart';
 
 /// Arka planda bildirime tıklanınca (ayrı isolate); [pragma] zorunlu.
 @pragma('vm:entry-point')
@@ -30,6 +31,9 @@ class HolidayNotificationScheduler {
   static const String _prefPendingNav =
       'rotalink_pending_open_holidays_from_notification';
 
+  static const String _prefPendingRoute =
+      'rotalink_pending_route_from_notification';
+
   static const int _idBase = 910_000;
 
   static const String _channelId = 'rotalink_holidays';
@@ -45,9 +49,27 @@ class HolidayNotificationScheduler {
   static bool _initialized = false;
 
   static Future<void> handleBackgroundTap(NotificationResponse details) async {
+    final route = _announcementRoute(details.payload);
+    if (route != null) {
+      await _setPendingRoute(route);
+      return;
+    }
     if (details.payload != payloadOpenHolidays) return;
     final p = await SharedPreferences.getInstance();
     await p.setBool(_prefPendingNav, true);
+  }
+
+  /// Duyuru bildirimi yükünden shell rotası; rota yoksa veya duyuru değilse null.
+  static String? _announcementRoute(String? payload) {
+    const prefix = AnnouncementNotificationScheduler.payloadPrefix;
+    if (payload == null || !payload.startsWith(prefix)) return null;
+    final route = payload.substring(prefix.length);
+    return route.isEmpty ? null : route;
+  }
+
+  static Future<void> _setPendingRoute(String route) async {
+    final p = await SharedPreferences.getInstance();
+    await p.setString(_prefPendingRoute, route);
   }
 
   static Future<void> initialize() async {
@@ -82,9 +104,14 @@ class HolidayNotificationScheduler {
     );
 
     final launch = await _plugin.getNotificationAppLaunchDetails();
-    if (launch?.didNotificationLaunchApp == true &&
-        launch?.notificationResponse?.payload == payloadOpenHolidays) {
-      await _setPendingNavigationFlag();
+    if (launch?.didNotificationLaunchApp == true) {
+      final payload = launch?.notificationResponse?.payload;
+      final route = _announcementRoute(payload);
+      if (route != null) {
+        await _setPendingRoute(route);
+      } else if (payload == payloadOpenHolidays) {
+        await _setPendingNavigationFlag();
+      }
     }
 
     _initialized = true;
@@ -93,6 +120,16 @@ class HolidayNotificationScheduler {
   }
 
   static void _onForegroundNotificationResponse(NotificationResponse r) {
+    final route = _announcementRoute(r.payload);
+    if (route != null) {
+      final shellNav = rotalinkShellBodyNavigatorKey.currentState;
+      if (shellNav != null) {
+        shellNav.pushNamed(route);
+      } else {
+        unawaited(_setPendingRoute(route));
+      }
+      return;
+    }
     if (r.payload != payloadOpenHolidays) return;
     final shellNav = rotalinkShellBodyNavigatorKey.currentState;
     if (shellNav != null) {
@@ -124,6 +161,15 @@ class HolidayNotificationScheduler {
       return true;
     }
     return false;
+  }
+
+  /// Uygulama kapalıyken dokunulan duyuru bildiriminin açacağı shell rotası.
+  static Future<String?> consumePendingRouteFromNotification() async {
+    final p = await SharedPreferences.getInstance();
+    await p.reload();
+    final route = p.getString(_prefPendingRoute);
+    if (route != null) await p.remove(_prefPendingRoute);
+    return route;
   }
 
   /// İzin diyaloğunu UI hazır olduktan sonra göstermek için ayrı metot.
