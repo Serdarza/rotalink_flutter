@@ -189,6 +189,7 @@ REJECT_LOCAL = {
     "no-reply",
     "donotreply",
     "webmaster",
+    "webadmin",
     "postmaster",
     "hostmaster",
     "sentry",
@@ -463,8 +464,18 @@ def classify(name: str, tip: str) -> str:
         return "esk"
     if "caykur" in name_f or "çaykur" in name.lower():
         return "caykur"
-    if "ogretmenevi" in name_f or "ogretmen evi" in name_f or "aksam sanat okulu" in name_f:
+    if (
+        "ogretmenevi" in name_f
+        or "ogretmen evi" in name_f
+        or "aksam sanat okulu" in name_f
+        or re.search(r"\bmtal\b", name_f)
+        or "uygulama oteli" in name_f
+    ):
         return "ogretmenevi"
+    if "gumruk" in name_f:
+        return "diger"
+    if fold_text(name).startswith("acu "):
+        return "universite"
     if any(k in name_f for k in ("orduevi", "ordu evi", "fuzze", "kisla", "askeri")):
         return "ordu"
     tip_f = fold_text(tip or "")
@@ -584,10 +595,18 @@ def normalize_url(url: str) -> str:
     return urlunsplit((parts.scheme, parts.netloc, path, query, ""))
 
 
-def visible_text(html: str) -> str:
-    cleaned = re.sub(r"(?is)<script[^>]*>.*?</script>", " ", html)
-    cleaned = re.sub(r"(?is)<style[^>]*>.*?</style>", " ", cleaned)
+def clean_html(html: str) -> str:
+    """Yorum ve sıfır genişlikli karakterleri çıkarır; yorumdaki adresler yok sayılır."""
+    cleaned = unescape(html or "")
+    cleaned = re.sub(r"[\u200b\u200c\u200d\ufeff]", "", cleaned)
     cleaned = re.sub(r"(?is)<!--.*?-->", " ", cleaned)
+    return cleaned
+
+
+def visible_text(html: str) -> str:
+    cleaned = clean_html(html)
+    cleaned = re.sub(r"(?is)<script[^>]*>.*?</script>", " ", cleaned)
+    cleaned = re.sub(r"(?is)<style[^>]*>.*?</style>", " ", cleaned)
     cleaned = unescape(cleaned)
     cleaned = re.sub(r"[\u200b\u200c\u200d\ufeff]", "", cleaned)
     cleaned = re.sub(r"(?s)<[^>]+>", " ", cleaned)
@@ -609,20 +628,23 @@ def decode_cfemail(value: str) -> str | None:
 def extract_hits(html: str) -> list[EmailHit]:
     if not html:
         return []
-    decoded = unescape(html)
-    decoded = re.sub(r"[\u200b\u200c\u200d\ufeff]", "", decoded)
+    decoded = clean_html(html)
+    decoded = re.sub(r"(?i)%20(?=[a-z0-9._%+\-]+@)", "", decoded)
     text = visible_text(decoded)
     found: dict[str, EmailHit] = {}
 
     def add(email: str, linked: bool) -> None:
         hit = _hit_or_none(email, text, linked)
+        if hit and ( "/" in hit.email or "\\" in hit.email):
+            return
         if hit and hit.email not in found:
             found[hit.email] = hit
 
     for raw in re.findall(r"""(?i)href=["'](?:mailto:)?([^"'#?\s>]+)""", decoded):
-        if "@" not in raw or raw.lower().startswith(("http:", "https:", "//")):
+        candidate = raw.strip()
+        if not EMAIL_RE.fullmatch(candidate):
             continue
-        add(raw, True)
+        add(candidate, True)
     for encoded in re.findall(r"""(?i)data-cfemail=["']([0-9a-f]+)["']""", decoded):
         decoded_email = decode_cfemail(encoded)
         if decoded_email:
@@ -633,7 +655,9 @@ def extract_hits(html: str) -> list[EmailHit]:
 
 
 def _hit_or_none(email: str, text: str, mailto: bool) -> EmailHit | None:
-    email = email.strip().strip(".").lower()
+    email = unquote(email).strip().strip(".").lower().replace(" ", "")
+    if any(mark in email for mark in ("%", "/", "\\", "<", ">")):
+        return None
     if email.count("@") != 1:
         return None
     local, domain = email.split("@")
@@ -667,7 +691,7 @@ def score_hit(hit: EmailHit, hints: list[str], page_host: str) -> int:
         return -100
     local, domain = hit.email.split("@", 1)
     flat = re.sub(r"[^a-z0-9]", "", local)
-    if any(bad in flat for bad in ("eapostil", "filateli", "kargo", "ihbar")):
+    if any(bad in flat for bad in ("eapostil", "filateli", "kargo", "ihbar", "arabuluculuk", "bilgiislem", "duzem", "arge")):
         return -100
     if domain in FREEMAIL:
         hinted = any(re.sub(r"[^a-z0-9]", "", hint or "") in flat for hint in hints if hint and len(re.sub(r"[^a-z0-9]", "", hint)) >= 4)
@@ -734,8 +758,43 @@ def page_has(html: str, token: str) -> bool:
     return token in compact(visible_text(html))
 
 
+def facility_grade(url: str, email: str, tokens: list[str]) -> bool:
+    """Bölge veya bakanlık iletişim sayfasını tesisin kendi adresi sayma."""
+    host = host_of(url)
+    if host in {
+        "www.caykur.gov.tr",
+        "caykur.gov.tr",
+        "www.ogm.gov.tr",
+        "ogm.gov.tr",
+        "www.tarimorman.gov.tr",
+        "tarimorman.gov.tr",
+        "www.kgm.gov.tr",
+        "www.dsi.gov.tr",
+        "www.dhmi.gov.tr",
+        "www.adalet.gov.tr",
+        "www.mgm.gov.tr",
+        "www.ptt.gov.tr",
+        "www.esk.gov.tr",
+        "www.meb.gov.tr",
+        "www.saglik.gov.tr",
+    }:
+        return False
+    if host.endswith(".k12.tr") and "hatalidns" not in url.lower():
+        return True
+    local = compact(email.split("@", 1)[0])
+    host_flat = compact(host)
+    if any(len(token) >= 5 and token in host_flat and token in local for token in tokens):
+        return True
+    path = compact(urlsplit(url).path)
+    specific = any(word in path for word in ("ogretmenevi", "misafirhane", "polisevi", "konukevi", "uygulamaoteli"))
+    if specific and any(role in local for role in ("konukevi", "misafirhane", "polisevi", "ogretmenevi")):
+        return True
+    return False
+
+
 def contact_links(html: str, base_url: str) -> list[str]:
     links = []
+    html = clean_html(html)
     for href in re.findall(r"""(?i)href=["']([^"'#]+)["']""", html or ""):
         if href.lower().startswith(("mailto:", "javascript:", "tel:")):
             continue
@@ -744,6 +803,8 @@ def contact_links(html: str, base_url: str) -> list[str]:
             continue
         folded = fold_text(unquote(absolute))
         if "eposta_gonder" in folded:
+            continue
+        if re.search(r"arabuluculuk|komisyon|ihale|duyuru|haber|kvkk|personel", folded):
             continue
         if not re.search(r"iletisim|iletişim|bize-ulasin|bizeulasin|contact", folded):
             continue
@@ -1114,7 +1175,7 @@ class Researcher:
                 found_urls[:2],
                 [],
                 [f"dsi{number}", f"dsi{number:02d}", "dsi"],
-                set(),
+                {"dsi.gnlmud@hs01.kep.tr"},
                 True,
             )
             if found is None:
@@ -1392,6 +1453,8 @@ class Engine:
             )
         chosen = pool[0][2]
         chosen_url = pool[0][1]
+        if not facility_grade(chosen_url, chosen.email, tokens):
+            return None
         return Resolution(
             institution_id=f"facility-{ascii_slug(facility['province'])}-{ascii_slug(facility['facility_name'])}",
             name=facility["facility_name"],
@@ -1934,6 +1997,7 @@ class Engine:
             [f"https://www.ogm.gov.tr/{pslug}obm/iletisim/bize-ulasin"],
             [pslug],
             [pslug, "obm", "ogm"],
+            ignore={"ogm@ogm.hs01.kep.tr"},
         )
 
     def ogm_gm(self) -> Resolution:
@@ -2228,6 +2292,15 @@ def self_test() -> None:
     assert any(hit.email == "info@atasehir.bel.tr" for hit in extract_hits(linked))
     assert decode_cfemail("3f565159507f5e4b5e4c5a57564d115d5a53114b4d") == "info@atasehir.bel.tr"
     assert classify("Et ve Süt Kurumu İstanbul Misafirhanesi", "Kamu") == "esk"
+    assert extract_hits('<!-- <a href="mailto:info@tarimorman.gov.tr">x</a> -->') == []
+    assert extract_hits('<a href="/meb_iys_dosyalar/53/02/971353/ardesenogretmenevimeb@gmail.com">İletişim</a>') == []
+    assert any(hit.email == "bilgi@cu.edu.tr" for hit in extract_hits('<a href="mailto:bilgi@cu.edu.tr">bilgi@cu.edu.tr</a>'))
+    assert classify("Van Uygulama Oteli (Edremit-Evliya Çelebi MTAL)", "Sağlık Müdürlüğü Misafirhanesi") == "ogretmenevi"
+    assert not facility_grade("https://www.ogm.gov.tr/sinopobm/iletisim/bize-ulasin", "sinopobm@ogm.gov.tr", ["isletme"])
+    assert not facility_grade("https://www.caykur.gov.tr/Pages/Iletisim/IletisimBilgileri.aspx", "caykur@caykur.gov.tr", ["caykur"])
+    hits = extract_hits("E-posta: %20trabzonobm@ogm.gov.tr")
+    assert [hit.email for hit in hits] == ["trabzonobm@ogm.gov.tr"]
+    assert classify("Gümrük Misafirhanesi Van", "Sağlık Müdürlüğü Misafirhanesi") == "diger"
     assert region_number("DSİ 14. Bölge Misafirhanesi") == 14
     assert region_number("Ağrı Dsi 85. Şube Misafirhanesi") is None
     assert match_university("Adana Çukurova Üniversitesi Balcalı Konukevi")[0] == "cu.edu.tr"
