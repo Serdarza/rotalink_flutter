@@ -8,6 +8,7 @@ import '../data/facility_compare_selection.dart';
 import '../models/misafirhane.dart';
 import '../theme/app_colors.dart';
 import '../utils/best_value_facility.dart';
+import '../utils/il_ilce.dart';
 import '../widgets/facility_stay_eligibility_card.dart' show stayAccessColor, stayCivilBadge;
 import '../widgets/facility_tariff_view.dart' show formatTl;
 
@@ -72,7 +73,7 @@ class FacilityCompareScreen extends StatelessWidget {
                 label: FacilityPricing.compareRowLocation,
                 cells: [
                   for (final m in facilities)
-                    m.ilce.trim().isEmpty ? m.il.trim() : '${m.ilce.trim()} / ${m.il.trim()}',
+                    IlIlce.label(m.il, m.ilce),
                 ],
               ),
               const SizedBox(height: 14),

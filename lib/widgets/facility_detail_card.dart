@@ -5,6 +5,7 @@ import '../data/facility_address_repository.dart';
 import '../map_location_state.dart';
 import '../models/misafirhane.dart';
 import '../theme/app_colors.dart';
+import '../utils/il_ilce.dart';
 import 'distance_permission_chip.dart';
 import 'facility_compare_widgets.dart';
 import 'facility_info_error_report.dart';
@@ -201,7 +202,7 @@ class FacilityDetailCard extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      ilce.isNotEmpty ? '$ilce / $il' : il,
+                                      IlIlce.label(il, ilce),
                                       style: TextStyle(
                                         color: muted,
                                         fontSize: 13.5,

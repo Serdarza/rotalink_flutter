@@ -18,6 +18,7 @@ import '../ads/ad_service.dart';
 import '../billing/pro_service.dart';
 import '../constants/store_links.dart';
 import '../data/app_rating_prefs.dart';
+import '../data/facility_address_repository.dart';
 import '../data/favorites_repository.dart';
 import '../data/firebase_rota_repository.dart';
 import '../providers/rota_data_provider.dart';
@@ -47,6 +48,7 @@ import '../utils/maps_launch.dart';
 import '../utils/misafirhane_compact_sheet_height.dart';
 import '../utils/route_facility_lookup.dart';
 import '../utils/safe_map_coordinates.dart';
+import '../utils/il_ilce.dart';
 import '../utils/main_map_search.dart';
 import '../widgets/app_rating_dialog.dart';
 import '../widgets/distance_permission_chip.dart';
@@ -312,6 +314,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     _cachedRotaData = widget.repository.currentState;
     _rotaStream = widget.repository.watchRoot();
     WidgetsBinding.instance.addObserver(this);
+    ref.listenManual<IlceSelection?>(facilityIlceFilterProvider, _onIlceFilterChanged);
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
     PackageInfo.fromPlatform().then((p) {
       if (mounted) {
@@ -496,7 +499,65 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     ref.read(searchPanelOpenProvider.notifier).state = open;
     if (!open) {
       ref.read(searchPanelFacilitiesSourceProvider.notifier).state = const [];
+      ref.read(facilityIlceFilterProvider.notifier).state = null;
     }
+  }
+
+  /// İlçe filtresi değişince harita yalnız görünen tesislere odaklanır.
+  void _onIlceFilterChanged(IlceSelection? prev, IlceSelection? next) {
+    final base = _markerOverride;
+    if (prev == next || base == null || base.isEmpty || !mounted) return;
+    final shown = filterFacilities(base, ref.read(facilityTypeFilterProvider), next);
+    if (shown.isNotEmpty) _fitFacilitiesCamera(shown);
+  }
+
+  /// Aynı adlı ilçe birden çok ilde varsa ("Edremit") kullanıcıya sorar.
+  Future<IlIlceMatch?> _pickAmbiguousIlce(
+    BuildContext context,
+    List<IlIlceMatch> options,
+    List<Misafirhane> kaynak,
+  ) {
+    final ilceOf = FacilityAddressRepository.instance.ilceOf;
+    int countOf(IlIlceMatch o) => kaynak
+        .where((m) => IlIlce.sameIl(m.il, o.il) && ilceOf(m) == o.ilce)
+        .length;
+    return showModalBottomSheet<IlIlceMatch>(
+      context: context,
+      showDragHandle: true,
+      useSafeArea: true,
+      builder: (ctx) => Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Text(
+              'Hangi ${options.first.ilce}?',
+              style: Theme.of(ctx).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            ),
+          ),
+          for (final o in options)
+            ListTile(
+              leading: const Icon(Icons.place_outlined, color: AppColors.primary),
+              title: Text(IlIlce.label(o.il, o.ilce!)),
+              trailing: Text(
+                countOf(o) == 0 ? 'Tesis yok' : '${countOf(o)} tesis',
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              onTap: () => Navigator.of(ctx).pop(o),
+            ),
+          const SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
+  /// Sonuç panelindeki il seçici: o il için yeni arama.
+  void _searchIlFromPanel(String il) {
+    final data = _tabbedSheetRotaData ?? _cachedRotaData;
+    if (data == null || !mounted) return;
+    _searchController.text = il;
+    unawaited(_performSearch(context, data));
   }
 
   void _onSearchBarFocusChanged(bool focused) {
@@ -1704,11 +1765,29 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     await _prepareLocationForSearch();
     if (!mounted) return;
 
-    final filtered = MainMapSearch.perform(
+    final ilceOf = FacilityAddressRepository.instance.ilceOf;
+    var ilceMatches = MainMapSearch.matchLocation(
       query: _searchController.text,
       kaynak: kaynak,
-      mapMisafirhaneler: data.misafirhaneler,
-    );
+    ).where((l) => l.ilce != null).toList();
+    if (ilceMatches.length > 1) {
+      if (!context.mounted) return;
+      final picked = await _pickAmbiguousIlce(context, ilceMatches, kaynak);
+      if (picked == null || !mounted || !context.mounted) return;
+      ilceMatches = [picked];
+    }
+    final presetIlce = ilceMatches.length == 1
+        ? IlceSelection(il: ilceMatches.single.il, ilce: ilceMatches.single.ilce!)
+        : null;
+
+    final filtered = presetIlce != null
+        ? kaynak.where((m) => IlIlce.sameIl(m.il, presetIlce.il)).toList()
+        : MainMapSearch.perform(
+            query: _searchController.text,
+            kaynak: kaynak,
+            mapMisafirhaneler: data.misafirhaneler,
+            ilceOf: ilceOf,
+          );
 
     if (filtered.isEmpty) {
       if (!context.mounted) return;
@@ -1726,15 +1805,20 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
     final displayList = filtered;
 
-    final narrowForHighlight = MainMapSearch.narrowFuzzyMatches(
-      query: _searchController.text,
-      kaynak: kaynak,
-    );
-    final highlightMatch = MainMapSearch.findPrimaryMatchForScroll(
-      query: _searchController.text,
-      displayedFacilities:
-          narrowForHighlight.isNotEmpty ? narrowForHighlight : displayList,
-    );
+    final narrowForHighlight = presetIlce != null
+        ? const <Misafirhane>[]
+        : MainMapSearch.narrowFuzzyMatches(
+            query: _searchController.text,
+            kaynak: kaynak,
+            ilceOf: ilceOf,
+          );
+    final highlightMatch = presetIlce != null
+        ? null
+        : MainMapSearch.findPrimaryMatchForScroll(
+            query: _searchController.text,
+            displayedFacilities:
+                narrowForHighlight.isNotEmpty ? narrowForHighlight : displayList,
+          );
     Misafirhane? highlightTarget = highlightMatch;
     if (highlightMatch != null) {
       for (final m in displayList) {
@@ -1754,16 +1838,19 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       _mapPreviewFacility = null;
       _searchSheetHighlight = highlightTarget;
     });
+    ref.read(facilityIlceFilterProvider.notifier).state = presetIlce;
+    final ilceFocus = filterFacilitiesByIlce(displayList, presetIlce);
+    final cameraList = ilceFocus.isNotEmpty ? ilceFocus : displayList;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || !context.mounted) return;
       final hl = highlightTarget;
       if (hl != null && _validFacilityCoords(hl)) {
-        _fitFacilitiesCamera(displayList);
+        _fitFacilitiesCamera(cameraList);
         await Future<void>.delayed(const Duration(milliseconds: 220));
         if (!mounted || !context.mounted) return;
         await _animateTowardsMisafirhane(hl);
       } else {
-        _fitFacilitiesCamera(displayList);
+        _fitFacilitiesCamera(cameraList);
       }
       await Future<void>.delayed(const Duration(milliseconds: 140));
       if (!mounted || !context.mounted) return;
@@ -2158,6 +2245,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                         },
                         onRequestLocationPermission: _onSearchSheetRequestLocation,
                         onClosePanel: _closeInlineTabbedSearchPanel,
+                        onSelectIl: _searchIlFromPanel,
                       ),
                     ValueListenableBuilder<int>(
                       valueListenable: _previewPositionTick,

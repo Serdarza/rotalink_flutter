@@ -6,7 +6,7 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 import '../l10n/app_strings.dart';
 import '../theme/app_colors.dart';
-import '../utils/main_map_search.dart';
+import '../utils/il_ilce.dart';
 
 // ── Tasarım sabitleri ─────────────────────────────────────────────────────────
 
@@ -242,8 +242,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             textEditingController: widget.controller,
             focusNode: _focusNode,
             displayStringForOption: (s) => s,
-            optionsBuilder: (tv) =>
-                MainMapSearch.filterIlAutocomplete(iller, tv.text),
+            optionsBuilder: (tv) => IlIlce.autocomplete(iller, tv.text),
             onSelected: (il) {
               widget.controller.text = il;
               FocusManager.instance.primaryFocus?.unfocus();
@@ -279,18 +278,32 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                       itemCount: options.length,
                       itemBuilder: (_, i) {
                         final opt = options.elementAt(i);
+                        final parts = opt.split(' / ');
+                        final isIlce = parts.length == 2;
                         return ListTile(
                           dense: true,
-                          leading: const Icon(Icons.map_outlined,
-                              color: AppColors.primary, size: 22),
+                          leading: Icon(
+                            isIlce ? Icons.place_outlined : Icons.map_outlined,
+                            color: AppColors.primary,
+                            size: 22,
+                          ),
                           title: Text(
-                            opt,
+                            isIlce ? parts[1] : opt,
                             style: const TextStyle(
                               color: AppColors.textPrimary,
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          subtitle: isIlce
+                              ? Text(
+                                  '${parts[0]} · ilçe',
+                                  style: const TextStyle(
+                                    color: AppColors.campaignSummaryMuted,
+                                    fontSize: 12.5,
+                                  ),
+                                )
+                              : null,
                           onTap: () => onSel(opt),
                         );
                       },

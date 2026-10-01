@@ -32,6 +32,8 @@ import '../map_location_state.dart';
 import '../services/nominatim_geocode_cache.dart';
 import '../theme/app_colors.dart';
 import '../utils/geo_helpers.dart';
+import '../utils/il_ilce.dart';
+import '../utils/main_map_search.dart';
 import '../utils/maps_launch.dart';
 import '../widgets/rotalink_native_ad_tile.dart';
 import '../utils/safe_map_coordinates.dart';
@@ -41,6 +43,7 @@ import 'best_value_pro_card.dart';
 import 'distance_permission_chip.dart';
 import 'facility_compare_widgets.dart';
 import 'facility_detail_card.dart';
+import 'facility_location_filter_bar.dart';
 import 'facility_sort_bar.dart';
 import 'rotalink_glass_bottom_nav.dart';
 
@@ -70,6 +73,7 @@ class MisafirhaneSearchResultsPanel extends ConsumerStatefulWidget {
     required this.onTesisSelect,
     this.onRequestLocationPermission,
     required this.onClosePanel,
+    this.onSelectIl,
   });
 
   final DraggableScrollableController sheetExtentController;
@@ -87,6 +91,9 @@ class MisafirhaneSearchResultsPanel extends ConsumerStatefulWidget {
 
   /// Detay kartındaki "Haritada göster" sonrası panel kapatılır.
   final VoidCallback onClosePanel;
+
+  /// Filtre çubuğundan il seçilince o il için arama yapılır.
+  final ValueChanged<String>? onSelectIl;
 
   @override
   MisafirhaneSearchResultsPanelState createState() =>
@@ -1327,8 +1334,39 @@ class MisafirhaneSearchResultsPanelState
 
 
   List<Widget> _tesisTabSlivers(BuildContext context, List<Misafirhane> facilities) {
+    final locationBar = SliverToBoxAdapter(
+      child: FacilityLocationFilterBar(
+        allFacilities: MainMapSearch.tesisKaynagiArama(
+          aramaIcinTumTesisler: widget.rotaData.aramaIcinTumTesisler,
+          misafirhaneler: widget.rotaData.misafirhaneler,
+        ),
+        onSelectIl: widget.onSelectIl,
+      ),
+    );
     if (facilities.isEmpty) {
+      final ilceActive = ref.watch(facilityIlceFilterProvider) != null;
+      final typeActive = ref.watch(facilityTypeFilterProvider) != kFacilityFilterAll;
+      final Widget empty;
+      if (ilceActive) {
+        empty = _emptyTabState(
+          typeActive
+              ? 'Bu ilçede seçili türde kamu konaklama tesisi bulunamadı.'
+              : 'Bu ilçede kayıtlı kamu konaklama tesisi bulunamadı.',
+          actionLabel: 'İl genelindeki tesisleri göster',
+          onAction: () => ref.read(facilityIlceFilterProvider.notifier).state = null,
+        );
+      } else if (typeActive) {
+        empty = _emptyTabState(
+          'Bu ilde seçili türde kamu konaklama tesisi bulunamadı.',
+          actionLabel: 'Tüm tesis türlerini göster',
+          onAction: () =>
+              ref.read(facilityTypeFilterProvider.notifier).state = kFacilityFilterAll,
+        );
+      } else {
+        empty = _emptyTabState('Bu aramada konaklama kaydı yok');
+      }
       return [
+        locationBar,
         SliverFillRemaining(
           hasScrollBody: false,
           child: SafeArea(
@@ -1336,7 +1374,7 @@ class MisafirhaneSearchResultsPanelState
             left: false,
             right: false,
             minimum: const EdgeInsets.only(bottom: 16),
-            child: _emptyTabState('Bu aramada konaklama kaydı yok'),
+            child: empty,
           ),
         ),
       ];
@@ -1373,6 +1411,7 @@ class MisafirhaneSearchResultsPanelState
       final priced = split.priced;
       final unpriced = split.unpriced;
       return [
+        locationBar,
         ?sortBar,
         ?compareBar,
         if (budget != null && (split.overBudget > 0 || priced.isEmpty))
@@ -1412,6 +1451,7 @@ class MisafirhaneSearchResultsPanelState
     final childCount = n * 2 - 1;
     final bestValue = pickBestValueFacility(facilities);
     return [
+      locationBar,
       ?sortBar,
       ?compareBar,
       if (bestValue != null)
@@ -1444,11 +1484,11 @@ class MisafirhaneSearchResultsPanelState
     final resolved = FacilityAddressRepository.instance.resolveFacility(m);
     final flash = _flashFacility != null &&
         m.sameFavoriteIdentity(_flashFacility!);
-    final ilce = resolved.ilce.trim();
+    final konum = IlIlce.label(resolved.il, resolved.ilce);
     final row = _searchListTile(
       icon: Icons.hotel_rounded,
       title: resolved.isim,
-      subtitle: ilce.isEmpty ? null : ilce,
+      subtitle: konum.isEmpty ? null : konum,
       distance: DistancePermissionChip(
         userLocation: widget.mapLocationState.userLocation,
         locationPermissionGranted:
@@ -1850,7 +1890,11 @@ class MisafirhaneSearchResultsPanelState
     ];
   }
 
-  Widget _emptyTabState(String message) {
+  Widget _emptyTabState(
+    String message, {
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -1882,6 +1926,14 @@ class MisafirhaneSearchResultsPanelState
                 letterSpacing: -0.1,
               ),
             ),
+            if (actionLabel != null && onAction != null) ...[
+              const SizedBox(height: 16),
+              FilledButton.tonalIcon(
+                onPressed: onAction,
+                icon: const Icon(Icons.travel_explore_rounded, size: 18),
+                label: Text(actionLabel),
+              ),
+            ],
           ],
         ),
       ),

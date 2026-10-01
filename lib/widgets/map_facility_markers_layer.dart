@@ -31,8 +31,11 @@ class MapFacilityPopupMarkersLayer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final filter = ref.watch(facilityTypeFilterProvider);
-    final display = filterFacilitiesByType(baseFacilities, filter);
+    final display = filterFacilities(
+      baseFacilities,
+      ref.watch(facilityTypeFilterProvider),
+      ref.watch(facilityIlceFilterProvider),
+    );
     final markers = _buildFacilityMarkers(display, highlight);
     final show = visible && markers.isNotEmpty;
 

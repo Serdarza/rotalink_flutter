@@ -1,4 +1,5 @@
 import '../models/misafirhane.dart';
+import 'il_ilce.dart';
 import 'search_normalize.dart';
 
 /// Kotlin [MainActivity.tesisKaynagiArama] + [performSearch] + [matchesMainSearchQueryFuzzy].
@@ -21,13 +22,26 @@ abstract final class MainMapSearch {
     return aramaIcinTumTesisler.isNotEmpty ? aramaIcinTumTesisler : misafirhaneler;
   }
 
-  static bool _matchesFuzzy(Misafirhane m, List<String> queryWords) {
+  static String _noIlce(Misafirhane m) => m.ilce;
+
+  static bool _matchesFuzzy(
+    Misafirhane m,
+    List<String> queryWords,
+    String Function(Misafirhane m) ilceOf,
+  ) {
     if (queryWords.isEmpty) return true;
     final ilNorm = normalizeForSearch(m.il);
     if (queryWords.every(ilNorm.contains)) return true;
-    final combined = normalizeForSearch('${m.il}${m.isim}');
+    final combined = normalizeForSearch('${m.il}${ilceOf(m)}${m.isim}');
     return queryWords.every(combined.contains);
   }
+
+  /// Sorgu il / "il ilçe" / ilçe adıysa konum eşleşmeleri ([IlIlce.matchQuery]).
+  static List<IlIlceMatch> matchLocation({
+    required String query,
+    required List<Misafirhane> kaynak,
+  }) =>
+      IlIlce.matchQuery(query, kaynak.map((m) => m.il).toSet());
 
   /// Kotlin [MainActivity] `tesisKaynagiArama().map { it.il }.distinct().sorted()`.
   static List<String> distinctSortedIller({
@@ -43,24 +57,12 @@ abstract final class MainMapSearch {
     return list;
   }
 
-  /// [AutoCompleteTextView] + [ArrayAdapter] ön ek filtresine yakın (küçük harf / aksan yok sayımı [normalizeForSearch] ile).
-  /// Önce önek; eşleşme yoksa ve sorgu en az 2 harf ise içerir eşlemesi (ör. "kara" → Karaman).
-  static Iterable<String> filterIlAutocomplete(List<String> sortedIller, String rawQuery) {
-    final q = rawQuery.trim();
-    if (q.isEmpty) return const Iterable<String>.empty();
-    final n = normalizeForSearch(q);
-    if (n.isEmpty) return const Iterable<String>.empty();
-    final prefix = sortedIller.where((il) => normalizeForSearch(il).startsWith(n));
-    if (prefix.isNotEmpty) return prefix;
-    if (n.length < 2) return const Iterable<String>.empty();
-    return sortedIller.where((il) => normalizeForSearch(il).contains(n));
-  }
-
   /// Boş sorguda Kotlin `allMisafirhaneList` (haritadaki il temsilcileri) döner.
   static List<Misafirhane> perform({
     required String query,
     required List<Misafirhane> kaynak,
     required List<Misafirhane> mapMisafirhaneler,
+    String Function(Misafirhane m) ilceOf = _noIlce,
   }) {
     final words = queryWords(query);
     final fullQueryNorm = words.join();
@@ -74,7 +76,8 @@ abstract final class MainMapSearch {
         .where((il) => normalizeForSearch(il) == fullQueryNorm)
         .toSet();
 
-    final narrowHits = kaynak.where((m) => _matchesFuzzy(m, words)).toList();
+    final narrowHits =
+        kaynak.where((m) => _matchesFuzzy(m, words, ilceOf)).toList();
 
     if (exactIlMatches.isNotEmpty) {
       return kaynak.where((m) => exactIlMatches.contains(m.il)).toList();
@@ -96,10 +99,11 @@ abstract final class MainMapSearch {
   static List<Misafirhane> narrowFuzzyMatches({
     required String query,
     required List<Misafirhane> kaynak,
+    String Function(Misafirhane m) ilceOf = _noIlce,
   }) {
     final words = queryWords(query);
     if (words.isEmpty) return const [];
-    return kaynak.where((m) => _matchesFuzzy(m, words)).toList();
+    return kaynak.where((m) => _matchesFuzzy(m, words, ilceOf)).toList();
   }
 
   /// Tek bir misafirhane kartına kaydırma / sarı vurgu için hedef.

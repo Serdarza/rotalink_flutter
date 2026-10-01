@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 
 import '../models/misafirhane.dart';
 import '../services/network_service.dart';
+import '../utils/il_ilce.dart';
 import '../utils/search_normalize.dart';
 import 'github_tesis_adres_data_source.dart';
 import 'tesis_adres_local_cache.dart';
@@ -27,8 +28,6 @@ class FacilityAddressEntry {
       '${normalizeForSearch(il)}\u0001${normalizeForSearch(isim)}';
 
   String get key => matchKey(il, isim);
-
-  bool get hasData => adres.trim().isNotEmpty || ilce.trim().isNotEmpty;
 }
 
 /// `tesisler_adres.json` — il+isim ile adres / ilçe birleştirir.
@@ -55,68 +54,23 @@ class FacilityAddressRepository {
   FacilityAddressEntry? lookup(String il, String isim) =>
       _byKey[FacilityAddressEntry.matchKey(il, isim)];
 
+  final Map<String, String> _ilceCache = {};
+
+  /// Tesisin standart ilçesi. `tesisler_adres.json` kaydı varsa o esastır
+  /// (boş = doğrulanamadı); kayıt yoksa master `ilce`. Referansta karşılığı
+  /// olmayan değer boş döner; ilçe tahmin edilmez.
+  String ilceOf(Misafirhane m) =>
+      _ilceCache.putIfAbsent(m.stableFacilityId, () {
+        final e = lookup(m.il, m.isim);
+        return IlIlce.canonicalIlce(m.il, e != null ? e.ilce : m.ilce);
+      });
+
   Misafirhane resolveFacility(Misafirhane m) {
     final e = lookup(m.il, m.isim);
-    if (e == null || !e.hasData) {
-      // Overlay yoksa bile master ilçe mahalle gibi görünmesin.
-      final cleaned = sanitizeIlce(m.ilce, il: m.il, isim: m.isim);
-      if (cleaned == m.ilce.trim()) return m;
-      return m.copyWithAddress(ilce: cleaned);
-    }
-    final ilce = sanitizeIlce(e.ilce, il: m.il, isim: m.isim);
-    return m.copyWithAddress(
-      adres: e.adres.trim().isNotEmpty ? e.adres : m.adres,
-      ilce: ilce.isNotEmpty ? ilce : m.ilce,
-    );
-  }
-
-  /// Liste altında sadece ilçe: mahalle / sokak / cadde yazılmaz.
-  static String sanitizeIlce(
-    String raw, {
-    required String il,
-    String isim = '',
-  }) {
-    var s = raw.trim();
-    if (s.isEmpty) return '';
-    final low = s.toLowerCase();
-    final looksMahalle = low.contains('mahallesi') ||
-        low.contains('sokak') ||
-        low.contains('caddesi') ||
-        low.contains('bulvar') ||
-        low.contains('belediye sınır') ||
-        RegExp(r'\bmah\.?\b').hasMatch(low);
-    // Yenimahalle gerçek ilçe — dokunma.
-    final isYenimahalle = low.replaceAll(' ', '') == 'yenimahalle';
-    if (looksMahalle && !isYenimahalle) {
-      s = '';
-    }
-    if (s.length > 32) s = '';
-    final ilN = il.trim().toLowerCase();
-    if (s.isNotEmpty && s.toLowerCase() == ilN) return 'Merkez';
-    if (s.isNotEmpty) return s;
-
-    // İsimden kaba ilçe (Yığılca Öğretmenevi).
-    final name = isim.trim();
-    if (name.isEmpty) return 'Merkez';
-    var n = name;
-    for (final suf in [
-      ' Öğretmenevi',
-      ' Orduevi',
-      ' Polisevi',
-      ' Polis Evi',
-      ' Misafirhanesi',
-      ' Konukevi',
-    ]) {
-      if (n.toLowerCase().endsWith(suf.toLowerCase())) {
-        n = n.substring(0, n.length - suf.length).trim();
-        break;
-      }
-    }
-    if (n.isEmpty || n.toLowerCase() == ilN) return 'Merkez';
-    final first = n.split(RegExp(r'\s+')).first;
-    if (first.toLowerCase() == ilN) return 'Merkez';
-    if (first.contains('Mahalle')) return 'Merkez';
-    return first;
+    final ilce = ilceOf(m);
+    final adres = e != null && e.adres.trim().isNotEmpty ? e.adres : m.adres;
+    if (ilce == m.ilce && adres == m.adres) return m;
+    return m.copyWithAddress(adres: adres, ilce: ilce);
   }
 
   Future<void> _maybeSyncIfRemoteVersionChanged() async {
@@ -189,11 +143,11 @@ class FacilityAddressRepository {
           adres: _str(m, const ['adres', 'address']),
           ilce: _str(m, const ['ilce', 'ilce_adi', 'district', 'ilçe']),
         );
-        if (!e.hasData) continue;
         map[e.key] = e;
       }
     }
     _byKey = map;
+    _ilceCache.clear();
     _log('Tesis adres yüklendi: ${map.length}');
   }
 
