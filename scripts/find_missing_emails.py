@@ -459,6 +459,10 @@ def classify(name: str, tip: str) -> str:
         return "etimaden"
     if "vakiflar" in name_f or "vakıflar" in name.lower():
         return "vgm"
+    if "et ve sut" in name_f or "et ve süt" in name.lower():
+        return "esk"
+    if "caykur" in name_f or "çaykur" in name.lower():
+        return "caykur"
     if "ogretmenevi" in name_f or "ogretmen evi" in name_f or "aksam sanat okulu" in name_f:
         return "ogretmenevi"
     if any(k in name_f for k in ("orduevi", "ordu evi", "fuzze", "kisla", "askeri")):
@@ -590,6 +594,18 @@ def visible_text(html: str) -> str:
     return re.sub(r"\s+", " ", cleaned).strip()
 
 
+def decode_cfemail(value: str) -> str | None:
+    """Cloudflare e-posta korumasının sayfaya gömdüğü adresi çözer."""
+    try:
+        raw = bytes.fromhex(value)
+    except ValueError:
+        return None
+    if len(raw) < 2:
+        return None
+    key = raw[0]
+    return "".join(chr(byte ^ key) for byte in raw[1:])
+
+
 def extract_hits(html: str) -> list[EmailHit]:
     if not html:
         return []
@@ -597,15 +613,22 @@ def extract_hits(html: str) -> list[EmailHit]:
     decoded = re.sub(r"[\u200b\u200c\u200d\ufeff]", "", decoded)
     text = visible_text(decoded)
     found: dict[str, EmailHit] = {}
-    for raw in re.findall(r"(?i)mailto:([^\"'\s>?#]+)", decoded):
-        email = raw.strip().strip(".").lower()
-        hit = _hit_or_none(email, text, True)
-        if hit:
-            found[hit.email] = hit
-    for email in EMAIL_RE.findall(text):
-        hit = _hit_or_none(email, text, False)
+
+    def add(email: str, linked: bool) -> None:
+        hit = _hit_or_none(email, text, linked)
         if hit and hit.email not in found:
             found[hit.email] = hit
+
+    for raw in re.findall(r"""(?i)href=["'](?:mailto:)?([^"'#?\s>]+)""", decoded):
+        if "@" not in raw or raw.lower().startswith(("http:", "https:", "//")):
+            continue
+        add(raw, True)
+    for encoded in re.findall(r"""(?i)data-cfemail=["']([0-9a-f]+)["']""", decoded):
+        decoded_email = decode_cfemail(encoded)
+        if decoded_email:
+            add(decoded_email, True)
+    for email in EMAIL_RE.findall(text):
+        add(email, False)
     return list(found.values())
 
 
@@ -642,10 +665,14 @@ def email_allowed(email: str, page_host: str) -> bool:
 def score_hit(hit: EmailHit, hints: list[str], page_host: str) -> int:
     if not email_allowed(hit.email, page_host):
         return -100
-    local = hit.email.split("@", 1)[0]
+    local, domain = hit.email.split("@", 1)
     flat = re.sub(r"[^a-z0-9]", "", local)
     if any(bad in flat for bad in ("eapostil", "filateli", "kargo", "ihbar")):
         return -100
+    if domain in FREEMAIL:
+        hinted = any(re.sub(r"[^a-z0-9]", "", hint or "") in flat for hint in hints if hint and len(re.sub(r"[^a-z0-9]", "", hint)) >= 4)
+        if not hinted:
+            return -100
     score = 0
     if hit.channel == "smtp":
         score += 5
@@ -814,7 +841,7 @@ class Http:
         with self.lock:
             self.cache[url] = item
             self.writes += 1
-            if self.writes % 25 == 0:
+            if self.writes % 400 == 0:
                 self._flush_locked()
         return item
 
@@ -1805,6 +1832,35 @@ class Engine:
                     ["etimaden", "eti"],
                 )
             )
+        elif kind == "esk":
+            chain.append(
+                self.simple(
+                    "esk",
+                    "Et ve Süt Kurumu",
+                    "esk",
+                    "general_directorate",
+                    None,
+                    None,
+                    ["https://www.esk.gov.tr/"],
+                    [],
+                    ["esk", "etvesut"],
+                    follow_pdf=True,
+                )
+            )
+        elif kind == "caykur":
+            chain.append(
+                self.simple(
+                    "caykur",
+                    "ÇAYKUR",
+                    "caykur",
+                    "general_directorate",
+                    None,
+                    None,
+                    ["https://www.caykur.gov.tr/"],
+                    [],
+                    ["caykur"],
+                )
+            )
         elif kind == "vgm":
             chain.append(
                 self.simple(
@@ -2043,6 +2099,8 @@ def suggested_parent(facility: dict) -> str:
         "mke": "Makine ve Kimya Endüstrisi",
         "etimaden": "Eti Maden",
         "vgm": "Vakıflar Genel Müdürlüğü",
+        "esk": "Et ve Süt Kurumu",
+        "caykur": "ÇAYKUR",
         "ordu": "İlgili kuvvet komutanlığı / Millî Savunma Bakanlığı",
         "sendika": "Sendika",
         "universite": "Üniversite rektörlüğü",
@@ -2070,7 +2128,7 @@ def ogretmenevi_hosts(facility: dict) -> list[str]:
     for base in (
         "".join(kept) + "ogretmenevi" if kept else "",
         district + "ogretmenevi" if district else "",
-        province + "ogretmenevi",
+        province + "ogretmenevi" if not kept else "",
         (district + "ogretmeneviaso") if district else "",
     ):
         if base and base not in bases and 6 <= len(base) <= 60:
@@ -2166,6 +2224,10 @@ def self_test() -> None:
     assert state == "verified" and chosen and chosen.email == "istanbulobm@ogm.gov.tr"
     hidden = "E\u200b-posta: istanbulobm\u200b@ogm.gov.tr"
     assert any(hit.email == "istanbulobm@ogm.gov.tr" for hit in extract_hits(hidden))
+    linked = '<a href="info@atasehir.bel.tr">Eposta</a>'
+    assert any(hit.email == "info@atasehir.bel.tr" for hit in extract_hits(linked))
+    assert decode_cfemail("3f565159507f5e4b5e4c5a57564d115d5a53114b4d") == "info@atasehir.bel.tr"
+    assert classify("Et ve Süt Kurumu İstanbul Misafirhanesi", "Kamu") == "esk"
     assert region_number("DSİ 14. Bölge Misafirhanesi") == 14
     assert region_number("Ağrı Dsi 85. Şube Misafirhanesi") is None
     assert match_university("Adana Çukurova Üniversitesi Balcalı Konukevi")[0] == "cu.edu.tr"
