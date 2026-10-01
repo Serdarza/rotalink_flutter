@@ -1,9 +1,12 @@
 package com.serdarza.rotalink
 
 import android.os.Bundle
+import android.provider.Settings
 import android.view.WindowManager
 import androidx.core.view.WindowCompat
 import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,5 +18,20 @@ class MainActivity : FlutterActivity() {
             WindowManager.LayoutParams.FLAG_SECURE,
             WindowManager.LayoutParams.FLAG_SECURE,
         )
+    }
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+        // Ücretsiz Pro hakkı için: uygulama silinip yüklenince değişmez.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "rotalink/device")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "androidId") {
+                    result.success(
+                        Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID),
+                    )
+                } else {
+                    result.notImplemented()
+                }
+            }
     }
 }

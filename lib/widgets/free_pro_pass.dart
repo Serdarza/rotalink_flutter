@@ -22,10 +22,11 @@ Future<bool> confirmAndStartFreePass(BuildContext context) async {
         color: AppColors.primary,
         size: 32,
       ),
-      title: const Text('15 dakika ücretsiz Pro'),
-      content: const Text(
-        'Tüm Pro özellikleri 15 dakika boyunca açılır. Bu hak her kullanıcıya '
-        'yalnızca bir kez verilir ve başladıktan sonra durdurulamaz.\n\n'
+      title: Text('${ProService.freePassMinutes} dakika ücretsiz Pro'),
+      content: Text(
+        'Tüm Pro özellikleri ${ProService.freePassMinutes} dakika boyunca '
+        'açılır. Bu hak her cihaza yalnızca bir kez verilir, uygulama silinip '
+        'yeniden yüklense de yenilenmez ve başladıktan sonra durdurulamaz.\n\n'
         'Konaklama araştırmanıza hazır olduğunuzda başlatmanızı öneririz.',
       ),
       actions: [

@@ -40,6 +40,8 @@ dependencies:
   # Play Billing Library 8.0+ (Play Console zorunluluğu, 31 Ağu 2026).
   in_app_purchase_android: 0.5.0
   workmanager: ^0.10.10
+  flutter_secure_storage: ^10.3.4
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:

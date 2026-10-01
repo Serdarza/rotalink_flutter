@@ -6,6 +6,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'free_pass_device_guard.dart';
 import 'pro_products.dart';
 
 /// Rotalink Pro (reklamsız) abonelik durumu.
@@ -23,7 +24,10 @@ class ProService {
   static const String _keyFreePassStartMs = 'rotalink_pro_free_pass_start_ms';
 
   /// Her kullanıcıya bir kereye mahsus verilen ücretsiz Pro süresi.
-  static const Duration freePassDuration = Duration(minutes: 15);
+  static const Duration freePassDuration = Duration(minutes: 5);
+
+  /// Arayüz metinleri için: "5 dakika".
+  static int get freePassMinutes => freePassDuration.inMinutes;
 
   /// Arka plan görevleri için: mağazaya sormadan yerel kayıttaki hak sahipliği.
   static bool cachedEntitlementActive(SharedPreferences prefs) {
@@ -130,9 +134,21 @@ class ProService {
     return true;
   }
 
-  /// Bir kereye mahsus 15 dakikalık ücretsiz Pro'yu başlatır.
+  /// Bir kereye mahsus ücretsiz Pro'yu başlatır. Hak cihaz adına sunucuya
+  /// kaydedilir; uygulama silinip yeniden yüklense de tekrar verilmez.
   Future<bool> startFreePass() async {
     if (!canStartFreePass) return false;
+    switch (await FreePassDeviceGuard.claim()) {
+      case FreePassClaim.granted:
+        break;
+      case FreePassClaim.alreadyUsed:
+        await _markFreePassUsed();
+        _emit('Ücretsiz Pro hakkı bu cihazda daha önce kullanıldı.');
+        return false;
+      case FreePassClaim.unavailable:
+        _emit('Ücretsiz Pro başlatılamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.');
+        return false;
+    }
     final now = DateTime.now();
     _freePassUsed = true;
     try {
@@ -142,8 +158,23 @@ class ProService {
       debugPrint('[Pro] ücretsiz Pro kaydedilemedi: $e');
     }
     _setFreePassEnd(now.add(freePassDuration));
-    _emit('15 dakikalık ücretsiz Pro başladı. Tüm Pro özellikleri açık.');
+    _emit('$freePassMinutes dakikalık ücretsiz Pro başladı. Tüm Pro özellikleri açık.');
     return true;
+  }
+
+  /// Yeniden yüklemeden sonra teklifin hiç görünmemesi için sunucudaki
+  /// kaydı yerelde de işaretler (süresi çoktan dolmuş bir başlangıç olarak).
+  Future<void> _markFreePassUsed() async {
+    _freePassUsed = true;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getInt(_keyFreePassStartMs) == null) {
+        await prefs.setInt(_keyFreePassStartMs, 0);
+      }
+    } catch (e) {
+      debugPrint('[Pro] ücretsiz Pro kaydedilemedi: $e');
+    }
+    _isPro.ping();
   }
 
   Future<void> _loadFreePass() async {
@@ -155,6 +186,11 @@ class ProService {
     } catch (e) {
       debugPrint('[Pro] ücretsiz Pro okunamadı: $e');
     }
+    if (!_freePassUsed) unawaited(_syncFreePassUsedFromServer());
+  }
+
+  Future<void> _syncFreePassUsedFromServer() async {
+    if (await FreePassDeviceGuard.wasUsed() == true) await _markFreePassUsed();
   }
 
   void _setFreePassEnd(DateTime? end) {

@@ -21,17 +21,27 @@ void main() {
       return SharedPreferences.getInstance();
     }
 
-    test('within 15 minutes', () async {
+    test('lasts 5 minutes', () {
+      expect(ProService.freePassDuration, const Duration(minutes: 5));
+      expect(ProService.freePassMinutes, 5);
+    });
+
+    test('within 5 minutes', () async {
       final prefs = await prefsWithStart(
-        DateTime.now().subtract(const Duration(minutes: 10)),
+        DateTime.now().subtract(const Duration(minutes: 4)),
       );
       expect(ProService.cachedEntitlementActive(prefs), isTrue);
     });
 
-    test('after 15 minutes', () async {
+    test('after 5 minutes', () async {
       final prefs = await prefsWithStart(
-        DateTime.now().subtract(const Duration(minutes: 16)),
+        DateTime.now().subtract(const Duration(minutes: 6)),
       );
+      expect(ProService.cachedEntitlementActive(prefs), isFalse);
+    });
+
+    test('used on this device before reinstall (start = 0)', () async {
+      final prefs = await prefsWithStart(DateTime.fromMillisecondsSinceEpoch(0));
       expect(ProService.cachedEntitlementActive(prefs), isFalse);
     });
 
