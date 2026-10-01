@@ -26,6 +26,7 @@ Mevcut tesis fiyatları (`fiyat_sivil`, `fiyat_kamu_personeli`, `fiyat_kurum_per
 
 | Yol | İçerik |
 | --- | --- |
+| `data/emails/tum_iller.json` | 81 ilin tesisleri tek dosyada. `provinces` dizisi il sırasını korur. |
 | `data/emails/<il>.json` | İlin bütün tesisleri. Dosya adı ASCII: `şanlıurfa` → `sanliurfa`, `çanakkale` → `canakkale`, `iğdır` → `igdir`, `kahramanmaraş` → `kahramanmaras`. |
 | `data/emails/manual_review.json` | Resmî adresi doğrulanamayan tesisler. |
 | `data/emails/ozet.json` | İl ve durum sayıları. |
