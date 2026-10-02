@@ -344,32 +344,74 @@ class FacilityDetailCard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
               child: SizedBox(
-                width: double.infinity,
                 height: 50,
-                child: FilledButton.icon(
-                  onPressed: onShowOnMap,
-                  icon: const Icon(Icons.my_location_outlined, size: 20),
-                  label: const Text(
-                    'Haritada göster',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15.5,
-                      letterSpacing: 0.1,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _BottomButton(
+                        icon: Icons.my_location_outlined,
+                        label: 'Haritada göster',
+                        color: AppColors.primary,
+                        onPressed: onShowOnMap,
+                      ),
                     ),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _BottomButton(
+                        icon: Icons.call_rounded,
+                        label: 'Ara',
+                        color: const Color(0xFF2E7D32),
+                        onPressed: onCall,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _BottomButton extends StatelessWidget {
+  const _BottomButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return FilledButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 20),
+      label: Text(
+        label,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          fontWeight: FontWeight.w800,
+          fontSize: 15,
+          letterSpacing: 0.1,
+        ),
+      ),
+      style: FilledButton.styleFrom(
+        backgroundColor: color,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        minimumSize: const Size.fromHeight(50),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+        ),
       ),
     );
   }
