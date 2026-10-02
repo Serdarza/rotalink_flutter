@@ -53,7 +53,7 @@ abstract final class FacilityPricing {
   static const bestValueOpen = 'Tesisi incele';
 
   static const sortDistance = 'Yakınlık';
-  static const sortPrice = 'Fiyat: ucuzdan pahalıya';
+  static const sortPrice = 'Ucuzdan pahalıya';
   static const unverifiedPrice = 'Teyit gerekli';
   static String unpricedHeader(int n) => 'Fiyat bilgisi olmayan tesisler ($n)';
   static const sortTeaserTitle = 'Fiyata göre sıralama Pro’da';

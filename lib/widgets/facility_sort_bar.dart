@@ -46,41 +46,50 @@ class FacilitySortBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _SortChip(
-                icon: Icons.near_me_rounded,
-                label: FacilityPricing.sortDistance,
-                selected: !byPrice,
-                onTap: onSelectDistance,
-              ),
-              _SortChip(
-                icon: Icons.trending_up_rounded,
-                label: FacilityPricing.sortPrice,
-                selected: byPrice,
-                onTap: onSelectPrice,
-                trailing: unlocked ? null : const _MiniProBadge(),
-              ),
-              _SortChip(
-                icon: Icons.account_balance_wallet_outlined,
-                label: budget == null
-                    ? FacilityPricing.budgetChip
-                    : FacilityPricing.budgetChipActive(formatTl(budget)),
-                selected: budget != null,
-                onTap: onBudgetTap,
-                trailing: !unlocked
-                    ? const _MiniProBadge()
-                    : budget != null
-                        ? GestureDetector(
-                            onTap: onBudgetClear,
-                            behavior: HitTestBehavior.opaque,
-                            child: const Icon(Icons.close_rounded, size: 16, color: Colors.white),
-                          )
-                        : null,
-              ),
-            ],
+          // Dar ekranda alt satıra kaymak yerine tek satırda orantılı küçülür.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 6,
+              children: [
+                _SortChip(
+                  icon: Icons.near_me_rounded,
+                  label: FacilityPricing.sortDistance,
+                  selected: !byPrice,
+                  onTap: onSelectDistance,
+                ),
+                _SortChip(
+                  icon: Icons.trending_up_rounded,
+                  label: FacilityPricing.sortPrice,
+                  selected: byPrice,
+                  onTap: onSelectPrice,
+                  trailing: unlocked ? null : const _MiniProBadge(),
+                ),
+                _SortChip(
+                  icon: Icons.account_balance_wallet_outlined,
+                  label: budget == null
+                      ? FacilityPricing.budgetChip
+                      : FacilityPricing.budgetChipActive(formatTl(budget)),
+                  selected: budget != null,
+                  onTap: onBudgetTap,
+                  trailing: !unlocked
+                      ? const _MiniProBadge()
+                      : budget != null
+                      ? GestureDetector(
+                          onTap: onBudgetClear,
+                          behavior: HitTestBehavior.opaque,
+                          child: const Icon(
+                            Icons.close_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        )
+                      : null,
+                ),
+              ],
+            ),
           ),
           if (byPrice || budget != null) ...[
             const SizedBox(height: 8),
@@ -100,8 +109,13 @@ class FacilitySortBar extends StatelessWidget {
               onSelectionChanged: (s) => onBasisChanged(s.first),
               style: SegmentedButton.styleFrom(
                 visualDensity: VisualDensity.compact,
-                textStyle: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
-                selectedBackgroundColor: AppColors.primary.withValues(alpha: 0.12),
+                textStyle: const TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                ),
+                selectedBackgroundColor: AppColors.primary.withValues(
+                  alpha: 0.12,
+                ),
                 selectedForegroundColor: AppColors.primary,
               ),
             ),
@@ -131,27 +145,30 @@ class _SortChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final fg = selected ? Colors.white : AppColors.primary;
     return Material(
-      color: selected ? AppColors.primary : AppColors.primary.withValues(alpha: 0.08),
+      color: selected
+          ? AppColors.primary
+          : AppColors.primary.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(999),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(999),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 16, color: fg),
               const SizedBox(width: 5),
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(color: fg, fontSize: 13, fontWeight: FontWeight.w700),
+              Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  color: fg,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-              if (trailing != null) ...[const SizedBox(width: 6), trailing!],
+              if (trailing != null) ...[const SizedBox(width: 5), trailing!],
             ],
           ),
         ),
@@ -208,7 +225,11 @@ class FacilityNightPriceTag extends StatelessWidget {
           ),
           const Text(
             FacilityPricing.bestValueUnit,
-            style: TextStyle(color: Color(0xFF6B7C82), fontSize: 10.5, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: Color(0xFF6B7C82),
+              fontSize: 10.5,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           if (!price.confirmed) ...[
             const SizedBox(height: 2),
@@ -219,7 +240,11 @@ class FacilityNightPriceTag extends StatelessWidget {
                 const SizedBox(width: 3),
                 Text(
                   price.dogrulama?.label ?? FacilityPricing.unverifiedPrice,
-                  style: const TextStyle(color: _amber, fontSize: 10.5, fontWeight: FontWeight.w700),
+                  style: const TextStyle(
+                    color: _amber,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -244,7 +269,11 @@ class FacilityUnpricedHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       child: Text(
         FacilityPricing.unpricedHeader(count),
-        style: const TextStyle(color: Color(0xFF5B6B70), fontSize: 12.5, fontWeight: FontWeight.w700),
+        style: const TextStyle(
+          color: Color(0xFF5B6B70),
+          fontSize: 12.5,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -252,7 +281,11 @@ class FacilityUnpricedHeader extends StatelessWidget {
 
 /// Bütçe filtresi açıkken: kaç tesis gizlendi / hiç uygun tesis yok.
 class FacilityBudgetInfo extends StatelessWidget {
-  const FacilityBudgetInfo({super.key, required this.hidden, required this.noneFits});
+  const FacilityBudgetInfo({
+    super.key,
+    required this.hidden,
+    required this.noneFits,
+  });
 
   final int hidden;
   final bool noneFits;
@@ -263,7 +296,11 @@ class FacilityBudgetInfo extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 6),
       child: Row(
         children: [
-          const Icon(Icons.filter_alt_outlined, size: 16, color: Color(0xFF5B6B70)),
+          const Icon(
+            Icons.filter_alt_outlined,
+            size: 16,
+            color: Color(0xFF5B6B70),
+          ),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
@@ -271,7 +308,11 @@ class FacilityBudgetInfo extends StatelessWidget {
                 if (noneFits) FacilityPricing.budgetNoneFits,
                 if (hidden > 0) FacilityPricing.budgetHidden(hidden),
               ].join(' '),
-              style: const TextStyle(color: Color(0xFF5B6B70), fontSize: 12.5, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                color: Color(0xFF5B6B70),
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -289,7 +330,10 @@ Future<double?> showBudgetPicker(
 }) {
   const step = 50.0;
   final lo = (range.min / step).floor() * step;
-  final hi = ((range.max / step).ceil() * step).clamp(lo + step, double.infinity);
+  final hi = ((range.max / step).ceil() * step).clamp(
+    lo + step,
+    double.infinity,
+  );
   var value = (current ?? hi).clamp(lo, hi).toDouble();
   return showModalBottomSheet<double>(
     context: context,
@@ -305,18 +349,30 @@ Future<double?> showBudgetPicker(
             children: [
               const Text(
                 FacilityPricing.budgetSheetTitle,
-                style: TextStyle(color: AppColors.textPrimary, fontSize: 17, fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
               const SizedBox(height: 6),
               const Text(
                 FacilityPricing.budgetSheetBody,
-                style: TextStyle(color: Color(0xFF5B6B70), fontSize: 13, height: 1.35),
+                style: TextStyle(
+                  color: Color(0xFF5B6B70),
+                  fontSize: 13,
+                  height: 1.35,
+                ),
               ),
               const SizedBox(height: 16),
               Center(
                 child: Text(
                   FacilityPricing.budgetChipActive(formatTl(value)),
-                  style: const TextStyle(color: AppColors.primary, fontSize: 22, fontWeight: FontWeight.w900),
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
               Slider(
@@ -330,8 +386,20 @@ Future<double?> showBudgetPicker(
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(formatTl(lo), style: const TextStyle(color: Color(0xFF6B7C82), fontSize: 12)),
-                  Text(formatTl(hi), style: const TextStyle(color: Color(0xFF6B7C82), fontSize: 12)),
+                  Text(
+                    formatTl(lo),
+                    style: const TextStyle(
+                      color: Color(0xFF6B7C82),
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    formatTl(hi),
+                    style: const TextStyle(
+                      color: Color(0xFF6B7C82),
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -340,8 +408,11 @@ Future<double?> showBudgetPicker(
                   if (current != null)
                     Expanded(
                       child: OutlinedButton(
-                        onPressed: () => Navigator.of(sheetContext).pop(double.nan),
-                        style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 13)),
+                        onPressed: () =>
+                            Navigator.of(sheetContext).pop(double.nan),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 13),
+                        ),
                         child: const Text(FacilityPricing.budgetClear),
                       ),
                     ),
@@ -352,7 +423,10 @@ Future<double?> showBudgetPicker(
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         padding: const EdgeInsets.symmetric(vertical: 13),
-                        textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+                        textStyle: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                       child: const Text(FacilityPricing.budgetApply),
                     ),
@@ -437,12 +511,20 @@ Future<void> showProFeatureTeaser(
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.check_circle_rounded, size: 18, color: AppColors.primary),
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         line,
-                        style: const TextStyle(color: Color(0xFF37474F), fontSize: 13.5, height: 1.35),
+                        style: const TextStyle(
+                          color: Color(0xFF37474F),
+                          fontSize: 13.5,
+                          height: 1.35,
+                        ),
                       ),
                     ),
                   ],
@@ -462,8 +544,13 @@ Future<void> showProFeatureTeaser(
                   backgroundColor: _gold,
                   foregroundColor: const Color(0xFF3D2A00),
                   padding: const EdgeInsets.symmetric(vertical: 13),
-                  textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  textStyle: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
               ),
             ),
