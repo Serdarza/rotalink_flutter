@@ -288,12 +288,6 @@ class FacilityDetailCard extends StatelessWidget {
                     child: Row(
                       children: [
                         _DetailAction(
-                          icon: Icons.call_rounded,
-                          color: const Color(0xFF2E7D32),
-                          label: 'Ara',
-                          onTap: onCall,
-                        ),
-                        _DetailAction(
                           icon: Icons.ios_share_rounded,
                           color: const Color(0xFF039BE5),
                           label: 'Paylaş',
