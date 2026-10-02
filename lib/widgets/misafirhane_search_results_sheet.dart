@@ -25,6 +25,7 @@ import '../data/favorites_repository.dart';
 import '../data/facility_address_repository.dart';
 import '../data/firebase_rota_repository.dart';
 import '../data/gezi_yemek_repository.dart';
+import '../data/hediyelik_repository.dart';
 import '../models/gezi_yemek_item.dart';
 import '../models/misafirhane.dart';
 import '../models/sosyal_item.dart';
@@ -286,6 +287,8 @@ class MisafirhaneSearchResultsPanelState
     ProService.instance.isPro.addListener(_onProChanged);
     FacilityCompareSelection.instance.addListener(_onCompareChanged);
     widget.mapLocationState.addListener(_onMapLocationChanged);
+    HediyelikRepository.instance.byIl.addListener(_onHediyelikChanged);
+    unawaited(HediyelikRepository.instance.ensureLoaded());
     unawaited(_loadFavorites());
     unawaited(_loadSortPrefs());
     // initState içinde setState çağırmaktan kaçın: sekme doğrudan set et.
@@ -463,6 +466,7 @@ class MisafirhaneSearchResultsPanelState
     ProService.instance.isPro.removeListener(_onProChanged);
     FacilityCompareSelection.instance.removeListener(_onCompareChanged);
     widget.mapLocationState.removeListener(_onMapLocationChanged);
+    HediyelikRepository.instance.byIl.removeListener(_onHediyelikChanged);
     for (final a in _nativeAdsGezi) {
       a.dispose();
     }
@@ -746,6 +750,13 @@ class MisafirhaneSearchResultsPanelState
         .where((g) => want.contains(normalizeForSearch(g.il)))
         .toList();
   }
+
+  void _onHediyelikChanged() {
+    if (mounted) setState(() {});
+  }
+
+  List<HediyelikItem> get _hediyelikFiltered =>
+      HediyelikRepository.instance.forIller(_facilityIllerNorm);
 
   List<SosyalItem> get _sosyalFiltered {
     final raw = widget.rotaData.sosyal;
@@ -1295,6 +1306,7 @@ class MisafirhaneSearchResultsPanelState
                                                 _geziFiltered.length,
                                                 _yemekFiltered.length,
                                                 _sosyalFiltered.length,
+                                                _hediyelikFiltered.length,
                                               ],
                                             ),
                                           ),
@@ -1327,6 +1339,8 @@ class MisafirhaneSearchResultsPanelState
         return _yemekTabSlivers(context, _yemekFiltered);
       case 3:
         return _sosyalTabSlivers(context, _sortedSosyal(_sosyalFiltered));
+      case _TabBarHeaderDelegate.hediyelikTab:
+        return _hediyelikTabSlivers(context, _hediyelikFiltered);
       default:
         return const [];
     }
@@ -1890,6 +1904,229 @@ class MisafirhaneSearchResultsPanelState
     ];
   }
 
+  List<Widget> _hediyelikTabSlivers(
+    BuildContext context,
+    List<HediyelikItem> items,
+  ) {
+    if (items.isEmpty) {
+      final loaded = HediyelikRepository.instance.byIl.value.isNotEmpty;
+      return [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: SafeArea(
+            top: false,
+            left: false,
+            right: false,
+            minimum: const EdgeInsets.only(bottom: 16),
+            child: _emptyTabState(
+              loaded
+                  ? 'Bu il için hediyelik kaydı yok'
+                  : 'Hediyelik listesi yüklenemedi. İnternet bağlantınızı kontrol edin.',
+            ),
+          ),
+        ),
+      ];
+    }
+    return [
+      SliverList(
+        delegate: SliverChildBuilderDelegate(
+          (ctx, index) {
+            if (index.isOdd) return _kListDivider;
+            return _hediyelikRow(context, items[index ~/ 2]);
+          },
+          childCount: items.length * 2 - 1,
+        ),
+      ),
+      _listBottomInset(context),
+    ];
+  }
+
+  static IconData _hediyelikIcon(String kategori) {
+    final k = kategori.toLowerCase();
+    if (k.contains('el sanat')) return Icons.palette_outlined;
+    if (k.contains('tatlı')) return Icons.cake_outlined;
+    if (k.contains('bal') || k.contains('peynir')) return Icons.egg_alt_outlined;
+    if (k.contains('meyve')) return Icons.eco_outlined;
+    if (k.contains('yağ') || k.contains('baharat')) return Icons.spa_outlined;
+    if (k.contains('içecek')) return Icons.local_cafe_outlined;
+    return Icons.card_giftcard_rounded;
+  }
+
+  Future<void> _openGoogleSearch(String query) async {
+    final q = query.trim();
+    if (q.isEmpty) return;
+    final uri = Uri.parse(
+      'https://www.google.com/search?q=${Uri.encodeComponent(q)}',
+    );
+    if (await canLaunchUrl(uri)) {
+      AdService.instance.notifyLeavingToExternalApp();
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _shareHediyelik(HediyelikItem h) async {
+    final body = StringBuffer('${h.il} hediyelik: ${h.ad}');
+    if (h.aciklama.isNotEmpty) {
+      body.write('\n\n');
+      body.write(h.aciklama);
+    }
+    body.write('\n\n');
+    body.write(_shareAppDownloadFooter());
+    await Share.share(body.toString());
+  }
+
+  Widget _hediyelikRow(BuildContext context, HediyelikItem h) {
+    final meta = [h.il, if (h.kategori.isNotEmpty) h.kategori].join(' · ');
+    return Material(
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 42,
+                  height: 42,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        AppColors.primary.withValues(alpha: 0.12),
+                        AppColors.primary.withValues(alpha: 0.05),
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  child: Icon(
+                    _hediyelikIcon(h.kategori),
+                    size: 20,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        h.ad,
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 15,
+                          height: 1.28,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        meta,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF6B7C82),
+                          fontSize: 12.5,
+                          height: 1.25,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (h.cografiIsaret) ...[
+                        const SizedBox(height: 5),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 7,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE8F5E9),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.verified_outlined,
+                                size: 12,
+                                color: Color(0xFF2E7D32),
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Coğrafi işaretli',
+                                style: TextStyle(
+                                  color: Color(0xFF2E7D32),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (h.aciklama.isNotEmpty) ...[
+              const SizedBox(height: 10),
+              Text(
+                h.aciklama,
+                softWrap: true,
+                style: const TextStyle(
+                  color: Color(0xFF455A64),
+                  fontSize: 13,
+                  height: 1.45,
+                  letterSpacing: -0.05,
+                ),
+              ),
+            ],
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _sosyalActionChip(
+                  icon: Icons.travel_explore_rounded,
+                  label: 'Gör',
+                  onTap: () => unawaited(_openGoogleSearch('${h.ad} ${h.il}')),
+                ),
+                _sosyalActionChip(
+                  icon: Icons.ios_share_rounded,
+                  label: 'Paylaş',
+                  onTap: () => unawaited(_shareHediyelik(h)),
+                ),
+                _sosyalActionChip(
+                  icon: Icons.chat_bubble_outline_rounded,
+                  label: 'Yorum',
+                  onTap: () => unawaited(
+                    pushOnShellNavigator<void>(
+                      MaterialPageRoute<void>(
+                        builder: (_) => YorumScreen(
+                          facilityId: ReviewRepository.sanitizeFacilityId(
+                            'hediyelik_${h.il}\u0001${h.ad}',
+                          ),
+                          facilityName: h.ad,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _emptyTabState(
     String message, {
     String? actionLabel,
@@ -2253,11 +2490,14 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   final int tabIndex;
   final ValueChanged<int> onTabChanged;
 
-  /// [Konaklama, Gezi, Yemek, Tesisler] sonuç sayıları.
+  /// [Konaklama, Gezi, Yemek, Tesisler, Hediyelik] sonuç sayıları.
   final List<int> counts;
 
   static const double height = 60.0;
   static const _labels = ['Konaklama', 'Gezi', 'Yemek', 'Tesisler'];
+
+  /// Açılır menüden seçilen sekme ([_labels] sonrası).
+  static const hediyelikTab = 4;
 
   @override
   double get minExtent => height;
@@ -2300,6 +2540,7 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                     children: [
                       for (var i = 0; i < _labels.length; i++)
                         Expanded(child: _segment(i)),
+                      _moreSegment(),
                     ],
                   ),
                 ),
@@ -2311,6 +2552,116 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
             child: SizedBox(height: 1, width: double.infinity),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _moreSegment() {
+    final sel = tabIndex == hediyelikTab;
+    final count = hediyelikTab < counts.length ? counts[hediyelikTab] : 0;
+    final fg = sel ? Colors.white : const Color(0xFF5A6B70);
+    return PopupMenuButton<int>(
+      tooltip: 'Diğer sekmeler',
+      position: PopupMenuPosition.under,
+      offset: const Offset(0, 8),
+      color: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      onSelected: onTabChanged,
+      itemBuilder: (_) => [
+        PopupMenuItem<int>(
+          value: hediyelikTab,
+          child: Row(
+            children: [
+              const Icon(
+                Icons.card_giftcard_rounded,
+                size: 20,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Hediyelik',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'İle özgü yöresel ürünler',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF6B7C82)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '$count',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF8A9A9F),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        width: sel ? 74 : 50,
+        decoration: BoxDecoration(
+          color: sel ? AppColors.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: sel
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.28),
+                    blurRadius: 6,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Center(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    sel ? 'Hediyelik' : 'Daha',
+                    style: TextStyle(
+                      color: fg,
+                      fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                      fontSize: 12.5,
+                      height: 1.05,
+                      letterSpacing: -0.2,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  sel
+                      ? Text(
+                          '$count',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11,
+                            height: 1.0,
+                          ),
+                        )
+                      : Icon(Icons.expand_more_rounded, size: 14, color: fg),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
