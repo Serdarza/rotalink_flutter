@@ -11,7 +11,9 @@ import '../models/facility_tariff.dart';
 import '../models/misafirhane.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import '../theme/app_colors.dart';
+import '../utils/stay_cost_calculator.dart';
 import 'facility_price_report_sheet.dart';
+import 'stay_cost_calculator_sheet.dart';
 import 'free_pro_pass.dart';
 import 'facility_tariff_view.dart';
 
@@ -453,6 +455,27 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                     unavailableColor: unavailableColor,
                   ),
                 ],
+              if (StayCostCalculator.isAvailable(tariff)) ...[
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () =>
+                      unawaited(showStayCostCalculator(context, priced)),
+                  icon: const Icon(Icons.calculate_outlined, size: 20),
+                  label: const Text(FacilityPricing.calcButton),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
               if (tariff != null) ...[
                 const SizedBox(height: 10),
                 _DetailToggle(
@@ -561,6 +584,7 @@ class _ProPreview extends StatelessWidget {
           '${firstTable.kategoriler.map((c) => c.ad).join(' / ')} fiyatları',
       ] else if (entry?.hasLegacyFiyat ?? false)
         'Personel türüne göre gecelik fiyatlar',
+      if (StayCostCalculator.isAvailable(tariff)) FacilityPricing.calcPerk,
       if (tariff != null) ..._tariffPerks(tariff),
       if (entry?.kaynak != null || entry?.gecerlilik != null)
         'Fiyat kaynağı ve geçerlilik bilgisi',

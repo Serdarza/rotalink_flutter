@@ -37,6 +37,13 @@ class _ProScreenState extends State<ProScreen> {
           'dokunuşla gizleyin.',
     ),
     _ProBenefit(
+      icon: Icons.calculate_outlined,
+      title: 'Konaklama ücreti hesaplama',
+      detail:
+          'Gece, yetişkin, çocuk, ek yatak ve kahvaltıya göre toplam '
+          'konaklama ücretini tarifeden hesaplayın.',
+    ),
+    _ProBenefit(
       icon: Icons.compare_arrows_rounded,
       title: 'Tesis karşılaştırma',
       detail:

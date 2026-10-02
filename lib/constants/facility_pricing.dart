@@ -84,6 +84,11 @@ abstract final class FacilityPricing {
     'Fiyat sıralamasıyla birlikte kullanın.',
   ];
 
+  static const calcTitle = 'Konaklama ücreti hesapla';
+  static const calcButton = 'Toplam konaklama ücretini hesapla';
+  static const calcPerk =
+      'Gece, yetişkin, çocuk ve kahvaltıya göre toplam ücret hesaplama';
+
   static const compareAdd = 'Karşılaştırmaya ekle';
   static const compareAdded = 'Karşılaştırmada';
   static String compareOpen(int n) => 'Karşılaştır ($n)';
