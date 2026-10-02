@@ -344,27 +344,61 @@ class FacilityDetailCard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
               child: SizedBox(
-                width: double.infinity,
                 height: 50,
-                child: FilledButton.icon(
-                  onPressed: onShowOnMap,
-                  icon: const Icon(Icons.my_location_outlined, size: 20),
-                  label: const Text(
-                    'Haritada göster',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 15.5,
-                      letterSpacing: 0.1,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: onShowOnMap,
+                        icon: const Icon(Icons.my_location_outlined, size: 18),
+                        label: const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            'Haritada göster',
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14.5,
+                              letterSpacing: 0.1,
+                            ),
+                          ),
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: FilledButton.icon(
+                        onPressed: onCall,
+                        icon: const Icon(Icons.call_rounded, size: 18),
+                        label: const Text(
+                          'Ara',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 14.5,
+                            letterSpacing: 0.1,
+                          ),
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF2E7D32),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
