@@ -2078,18 +2078,6 @@ class MisafirhaneSearchResultsPanelState
     return Icons.card_giftcard_rounded;
   }
 
-  Future<void> _openGoogleSearch(String query) async {
-    final q = query.trim();
-    if (q.isEmpty) return;
-    final uri = Uri.parse(
-      'https://www.google.com/search?q=${Uri.encodeComponent(q)}',
-    );
-    if (await canLaunchUrl(uri)) {
-      AdService.instance.notifyLeavingToExternalApp();
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
-  }
-
   Future<void> _shareHediyelik(HediyelikItem h) async {
     final body = StringBuffer('${h.il} hediyelik: ${h.ad}');
     if (h.aciklama.isNotEmpty) {
@@ -2220,9 +2208,9 @@ class MisafirhaneSearchResultsPanelState
               runSpacing: 8,
               children: [
                 _sosyalActionChip(
-                  icon: Icons.travel_explore_rounded,
+                  icon: Icons.image_search,
                   label: 'Gör',
-                  onTap: () => unawaited(_openGoogleSearch('${h.ad} ${h.il}')),
+                  onTap: () => unawaited(_openGoogleImages('${h.ad} ${h.il}')),
                 ),
                 _sosyalActionChip(
                   icon: Icons.ios_share_rounded,
