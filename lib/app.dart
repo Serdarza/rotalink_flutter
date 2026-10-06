@@ -6,13 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'main.dart';
+import 'bootstrap/secondary_data.dart';
 import 'data/app_rating_prefs.dart';
 import 'data/firebase_rota_repository.dart';
 import 'data/rota_local_cache.dart';
 import 'navigator_keys.dart';
 import 'l10n/app_strings.dart';
 import 'screens/no_connection_screen.dart';
-import 'screens/splash_screen.dart';
+import 'screens/rotalink_main_shell.dart';
 import 'services/holiday_notification_scheduler.dart';
 import 'services/network_service.dart';
 import 'theme/app_theme.dart';
@@ -41,10 +42,11 @@ class RotalinkApp extends StatelessWidget {
 /// Uygulama giriş noktası: internet durumunu ve geçmiş açılış sayısını kontrol eder.
 ///
 /// - İlk açılış (hiç önbellek yok) + internet yok → [NoConnectionScreen]
-/// - Geri dönen kullanıcı (yerel veri önbelleği var) → internet olmadan da [SplashScreen]
-/// - İnternet var → [SplashScreen]
+/// - Geri dönen kullanıcı (yerel veri önbelleği var) → internet olmadan da ana ekran
+/// - İnternet var → ana ekran
 ///
-/// Bağlantı geldiğinde [NoConnectionScreen] otomatik olarak [SplashScreen]'e geçer.
+/// Ara açılış ekranı yok: ana ekran veriyi beklemeden açılır, harita verisi
+/// gelince dolar. Bağlantı geldiğinde [NoConnectionScreen] ana ekrana geçer.
 class _ConnectivityGate extends StatefulWidget {
   const _ConnectivityGate();
 
@@ -53,11 +55,11 @@ class _ConnectivityGate extends StatefulWidget {
 }
 
 class _ConnectivityGateState extends State<_ConnectivityGate> {
-  /// Repository bir kez oluşturulur; splash → main akışı boyunca aynı örnek.
+  /// Repository bir kez oluşturulur; uygulama boyunca aynı örnek.
   final _repository = FirebaseRotaRepository();
 
-  /// null = henüz kontrol ediliyor; true = splash göster; false = bağlantı yok ekranı.
-  bool? _showSplash;
+  /// null = henüz kontrol ediliyor; true = ana ekran; false = bağlantı yok ekranı.
+  bool? _showMain;
 
   @override
   void initState() {
@@ -85,9 +87,7 @@ class _ConnectivityGateState extends State<_ConnectivityGate> {
     final isReturningUser = launchCount > 1 || hasLocalRota;
 
     if (isReturningUser) {
-      // Native splash sırasında veriyi şimdiden yükle — Flutter splash kısa kalsın.
-      unawaited(_repository.ensureLocalDataReady());
-      if (mounted) setState(() => _showSplash = true);
+      _openMain();
       return;
     }
 
@@ -96,29 +96,42 @@ class _ConnectivityGateState extends State<_ConnectivityGate> {
     if (!mounted) return;
 
     if (connected) {
-      unawaited(_repository.ensureLocalDataReady());
-      setState(() => _showSplash = true);
+      _openMain();
     } else {
       FlutterNativeSplash.remove();
-      setState(() => _showSplash = false);
+      setState(() => _showMain = false);
     }
   }
 
-  void _onConnected() {
+  bool _mainStarted = false;
+
+  void _openMain() {
     if (!mounted) return;
-    setState(() => _showSplash = true);
+    if (!_mainStarted) {
+      _mainStarted = true;
+      unawaited(AppRatingPrefs.incrementLaunchCount());
+      unawaited(RotalinkSystemUi.applyEdgeToEdge());
+      unawaited(() async {
+        await _repository.ensureLocalDataReady();
+        await warmSecondaryData();
+      }());
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        FlutterNativeSplash.remove();
+      });
+    }
+    setState(() => _showMain = true);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_showSplash == null) {
+    if (_showMain == null) {
       return const Scaffold(backgroundColor: Colors.transparent);
     }
 
-    if (_showSplash!) {
-      return SplashScreen(repository: _repository);
+    if (_showMain!) {
+      return RotalinkMainShell(repository: _repository);
     }
 
-    return NoConnectionScreen(onConnected: _onConnected);
+    return NoConnectionScreen(onConnected: _openMain);
   }
 }

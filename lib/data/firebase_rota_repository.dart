@@ -101,6 +101,10 @@ class FirebaseRotaRepository {
   }
 
   Future<RotaDataState> _resolveState() async {
+    // Ana ekran açılışta yüklemeyi beklemeden dinler; aynı veriyi iki kez
+    // okuyup indirmemek için süren yüklemeyi paylaş.
+    final inFlight = _readyInFlight;
+    if (inFlight != null) await inFlight;
     if (_memoryState != null) return _memoryState!;
     if (await RotaLocalCache.hasCache()) {
       return _loadFromLocalCache();

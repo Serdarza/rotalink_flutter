@@ -1,7 +1,6 @@
 /// `res/values/strings.xml` + `activity_main.xml` / `drawer_menu` içi sabit metinler.
 abstract final class AppStrings {
   static const String appName = 'Rotalink';
-  static const String splashTagline = 'Akıllı Seyahat Rehberiniz';
   static const String defaultNotificationChannelId = 'rotalink_notifications';
   static const String discoverLoadingTitle = 'Kampanyalar yükleniyor';
   static const String discoverLoadingSubtitle = 'Birkaç saniye içinde hazır olacak';
