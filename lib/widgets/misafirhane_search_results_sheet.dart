@@ -765,6 +765,114 @@ class MisafirhaneSearchResultsPanelState
     return raw.where((s) => want.contains(normalizeForSearch(s.il))).toList();
   }
 
+  final Map<String, String> _inferredIlce = {};
+
+  /// "İlçesi belirsiz" seçimi sekme bazında tutulur: sekme → seçildiği il.
+  final Map<int, String> _unknownIlceTabs = {};
+
+  String _ilceOfGezi(GeziYemekItem g) => _inferredIlce.putIfAbsent(
+        'g\u0001${g.il}\u0001${g.isim}\u0001${g.adres}',
+        () => IlIlce.inferIlce(g.il, adres: g.adres),
+      );
+
+  String _ilceOfSosyal(SosyalItem s) => _inferredIlce.putIfAbsent(
+        's\u0001${s.il}\u0001${s.ilce}\u0001${s.isim}\u0001${s.adres}',
+        () => IlIlce.inferIlce(s.il, ilce: s.ilce, adres: s.adres),
+      );
+
+  /// Gezi / sosyal sekmesinde aktif ilçe; null → tüm ilçeler.
+  String? _listIlceFor(int tab) {
+    final il = ref.watch(searchPanelLocationSummaryProvider).il;
+    if (il == null) return null;
+    if (_unknownIlceTabs[tab] == il) return kIlceUnknown;
+    final sel = ref.watch(facilityIlceFilterProvider);
+    return sel != null && IlIlce.sameIl(sel.il, il) ? sel.ilce : null;
+  }
+
+  List<T> _byIlce<T>(List<T> items, String? ilce, String Function(T) ilceOf) {
+    if (ilce == null) return items;
+    final want = ilce == kIlceUnknown ? '' : ilce;
+    return items.where((e) => ilceOf(e) == want).toList();
+  }
+
+  List<GeziYemekItem> get _geziShown =>
+      _byIlce(_geziFiltered, _listIlceFor(1), _ilceOfGezi);
+
+  List<SosyalItem> get _sosyalShown =>
+      _byIlce(_sosyalFiltered, _listIlceFor(3), _ilceOfSosyal);
+
+  /// Gerçek ilçe seçimi konaklama sekmesiyle ortaktır; "belirsiz" yalnız o sekmede.
+  void _setListIlce(int tab, String il, String? value) {
+    setState(() {
+      if (value == kIlceUnknown) {
+        _unknownIlceTabs[tab] = il;
+      } else {
+        _unknownIlceTabs.clear();
+      }
+    });
+    ref.read(facilityIlceFilterProvider.notifier).state =
+        value == null || value == kIlceUnknown
+            ? null
+            : IlceSelection(il: il, ilce: value);
+  }
+
+  Widget _listLocationBar<T>({
+    required int tab,
+    required String noun,
+    required List<T> inIl,
+    required List<T> all,
+    required String Function(T) ilOf,
+    required String Function(T) ilceOf,
+    required int shown,
+  }) {
+    final il = ref.watch(searchPanelLocationSummaryProvider).il;
+    final ilceCounts = <String, int>{};
+    var unknown = 0;
+    if (il != null) {
+      for (final d in IlIlce.ilceleri(il)) {
+        ilceCounts[d] = 0;
+      }
+      for (final e in inIl) {
+        final d = ilceOf(e);
+        if (d.isEmpty) {
+          unknown++;
+        } else {
+          ilceCounts[d] = (ilceCounts[d] ?? 0) + 1;
+        }
+      }
+    }
+    final ilCounts = <String, int>{};
+    for (final e in all) {
+      final c = IlIlce.canonicalIl(ilOf(e));
+      if (c != null) ilCounts[c] = (ilCounts[c] ?? 0) + 1;
+    }
+    return ListLocationFilterBar(
+      il: il,
+      ilce: _listIlceFor(tab),
+      count: shown,
+      noun: noun,
+      total: inIl.length,
+      ilceCounts: ilceCounts,
+      unknownCount: unknown,
+      ilCounts: ilCounts,
+      onSelectIl: widget.onSelectIl,
+      onSelectIlce: (v) {
+        if (il != null) _setListIlce(tab, il, v);
+      },
+    );
+  }
+
+  /// İlçe süzgeci boş sonuç verdiyse il geneline dönme düğmeli boş durum.
+  Widget _listEmptyState(int tab, String ilMsg, String ilceMsg) {
+    final il = ref.watch(searchPanelLocationSummaryProvider).il;
+    if (il == null || _listIlceFor(tab) == null) return _emptyTabState(ilMsg);
+    return _emptyTabState(
+      ilceMsg,
+      actionLabel: 'İl genelini göster',
+      onAction: () => _setListIlce(tab, il, null),
+    );
+  }
+
   String _keyGeziYemek(GeziYemekItem g) => '${g.isim}\u0001${g.il}';
 
   String _keySosyal(SosyalItem s) => '${s.isim}\u0001${s.il}\u0001${s.ilce}';
@@ -1303,9 +1411,9 @@ class MisafirhaneSearchResultsPanelState
                                               onTabChanged: _onTabChanged,
                                               counts: [
                                                 tesisFacilities.length,
-                                                _geziFiltered.length,
+                                                _geziShown.length,
                                                 _yemekFiltered.length,
-                                                _sosyalFiltered.length,
+                                                _sosyalShown.length,
                                                 _hediyelikFiltered.length,
                                               ],
                                             ),
@@ -1334,11 +1442,11 @@ class MisafirhaneSearchResultsPanelState
       case 0:
         return _tesisTabSlivers(context, ref.watch(filteredTesisListProvider));
       case 1:
-        return _geziTabSlivers(context, _sortedGezi(_geziFiltered));
+        return _geziTabSlivers(context, _sortedGezi(_geziShown));
       case 2:
         return _yemekTabSlivers(context, _yemekFiltered);
       case 3:
-        return _sosyalTabSlivers(context, _sortedSosyal(_sosyalFiltered));
+        return _sosyalTabSlivers(context, _sortedSosyal(_sosyalShown));
       case _TabBarHeaderDelegate.hediyelikTab:
         return _hediyelikTabSlivers(context, _hediyelikFiltered);
       default:
@@ -1829,8 +1937,21 @@ class MisafirhaneSearchResultsPanelState
   );
 
   List<Widget> _geziTabSlivers(BuildContext context, List<GeziYemekItem> items) {
+    final locationBar = SliverToBoxAdapter(
+      child: _listLocationBar<GeziYemekItem>(
+        tab: 1,
+        noun: 'yer',
+        inIl: _geziFiltered,
+        all: GeziYemekRepository.instance
+            .mergeWithMaster(widget.rotaData.gezi, gezi: true),
+        ilOf: (g) => g.il,
+        ilceOf: _ilceOfGezi,
+        shown: items.length,
+      ),
+    );
     if (items.isEmpty) {
       return [
+        locationBar,
         SliverFillRemaining(
           hasScrollBody: false,
           child: SafeArea(
@@ -1838,7 +1959,11 @@ class MisafirhaneSearchResultsPanelState
             left: false,
             right: false,
             minimum: const EdgeInsets.only(bottom: 16),
-            child: _emptyTabState('Bu ilde gezi kaydı yok'),
+            child: _listEmptyState(
+              1,
+              'Bu ilde gezi kaydı yok',
+              'Bu seçimde gezilecek yer kaydı yok',
+            ),
           ),
         ),
       ];
@@ -2351,8 +2476,20 @@ class MisafirhaneSearchResultsPanelState
   }
 
   List<Widget> _sosyalTabSlivers(BuildContext context, List<SosyalItem> items) {
+    final locationBar = SliverToBoxAdapter(
+      child: _listLocationBar<SosyalItem>(
+        tab: 3,
+        noun: 'tesis',
+        inIl: _sosyalFiltered,
+        all: widget.rotaData.sosyal,
+        ilOf: (s) => s.il,
+        ilceOf: _ilceOfSosyal,
+        shown: items.length,
+      ),
+    );
     if (items.isEmpty) {
       return [
+        locationBar,
         SliverFillRemaining(
           hasScrollBody: false,
           child: SafeArea(
@@ -2360,7 +2497,11 @@ class MisafirhaneSearchResultsPanelState
             left: false,
             right: false,
             minimum: const EdgeInsets.only(bottom: 16),
-            child: _emptyTabState('Bu ilde belediye / tesis kaydı yok'),
+            child: _listEmptyState(
+              3,
+              'Bu ilde belediye / tesis kaydı yok',
+              'Bu seçimde belediye sosyal tesisi kaydı yok',
+            ),
           ),
         ),
       ];

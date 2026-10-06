@@ -44,9 +44,25 @@ abstract final class IlIlce {
   }
 
   static const _fold = <String, String>{
-    'ç': 'c', 'Ç': 'c', 'ğ': 'g', 'Ğ': 'g', 'ı': 'i', 'I': 'i', 'İ': 'i',
-    'ö': 'o', 'Ö': 'o', 'ş': 's', 'Ş': 's', 'ü': 'u', 'Ü': 'u',
-    'â': 'a', 'Â': 'a', 'î': 'i', 'Î': 'i', 'û': 'u', 'Û': 'u',
+    'ç': 'c',
+    'Ç': 'c',
+    'ğ': 'g',
+    'Ğ': 'g',
+    'ı': 'i',
+    'I': 'i',
+    'İ': 'i',
+    'ö': 'o',
+    'Ö': 'o',
+    'ş': 's',
+    'Ş': 's',
+    'ü': 'u',
+    'Ü': 'u',
+    'â': 'a',
+    'Â': 'a',
+    'î': 'i',
+    'Î': 'i',
+    'û': 'u',
+    'Û': 'u',
   };
 
   static final Map<String, String> _ilByKey = {
@@ -86,6 +102,58 @@ abstract final class IlIlce {
       return merkez;
     }
     return '';
+  }
+
+  /// Kayıttaki ilçe alanından, adresteki "İlçe/İl" kalıbından veya adreste
+  /// geçen resmi ilçe adından ilçeyi bulur. Kesin değilse boş döner; tahmin
+  /// edilmez. İl adı ilçe alanına yazılmışsa (ör. "Adana") ilçe sayılmaz.
+  static String inferIlce(String il, {String ilce = '', String adres = ''}) {
+    final cIl = canonicalIl(il);
+    if (cIl == null) return '';
+    final fromField = canonicalIlce(cIl, ilce);
+    if (fromField.isNotEmpty &&
+        !(fromField == merkez && key(ilce) == key(cIl))) {
+      return fromField;
+    }
+    for (final m in _slashIlce.allMatches(adres)) {
+      if (key(m.group(2)!) != key(cIl)) continue;
+      final hit = canonicalIlce(cIl, m.group(1)!);
+      if (hit.isNotEmpty) return hit;
+    }
+    final w = _words(adres);
+    String best = '';
+    for (final d in kTrIlIlceleri[cIl]!) {
+      if (d == merkez || d.length <= best.length) continue;
+      if (w.contains(' ${_words(d).trim()} ')) best = d;
+    }
+    if (best.isNotEmpty) return best;
+    if (_ilceByKey[cIl]!.containsKey(key(merkez)) && w.contains(' merkez ')) {
+      return merkez;
+    }
+    return '';
+  }
+
+  static final _slashIlce = RegExp(r'([^,/\d]+)/\s*([^,/]+)');
+
+  /// Türkçe katlanmış, kelimeleri tek boşlukla ayrılmış ve iki ucu boşluklu metin.
+  static String _words(String s) {
+    final b = StringBuffer(' ');
+    var space = true;
+    for (final r in s.runes) {
+      final c = String.fromCharCode(r);
+      final f = _fold[c] ?? c.toLowerCase();
+      final u = f.codeUnitAt(0);
+      if (f.length == 1 &&
+          ((u >= 0x61 && u <= 0x7a) || (u >= 0x30 && u <= 0x39))) {
+        b.write(f);
+        space = false;
+      } else if (!space) {
+        b.write(' ');
+        space = true;
+      }
+    }
+    if (!space) b.write(' ');
+    return b.toString();
   }
 
   /// Kart ve sonuç başlığı: "İstanbul / Sarıyer"; ilçe yoksa yalnız il.
@@ -146,7 +214,8 @@ abstract final class IlIlce {
       if (cIl == null) continue;
       final ilK = key(cIl);
       for (final e in _ilceByKey[cIl]!.entries) {
-        final byName = q.length >= 3 && e.value != merkez && e.key.startsWith(q);
+        final byName =
+            q.length >= 3 && e.value != merkez && e.key.startsWith(q);
         final byIl = q.length > ilK.length && '$ilK${e.key}'.startsWith(q);
         if (byName || byIl) districts.add(label(il, e.value));
       }

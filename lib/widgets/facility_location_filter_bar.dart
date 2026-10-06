@@ -29,7 +29,8 @@ class FacilityLocationFilterBar extends ConsumerWidget {
     final selection = ref.watch(facilityIlceFilterProvider);
     final count = ref.watch(filteredTesisListProvider).length;
     final il = summary.il;
-    final ilce = il != null && selection != null && IlIlce.sameIl(selection.il, il)
+    final ilce =
+        il != null && selection != null && IlIlce.sameIl(selection.il, il)
         ? selection.ilce
         : null;
 
@@ -46,7 +47,11 @@ class FacilityLocationFilterBar extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.place_rounded, size: 18, color: AppColors.primary),
+              const Icon(
+                Icons.place_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
@@ -92,10 +97,16 @@ class FacilityLocationFilterBar extends ConsumerWidget {
                   label: 'İlçe',
                   value: il == null ? 'Önce il seçin' : (ilce ?? 'Tüm ilçeler'),
                   active: ilce != null,
-                  onTap: il == null ? null : () => _pickIlce(context, ref, il, summary, ilce),
+                  onTap: il == null
+                      ? null
+                      : () => _pickIlce(context, ref, il, summary, ilce),
                   onClear: ilce == null
                       ? null
-                      : () => ref.read(facilityIlceFilterProvider.notifier).state = null,
+                      : () =>
+                            ref
+                                    .read(facilityIlceFilterProvider.notifier)
+                                    .state =
+                                null,
                 ),
               ),
             ],
@@ -153,8 +164,9 @@ class FacilityLocationFilterBar extends ConsumerWidget {
       ),
     );
     if (picked == null) return;
-    ref.read(facilityIlceFilterProvider.notifier).state =
-        picked.isEmpty ? null : IlceSelection(il: il, ilce: picked);
+    ref.read(facilityIlceFilterProvider.notifier).state = picked.isEmpty
+        ? null
+        : IlceSelection(il: il, ilce: picked);
   }
 }
 
@@ -180,7 +192,9 @@ class _FilterPill extends StatelessWidget {
         ? const Color(0xFF9AABB0)
         : (active ? AppColors.primary : AppColors.textPrimary);
     return Material(
-      color: active ? AppColors.primary.withValues(alpha: 0.08) : const Color(0xFFF4F7F8),
+      color: active
+          ? AppColors.primary.withValues(alpha: 0.08)
+          : const Color(0xFFF4F7F8),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -191,7 +205,9 @@ class _FilterPill extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: active ? AppColors.primary.withValues(alpha: 0.5) : const Color(0xFFE1E8EA),
+              color: active
+                  ? AppColors.primary.withValues(alpha: 0.5)
+                  : const Color(0xFFE1E8EA),
             ),
           ),
           child: Row(
@@ -243,6 +259,167 @@ class _FilterPill extends StatelessWidget {
   }
 }
 
+/// Gezi / sosyal tesis listelerinde ilçesi adresten çıkarılamayan kayıtlar.
+const String kIlceUnknown = '\u0000belirsiz';
+const String kIlceUnknownLabel = 'İlçesi belirsiz';
+
+/// Gezi ve sosyal tesis sekmelerinin il → ilçe çubuğu.
+///
+/// [ilce] null → tüm ilçeler; [kIlceUnknown] → ilçesi belirsiz kayıtlar.
+class ListLocationFilterBar extends StatelessWidget {
+  const ListLocationFilterBar({
+    super.key,
+    required this.il,
+    required this.ilce,
+    required this.count,
+    required this.noun,
+    required this.total,
+    required this.ilceCounts,
+    required this.unknownCount,
+    required this.ilCounts,
+    required this.onSelectIlce,
+    this.onSelectIl,
+  });
+
+  final String? il;
+  final String? ilce;
+  final int count;
+  final String noun;
+  final int total;
+  final Map<String, int> ilceCounts;
+  final int unknownCount;
+  final Map<String, int> ilCounts;
+  final ValueChanged<String?> onSelectIlce;
+  final ValueChanged<String>? onSelectIl;
+
+  @override
+  Widget build(BuildContext context) {
+    final il = this.il;
+    final ilceLabel = ilce == kIlceUnknown ? kIlceUnknownLabel : ilce;
+    final title = il == null
+        ? 'Birden çok il'
+        : ilce == kIlceUnknown
+        ? '$il · $kIlceUnknownLabel'
+        : IlIlce.label(il, ilce ?? '');
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Color(0xFFE8EEF0))),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.place_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  '$count $noun',
+                  style: const TextStyle(
+                    color: AppColors.primary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              if (onSelectIl != null) ...[
+                Expanded(
+                  child: _FilterPill(
+                    label: 'İl',
+                    value: il ?? 'İl seç',
+                    onTap: () => _pickIl(context),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              Expanded(
+                child: _FilterPill(
+                  label: 'İlçe',
+                  value: il == null
+                      ? 'Önce il seçin'
+                      : (ilceLabel ?? 'Tüm ilçeler'),
+                  active: ilce != null,
+                  onTap: il == null ? null : () => _pickIlce(context, il),
+                  onClear: ilce == null ? null : () => onSelectIlce(null),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _pickIl(BuildContext context) async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) => _LocationPickerSheet(
+        title: 'İl seç',
+        searchHint: 'İl ara',
+        allLabel: null,
+        allCount: 0,
+        counts: ilCounts,
+        selected: il,
+        noun: noun,
+      ),
+    );
+    if (picked != null && picked.isNotEmpty && picked != il) {
+      onSelectIl?.call(picked);
+    }
+  }
+
+  Future<void> _pickIlce(BuildContext context, String il) async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (_) => _LocationPickerSheet(
+        title: '$il ilçeleri',
+        searchHint: 'İlçe ara',
+        allLabel: 'Tüm ilçeler',
+        allCount: total,
+        counts: ilceCounts,
+        selected: ilce ?? '',
+        noun: noun,
+        extraLabel: unknownCount > 0 ? kIlceUnknownLabel : null,
+        extraValue: kIlceUnknown,
+        extraCount: unknownCount,
+      ),
+    );
+    if (picked == null) return;
+    onSelectIlce(picked.isEmpty ? null : picked);
+  }
+}
+
 /// Aramalı il / ilçe seçim listesi. Boş string → "Tüm …" seçeneği.
 class _LocationPickerSheet extends StatefulWidget {
   const _LocationPickerSheet({
@@ -252,6 +429,10 @@ class _LocationPickerSheet extends StatefulWidget {
     required this.allCount,
     required this.counts,
     required this.selected,
+    this.noun = 'tesis',
+    this.extraLabel,
+    this.extraValue = '',
+    this.extraCount = 0,
   });
 
   final String title;
@@ -260,6 +441,12 @@ class _LocationPickerSheet extends StatefulWidget {
   final int allCount;
   final Map<String, int> counts;
   final String? selected;
+  final String noun;
+
+  /// Listenin sonunda ayrı seçenek (ör. "İlçesi belirsiz"); null → gösterilmez.
+  final String? extraLabel;
+  final String extraValue;
+  final int extraCount;
 
   @override
   State<_LocationPickerSheet> createState() => _LocationPickerSheetState();
@@ -283,6 +470,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
         ? _names
         : _names.where((n) => IlIlce.key(n).contains(q)).toList();
     final showAll = widget.allLabel != null && q.isEmpty;
+    final showExtra = widget.extraLabel != null && q.isEmpty;
     final height = MediaQuery.sizeOf(context).height * 0.75;
 
     return SizedBox(
@@ -329,7 +517,8 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                     ),
                   )
                 : ListView.builder(
-                    itemCount: names.length + (showAll ? 1 : 0),
+                    itemCount:
+                        names.length + (showAll ? 1 : 0) + (showExtra ? 1 : 0),
                     itemBuilder: (context, i) {
                       if (showAll && i == 0) {
                         return _row(
@@ -338,6 +527,14 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
                           value: '',
                           count: widget.allCount,
                           emphasized: true,
+                        );
+                      }
+                      if (showExtra && i == names.length + (showAll ? 1 : 0)) {
+                        return _row(
+                          context,
+                          name: widget.extraLabel!,
+                          value: widget.extraValue,
+                          count: widget.extraCount,
                         );
                       }
                       final n = names[i - (showAll ? 1 : 0)];
@@ -370,7 +567,9 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
       title: Text(
         name,
         style: TextStyle(
-          fontWeight: emphasized || selected ? FontWeight.w700 : FontWeight.w500,
+          fontWeight: emphasized || selected
+              ? FontWeight.w700
+              : FontWeight.w500,
           color: empty && !selected ? const Color(0xFF8A9A9F) : null,
         ),
       ),
@@ -378,11 +577,13 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            empty ? 'Tesis yok' : '$count tesis',
+            empty ? 'Kayıt yok' : '$count ${widget.noun}',
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
-              color: empty ? const Color(0xFFA5B3B7) : AppColors.campaignSummaryMuted,
+              color: empty
+                  ? const Color(0xFFA5B3B7)
+                  : AppColors.campaignSummaryMuted,
             ),
           ),
           if (selected) ...[
