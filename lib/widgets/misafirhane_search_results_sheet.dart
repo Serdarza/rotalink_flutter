@@ -1972,6 +1972,7 @@ class MisafirhaneSearchResultsPanelState
     final m = merged.length;
     final childCount = m == 0 ? 0 : m * 2 - 1;
     return [
+      locationBar,
       SliverList(
         delegate: SliverChildBuilderDelegate(
           (ctx, index) {
@@ -2510,6 +2511,7 @@ class MisafirhaneSearchResultsPanelState
     final m = merged.length;
     final childCount = m == 0 ? 0 : m * 2 - 1;
     return [
+      locationBar,
       SliverList(
         delegate: SliverChildBuilderDelegate(
           (ctx, index) {
