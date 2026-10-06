@@ -2,7 +2,6 @@ package com.serdarza.rotalink
 
 import android.os.Bundle
 import android.provider.Settings
-import android.view.WindowManager
 import androidx.core.view.WindowCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -14,10 +13,6 @@ class MainActivity : FlutterActivity() {
         // SystemUiMode.edgeToEdge ile sistem çubuğu boşluklarını kendisi yönetir.
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-        window.setFlags(
-            WindowManager.LayoutParams.FLAG_SECURE,
-            WindowManager.LayoutParams.FLAG_SECURE,
-        )
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
