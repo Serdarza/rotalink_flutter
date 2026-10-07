@@ -140,6 +140,7 @@ abstract final class IlIlce {
     final b = StringBuffer(' ');
     var space = true;
     for (final r in s.runes) {
+      if (r >= 0x0300 && r <= 0x036F) continue;
       final c = String.fromCharCode(r);
       final f = _fold[c] ?? c.toLowerCase();
       final u = f.codeUnitAt(0);
