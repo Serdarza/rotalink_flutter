@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import '../utils/text_encoding.dart';
 
 /// RTDB kök anlık görüntüsü — ağ olmadan harita verisi için yerel dosya önbelleği.
 abstract final class RotaLocalCache {
@@ -25,7 +26,7 @@ abstract final class RotaLocalCache {
     try {
       final file = await _cacheFile();
       if (!await file.exists()) return null;
-      final text = await file.readAsString();
+      final text = fixMojibake(await file.readAsString());
       if (text.trim().isEmpty) return null;
       return text;
     } catch (_) {

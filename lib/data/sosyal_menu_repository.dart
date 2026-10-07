@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/network_service.dart';
 import '../utils/search_normalize.dart';
+import '../utils/text_encoding.dart';
 
 class SosyalMenuUrun {
   const SosyalMenuUrun({required this.ad, required this.fiyat});
@@ -210,7 +211,7 @@ class SosyalMenuRepository {
           .timeout(const Duration(seconds: 45));
       // Dosya henüz oluşturulmadıysa (ilk tarama öncesi) 404 normaldir.
       if (res.statusCode != 200) return;
-      final body = utf8.decode(res.bodyBytes).trim();
+      final body = responseText(res).trim();
       if (body.isEmpty) return;
       _apply(body);
       final file = await _cacheFile();
@@ -235,7 +236,7 @@ class SosyalMenuRepository {
     try {
       final f = await _cacheFile();
       if (!await f.exists()) return null;
-      final text = await f.readAsString();
+      final text = fixMojibake(await f.readAsString());
       return text.trim().length > 2 ? text : null;
     } catch (_) {
       return null;

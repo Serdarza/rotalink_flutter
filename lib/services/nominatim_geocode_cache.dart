@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import '../utils/text_encoding.dart';
 
 enum GeocodeStatus {
   /// Koordinat bulundu.
@@ -112,7 +113,7 @@ abstract final class NominatimGeocodeCache {
         return const GeocodeOutcome.error();
       }
       if (res.statusCode != 200) return const GeocodeOutcome.error();
-      final root = jsonDecode(res.body);
+      final root = jsonDecode(responseText(res));
       if (root is! Map) return const GeocodeOutcome.miss();
       final features = root['features'];
       if (features is! List || features.isEmpty) {
@@ -161,7 +162,7 @@ abstract final class NominatimGeocodeCache {
         return const GeocodeOutcome.error();
       }
       if (res.statusCode != 200) return const GeocodeOutcome.error();
-      final list = jsonDecode(res.body);
+      final list = jsonDecode(responseText(res));
       if (list is! List || list.isEmpty) {
         return const GeocodeOutcome.miss();
       }

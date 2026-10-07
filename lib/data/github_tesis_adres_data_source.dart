@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:http/http.dart' as http;
 
 import '../constants/github_tesis_adres_config.dart';
+import '../utils/text_encoding.dart';
 
 abstract final class GithubTesisAdresDataSource {
   static const _userAgent = 'RotalinkFlutter/1.0 (https://rotalink.tr)';
@@ -45,7 +46,7 @@ abstract final class GithubTesisAdresDataSource {
         );
         return null;
       }
-      final body = res.body.trim();
+      final body = responseText(res).trim();
       if (body.isEmpty) {
         _log('Tesis adres yanıtı boş.');
         return null;

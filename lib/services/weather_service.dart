@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:http/http.dart' as http;
 
 import 'weather_api_config.dart';
+import '../utils/text_encoding.dart';
 
 class WeatherSnapshot {
   const WeatherSnapshot({
@@ -61,7 +62,7 @@ abstract final class WeatherService {
         }
         return null;
       }
-      final root = jsonDecode(res.body) as Map<String, dynamic>;
+      final root = jsonDecode(responseText(res)) as Map<String, dynamic>;
       final main = root['main'] as Map<String, dynamic>?;
       final weather = (root['weather'] as List?)?.cast<dynamic>();
       if (main == null || weather == null || weather.isEmpty) return null;

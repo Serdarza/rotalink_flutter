@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import '../utils/text_encoding.dart';
 
 /// Keşfet kampanyaları — yerel JSON önbelleği.
 abstract final class KampanyaLocalCache {
@@ -25,7 +26,7 @@ abstract final class KampanyaLocalCache {
     try {
       final file = await _cacheFile();
       if (!await file.exists()) return null;
-      final text = await file.readAsString();
+      final text = fixMojibake(await file.readAsString());
       if (text.trim().isEmpty) return null;
       return text;
     } catch (_) {

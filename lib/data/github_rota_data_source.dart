@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:http/http.dart' as http;
 
 import '../constants/github_rota_config.dart';
+import '../utils/text_encoding.dart';
 
 /// GitHub / CDN üzerinden master_database_updated.json indirme ve sürüm kontrolü.
 abstract final class GithubRotaDataSource {
@@ -57,7 +58,7 @@ abstract final class GithubRotaDataSource {
           continue;
         }
 
-        final body = res.body.trim();
+        final body = responseText(res).trim();
         if (body.isEmpty) {
           _log('Boş yanıt: $uri');
           continue;

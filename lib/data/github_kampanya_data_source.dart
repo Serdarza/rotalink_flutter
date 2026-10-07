@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:http/http.dart' as http;
 
 import '../constants/github_kampanya_config.dart';
+import '../utils/text_encoding.dart';
 
 /// GitHub Raw üzerinden kampanya.json indirme ve sürüm kontrolü.
 abstract final class GithubKampanyaDataSource {
@@ -50,7 +51,7 @@ abstract final class GithubKampanyaDataSource {
         return null;
       }
 
-      final body = res.body.trim();
+      final body = responseText(res).trim();
       if (body.isEmpty) {
         _log('GitHub kampanya yanıtı boş.');
         return null;

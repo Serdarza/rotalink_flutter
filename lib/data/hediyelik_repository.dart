@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/github_hediyelik_config.dart';
 import '../services/network_service.dart';
 import '../utils/search_normalize.dart';
+import '../utils/text_encoding.dart';
 
 class HediyelikItem {
   const HediyelikItem({
@@ -78,7 +79,7 @@ class HediyelikRepository {
           )
           .timeout(const Duration(seconds: 30));
       if (res.statusCode != 200) return;
-      final body = utf8.decode(res.bodyBytes).trim();
+      final body = responseText(res).trim();
       if (body.isEmpty) return;
       applyJsonString(body);
       await prefs.setString(_prefsJson, body);

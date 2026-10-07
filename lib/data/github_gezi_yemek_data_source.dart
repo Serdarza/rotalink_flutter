@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:http/http.dart' as http;
 
 import '../constants/github_gezi_yemek_config.dart';
+import '../utils/text_encoding.dart';
 
 /// GitHub Raw — geziler.json / yemekler.json.
 abstract final class GithubGeziYemekDataSource {
@@ -41,7 +42,7 @@ abstract final class GithubGeziYemekDataSource {
         _log('İndirme başarısız: HTTP ${res.statusCode} ($uri)');
         return null;
       }
-      final body = res.body.trim();
+      final body = responseText(res).trim();
       if (body.isEmpty) {
         _log('Boş yanıt: $uri');
         return null;

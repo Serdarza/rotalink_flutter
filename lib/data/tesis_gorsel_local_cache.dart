@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import '../utils/text_encoding.dart';
 
 abstract final class TesisGorselLocalCache {
   static const _fileName = 'rotalink_tesisler_gorseller.json';
@@ -24,7 +25,7 @@ abstract final class TesisGorselLocalCache {
     try {
       final file = await _cacheFile();
       if (!await file.exists()) return null;
-      final text = await file.readAsString();
+      final text = fixMojibake(await file.readAsString());
       if (text.trim().isEmpty) return null;
       return text;
     } catch (_) {

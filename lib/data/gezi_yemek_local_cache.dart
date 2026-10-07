@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
+import '../utils/text_encoding.dart';
 
 abstract final class GeziYemekLocalCache {
   static const _geziFile = 'rotalink_geziler.json';
@@ -33,7 +34,7 @@ abstract final class GeziYemekLocalCache {
     try {
       final f = await _file(_geziFile);
       if (!await f.exists()) return null;
-      final t = await f.readAsString();
+      final t = fixMojibake(await f.readAsString());
       return t.trim().isEmpty ? null : t;
     } catch (_) {
       return null;
@@ -44,7 +45,7 @@ abstract final class GeziYemekLocalCache {
     try {
       final f = await _file(_yemekFile);
       if (!await f.exists()) return null;
-      final t = await f.readAsString();
+      final t = fixMojibake(await f.readAsString());
       return t.trim().isEmpty ? null : t;
     } catch (_) {
       return null;

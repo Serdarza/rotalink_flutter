@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/github_ad_config.dart';
 import '../models/ad_config_policy.dart';
+import '../utils/text_encoding.dart';
 
 /// GitHub Raw üzerinden reklam_ayar.json okuma ve yerel önbellek.
 abstract final class GithubAdConfigDataSource {
@@ -27,7 +28,7 @@ abstract final class GithubAdConfigDataSource {
         return allowCache ? _readCachedPolicy() : null;
       }
 
-      final body = res.body.trim();
+      final body = responseText(res).trim();
       if (body.isEmpty) return allowCache ? _readCachedPolicy() : null;
 
       final decoded = jsonDecode(body);

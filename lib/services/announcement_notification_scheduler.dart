@@ -11,6 +11,7 @@ import 'package:timezone/timezone.dart' as tz;
 import '../constants/github_bildirim_config.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import 'holiday_notification_scheduler.dart';
+import '../utils/text_encoding.dart';
 
 /// `bildirimler.json` içindeki bir mesajın telefonda zamanlanacak hâli.
 @immutable
@@ -189,7 +190,7 @@ abstract final class AnnouncementNotificationScheduler {
           .get(GithubBildirimConfig.uri, headers: const {'User-Agent': _userAgent})
           .timeout(const Duration(seconds: 20));
       if (res.statusCode != 200) return null;
-      final body = utf8.decode(res.bodyBytes).trim();
+      final body = responseText(res).trim();
       if (body.isEmpty) return null;
       jsonDecode(body);
       return body;

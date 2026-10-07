@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 
 import '../utils/safe_map_coordinates.dart';
+import '../utils/text_encoding.dart';
 
 /// Kotlin [MainActivity.drawRealRoute] OSRM segmentleri.
 class OsrmSegment {
@@ -36,7 +37,7 @@ abstract final class OsrmRouteService {
       try {
         final resp = await http.get(uri).timeout(const Duration(seconds: 20));
         if (resp.statusCode != 200) continue;
-        final json = jsonDecode(resp.body) as Map<String, dynamic>;
+        final json = jsonDecode(responseText(resp)) as Map<String, dynamic>;
         if (json['code'] != 'Ok') continue;
         final routes = json['routes'] as List<dynamic>?;
         if (routes == null || routes.isEmpty) continue;

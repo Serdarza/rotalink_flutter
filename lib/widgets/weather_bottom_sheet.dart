@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import '../services/simple_location_service.dart';
 import '../services/weather_api_config.dart';
 import '../theme/app_colors.dart';
+import '../utils/text_encoding.dart';
 
 /// OpenWeatherMap 2.5 + Nominatim.
 const _weatherUrl = 'https://api.openweathermap.org/data/2.5/weather';
@@ -241,10 +242,10 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
       if (res.statusCode == 401) {
         throw Exception('API anahtarı geçersiz.');
       }
-      if (res.statusCode != 200 || res.body.isEmpty) {
+      if (res.statusCode != 200 || responseText(res).isEmpty) {
         throw Exception('Hava durumu alınamadı. (${res.statusCode})');
       }
-      final map = jsonDecode(res.body) as Map<String, dynamic>;
+      final map = jsonDecode(responseText(res)) as Map<String, dynamic>;
       if (!mounted) return;
       setState(() {
         _weatherJson = map;
@@ -265,8 +266,8 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
   Future<void> _prefetchForecastQuiet() async {
     try {
       final res = await http.get(_forecastUri(_lat, _lon)).timeout(const Duration(seconds: 18));
-      if (res.statusCode != 200 || res.body.isEmpty || !mounted) return;
-      final root = jsonDecode(res.body) as Map<String, dynamic>;
+      if (res.statusCode != 200 || responseText(res).isEmpty || !mounted) return;
+      final root = jsonDecode(responseText(res)) as Map<String, dynamic>;
       final days = _parseForecastDays(root);
       if (days.isEmpty || !mounted) return;
       setState(() {
@@ -291,10 +292,10 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
       if (res.statusCode == 401) {
         throw Exception('API anahtarı geçersiz.');
       }
-      if (res.statusCode != 200 || res.body.isEmpty) {
+      if (res.statusCode != 200 || responseText(res).isEmpty) {
         throw Exception('Haftalık veri alınamadı. (${res.statusCode})');
       }
-      final root = jsonDecode(res.body) as Map<String, dynamic>;
+      final root = jsonDecode(responseText(res)) as Map<String, dynamic>;
       final days = _parseForecastDays(root);
       if (!mounted) return;
       setState(() {
@@ -361,7 +362,7 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
         },
       ).timeout(const Duration(seconds: 18));
       if (res.statusCode != 200) return;
-      final list = jsonDecode(res.body) as List<dynamic>;
+      final list = jsonDecode(responseText(res)) as List<dynamic>;
       if (list.isEmpty) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

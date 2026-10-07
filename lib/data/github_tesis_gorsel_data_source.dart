@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:http/http.dart' as http;
 
 import '../constants/github_tesis_gorsel_config.dart';
+import '../utils/text_encoding.dart';
 
 /// GitHub Raw — tesisler_gorseller.json.
 abstract final class GithubTesisGorselDataSource {
@@ -50,7 +51,7 @@ abstract final class GithubTesisGorselDataSource {
         return null;
       }
 
-      final body = res.body.trim();
+      final body = responseText(res).trim();
       if (body.isEmpty) {
         _log('Tesis görselleri yanıtı boş.');
         return null;

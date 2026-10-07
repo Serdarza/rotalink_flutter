@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/github_app_version_config.dart';
 import '../models/app_version_policy.dart';
+import '../utils/text_encoding.dart';
 
 /// GitHub Raw üzerinden app_version.json okuma ve yerel önbellek.
 abstract final class GithubAppVersionDataSource {
@@ -29,7 +30,7 @@ abstract final class GithubAppVersionDataSource {
         return allowCache ? _readCachedPolicy() : null;
       }
 
-      final body = res.body.trim();
+      final body = responseText(res).trim();
       if (body.isEmpty) return allowCache ? _readCachedPolicy() : null;
 
       final decoded = jsonDecode(body);

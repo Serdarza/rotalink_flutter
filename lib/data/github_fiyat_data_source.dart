@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:http/http.dart' as http;
 
 import '../constants/github_fiyat_config.dart';
+import '../utils/text_encoding.dart';
 
 /// GitHub Raw üzerinden fiyatlar.json indirme ve sürüm kontrolü.
 abstract final class GithubFiyatDataSource {
@@ -51,7 +52,7 @@ abstract final class GithubFiyatDataSource {
         return null;
       }
 
-      final body = res.body.trim();
+      final body = responseText(res).trim();
       if (body.isEmpty) {
         _log('Fiyatlar yanıtı boş.');
         return null;
