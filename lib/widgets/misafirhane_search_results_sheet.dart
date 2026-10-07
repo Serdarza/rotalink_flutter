@@ -26,6 +26,7 @@ import '../data/facility_address_repository.dart';
 import '../data/firebase_rota_repository.dart';
 import '../data/gezi_yemek_repository.dart';
 import '../data/hediyelik_repository.dart';
+import '../data/sosyal_menu_repository.dart';
 import '../models/gezi_yemek_item.dart';
 import '../models/misafirhane.dart';
 import '../models/sosyal_item.dart';
@@ -47,6 +48,7 @@ import 'facility_detail_card.dart';
 import 'facility_location_filter_bar.dart';
 import 'facility_sort_bar.dart';
 import 'rotalink_glass_bottom_nav.dart';
+import 'sosyal_menu_sheet.dart';
 
 /// Arama sonucu alt paneli: liste için yarı ekran.
 const double kMisafirhaneSearchSheetOpenExtent = 0.5;
@@ -2329,6 +2331,7 @@ class MisafirhaneSearchResultsPanelState
     final ilce = _sosyalIlceLine(s);
     final aciklama = s.aciklama.trim();
     final ll = _latLngSosyal(s);
+    final menu = SosyalMenuRepository.instance.lookup(s.il, s.isim);
     return Material(
       color: Colors.white,
       child: InkWell(
@@ -2423,11 +2426,29 @@ class MisafirhaneSearchResultsPanelState
                 spacingAbove: 10,
                 fullWidthSingleLine: true,
               ),
+              if (menu != null) ...[
+                const SizedBox(height: 10),
+                Text(
+                  '${menu.tesisMenusu ? 'Menü' : 'Belediye tarifesi'}: '
+                  '${menu.urunSayisi} ürün · ${sosyalMenuKaynakSatiri(menu)}',
+                  style: const TextStyle(
+                    color: Color(0xFF6B7C82),
+                    fontSize: 12,
+                    height: 1.3,
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: [
+                  if (menu != null)
+                    _sosyalActionChip(
+                      icon: Icons.restaurant_menu_rounded,
+                      label: 'Menü',
+                      onTap: () => unawaited(showSosyalMenuSheet(context, menu)),
+                    ),
                   _sosyalActionChip(
                     icon: Icons.map_outlined,
                     label: 'Harita',
