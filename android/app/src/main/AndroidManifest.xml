@@ -65,6 +65,29 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Linkleri app_links paketi işler; Flutter'ın kendi deep link yönlendirmesi kapalı. -->
+            <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
+            <!--
+              Android App Links: yalnızca içerik sayfaları uygulamaya bağlanır.
+              Ana sayfa / yasal sayfalar web'de kalır (app → web → app döngüsü olmasın).
+              Doğrulama: https://rotalink.tr/.well-known/assetlinks.json
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:host="rotalink.tr" />
+                <data android:pathPrefix="/sehir/" />
+                <data android:pathPrefix="/tesis/" />
+            </intent-filter>
+            <!-- Web sitesinden uygulamaya geçiş: rotalink://open/sehir/kayseri/ -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="rotalink" />
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

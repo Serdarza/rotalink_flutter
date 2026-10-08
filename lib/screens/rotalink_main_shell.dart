@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../billing/pro_service.dart';
 import '../data/firebase_rota_repository.dart';
 import '../data/pro_support_banner_prefs.dart';
+import '../deeplink/deep_link_service.dart';
+import '../deeplink/deep_link_target.dart';
 import '../navigation/main_map_nav_bridge.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import '../navigation/rotalink_shell_scope.dart';
@@ -50,10 +52,20 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     ProService.instance.isPro.addListener(_onProChanged);
     ProService.instance.freePassEndsAt.addListener(_onFreePassChanged);
     _freePassWasActive = ProService.instance.freePassEndsAt.value != null;
+    DeepLinkService.instance.pending.addListener(_onDeepLink);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_maybeStartOnboarding());
       _scheduleProSupportBanner();
     });
+  }
+
+  /// Web linki: içerik ana haritada açılır; alt menü de oraya döner.
+  void _onDeepLink() {
+    final target = DeepLinkService.instance.pending.value;
+    if (!mounted || target == null || target.kind == DeepLinkKind.home) return;
+    if (_selected != RotalinkBottomNavItem.home) {
+      setState(() => _selected = RotalinkBottomNavItem.home);
+    }
   }
 
   void _onOnboardingChanged() {
@@ -129,6 +141,8 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     if (!await OnboardingPrefs.shouldShow()) return;
     await Future<void>.delayed(const Duration(milliseconds: 350));
     if (!mounted) return;
+    // Web linkiyle açıldıysa içeriği bozmasın; tanıtım sonraki açılışta.
+    if (DeepLinkService.instance.openedFromLink) return;
     _goHome();
     await Future<void>.delayed(const Duration(milliseconds: 180));
     if (!mounted) return;
@@ -142,6 +156,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     ProService.instance.freePassEndsAt.removeListener(_onFreePassChanged);
     _onboarding.removeListener(_onOnboardingChanged);
     _onboarding.dispose();
+    DeepLinkService.instance.pending.removeListener(_onDeepLink);
     _navBridge.dispose();
     super.dispose();
   }

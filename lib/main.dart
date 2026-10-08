@@ -13,6 +13,7 @@ import 'ads/firebase_analytics_service.dart';
 import 'app.dart';
 import 'billing/pro_service.dart';
 import 'bootstrap/firebase_bootstrap.dart';
+import 'deeplink/deep_link_service.dart';
 import 'services/announcement_notification_scheduler.dart';
 import 'services/holiday_notification_scheduler.dart';
 import 'services/pro_update_notifier.dart';
@@ -41,6 +42,9 @@ Future<void> main() async {
   }
 
   analyticsObserver = AnalyticsObserver(FirebaseAnalyticsService.instance);
+
+  // rotalink.tr linkiyle açılış: hedef ana ekran veri yükleyince açılır.
+  unawaited(DeepLinkService.instance.start());
 
   runApp(const ProviderScope(child: RotalinkApp()));
 

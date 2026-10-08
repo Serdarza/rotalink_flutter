@@ -21,6 +21,8 @@ import '../data/app_rating_prefs.dart';
 import '../data/facility_address_repository.dart';
 import '../data/favorites_repository.dart';
 import '../data/firebase_rota_repository.dart';
+import '../deeplink/deep_link_service.dart';
+import '../deeplink/deep_link_target.dart';
 import '../providers/rota_data_provider.dart';
 import '../navigator_keys.dart';
 import '../navigation/main_map_nav_bridge.dart';
@@ -332,6 +334,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     _mapPreviewDismissSub = _mapController.mapEventStream.listen(_onMapControllerEvent);
     unawaited(_syncLocationUiFromPermissionOnly());
     _registerNavBridge();
+    DeepLinkService.instance.pending.addListener(_onDeepLinkPending);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _onDeepLinkPending());
   }
 
   void _registerNavBridge() {
@@ -432,6 +436,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    DeepLinkService.instance.pending.removeListener(_onDeepLinkPending);
     _previewPositionTick.dispose();
     _stopLocationStream();
     _dismissAttachedBottomSheet();
@@ -1720,7 +1725,14 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     );
   }
 
-  Future<void> _performSearch(BuildContext context, RotaDataState data) async {
+  /// [forceHighlight]: arama sonucunda vurgulanacak tesis (ör. web tesis linki);
+  /// [openHighlightDetail] ise detay kartı da açılır.
+  Future<void> _performSearch(
+    BuildContext context,
+    RotaDataState data, {
+    Misafirhane? forceHighlight,
+    bool openHighlightDetail = false,
+  }) async {
     FocusScope.of(context).unfocus();
     _popupController.hideAllPopups();
     final prevSheet = _attachedBottomSheet;
@@ -1819,10 +1831,11 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
             displayedFacilities:
                 narrowForHighlight.isNotEmpty ? narrowForHighlight : displayList,
           );
-    Misafirhane? highlightTarget = highlightMatch;
-    if (highlightMatch != null) {
+    final wanted = forceHighlight ?? highlightMatch;
+    Misafirhane? highlightTarget = wanted;
+    if (wanted != null) {
       for (final m in displayList) {
-        if (m.sameFavoriteIdentity(highlightMatch)) {
+        if (m.sameFavoriteIdentity(wanted)) {
           highlightTarget = m;
           break;
         }
@@ -1860,7 +1873,96 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
         displayList,
         highlightTarget: hl,
       );
+      if (openHighlightDetail && hl != null) {
+        await _openFacilityDetailInPanel(hl);
+      }
     });
+  }
+
+  /// Arama paneli kurulunca tesis detayını açar.
+  Future<void> _openFacilityDetailInPanel(Misafirhane m) async {
+    for (var i = 0; i < 60; i++) {
+      final panel = _searchResultsPanelKey.currentState;
+      if (panel != null) {
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+        if (!mounted) return;
+        _searchResultsPanelKey.currentState?.openFacilityDetail(m);
+        return;
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 50));
+      if (!mounted) return;
+    }
+  }
+
+  // ─── Web linkleri (rotalink.tr / rotalink://open) ─────────────────────────
+
+  bool _deepLinkBusy = false;
+
+  void _onDeepLinkPending() {
+    if (_deepLinkBusy || !mounted) return;
+    final target = DeepLinkService.instance.pending.value;
+    if (target == null) return;
+    final needsData =
+        target.kind == DeepLinkKind.city || target.kind == DeepLinkKind.facility;
+    final data = _cachedRotaData;
+    if (needsData &&
+        (data == null ||
+            (data.aramaIcinTumTesisler.isEmpty && data.misafirhaneler.isEmpty))) {
+      return; // Veri gelince StreamBuilder tekrar dener.
+    }
+    DeepLinkService.instance.take();
+    _deepLinkBusy = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(
+        _openDeepLinkTarget(target, data).whenComplete(() => _deepLinkBusy = false),
+      );
+    });
+  }
+
+  Future<void> _openDeepLinkTarget(DeepLinkTarget target, RotaDataState? data) async {
+    if (!mounted || !context.mounted) return;
+    Navigator.of(context).popUntil((r) => r.isFirst);
+    switch (target.kind) {
+      case DeepLinkKind.home:
+        return;
+      case DeepLinkKind.holidays:
+        await Navigator.of(context).pushNamed(RotalinkShellRoutes.holidays);
+        return;
+      case DeepLinkKind.city:
+      case DeepLinkKind.facility:
+        break;
+    }
+    if (data == null) return;
+    final kaynak = MainMapSearch.tesisKaynagiArama(
+      aramaIcinTumTesisler: data.aramaIcinTumTesisler,
+      misafirhaneler: data.misafirhaneler,
+    );
+    String? il;
+    for (final m in kaynak) {
+      if (rotalinkSlug(m.il) == target.citySlug) {
+        il = m.il;
+        break;
+      }
+    }
+    if (il == null) return;
+    Misafirhane? facility;
+    final facilitySlug = target.facilitySlug;
+    if (facilitySlug != null) {
+      for (final m in kaynak) {
+        if (rotalinkSlug(m.isim) == facilitySlug && IlIlce.sameIl(m.il, il)) {
+          facility = m;
+          break;
+        }
+      }
+    }
+    if (!mounted || !context.mounted) return;
+    _searchController.text = il;
+    await _performSearch(
+      context,
+      data,
+      forceHighlight: facility,
+      openHighlightDetail: facility != null,
+    );
   }
 
   /// Kullanıcının konumu — yeşil harita pini (tesis işaretçisiyle aynı ikon ailesi).
@@ -1983,6 +2085,10 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                 if (data != null && data.errorMessage == null) {
                   _cachedRotaData = data;
                   _publishRotaDataToProvider(data);
+                  if (DeepLinkService.instance.pending.value != null) {
+                    WidgetsBinding.instance
+                        .addPostFrameCallback((_) => _onDeepLinkPending());
+                  }
                 }
                 final rotaForUi = (data != null && data.errorMessage != null)
                     ? _cachedRotaData
@@ -2523,7 +2629,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   Future<void> _shareFacility(Misafirhane m) async {
     final mapsUrl = googleMapsShareUrlForMisafirhane(m);
-    final text = '${m.isim}\n$mapsUrl\n\n'
+    final text = '${m.isim}\n${facilityWebUrl(il: m.il, isim: m.isim)}\n'
+        'Yol tarifi: $mapsUrl\n\n'
         'Telefon: ${m.telefon.isEmpty ? 'Yok' : m.telefon}\n\n'
         '${StoreLinks.shareDownloadFooter()}';
     await Share.share(text);
@@ -3719,7 +3826,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   Future<void> _openDrawerWebsite(BuildContext context) async {
     Navigator.pop(context);
-    final uri = Uri.parse('https://rotalink.tr');
+    // web=1: telefondaki site uygulamaya / mağazaya geri yönlendirmesin.
+    final uri = Uri.parse('https://rotalink.tr/?web=1');
     try {
       final ok = await canLaunchUrl(uri);
       if (ok) {

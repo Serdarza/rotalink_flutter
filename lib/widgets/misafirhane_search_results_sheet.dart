@@ -125,6 +125,12 @@ class MisafirhaneSearchResultsPanelState
 
   bool get isDetailOpen => _detailFacility != null;
 
+  /// Dışarıdan (ör. rotalink.tr tesis linki) tesis detayını açar.
+  void openFacilityDetail(Misafirhane m) {
+    if (!mounted) return;
+    unawaited(_openFacilityDetail(m));
+  }
+
   Future<void> _animateSheetToDetail() async {
     final c = widget.sheetExtentController;
     if (!c.isAttached) return;
