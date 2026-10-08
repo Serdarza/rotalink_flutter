@@ -6,7 +6,6 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'free_pass_device_guard.dart';
 import 'pro_products.dart';
 
 /// Rotalink Pro abonelik durumu.
@@ -21,32 +20,13 @@ class ProService {
   static const String _keyActive = 'rotalink_pro_active';
   static const String _keyProductId = 'rotalink_pro_product_id';
   static const String _keyExpiryMs = 'rotalink_pro_expiry_ms';
-  static const String _keyFreePassStartMs = 'rotalink_pro_free_pass_start_ms';
-
-  /// Her kullanıcıya bir kereye mahsus verilen ücretsiz Pro süresi.
-  static const Duration freePassDuration = Duration(minutes: 5);
-
-  /// Arayüz metinleri için: "5 dakika".
-  static int get freePassMinutes => freePassDuration.inMinutes;
 
   /// Arka plan görevleri için: mağazaya sormadan yerel kayıttaki hak sahipliği.
   static bool cachedEntitlementActive(SharedPreferences prefs) {
-    if (_freePassEnd(prefs.getInt(_keyFreePassStartMs)) != null) return true;
     if (!(prefs.getBool(_keyActive) ?? false)) return false;
     final expiryMs = prefs.getInt(_keyExpiryMs);
     return expiryMs == null ||
         DateTime.fromMillisecondsSinceEpoch(expiryMs).isAfter(DateTime.now());
-  }
-
-  /// Başlangıç kaydından hâlâ süren ücretsiz Pro'nun bitişi; bittiyse veya
-  /// saat geri alınmışsa null.
-  static DateTime? _freePassEnd(int? startMs) {
-    if (startMs == null) return null;
-    final start = DateTime.fromMillisecondsSinceEpoch(startMs);
-    final now = DateTime.now();
-    final end = start.add(freePassDuration);
-    if (now.isBefore(start) || !now.isBefore(end)) return null;
-    return end;
   }
 
   /// Mağaza yanıtı beklenirken hak sahipliği kararı için tanınan süre.
@@ -59,31 +39,12 @@ class ProService {
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _sub;
   Timer? _expiryTimer;
-  Timer? _freePassTimer;
 
   final _ProFlag _isPro = _ProFlag(false);
 
-  /// Satın alınmış abonelik. Arayüz bunu dinler; ücretsiz Pro başlayıp
-  /// bitince de dinleyiciler uyarılır, böylece [hasProAccess] yeniden okunur.
+  /// Satın alınmış abonelik. Arayüz bunu dinler; böylece [hasProAccess]
+  /// yeniden okunur.
   ValueNotifier<bool> get isPro => _isPro;
-
-  /// Süren ücretsiz Pro'nun bitişi (yoksa null).
-  final ValueNotifier<DateTime?> freePassEndsAt = ValueNotifier<DateTime?>(
-    null,
-  );
-
-  bool _freePassUsed = false;
-
-  /// Ücretsiz Pro hakkı daha önce kullanıldı mı (süresi dolmuş olsa da).
-  bool get freePassUsed => _freePassUsed;
-
-  bool get freePassActive {
-    final end = freePassEndsAt.value;
-    return end != null && end.isAfter(DateTime.now());
-  }
-
-  /// Ücretsiz Pro teklif edilebilir mi: hiç kullanılmamış ve abonelik yok.
-  bool get canStartFreePass => !_freePassUsed && !isPro.value;
 
   /// Mevcut dönemin tahmini bitiş anı (geri sayım için).
   final ValueNotifier<DateTime?> expiryAt = ValueNotifier<DateTime?>(null);
@@ -122,7 +83,7 @@ class ProService {
   ///
   /// Aktif abonelik + (varsa) dönem bitişi gelecekte.
   /// Süre dolmuşsa anında false döner ve arka planda hak düşürülür.
-  bool get hasProAccess => freePassActive || _subscriptionActive;
+  bool get hasProAccess => _subscriptionActive;
 
   bool get _subscriptionActive {
     if (!isPro.value) return false;
@@ -134,83 +95,11 @@ class ProService {
     return true;
   }
 
-  /// Bir kereye mahsus ücretsiz Pro'yu başlatır. Hak cihaz adına sunucuya
-  /// kaydedilir; uygulama silinip yeniden yüklense de tekrar verilmez.
-  Future<bool> startFreePass() async {
-    if (!canStartFreePass) return false;
-    switch (await FreePassDeviceGuard.claim()) {
-      case FreePassClaim.granted:
-        break;
-      case FreePassClaim.alreadyUsed:
-        await _markFreePassUsed();
-        _emit('Ücretsiz Pro hakkı bu cihazda daha önce kullanıldı.');
-        return false;
-      case FreePassClaim.unavailable:
-        _emit('Ücretsiz Pro başlatılamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.');
-        return false;
-    }
-    final now = DateTime.now();
-    _freePassUsed = true;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_keyFreePassStartMs, now.millisecondsSinceEpoch);
-    } catch (e) {
-      debugPrint('[Pro] ücretsiz Pro kaydedilemedi: $e');
-    }
-    _setFreePassEnd(now.add(freePassDuration));
-    _emit('$freePassMinutes dakikalık ücretsiz Pro başladı. Tüm Pro özellikleri açık.');
-    return true;
-  }
-
-  /// Yeniden yüklemeden sonra teklifin hiç görünmemesi için sunucudaki
-  /// kaydı yerelde de işaretler (süresi çoktan dolmuş bir başlangıç olarak).
-  Future<void> _markFreePassUsed() async {
-    _freePassUsed = true;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      if (prefs.getInt(_keyFreePassStartMs) == null) {
-        await prefs.setInt(_keyFreePassStartMs, 0);
-      }
-    } catch (e) {
-      debugPrint('[Pro] ücretsiz Pro kaydedilemedi: $e');
-    }
-    _isPro.ping();
-  }
-
-  Future<void> _loadFreePass() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final startMs = prefs.getInt(_keyFreePassStartMs);
-      _freePassUsed = startMs != null;
-      _setFreePassEnd(_freePassEnd(startMs));
-    } catch (e) {
-      debugPrint('[Pro] ücretsiz Pro okunamadı: $e');
-    }
-    if (!_freePassUsed) unawaited(_syncFreePassUsedFromServer());
-  }
-
-  Future<void> _syncFreePassUsedFromServer() async {
-    if (await FreePassDeviceGuard.wasUsed() == true) await _markFreePassUsed();
-  }
-
-  void _setFreePassEnd(DateTime? end) {
-    _freePassTimer?.cancel();
-    _freePassTimer = null;
-    freePassEndsAt.value = end;
-    if (end != null) {
-      _freePassTimer = Timer(end.difference(DateTime.now()), () {
-        _setFreePassEnd(null);
-      });
-    }
-    _isPro.ping();
-  }
-
   Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
 
     await _loadCachedEntitlement();
-    await _loadFreePass();
     _scheduleExpiryTimer();
 
     try {
@@ -618,8 +507,6 @@ class ProService {
   void dispose() {
     _expiryTimer?.cancel();
     _expiryTimer = null;
-    _freePassTimer?.cancel();
-    _freePassTimer = null;
     _sub?.cancel();
     _sub = null;
     _messages.close();

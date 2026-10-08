@@ -9,6 +9,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'ads/analytics_observer.dart';
 import 'ads/firebase_analytics_service.dart';
 import 'app.dart';
+import 'billing/free_price_quota.dart';
 import 'billing/pro_service.dart';
 import 'bootstrap/firebase_bootstrap.dart';
 import 'deeplink/deep_link_service.dart';
@@ -68,6 +69,7 @@ Future<void> _bootstrapSecondary() async {
         debugPrint('Pro abonelik başlatılamadı: $e');
       }
     }(),
+    FreePriceQuota.instance.initialize(),
     () async {
       try {
         await initializeDateFormatting('tr_TR', null);

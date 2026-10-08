@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../billing/free_price_quota.dart';
 import '../billing/price_access.dart';
 import '../billing/pro_service.dart';
 import '../constants/facility_pricing.dart';
@@ -14,12 +15,11 @@ import '../theme/app_colors.dart';
 import '../utils/stay_cost_calculator.dart';
 import 'facility_price_report_sheet.dart';
 import 'stay_cost_calculator_sheet.dart';
-import 'free_pro_pass.dart';
 import 'facility_tariff_view.dart';
 
 /// `fiyatlar.json` kaydını il+isim ile eşleyip gösterir.
 ///
-/// Fiyat satırları yalnızca Rotalink Pro aboneliğinde açılır.
+/// Fiyat satırları Rotalink Pro'da veya ücretsiz tesis hakkıyla açılır.
 /// Eşleşme yoksa: "Fiyat Bildir"; Pro'da açık fiyatta "Fiyatı Güncelle".
 class FacilityOvernightPriceBox extends StatefulWidget {
   const FacilityOvernightPriceBox({
@@ -42,16 +42,19 @@ class FacilityOvernightPriceBox extends StatefulWidget {
 
 class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
   bool _expanded = false;
+  bool _unlocking = false;
 
   @override
   void initState() {
     super.initState();
     ProService.instance.isPro.addListener(_onProChanged);
+    FreePriceQuota.instance.unlockedIds.addListener(_onProChanged);
   }
 
   @override
   void dispose() {
     ProService.instance.isPro.removeListener(_onProChanged);
+    FreePriceQuota.instance.unlockedIds.removeListener(_onProChanged);
     super.dispose();
   }
 
@@ -62,7 +65,57 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
   Misafirhane get _priced =>
       FacilityPriceRepository.instance.resolveFacility(widget.facility);
 
-  bool get _unlocked => PriceAccess.unlocked;
+  bool get _unlocked =>
+      PriceAccess.unlockedFor(widget.facility.stableFacilityId);
+
+  Future<void> _unlockWithFreeQuota() async {
+    final quota = FreePriceQuota.instance;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: const Icon(
+          Icons.lock_open_rounded,
+          color: AppColors.primary,
+          size: 32,
+        ),
+        title: const Text('Fiyatı ücretsiz gör'),
+        content: Text(
+          '${widget.facility.isim} tesisinin fiyatları kalıcı olarak açılacak.\n\n'
+          'Kalan ücretsiz hakkınız: ${quota.remaining}/${FreePriceQuota.limit}. '
+          'Haklar her cihaza bir kez verilir; uygulama silinip yeniden '
+          'yüklense de yenilenmez. Tüm tesislerin fiyatları için Rotalink Pro.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.primary),
+            child: const Text('Fiyatı aç'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _unlocking = true);
+    final error = await quota.unlock(widget.facility.stableFacilityId);
+    if (!mounted) return;
+    setState(() => _unlocking = false);
+    final left = quota.remaining;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          error ??
+              (left > 0
+                  ? 'Fiyatlar açıldı. Kalan ücretsiz hak: $left.'
+                  : 'Fiyatlar açıldı. Ücretsiz haklarınız bitti; '
+                        'tüm tesisler için Rotalink Pro.'),
+        ),
+      ),
+    );
+  }
 
   Future<void> _openPro() async {
     await Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
@@ -315,13 +368,22 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                     ),
                   ),
                 ),
-                if (ProService.instance.canStartFreePass)
+                const SizedBox(height: 4),
+                if (FreePriceQuota.instance.remaining > 0)
                   TextButton.icon(
-                    onPressed: () =>
-                        unawaited(confirmAndStartFreePass(context)),
-                    icon: const Icon(Icons.timer_outlined, size: 18),
+                    onPressed: _unlocking
+                        ? null
+                        : () => unawaited(_unlockWithFreeQuota()),
+                    icon: _unlocking
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.lock_open_rounded, size: 18),
                     label: Text(
-                      '${ProService.freePassMinutes} dakika ücretsiz dene',
+                      'Bu tesisin fiyatını ücretsiz gör '
+                      '(${FreePriceQuota.instance.remaining}/${FreePriceQuota.limit} hak)',
                     ),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.primary,
@@ -329,6 +391,16 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                       ),
+                    ),
+                  )
+                else
+                  Text(
+                    'Ücretsiz ${FreePriceQuota.limit} tesis hakkınızı kullandınız.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: labelColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
               ],

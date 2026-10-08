@@ -10,8 +10,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 enum FreePassClaim { granted, alreadyUsed, unavailable }
 
-/// Ücretsiz Pro hakkını cihaza bağlar; uygulama silinip yeniden yüklense de
-/// hak geri gelmez.
+/// Ücretsiz fiyat haklarını cihaza bağlar; uygulama silinip yeniden yüklense
+/// de haklar geri gelmez.
 ///
 /// Kimlik uygulama silinince değişmeyen bir değerdir: Android'de `ANDROID_ID`
 /// (aynı imza anahtarı + cihaz + kullanıcı için sabit; fabrika ayarında
@@ -45,47 +45,48 @@ abstract final class FreePassDeviceGuard {
     return null;
   }
 
-  static Future<DocumentReference<Map<String, dynamic>>?> _doc() async {
-    final id = await _deviceId();
-    if (id == null) return null;
-    final hash = sha256.convert(utf8.encode('rotalink-free-pass:$id')).toString();
+  static DocumentReference<Map<String, dynamic>> _slotDoc(String deviceId, int slot) {
+    final hash = sha256
+        .convert(utf8.encode('rotalink-free-price:$deviceId:$slot'))
+        .toString();
     return FirebaseFirestore.instance.collection(_collection).doc(hash);
   }
 
-  /// Bu cihazda hak daha önce kullanılmış mı? Sunucuya ulaşılamazsa null.
-  static Future<bool?> wasUsed() async {
+  /// [fromSlot]..[maxSlots] arasındaki ilk boş fiyat hakkını bu cihaz adına
+  /// kaydeder. Hepsi doluysa [FreePassClaim.alreadyUsed]; çevrimdışıyken veya
+  /// sunucu yanıt vermezken [FreePassClaim.unavailable].
+  static Future<FreePassClaim> claimPriceSlot({
+    required int fromSlot,
+    required int maxSlots,
+  }) async {
     try {
-      final ref = await _doc();
-      if (ref == null) return null;
-      final snap = await ref.get(const GetOptions(source: Source.server));
-      return snap.exists;
+      final id = await _deviceId();
+      if (id == null) return FreePassClaim.unavailable;
+      for (var slot = fromSlot; slot <= maxSlots; slot++) {
+        final ref = _slotDoc(id, slot);
+        final granted = await FirebaseFirestore.instance.runTransaction<bool>(
+          (tx) async {
+            final snap = await tx.get(ref);
+            if (snap.exists) return false;
+            tx.set(ref, {
+              'createdAt': FieldValue.serverTimestamp(),
+              'platform': Platform.operatingSystem,
+            });
+            return true;
+          },
+          timeout: const Duration(seconds: 10),
+        );
+        if (granted) return FreePassClaim.granted;
+      }
+      return FreePassClaim.alreadyUsed;
+    } on FirebaseException catch (e) {
+      debugPrint('[Pro] ücretsiz fiyat hakkı kaydedilemedi: $e');
+      // Firestore kuralları bu belgeye izin vermiyorsa yalnız yerel sınır uygulanır.
+      return e.code == 'permission-denied'
+          ? FreePassClaim.granted
+          : FreePassClaim.unavailable;
     } catch (e) {
-      debugPrint('[Pro] ücretsiz Pro cihaz kontrolü yapılamadı: $e');
-      return null;
-    }
-  }
-
-  /// Hakkı bu cihaz adına tek seferlik kaydeder. Çevrimdışıyken veya sunucu
-  /// yanıt vermezken hak verilmez.
-  static Future<FreePassClaim> claim() async {
-    try {
-      final ref = await _doc();
-      if (ref == null) return FreePassClaim.unavailable;
-      final granted = await FirebaseFirestore.instance.runTransaction<bool>(
-        (tx) async {
-          final snap = await tx.get(ref);
-          if (snap.exists) return false;
-          tx.set(ref, {
-            'createdAt': FieldValue.serverTimestamp(),
-            'platform': Platform.operatingSystem,
-          });
-          return true;
-        },
-        timeout: const Duration(seconds: 10),
-      );
-      return granted ? FreePassClaim.granted : FreePassClaim.alreadyUsed;
-    } catch (e) {
-      debugPrint('[Pro] ücretsiz Pro kaydedilemedi: $e');
+      debugPrint('[Pro] ücretsiz fiyat hakkı kaydedilemedi: $e');
       return FreePassClaim.unavailable;
     }
   }
