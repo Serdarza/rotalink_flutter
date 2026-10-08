@@ -5,6 +5,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../billing/pro_gift_code.dart';
 import '../billing/pro_products.dart';
 import '../billing/pro_service.dart';
 import '../constants/store_links.dart';
@@ -124,9 +125,9 @@ class _ProScreenState extends State<ProScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                _Hero(isPro: isPro),
+                _Hero(isPro: isPro || _pro.giftActive),
                 const SizedBox(height: 14),
-                _SupportCard(isPro: isPro),
+                _SupportCard(isPro: isPro || _pro.giftActive),
                 const SizedBox(height: 26),
                 const _SectionTitle('Pro ile gelenler'),
                 const SizedBox(height: 12),
@@ -143,6 +144,8 @@ class _ProScreenState extends State<ProScreen> {
                   const _SectionTitle('Planınızı seçin'),
                   const SizedBox(height: 12),
                   _PlanSection(pro: _pro),
+                  const SizedBox(height: 18),
+                  _GiftCodeCard(pro: _pro),
                 ],
                 const SizedBox(height: 14),
                 TextButton(
@@ -1079,6 +1082,188 @@ class _CountdownUnit extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Hediye Pro kodu: aktif hediye bilgisi ve kod girişi.
+class _GiftCodeCard extends StatefulWidget {
+  const _GiftCodeCard({required this.pro});
+
+  final ProService pro;
+
+  @override
+  State<_GiftCodeCard> createState() => _GiftCodeCardState();
+}
+
+class _GiftCodeCardState extends State<_GiftCodeCard> {
+  final _controller = TextEditingController();
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _redeem() async {
+    if (_busy) return;
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    final result = await ProGiftCodes.redeem(_controller.text);
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      _error = result.ok ? null : result.message;
+      if (result.ok) _controller.clear();
+    });
+    if (result.ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final muted = _mutedText(context);
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.10)
+              : AppColors.primary.withValues(alpha: 0.18),
+        ),
+      ),
+      child: ValueListenableBuilder<DateTime?>(
+        valueListenable: widget.pro.giftEndsAt,
+        builder: (context, giftEnd, _) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (giftEnd != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF14352A)
+                        : const Color(0xFFECFDF5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.card_giftcard_rounded,
+                        color: Color(0xFF16A34A),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          '${ProGiftCodes.planLabel(widget.pro.giftPlan)} '
+                          'hediye Pro aktif\n'
+                          '${ProGiftCodes.formatDate(giftEnd)} tarihine kadar',
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            height: 1.4,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
+              Row(
+                children: [
+                  const Icon(
+                    Icons.redeem_rounded,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    giftEnd != null
+                        ? 'Başka bir kodunuz mu var?'
+                        : 'Hediye kodunuz mu var?',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Size verilen aylık veya yıllık Pro kodunu yazın. Yeni kod, '
+                'süren hediyenizin sonuna eklenir.',
+                style: TextStyle(fontSize: 12.5, height: 1.4, color: muted),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _controller,
+                enabled: !_busy,
+                textCapitalization: TextCapitalization.characters,
+                autocorrect: false,
+                enableSuggestions: false,
+                maxLength: 32,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => unawaited(_redeem()),
+                onChanged: (_) {
+                  if (_error != null) setState(() => _error = null);
+                },
+                decoration: InputDecoration(
+                  hintText: 'RL-XXXX-XXXX-XXXX',
+                  counterText: '',
+                  errorText: _error,
+                  prefixIcon: const Icon(Icons.vpn_key_outlined),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              FilledButton(
+                onPressed: _busy ? null : () => unawaited(_redeem()),
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  minimumSize: const Size.fromHeight(46),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _busy
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        'Kodu kullan',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

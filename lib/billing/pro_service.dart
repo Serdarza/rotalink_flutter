@@ -20,9 +20,16 @@ class ProService {
   static const String _keyActive = 'rotalink_pro_active';
   static const String _keyProductId = 'rotalink_pro_product_id';
   static const String _keyExpiryMs = 'rotalink_pro_expiry_ms';
+  static const String _keyGiftEndMs = 'rotalink_pro_gift_end_ms';
+  static const String _keyGiftPlan = 'rotalink_pro_gift_plan';
 
   /// Arka plan görevleri için: mağazaya sormadan yerel kayıttaki hak sahipliği.
   static bool cachedEntitlementActive(SharedPreferences prefs) {
+    final giftEndMs = prefs.getInt(_keyGiftEndMs);
+    if (giftEndMs != null &&
+        DateTime.fromMillisecondsSinceEpoch(giftEndMs).isAfter(DateTime.now())) {
+      return true;
+    }
     if (!(prefs.getBool(_keyActive) ?? false)) return false;
     final expiryMs = prefs.getInt(_keyExpiryMs);
     return expiryMs == null ||
@@ -39,6 +46,7 @@ class ProService {
   final InAppPurchase _iap = InAppPurchase.instance;
   StreamSubscription<List<PurchaseDetails>>? _sub;
   Timer? _expiryTimer;
+  Timer? _giftTimer;
 
   final _ProFlag _isPro = _ProFlag(false);
 
@@ -48,6 +56,19 @@ class ProService {
 
   /// Mevcut dönemin tahmini bitiş anı (geri sayım için).
   final ValueNotifier<DateTime?> expiryAt = ValueNotifier<DateTime?>(null);
+
+  /// Hediye kodla açılan Pro'nun bitişi (yoksa veya bittiyse null).
+  final ValueNotifier<DateTime?> giftEndsAt = ValueNotifier<DateTime?>(null);
+
+  String? _giftPlan;
+
+  /// Hediye kodun planı: `aylik` / `yillik`.
+  String? get giftPlan => _giftPlan;
+
+  bool get giftActive {
+    final end = giftEndsAt.value;
+    return end != null && end.isAfter(DateTime.now());
+  }
 
   /// Mağazadan okunan planlar (fiyat/başlık dahil).
   final ValueNotifier<List<ProductDetails>> products =
@@ -81,9 +102,9 @@ class ProService {
 
   /// Pro özellikleri şu an açık mı?
   ///
-  /// Aktif abonelik + (varsa) dönem bitişi gelecekte.
-  /// Süre dolmuşsa anında false döner ve arka planda hak düşürülür.
-  bool get hasProAccess => _subscriptionActive;
+  /// Aktif abonelik (dönem bitişi gelecekte) veya süren hediye Pro.
+  /// Abonelik süresi dolmuşsa anında false döner ve arka planda hak düşürülür.
+  bool get hasProAccess => _subscriptionActive || giftActive;
 
   bool get _subscriptionActive {
     if (!isPro.value) return false;
@@ -100,6 +121,7 @@ class ProService {
     _initialized = true;
 
     await _loadCachedEntitlement();
+    await _loadGift();
     _scheduleExpiryTimer();
 
     try {
@@ -504,9 +526,48 @@ class ProService {
     _messages.add(message);
   }
 
+  /// Hediye kodla Pro'yu [end] anına kadar açar ve yerelde saklar.
+  Future<void> grantGift({required String plan, required DateTime end}) async {
+    _giftPlan = plan;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_keyGiftEndMs, end.millisecondsSinceEpoch);
+      await prefs.setString(_keyGiftPlan, plan);
+    } catch (e) {
+      debugPrint('[Pro] hediye Pro kaydedilemedi: $e');
+    }
+    _setGiftEnd(end);
+  }
+
+  Future<void> _loadGift() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final endMs = prefs.getInt(_keyGiftEndMs);
+      _giftPlan = prefs.getString(_keyGiftPlan);
+      if (endMs != null) {
+        _setGiftEnd(DateTime.fromMillisecondsSinceEpoch(endMs));
+      }
+    } catch (e) {
+      debugPrint('[Pro] hediye Pro okunamadı: $e');
+    }
+  }
+
+  void _setGiftEnd(DateTime? end) {
+    _giftTimer?.cancel();
+    _giftTimer = null;
+    final active = end != null && end.isAfter(DateTime.now());
+    giftEndsAt.value = active ? end : null;
+    if (active) {
+      _giftTimer = Timer(end.difference(DateTime.now()), () => _setGiftEnd(null));
+    }
+    _isPro.ping();
+  }
+
   void dispose() {
     _expiryTimer?.cancel();
     _expiryTimer = null;
+    _giftTimer?.cancel();
+    _giftTimer = null;
     _sub?.cancel();
     _sub = null;
     _messages.close();
