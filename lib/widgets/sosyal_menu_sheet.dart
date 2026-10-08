@@ -19,13 +19,22 @@ String formatTl(double v) {
   return '${buf.toString()}${parts.length > 1 ? ',${parts[1]}' : ''} ₺';
 }
 
+String formatTrDate(DateTime d) =>
+    '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+
 String sosyalMenuKaynakSatiri(SosyalMenu m) {
   final kaynak = m.kaynakAdi.isNotEmpty ? m.kaynakAdi : m.kaynak.host;
   final k = m.kontrol;
-  final tarih = k == null
-      ? (m.yil != null ? '${m.yil}' : '')
-      : '${k.day.toString().padLeft(2, '0')}.${k.month.toString().padLeft(2, '0')}.${k.year}';
+  final tarih = k == null ? (m.yil != null ? '${m.yil}' : '') : formatTrDate(k);
   return tarih.isEmpty ? 'Kaynak: $kaynak' : 'Kaynak: $kaynak · $tarih';
+}
+
+String? sosyalMenuUyari(SosyalMenu m) {
+  if (!m.kaynakBulunamadi) return null;
+  final d = m.dogrulama ?? m.kontrol;
+  return d == null
+      ? 'Resmî kaynak şu an bulunamıyor; son doğrulanan fiyatlar gösteriliyor.'
+      : 'Resmî kaynak şu an bulunamıyor; ${formatTrDate(d)} tarihinde doğrulanan fiyatlar gösteriliyor.';
 }
 
 Future<void> showSosyalMenuSheet(BuildContext context, SosyalMenu menu) {
@@ -69,6 +78,7 @@ class _SosyalMenuBody extends StatelessWidget {
         ? 'Fiyatlar belediyenin resmî sitesinde bu tesis için yayımlanan belgeden alınmıştır.'
         : 'Bu fiyatlar belediyenin sosyal tesisleri için yayımladığı genel tarifedir; '
             'tesiste farklılık olabilir.';
+    final uyari = sosyalMenuUyari(menu);
     return ListView(
       controller: controller,
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 28),
@@ -84,6 +94,16 @@ class _SosyalMenuBody extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
+        const Text(
+          '🍽️ YEMEK & MENÜ FİYATLARI',
+          style: TextStyle(
+            color: AppColors.primary,
+            fontSize: 12.5,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.6,
+          ),
+        ),
+        const SizedBox(height: 6),
         Text(
           menu.isim,
           style: const TextStyle(
@@ -119,6 +139,29 @@ class _SosyalMenuBody extends StatelessWidget {
           scopeNote,
           style: const TextStyle(color: Color(0xFF6B7C82), fontSize: 12.5, height: 1.4),
         ),
+        if (uyari != null) ...[
+          const SizedBox(height: 10),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF4E5),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFFB26A00)),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    uyari,
+                    style: const TextStyle(color: Color(0xFF8A5300), fontSize: 12.5, height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         for (final k in menu.kategoriler) ...[
           const SizedBox(height: 18),
           Text(
@@ -137,8 +180,17 @@ class _SosyalMenuBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text(
-                      u.ad,
+                    child: Text.rich(
+                      TextSpan(
+                        text: u.ad,
+                        children: [
+                          if (u.birim.isNotEmpty)
+                            TextSpan(
+                              text: '  ${u.birim}',
+                              style: const TextStyle(color: Color(0xFF90A4AE), fontSize: 12),
+                            ),
+                        ],
+                      ),
                       style: const TextStyle(
                         color: Color(0xFF37474F),
                         fontSize: 13.5,
@@ -147,13 +199,27 @@ class _SosyalMenuBody extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Text(
-                    formatTl(u.fiyat),
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        formatTl(u.fiyat),
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (u.oncekiFiyat != null)
+                        Text(
+                          formatTl(u.oncekiFiyat!),
+                          style: const TextStyle(
+                            color: Color(0xFF90A4AE),
+                            fontSize: 11.5,
+                            decoration: TextDecoration.lineThrough,
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),
@@ -162,6 +228,18 @@ class _SosyalMenuBody extends StatelessWidget {
         const SizedBox(height: 22),
         const Divider(height: 1),
         const SizedBox(height: 12),
+        const Text(
+          'Fiyatlar belediyenin resmi internet sitesinden alınmıştır.',
+          style: TextStyle(color: Color(0xFF37474F), fontSize: 12.5, fontWeight: FontWeight.w600),
+        ),
+        if (menu.kontrol != null) ...[
+          const SizedBox(height: 4),
+          Text(
+            'Son kontrol: ${formatTrDate(menu.kontrol!)}',
+            style: const TextStyle(color: Color(0xFF6B7C82), fontSize: 12.5),
+          ),
+        ],
+        const SizedBox(height: 4),
         Text(
           sosyalMenuKaynakSatiri(menu),
           style: const TextStyle(color: Color(0xFF6B7C82), fontSize: 12.5),
@@ -179,7 +257,7 @@ class _SosyalMenuBody extends StatelessWidget {
           child: TextButton.icon(
             onPressed: () => unawaited(_openSource()),
             icon: const Icon(Icons.open_in_new_rounded, size: 16),
-            label: const Text('Resmî kaynağı aç'),
+            label: const Text('Resmi kaynağı görüntüle'),
           ),
         ),
         const Text(

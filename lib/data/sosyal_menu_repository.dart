@@ -12,10 +12,21 @@ import '../utils/search_normalize.dart';
 import '../utils/text_encoding.dart';
 
 class SosyalMenuUrun {
-  const SosyalMenuUrun({required this.ad, required this.fiyat});
+  const SosyalMenuUrun({
+    required this.ad,
+    required this.fiyat,
+    this.birim = '',
+    this.oncekiFiyat,
+  });
 
   final String ad;
   final double fiyat;
+
+  /// `porsiyon`, `kg`, `bardak`, `kişilik`… (belgede yazıyorsa).
+  final String birim;
+
+  /// Son fiyat değişikliğinden önceki fiyat.
+  final double? oncekiFiyat;
 }
 
 class SosyalMenuKategori {
@@ -37,6 +48,9 @@ class SosyalMenu {
     required this.yil,
     required this.kontrol,
     required this.kategoriler,
+    this.durum = 'guncel',
+    this.dogrulama,
+    this.kaynakTarihi,
   });
 
   final String il;
@@ -51,7 +65,18 @@ class SosyalMenu {
   final DateTime? kontrol;
   final List<SosyalMenuKategori> kategoriler;
 
+  /// `guncel` | `kaynak_bulunamadi` (kaynak kalktı; son doğrulanan fiyatlar gösterilir).
+  final String durum;
+
+  /// Fiyatların resmî kaynakta en son doğrulandığı gün.
+  final DateTime? dogrulama;
+
+  /// Kaynak belgenin yayım / güncellenme tarihi (sunucu bildiriyorsa).
+  final DateTime? kaynakTarihi;
+
   bool get tesisMenusu => kapsam == 'tesis';
+
+  bool get kaynakBulunamadi => durum == 'kaynak_bulunamadi';
 
   int get urunSayisi => kategoriler.fold(0, (a, k) => a + k.urunler.length);
 
@@ -96,7 +121,15 @@ class SosyalMenu {
             final f = u['fiyat'];
             final fiyat = f is num ? f.toDouble() : double.tryParse('$f');
             if (ad.isEmpty || fiyat == null || fiyat <= 0) continue;
-            urunler.add(SosyalMenuUrun(ad: ad, fiyat: fiyat));
+            final o = u['onceki'];
+            final of = o is Map ? o['fiyat'] : null;
+            final onceki = of is num ? of.toDouble() : null;
+            urunler.add(SosyalMenuUrun(
+              ad: ad,
+              fiyat: fiyat,
+              birim: (u['birim'] ?? '').toString().trim(),
+              oncekiFiyat: onceki != null && onceki > 0 && onceki != fiyat ? onceki : null,
+            ));
           }
         }
         final ad = (c['ad'] ?? '').toString().trim();
@@ -117,6 +150,9 @@ class SosyalMenu {
       yil: yil is num ? yil.toInt() : int.tryParse('$yil'),
       kontrol: DateTime.tryParse((m['kontrol'] ?? '').toString()),
       kategoriler: kategoriler,
+      durum: (m['durum'] ?? 'guncel').toString(),
+      dogrulama: DateTime.tryParse((m['dogrulama'] ?? '').toString()),
+      kaynakTarihi: DateTime.tryParse((m['kaynak_tarihi'] ?? '').toString()),
     );
   }
 }

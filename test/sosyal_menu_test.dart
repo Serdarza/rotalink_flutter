@@ -47,6 +47,29 @@ void main() {
     expect(repo.count, 0);
   });
 
+  test('birim, önceki fiyat ve kaynak bulunamadı uyarısı', () {
+    final raw = _item()
+      ..['durum'] = 'kaynak_bulunamadi'
+      ..['dogrulama'] = '2026-06-01'
+      ..['kategoriler'] = [
+        {
+          'ad': 'Ana yemekler',
+          'urunler': [
+            {'ad': 'Köfte', 'fiyat': 250, 'birim': 'porsiyon', 'onceki': {'fiyat': 220, 'tarih': '2026-09-05'}},
+            {'ad': 'Ayran', 'fiyat': 40},
+          ],
+        },
+      ];
+    final m = SosyalMenu.tryParse(raw)!;
+    final kofte = m.kategoriler.first.urunler.first;
+    expect(kofte.birim, 'porsiyon');
+    expect(kofte.oncekiFiyat, 220);
+    expect(m.kategoriler.first.urunler.last.oncekiFiyat, isNull);
+    expect(m.kaynakBulunamadi, isTrue);
+    expect(sosyalMenuUyari(m), contains('01.06.2026'));
+    expect(sosyalMenuUyari(SosyalMenu.tryParse(_item())!), isNull);
+  });
+
   test('TL biçimi', () {
     expect(formatTl(15), '15 ₺');
     expect(formatTl(1250), '1.250 ₺');
