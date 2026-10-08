@@ -26,6 +26,7 @@ import '../data/facility_address_repository.dart';
 import '../data/firebase_rota_repository.dart';
 import '../data/gezi_yemek_repository.dart';
 import '../data/hediyelik_repository.dart';
+import '../data/kamp_repository.dart';
 import '../data/sosyal_menu_repository.dart';
 import '../models/gezi_yemek_item.dart';
 import '../models/misafirhane.dart';
@@ -33,6 +34,7 @@ import '../models/sosyal_item.dart';
 import '../map_location_state.dart';
 import '../services/nominatim_geocode_cache.dart';
 import '../theme/app_colors.dart';
+import 'kamp_rotalari_view.dart';
 import '../utils/geo_helpers.dart';
 import '../utils/il_ilce.dart';
 import '../utils/main_map_search.dart';
@@ -297,6 +299,8 @@ class MisafirhaneSearchResultsPanelState
     widget.mapLocationState.addListener(_onMapLocationChanged);
     HediyelikRepository.instance.byIl.addListener(_onHediyelikChanged);
     unawaited(HediyelikRepository.instance.ensureLoaded());
+    KampRepository.instance.items.addListener(_onKampChanged);
+    unawaited(KampRepository.instance.ensureLoaded());
     unawaited(_loadFavorites());
     unawaited(_loadSortPrefs());
     // initState içinde setState çağırmaktan kaçın: sekme doğrudan set et.
@@ -475,6 +479,7 @@ class MisafirhaneSearchResultsPanelState
     FacilityCompareSelection.instance.removeListener(_onCompareChanged);
     widget.mapLocationState.removeListener(_onMapLocationChanged);
     HediyelikRepository.instance.byIl.removeListener(_onHediyelikChanged);
+    KampRepository.instance.items.removeListener(_onKampChanged);
     for (final a in _nativeAdsGezi) {
       a.dispose();
     }
@@ -765,6 +770,13 @@ class MisafirhaneSearchResultsPanelState
 
   List<HediyelikItem> get _hediyelikFiltered =>
       HediyelikRepository.instance.forIller(_facilityIllerNorm);
+
+  void _onKampChanged() {
+    if (mounted) setState(() {});
+  }
+
+  List<KampAlani> get _kampFiltered =>
+      KampRepository.instance.forIller(_facilityIllerNorm);
 
   List<SosyalItem> get _sosyalFiltered {
     final raw = widget.rotaData.sosyal;
@@ -1423,6 +1435,7 @@ class MisafirhaneSearchResultsPanelState
                                                 _yemekFiltered.length,
                                                 _sosyalShown.length,
                                                 _hediyelikFiltered.length,
+                                                _kampFiltered.length,
                                               ],
                                             ),
                                           ),
@@ -1457,6 +1470,12 @@ class MisafirhaneSearchResultsPanelState
         return _sosyalTabSlivers(context, _sortedSosyal(_sosyalShown));
       case _TabBarHeaderDelegate.hediyelikTab:
         return _hediyelikTabSlivers(context, _hediyelikFiltered);
+      case _TabBarHeaderDelegate.kampTab:
+        return [
+          SliverFillRemaining(
+            child: KampRotalariBody(iller: _facilityIllerNorm),
+          ),
+        ];
       default:
         return const [];
     }
@@ -2648,14 +2667,15 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   final int tabIndex;
   final ValueChanged<int> onTabChanged;
 
-  /// [Konaklama, Gezi, Yemek, Tesisler, Hediyelik] sonuç sayıları.
+  /// [Konaklama, Gezi, Yemek, Tesisler, Hediyelik, Kamp] sonuç sayıları.
   final List<int> counts;
 
   static const double height = 60.0;
   static const _labels = ['Konaklama', 'Gezi', 'Yemek', 'Tesisler'];
 
-  /// Açılır menüden seçilen sekme ([_labels] sonrası).
+  /// Açılır menüden seçilen sekmeler ([_labels] sonrası).
   static const hediyelikTab = 4;
+  static const kampTab = 5;
 
   @override
   double get minExtent => height;
@@ -2715,8 +2735,11 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   Widget _moreSegment() {
-    final sel = tabIndex == hediyelikTab;
-    final count = hediyelikTab < counts.length ? counts[hediyelikTab] : 0;
+    final sel = tabIndex == hediyelikTab || tabIndex == kampTab;
+    final selIndex = tabIndex == kampTab ? kampTab : hediyelikTab;
+    final count = selIndex < counts.length ? counts[selIndex] : 0;
+    final hediyelikSayisi = hediyelikTab < counts.length ? counts[hediyelikTab] : 0;
+    final kampSayisi = kampTab < counts.length ? counts[kampTab] : 0;
     final fg = sel ? Colors.white : const Color(0xFF5A6B70);
     return PopupMenuButton<int>(
       tooltip: 'Diğer sekmeler',
@@ -2758,7 +2781,44 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
               ),
               const SizedBox(width: 12),
               Text(
-                '$count',
+                '$hediyelikSayisi',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF8A9A9F),
+                ),
+              ),
+            ],
+          ),
+        ),
+        PopupMenuItem<int>(
+          value: kampTab,
+          child: Row(
+            children: [
+              const Icon(Icons.park_rounded, size: 20, color: AppColors.primary),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Kamp Rotaları',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      'Çadır, karavan ve kamping',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF6B7C82)),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '$kampSayisi',
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF8A9A9F),
@@ -2794,7 +2854,11 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    sel ? 'Hediyelik' : 'Daha',
+                    tabIndex == kampTab
+                        ? 'Kamp'
+                        : tabIndex == hediyelikTab
+                            ? 'Hediyelik'
+                            : 'Daha',
                     style: TextStyle(
                       color: fg,
                       fontWeight: sel ? FontWeight.w700 : FontWeight.w500,

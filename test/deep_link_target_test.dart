@@ -59,6 +59,18 @@ void main() {
       expect(parse('rotalink://sehir/mugla')!.citySlug, 'mugla');
     });
 
+    test('buton karşılığı: arama ve konum', () {
+      final call = parse('rotalink://open/tesis/kayseri/kayseri-ogretmenevi/?eylem=ara')!;
+      expect(call.kind, DeepLinkKind.facility);
+      expect(call.action, DeepLinkAction.call);
+      final map = parse(
+        'https://rotalink.tr/sehir/kayseri/?eylem=konum&q=Erciyes%20Kayak',
+      )!;
+      expect(map.action, DeepLinkAction.map);
+      expect(map.mapQuery, 'Erciyes Kayak');
+      expect(map.citySlug, 'kayseri');
+    });
+
     test('Türkçe karakterli / kodlanmış yol normalize edilir', () {
       final t = parse('https://rotalink.tr/sehir/%C4%B0stanbul')!;
       expect(t.citySlug, 'istanbul');

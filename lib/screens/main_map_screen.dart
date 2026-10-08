@@ -1963,6 +1963,36 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       forceHighlight: facility,
       openHighlightDetail: facility != null,
     );
+    if (!mounted || !context.mounted) return;
+    await _runDeepLinkAction(target, facility);
+  }
+
+  /// Web'deki İletişim / Konum butonunun uygulama karşılığı.
+  Future<void> _runDeepLinkAction(DeepLinkTarget target, Misafirhane? facility) async {
+    if (target.action == DeepLinkAction.call) {
+      final phone = facility?.telefon.trim() ?? '';
+      if (phone.isEmpty) return;
+      final uri = Uri(scheme: 'tel', path: phone.replaceAll(RegExp(r'\s'), ''));
+      try {
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      } catch (_) {}
+      return;
+    }
+    if (target.action != DeepLinkAction.map || !context.mounted) return;
+    final query = facility != null
+        ? '${facility.il} ${facility.isim}'.trim()
+        : (target.mapQuery ?? '');
+    if (query.isEmpty && facility == null) return;
+    final lat = facility?.latitude;
+    final lng = facility?.longitude;
+    await openInNativeMaps(
+      context,
+      query: query.isEmpty ? '${lat ?? ''},${lng ?? ''}' : query,
+      latitude: lat,
+      longitude: lng,
+    );
   }
 
   /// Kullanıcının konumu — yeşil harita pini (tesis işaretçisiyle aynı ikon ailesi).

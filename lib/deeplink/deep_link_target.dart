@@ -36,9 +36,34 @@ String facilityWebUrl({required String il, required String isim}) =>
 
 enum DeepLinkKind { home, city, facility, holidays }
 
+/// Web'deki butonun uygulama karşılığı: `?eylem=ara` arar, `?eylem=konum` haritayı açar.
+enum DeepLinkAction {
+  none,
+  call,
+  map;
+
+  static DeepLinkAction parse(String? raw) {
+    switch (raw) {
+      case 'ara':
+        return DeepLinkAction.call;
+      case 'konum':
+        return DeepLinkAction.map;
+      default:
+        return DeepLinkAction.none;
+    }
+  }
+}
+
 /// rotalink.tr / `rotalink://open` linkinden çıkarılan uygulama hedefi.
 class DeepLinkTarget {
-  const DeepLinkTarget._(this.kind, this.path, {this.citySlug, this.facilitySlug});
+  const DeepLinkTarget._(
+    this.kind,
+    this.path, {
+    this.citySlug,
+    this.facilitySlug,
+    this.action = DeepLinkAction.none,
+    this.mapQuery,
+  });
 
   final DeepLinkKind kind;
 
@@ -46,6 +71,10 @@ class DeepLinkTarget {
   final String path;
   final String? citySlug;
   final String? facilitySlug;
+  final DeepLinkAction action;
+
+  /// `eylem=konum` ile gelen serbest arama (gezi / yemek). Tesis bulunursa kullanılmaz.
+  final String? mapQuery;
 
   static const Set<String> webHosts = {'rotalink.tr', 'www.rotalink.tr'};
   static const String appScheme = 'rotalink';
@@ -62,21 +91,38 @@ class DeepLinkTarget {
     final scheme = uri.scheme.toLowerCase();
     if (scheme == 'https' || scheme == 'http') {
       if (!webHosts.contains(uri.host.toLowerCase())) return null;
-      return fromPath(uri.path);
+      return fromPath(_pathWithQuery(uri.path, uri));
     }
     if (scheme == appScheme) {
       final host = uri.host.toLowerCase();
       // rotalink://open/sehir/kayseri  veya  rotalink://sehir/kayseri
       final path = (host.isEmpty || host == 'open') ? uri.path : '/$host${uri.path}';
-      return fromPath(path);
+      return fromPath(_pathWithQuery(path, uri));
     }
     return null;
   }
 
+  static String _pathWithQuery(String path, Uri uri) {
+    if (!uri.hasQuery) return path;
+    return '$path?${uri.query}';
+  }
+
   static DeepLinkTarget fromPath(String rawPath) {
-    var pathOnly = rawPath;
-    final q = pathOnly.indexOf(RegExp(r'[?#]'));
-    if (q >= 0) pathOnly = pathOnly.substring(0, q);
+    String? eylem;
+    String? mapQuery;
+    final qMark = rawPath.indexOf('?');
+    if (qMark >= 0) {
+      final query = rawPath.substring(qMark + 1).split('#').first;
+      try {
+        final params = Uri.splitQueryString(query);
+        eylem = params['eylem'];
+        final q = params['q']?.trim();
+        if (q != null && q.isNotEmpty) mapQuery = q;
+      } catch (_) {}
+    }
+    var pathOnly = qMark >= 0 ? rawPath.substring(0, qMark) : rawPath;
+    final hash = pathOnly.indexOf('#');
+    if (hash >= 0) pathOnly = pathOnly.substring(0, hash);
     final segs = pathOnly
         .split('/')
         .where((s) => s.isNotEmpty)
@@ -91,8 +137,15 @@ class DeepLinkTarget {
         .where((s) => s.isNotEmpty)
         .toList();
 
+    final action = DeepLinkAction.parse(eylem);
     if (segs.length >= 2 && segs[0] == 'sehir') {
-      return DeepLinkTarget._(DeepLinkKind.city, '/sehir/${segs[1]}', citySlug: segs[1]);
+      return DeepLinkTarget._(
+        DeepLinkKind.city,
+        '/sehir/${segs[1]}',
+        citySlug: segs[1],
+        action: action,
+        mapQuery: mapQuery,
+      );
     }
     if (segs.length >= 2 && segs[0] == 'tesis') {
       if (segs.length >= 3) {
@@ -101,17 +154,31 @@ class DeepLinkTarget {
           '/tesis/${segs[1]}/${segs[2]}',
           citySlug: segs[1],
           facilitySlug: segs[2],
+          action: action,
+          mapQuery: mapQuery,
         );
       }
-      return DeepLinkTarget._(DeepLinkKind.city, '/sehir/${segs[1]}', citySlug: segs[1]);
+      return DeepLinkTarget._(
+        DeepLinkKind.city,
+        '/sehir/${segs[1]}',
+        citySlug: segs[1],
+        action: action,
+        mapQuery: mapQuery,
+      );
     }
     if (segs.length == 1 && segs[0] == 'resmi-tatiller') {
       return const DeepLinkTarget._(DeepLinkKind.holidays, '/resmi-tatiller');
     }
     if (segs.length == 1 && !_reservedSingleSegments.contains(segs[0])) {
-      return DeepLinkTarget._(DeepLinkKind.city, '/${segs[0]}', citySlug: segs[0]);
+      return DeepLinkTarget._(
+        DeepLinkKind.city,
+        '/${segs[0]}',
+        citySlug: segs[0],
+        action: action,
+        mapQuery: mapQuery,
+      );
     }
-    return const DeepLinkTarget._(DeepLinkKind.home, '/');
+    return DeepLinkTarget._(DeepLinkKind.home, '/', action: action, mapQuery: mapQuery);
   }
 
   @override
