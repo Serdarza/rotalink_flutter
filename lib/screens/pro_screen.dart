@@ -1225,7 +1225,7 @@ class _GiftCodeCardState extends State<_GiftCodeCard> {
                   if (_error != null) setState(() => _error = null);
                 },
                 decoration: InputDecoration(
-                  hintText: 'RL-XXXX-XXXX-XXXX',
+                  hintText: 'XXXX-XXXX-XXXX-XXXX',
                   counterText: '',
                   errorText: _error,
                   prefixIcon: const Icon(Icons.vpn_key_outlined),

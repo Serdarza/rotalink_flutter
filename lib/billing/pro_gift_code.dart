@@ -78,7 +78,7 @@ abstract final class ProGiftCodes {
   static DateTime? _lockedUntil;
   static bool _busy = false;
 
-  /// Büyük harf, yalnız harf ve rakam: "rl-ab12 cd34" → "RLAB12CD34".
+  /// Büyük harf, yalnız harf ve rakam: "ab12-cd34 ef56" → "AB12CD34EF56".
   static String normalize(String raw) =>
       raw.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
 

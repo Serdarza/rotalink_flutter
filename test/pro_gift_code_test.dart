@@ -3,10 +3,10 @@ import 'package:rotalink_flutter/billing/pro_gift_code.dart';
 
 void main() {
   test('kod özeti rotalink-data/pro_kod/kod_uret.py ile aynı', () {
-    expect(ProGiftCodes.normalize('rl-ab2c 3d4e-fghj'), 'RLAB2C3D4EFGHJ');
+    expect(ProGiftCodes.normalize('ab2c-3d4e fghj-kmnp'), 'AB2C3D4EFGHJKMNP');
     expect(
-      ProGiftCodes.hash(ProGiftCodes.normalize('RL-AB2C-3D4E-FGHJ')),
-      'c5df1eb90b02ab60c362a34e3aa9efdccc3889ed84ca6caff5e1247e4bff6d25',
+      ProGiftCodes.hash(ProGiftCodes.normalize('AB2C-3D4E-FGHJ-KMNP')),
+      '2b3024260e20333fb79a0d7865feefd823576e2b74683935982e10034ae280ec',
     );
   });
 
