@@ -14,7 +14,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../ads/ad_service.dart';
 import '../billing/pro_service.dart';
 import '../constants/store_links.dart';
 import '../data/app_rating_prefs.dart';
@@ -66,7 +65,6 @@ import '../widgets/map_facility_preview_card.dart';
 import '../widgets/misafirhane_map_marker.dart';
 import '../widgets/misafirhane_marker_info_popup.dart';
 import '../widgets/misafirhane_search_results_sheet.dart';
-import '../widgets/rotalink_banner_ad.dart';
 import '../widgets/rotalink_tile_layer.dart';
 import '../widgets/map_weather_chip.dart';
 import '../widgets/weather_bottom_sheet.dart';
@@ -324,9 +322,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (AdService.adsEnabled && !ProService.instance.isAdFree) {
-        unawaited(AdService.instance.preloadInterstitial());
-      }
       unawaited(_maybeOpenHolidaysFromNotification());
       unawaited(_checkForUpdate());
     });
@@ -351,7 +346,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    AdService.instance.onAppLifecycle(state);
     if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
       _stopLocationStream(); // Arka planda stream durdur — pil tasarrufu
     }
@@ -443,7 +437,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     _disposeSearchSheetExtentController();
     _mapPreviewDismissSub?.cancel();
     _viewportRefreshDebounce?.cancel();
-    AdService.instance.disposeInterstitial();
     _searchController.dispose();
     _searchBarFocusNode.dispose();
     _popupController.dispose();
@@ -2622,9 +2615,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
               },
             ),
           ),
-          /// AdMob banner: arama sekmeli panel [Stack] içinde olduğundan body ile aynı katmanda engellenmez.
-          if (_attachedBottomSheet == null && !_inlineTabbedSearchOpen)
-            RotalinkBannerAd(adsEnabled: AdService.adsEnabled),
         ],
       ),
     );
@@ -2646,7 +2636,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     }
     final uri = Uri(scheme: 'tel', path: p.replaceAll(RegExp(r'\s'), ''));
     if (await canLaunchUrl(uri)) {
-      AdService.instance.notifyLeavingToExternalApp();
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (context.mounted) {

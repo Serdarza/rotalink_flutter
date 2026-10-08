@@ -2,8 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- AdMob / reklam kimliği (Play Console veri güvenliği ile uyum için gerekli) -->
-    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
+    <!-- Reklam yok: Firebase kütüphanelerinin eklediği reklam kimliği izni kaldırılır. -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -41,9 +41,6 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/primary" />
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-6478556288740067~6800762661" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

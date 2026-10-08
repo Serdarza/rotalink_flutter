@@ -9,11 +9,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'free_pass_device_guard.dart';
 import 'pro_products.dart';
 
-/// Rotalink Pro (reklamsız) abonelik durumu.
+/// Rotalink Pro abonelik durumu.
 ///
 /// Hak sahipliği mağaza satın alma akışından okunur; çevrimdışı açılışlar
 /// için yerel saklanır. Dönem bitişi plan türüne göre (aylık/yıllık)
-/// hesaplanır; süre dolunca [isPro] false olur ve reklamlar geri gelir.
+/// hesaplanır; süre dolunca [isPro] false olur ve Pro özellikleri kapanır.
 class ProService {
   ProService._();
   static final ProService instance = ProService._();
@@ -53,7 +53,7 @@ class ProService {
   static const Duration _restoreWindow = Duration(seconds: 4);
 
   /// Dönem sonu ile mağaza yenilemesinin bize ulaşması arasındaki pay.
-  /// Yenileme gecikirse kullanıcı haksız yere reklam görmesin.
+  /// Yenileme gecikirse kullanıcı haksız yere Pro erişimini kaybetmesin.
   static const Duration _renewalGrace = Duration(days: 3);
 
   final InAppPurchase _iap = InAppPurchase.instance;
@@ -64,7 +64,7 @@ class ProService {
   final _ProFlag _isPro = _ProFlag(false);
 
   /// Satın alınmış abonelik. Arayüz bunu dinler; ücretsiz Pro başlayıp
-  /// bitince de dinleyiciler uyarılır, böylece [isAdFree] yeniden okunur.
+  /// bitince de dinleyiciler uyarılır, böylece [hasProAccess] yeniden okunur.
   ValueNotifier<bool> get isPro => _isPro;
 
   /// Süren ücretsiz Pro'nun bitişi (yoksa null).
@@ -118,11 +118,11 @@ class ProService {
   /// Aylık mı yıllık mı.
   bool get isYearlyPlan => _activeProductId == ProProducts.yearly;
 
-  /// Reklamlar şu an kapalı olmalı mı?
+  /// Pro özellikleri şu an açık mı?
   ///
   /// Aktif abonelik + (varsa) dönem bitişi gelecekte.
   /// Süre dolmuşsa anında false döner ve arka planda hak düşürülür.
-  bool get isAdFree => freePassActive || _subscriptionActive;
+  bool get hasProAccess => freePassActive || _subscriptionActive;
 
   bool get _subscriptionActive {
     if (!isPro.value) return false;
@@ -462,7 +462,7 @@ class ProService {
         end = _periodEnd(DateTime.now(), _activeProductId!);
       }
 
-      // Yerel süre dolmuşsa reklamları hemen aç.
+      // Yerel süre dolmuşsa Pro erişimini hemen kapat.
       if (active && end != null && !end.isAfter(DateTime.now())) {
         active = false;
         end = null;
@@ -470,7 +470,7 @@ class ProService {
         await prefs.setBool(_keyActive, false);
         await prefs.remove(_keyProductId);
         await prefs.remove(_keyExpiryMs);
-        debugPrint('[Pro] önbellek süresi dolmuş — reklamlar açılacak');
+        debugPrint('[Pro] önbellek süresi dolmuş — Pro kapanacak');
       }
 
       isPro.value = active;
@@ -533,13 +533,13 @@ class ProService {
         if (_sawEntitlementDuringRestore &&
             expiryAt.value != null &&
             expiryAt.value!.isAfter(DateTime.now())) {
-          debugPrint('[Pro] abonelik yenilenmiş — reklamlar kapalı kalacak');
+          debugPrint('[Pro] abonelik yenilenmiş — Pro açık kalacak');
           _scheduleExpiryTimer();
           return;
         }
       }
       await _setEntitlement(false, productId: null, expiry: null);
-      debugPrint('[Pro] abonelik süresi doldu — reklamlar açıldı');
+      debugPrint('[Pro] abonelik süresi doldu — Pro kapandı');
     } finally {
       _expiring = false;
     }

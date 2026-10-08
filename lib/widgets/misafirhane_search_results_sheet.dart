@@ -1,16 +1,12 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../ads/ad_service.dart';
-import '../ads/discover_native_merge.dart';
 import '../billing/price_access.dart';
 import '../billing/pro_service.dart';
 import '../constants/facility_pricing.dart';
@@ -39,7 +35,6 @@ import '../utils/geo_helpers.dart';
 import '../utils/il_ilce.dart';
 import '../utils/main_map_search.dart';
 import '../utils/maps_launch.dart';
-import '../widgets/rotalink_native_ad_tile.dart';
 import '../utils/safe_map_coordinates.dart';
 import '../utils/best_value_facility.dart';
 import '../utils/search_normalize.dart';
@@ -269,11 +264,6 @@ class MisafirhaneSearchResultsPanelState
   /// Pro: tek kişi / gece fiyatı için üst limit (TL); null ise bütçe filtresi kapalı.
   double? _budgetMax;
 
-  int _nativeAdGen = 0;
-  List<NativeAd> _nativeAdsGezi = [];
-  List<NativeAd> _nativeAdsYemek = [];
-  List<NativeAd> _nativeAdsSosyal = [];
-
   static String _shareAppDownloadFooter() => StoreLinks.shareDownloadFooter();
 
   /// Sosyal satırında ilçe satırı (açıklama ayrı gösterilir).
@@ -313,9 +303,6 @@ class MisafirhaneSearchResultsPanelState
       if (!mounted) return;
       // Arama açılır açılmaz tüm sekmeler için mesafe hazırlığı.
       unawaited(_prefetchDistancesForAllTabs());
-      if (widget.initialTabIndex != 0) {
-        _scheduleNativesForTab(widget.initialTabIndex);
-      }
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
           if (widget.initialTabIndex == 0) {
@@ -423,28 +410,7 @@ class MisafirhaneSearchResultsPanelState
     } else if (!_sortByPrice && PriceAccess.unlocked) {
       unawaited(_loadSortPrefs());
     }
-    if (ProService.instance.isAdFree) {
-      _clearNativeAds();
-      setState(() {});
-    } else if (_tabIndex >= 1 && _tabIndex <= 3) {
-      _scheduleNativesForTab(_tabIndex);
-    }
-  }
-
-  void _clearNativeAds() {
-    _nativeAdGen++;
-    for (final a in _nativeAdsGezi) {
-      a.dispose();
-    }
-    for (final a in _nativeAdsYemek) {
-      a.dispose();
-    }
-    for (final a in _nativeAdsSosyal) {
-      a.dispose();
-    }
-    _nativeAdsGezi = [];
-    _nativeAdsYemek = [];
-    _nativeAdsSosyal = [];
+    setState(() {});
   }
 
   @override
@@ -466,11 +432,6 @@ class MisafirhaneSearchResultsPanelState
         if (mounted) unawaited(_expandSheetAndScrollToHighlight());
       });
     }
-    if (oldWidget.rotaData.gezi.length != widget.rotaData.gezi.length ||
-        oldWidget.rotaData.yemek.length != widget.rotaData.yemek.length ||
-        oldWidget.rotaData.sosyal.length != widget.rotaData.sosyal.length) {
-      _scheduleNativesForTab(_tabIndex);
-    }
   }
 
   @override
@@ -480,112 +441,7 @@ class MisafirhaneSearchResultsPanelState
     widget.mapLocationState.removeListener(_onMapLocationChanged);
     HediyelikRepository.instance.byIl.removeListener(_onHediyelikChanged);
     KampRepository.instance.items.removeListener(_onKampChanged);
-    for (final a in _nativeAdsGezi) {
-      a.dispose();
-    }
-    for (final a in _nativeAdsYemek) {
-      a.dispose();
-    }
-    for (final a in _nativeAdsSosyal) {
-      a.dispose();
-    }
     super.dispose();
-  }
-
-  void _scheduleNativesForTab(int tab) {
-    _nativeAdGen++;
-    final gen = _nativeAdGen;
-    for (final a in _nativeAdsGezi) {
-      a.dispose();
-    }
-    for (final a in _nativeAdsYemek) {
-      a.dispose();
-    }
-    for (final a in _nativeAdsSosyal) {
-      a.dispose();
-    }
-    _nativeAdsGezi = [];
-    _nativeAdsYemek = [];
-    _nativeAdsSosyal = [];
-    if (mounted) setState(() {});
-    if (tab < 1 || tab > 3) return;
-    if (!AdService.adsEnabled ||
-        kIsWeb ||
-        ProService.instance.isAdFree) {
-      return;
-    }
-    final len = switch (tab) {
-      1 => _geziFiltered.length,
-      2 => _yemekFiltered.length,
-      3 => _sosyalFiltered.length,
-      _ => 0,
-    };
-    final slots = DiscoverNativeMerge.nativeSlotsNeeded(len);
-    if (slots <= 0) return;
-    unawaited(() async {
-      final pool = await DiscoverNativeMerge.loadPool(slots);
-      if (!mounted ||
-          gen != _nativeAdGen ||
-          ProService.instance.isAdFree) {
-        for (final a in pool) {
-          a.dispose();
-        }
-        return;
-      }
-      setState(() {
-        switch (tab) {
-          case 1:
-            _nativeAdsGezi = pool;
-            break;
-          case 2:
-            _nativeAdsYemek = pool;
-            break;
-          case 3:
-            _nativeAdsSosyal = pool;
-            break;
-        }
-      });
-    }());
-  }
-
-  List<Object> _mergeGeziEveryFive(List<GeziYemekItem> items, List<NativeAd> ads) {
-    if (ads.isEmpty ||
-        !AdService.adsEnabled ||
-        kIsWeb ||
-        ProService.instance.isAdFree) {
-      return List<Object>.from(items);
-    }
-    final out = <Object>[];
-    var ai = 0;
-    for (var i = 0; i < items.length; i++) {
-      out.add(items[i]);
-      if ((i + 1) % 5 == 0 && ai < ads.length) {
-        out.add(ads[ai++]);
-      }
-    }
-    return out;
-  }
-
-  List<Object> _mergeSosyalEveryFive(List<SosyalItem> items, List<NativeAd> ads) {
-    if (ads.isEmpty ||
-        !AdService.adsEnabled ||
-        kIsWeb ||
-        ProService.instance.isAdFree) {
-      return List<Object>.from(items);
-    }
-    final out = <Object>[];
-    var ai = 0;
-    for (var i = 0; i < items.length; i++) {
-      out.add(items[i]);
-      if ((i + 1) % 5 == 0 && ai < ads.length) {
-        out.add(ads[ai++]);
-      }
-    }
-    return out;
-  }
-
-  Widget _nativeAdTile(NativeAd ad) {
-    return RotalinkNativeAdTile(ad: ad);
   }
 
   GlobalKey _keyForFacility(Misafirhane m) =>
@@ -967,7 +823,6 @@ class MisafirhaneSearchResultsPanelState
         ),
       );
     }
-    _scheduleNativesForTab(index);
     if (index == 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         unawaited(_expandSheetAndScrollToHighlight());
@@ -1229,7 +1084,6 @@ class MisafirhaneSearchResultsPanelState
     }
     final uri = Uri(scheme: 'tel', path: p.replaceAll(RegExp(r'\s'), ''));
     if (await canLaunchUrl(uri)) {
-      AdService.instance.notifyLeavingToExternalApp();
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (ctx.mounted) {
@@ -1255,7 +1109,6 @@ class MisafirhaneSearchResultsPanelState
       'https://www.google.com/search?tbm=isch&q=${Uri.encodeComponent(q)}',
     );
     if (await canLaunchUrl(uri)) {
-      AdService.instance.notifyLeavingToExternalApp();
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
   }
@@ -1995,24 +1848,15 @@ class MisafirhaneSearchResultsPanelState
         ),
       ];
     }
-    final merged = _mergeGeziEveryFive(items, _nativeAdsGezi);
-    final m = merged.length;
-    final childCount = m == 0 ? 0 : m * 2 - 1;
     return [
       locationBar,
       SliverList(
         delegate: SliverChildBuilderDelegate(
           (ctx, index) {
             if (index.isOdd) return _kListDivider;
-            final i = index ~/ 2;
-            final e = merged[i];
-            if (e is NativeAd) {
-              return _nativeAdTile(e);
-            }
-            final g = e as GeziYemekItem;
-            return _geziYemekCompactRow(context, g, isGezi: true);
+            return _geziYemekCompactRow(context, items[index ~/ 2], isGezi: true);
           },
-          childCount: childCount,
+          childCount: items.length * 2 - 1,
         ),
       ),
       _listBottomInset(context),
@@ -2034,23 +1878,14 @@ class MisafirhaneSearchResultsPanelState
         ),
       ];
     }
-    final merged = _mergeGeziEveryFive(items, _nativeAdsYemek);
-    final m = merged.length;
-    final childCount = m == 0 ? 0 : m * 2 - 1;
     return [
       SliverList(
         delegate: SliverChildBuilderDelegate(
           (ctx, index) {
             if (index.isOdd) return _kListDivider;
-            final i = index ~/ 2;
-            final e = merged[i];
-            if (e is NativeAd) {
-              return _nativeAdTile(e);
-            }
-            final g = e as GeziYemekItem;
-            return _geziYemekCompactRow(context, g, isGezi: false);
+            return _geziYemekCompactRow(context, items[index ~/ 2], isGezi: false);
           },
-          childCount: childCount,
+          childCount: items.length * 2 - 1,
         ),
       ),
       _listBottomInset(context),
@@ -2541,23 +2376,15 @@ class MisafirhaneSearchResultsPanelState
         ),
       ];
     }
-    final merged = _mergeSosyalEveryFive(items, _nativeAdsSosyal);
-    final m = merged.length;
-    final childCount = m == 0 ? 0 : m * 2 - 1;
     return [
       locationBar,
       SliverList(
         delegate: SliverChildBuilderDelegate(
           (ctx, index) {
             if (index.isOdd) return _kListDivider;
-            final i = index ~/ 2;
-            final e = merged[i];
-            if (e is NativeAd) {
-              return _nativeAdTile(e);
-            }
-            return _sosyalFacilityRow(context, e as SosyalItem);
+            return _sosyalFacilityRow(context, items[index ~/ 2]);
           },
-          childCount: childCount,
+          childCount: items.length * 2 - 1,
         ),
       ),
       _listBottomInset(context),

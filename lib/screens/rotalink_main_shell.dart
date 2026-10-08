@@ -78,7 +78,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
 
   void _onProChanged() {
     if (!mounted) return;
-    if (ProService.instance.isAdFree && _showProSupportBanner) {
+    if (ProService.instance.hasProAccess && _showProSupportBanner) {
       setState(() => _showProSupportBanner = false);
     }
   }
@@ -89,7 +89,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     _freePassWasActive = active;
     if (!mounted) return;
     setState(() {});
-    if (!ended || ProService.instance.isAdFree) return;
+    if (!ended || ProService.instance.hasProAccess) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
@@ -117,7 +117,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
 
   Future<void> _tryShowProSupportBanner() async {
     if (!mounted || _showProSupportBanner) return;
-    if (ProService.instance.isAdFree) return;
+    if (ProService.instance.hasProAccess) return;
     if (_onboarding.active) return;
     if (await ProSupportBannerPrefs.wasShownToday()) return;
     if (!mounted) return;

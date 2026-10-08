@@ -1,23 +1,14 @@
-import 'dart:async';
-
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../ads/ad_service.dart';
-import '../ads/discover_native_merge.dart';
-import '../billing/pro_service.dart';
 import '../constants/store_links.dart';
-import '../widgets/rotalink_banner_ad.dart';
-import '../widgets/rotalink_native_ad_tile.dart';
 import '../l10n/app_strings.dart';
 import '../models/campaign.dart';
 import '../theme/app_colors.dart';
 
-/// Kotlin [CampaignDetailActivity] — alt bölümde native reklam.
+/// Kotlin [CampaignDetailActivity].
 class CampaignDetailScreen extends StatefulWidget {
   const CampaignDetailScreen({super.key, required this.campaign});
 
@@ -28,8 +19,6 @@ class CampaignDetailScreen extends StatefulWidget {
 }
 
 class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
-  NativeAd? _nativeAd;
-
   Campaign get campaign => widget.campaign;
 
   String get _dateText {
@@ -37,42 +26,6 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
     if (d == null) return 'Tarih: -';
     final fmt = DateFormat('dd.MM.yyyy');
     return 'Tarih: ${fmt.format(d)}';
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    ProService.instance.isPro.addListener(_onProChanged);
-    unawaited(_loadNative());
-  }
-
-  void _onProChanged() {
-    if (!mounted) return;
-    if (ProService.instance.isAdFree) {
-      _nativeAd?.dispose();
-      setState(() => _nativeAd = null);
-    }
-  }
-
-  Future<void> _loadNative() async {
-    if (!AdService.adsEnabled ||
-        kIsWeb ||
-        ProService.instance.isAdFree) {
-      return;
-    }
-    final ad = await DiscoverNativeMerge.loadOneNative();
-    if (!mounted || ProService.instance.isAdFree) {
-      ad?.dispose();
-      return;
-    }
-    setState(() => _nativeAd = ad);
-  }
-
-  @override
-  void dispose() {
-    ProService.instance.isPro.removeListener(_onProChanged);
-    _nativeAd?.dispose();
-    super.dispose();
   }
 
   Future<void> _openLink() async {
@@ -210,14 +163,9 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
               icon: const Icon(Icons.share),
               label: const Text(AppStrings.share),
             ),
-            if (_nativeAd != null) ...[
-              const SizedBox(height: 24),
-              RotalinkNativeAdTile(ad: _nativeAd!),
-            ],
           ],
         ),
       ),
-      bottomNavigationBar: RotalinkBannerAd(adsEnabled: AdService.adsEnabled),
     );
   }
 }

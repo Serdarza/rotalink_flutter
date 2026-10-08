@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../ads/ad_service.dart';
 import '../data/firebase_rota_repository.dart';
 import '../models/misafirhane.dart';
 import '../models/route_plan_outcome.dart';
@@ -185,7 +184,6 @@ Future<void> _kamiOpenGoogleImages(String query) async {
     'https://www.google.com/search?tbm=isch&q=${Uri.encodeComponent(q)}',
   );
   if (await canLaunchUrl(uri)) {
-    AdService.instance.notifyLeavingToExternalApp();
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }
@@ -201,7 +199,6 @@ Future<void> _kamiDialPhone(BuildContext context, String raw) async {
   }
   final uri = Uri(scheme: 'tel', path: p);
   try {
-    AdService.instance.notifyLeavingToExternalApp();
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   } catch (_) {
     if (!context.mounted) return;

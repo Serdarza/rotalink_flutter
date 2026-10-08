@@ -1,8 +1,5 @@
 import 'dart:async';
 
-import '../ads/ad_service.dart';
-import '../ads/discover_native_ad_pool.dart';
-import '../billing/pro_service.dart';
 import '../data/campaign_repository.dart';
 import '../data/facility_address_repository.dart';
 import '../data/facility_price_repository.dart';
@@ -20,12 +17,4 @@ Future<void> warmSecondaryData() async {
     SosyalMenuRepository.instance.ensureLocalDataReady(),
     KampRepository.instance.ensureLoaded(),
   ]);
-  final campaignCount = CampaignRepository.instance.currentCampaigns.length;
-  if (campaignCount > 0 && !ProService.instance.isAdFree) {
-    // AdMob SDK hazır olmadan istek atılmasın (Android/iOS).
-    await AdService.instance.whenSdkReady();
-    if (!ProService.instance.isAdFree) {
-      unawaited(DiscoverNativeAdPool.instance.ensureAds(campaignCount));
-    }
-  }
 }

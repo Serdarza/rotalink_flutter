@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../ads/ad_service.dart';
 import '../data/firebase_rota_repository.dart';
 import '../data/saved_routes_repository.dart';
 import '../l10n/app_strings.dart';
@@ -12,8 +11,6 @@ import '../route/route_planning_notifier.dart';
 import '../screens/route_plan_advice_screen.dart';
 import '../theme/app_colors.dart';
 import '../widgets/route_plan/route_plan_city_input.dart';
-import '../widgets/rotalink_banner_ad.dart';
-
 /// 1. adım: iller + günler. 2. adım tavsiye ekranına gider.
 class RoutePlanScreen extends StatelessWidget {
   RoutePlanScreen({
@@ -387,7 +384,6 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                             ),
                           ),
                         ),
-                        RotalinkBannerAd(adsEnabled: AdService.adsEnabled),
                       ],
                     );
                   },

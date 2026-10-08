@@ -10,7 +10,7 @@ abstract final class PriceAccess {
   /// Debug derlemede (flutter run) geliştirici testi için açık; mağaza
   /// (release) derlemesinde `kDebugMode` sabit false olduğundan kilit aynen kalır.
   static bool get unlocked =>
-      (kDebugMode && !_forcePreview) || ProService.instance.isAdFree;
+      (kDebugMode && !_forcePreview) || ProService.instance.hasProAccess;
 
   /// Arka plan görevleri: [ProService] başlatılmadan yerel Pro kaydıyla karar verir.
   static bool unlockedWithCachedPro(bool cachedPro) =>

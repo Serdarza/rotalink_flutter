@@ -1,13 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import '../ads/ad_service.dart';
-import '../ads/discover_native_ad_pool.dart';
-import '../ads/discover_native_merge.dart';
-import '../billing/pro_service.dart';
 import '../data/campaign_filter_prefs.dart';
 import '../data/campaign_repository.dart';
 import '../l10n/app_strings.dart';
@@ -15,14 +9,12 @@ import '../models/campaign.dart';
 import '../models/campaign_insights.dart';
 import '../theme/app_colors.dart';
 import '../widgets/campaign_smart_icon.dart';
-import '../widgets/rotalink_banner_ad.dart';
-import '../widgets/rotalink_native_ad_tile.dart';
 import 'campaign_detail_screen.dart';
 
 const _headerTop = Color(0xFF005F6B);
 const _headerBottom = Color(0xFF008898);
 
-/// Kotlin [DiscoverActivity] + [DiscoverComposeScreen] (liste arası native + banner).
+/// Kotlin [DiscoverActivity] + [DiscoverComposeScreen].
 class DiscoverScreen extends StatefulWidget {
   DiscoverScreen({
     super.key,
@@ -56,14 +48,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   String? _loadError;
   bool _streamWaiting = true;
 
-  List<NativeAd> _nativeAds = const [];
-  int _nativeGen = 0;
-  int _nativeEmptyRetries = 0;
-
-  /// Hızlı kaydırırken AdWidget platform view oluşturmayı ertele (iOS crash).
-  final ValueNotifier<bool> _listScrolling = ValueNotifier<bool>(false);
-  Timer? _scrollIdleTimer;
-
   void _onSearchTextChanged() {
     _searchDebounce?.cancel();
     _searchDebounce = Timer(const Duration(milliseconds: 500), () {
@@ -75,7 +59,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   void initState() {
     super.initState();
-    ProService.instance.isPro.addListener(_onProChanged);
     unawaited(
       CampaignFilterPrefs.getAudience().then((a) {
         if (mounted && a != null) _audience.value = a;
@@ -84,10 +67,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     if (widget.repository.isReady) {
       _allCampaigns = widget.repository.currentCampaigns;
       _streamWaiting = false;
-      _nativeAds = DiscoverNativeAdPool.instance.snapshot(_allCampaigns.length);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _onCampaignsDataChanged();
-      });
     }
     _search.addListener(_onSearchTextChanged);
     _campaignSub = widget.repository.watchCampaignsOrdered().listen(
@@ -99,12 +78,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           _streamWaiting = false;
         });
         _discoverBodyTick.value++;
-        _onCampaignsDataChanged();
       },
       onError: (Object? _, StackTrace? stackTrace) {
         if (!mounted) return;
-        _nativeGen++;
-        _disposeNatives();
         setState(() {
           _loadError = 'Kampanyalar yüklenemedi.';
           _allCampaigns = const [];
@@ -115,124 +91,15 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     );
   }
 
-  void _onProChanged() {
-    if (!mounted) return;
-    if (ProService.instance.isAdFree) {
-      _nativeGen++;
-      _disposeNatives();
-      setState(() {});
-      _discoverBodyTick.value++;
-    } else {
-      _onCampaignsDataChanged();
-    }
-  }
-
-  void _disposeNatives() {
-    _nativeAds = const [];
-  }
-
-  void _onCampaignsDataChanged() {
-    if (_loadError != null) return;
-
-    if (!AdService.adsEnabled || kIsWeb || ProService.instance.isAdFree) {
-      _disposeNatives();
-      if (mounted) {
-        setState(() {});
-        _discoverBodyTick.value++;
-      }
-      return;
-    }
-
-    final needed = DiscoverNativeMerge.nativeSlotsNeeded(_allCampaigns.length);
-    if (needed == 0) {
-      _disposeNatives();
-      if (mounted) {
-        _discoverBodyTick.value++;
-      }
-      return;
-    }
-
-    // Zaten yeterli reklam varsa yeniden yükleme tetikleme (scroll crash).
-    if (_nativeAds.length >= needed) {
-      if (mounted) {
-        _discoverBodyTick.value++;
-      }
-      return;
-    }
-
-    if (DiscoverNativeAdPool.instance.hasAdsFor(_allCampaigns.length)) {
-      if (mounted) {
-        setState(() {
-          _nativeAds = DiscoverNativeAdPool.instance.snapshot(
-            _allCampaigns.length,
-          );
-        });
-        _discoverBodyTick.value++;
-      }
-      return;
-    }
-
-    unawaited(_reloadNativeAds(needed));
-  }
-
-  Future<void> _reloadNativeAds(int needed) async {
-    final gen = ++_nativeGen;
-
-    final loaded = await DiscoverNativeAdPool.instance.ensureAds(
-      _allCampaigns.length,
-    );
-
-    if (!mounted || gen != _nativeGen) {
-      return;
-    }
-
-    setState(() {
-      _nativeAds = loaded;
-    });
-    _discoverBodyTick.value++;
-
-    // İlk istek boş dönerse (SDK/ağ) kısa süre sonra tekrar tetikle.
-    if (loaded.isEmpty &&
-        needed > 0 &&
-        !ProService.instance.isAdFree &&
-        _nativeEmptyRetries < 2) {
-      _nativeEmptyRetries++;
-      Future<void>.delayed(Duration(seconds: 2 * _nativeEmptyRetries), () {
-        if (!mounted || gen != _nativeGen) return;
-        if (_nativeAds.isNotEmpty || ProService.instance.isAdFree) return;
-        unawaited(_reloadNativeAds(needed));
-      });
-    } else if (loaded.isNotEmpty) {
-      _nativeEmptyRetries = 0;
-    }
-  }
-
-  void _onScrollActivity() {
-    if (!_listScrolling.value) {
-      _listScrolling.value = true;
-    }
-    _scrollIdleTimer?.cancel();
-    // Kaydırma bittikten kısa süre sonra platform view oluştur.
-    _scrollIdleTimer = Timer(const Duration(milliseconds: 280), () {
-      if (!mounted) return;
-      _listScrolling.value = false;
-    });
-  }
-
   @override
   void dispose() {
-    ProService.instance.isPro.removeListener(_onProChanged);
-    _nativeGen++;
     _searchDebounce?.cancel();
-    _scrollIdleTimer?.cancel();
-    _listScrolling.dispose();
     _debouncedFilter.dispose();
     _discoverBodyTick.dispose();
     _audience.dispose();
     _campaignSub?.cancel();
     _search.removeListener(_onSearchTextChanged);
     _search.dispose();
-    _disposeNatives();
     super.dispose();
   }
 
@@ -284,14 +151,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   Widget _buildBody({
     required BuildContext context,
     required bool overlay,
-    required List<Object> merged,
-    required int campaignOnly,
+    required List<Campaign> campaigns,
     required String emptyMsg,
   }) {
     if (overlay) {
       return const _DiscoverLoadingBody();
     }
-    if (campaignOnly == 0) {
+    if (campaigns.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -304,51 +170,26 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
       );
     }
     final ime = MediaQuery.viewInsetsOf(context).bottom;
-    return NotificationListener<ScrollNotification>(
-      onNotification: (ScrollNotification n) {
-        if (n is ScrollStartNotification || n is ScrollUpdateNotification) {
-          _onScrollActivity();
-        } else if (n is ScrollEndNotification) {
-          _onScrollActivity();
-        }
-        return false;
-      },
-      child: RefreshIndicator(
-        color: AppColors.primary,
-        onRefresh: widget.repository.refresh,
-        child: ListView.builder(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(0, 8, 0, 8 + ime),
-          itemCount: merged.length,
-          // Offscreen native Platform View sayısını sınırla (iOS).
-          cacheExtent: 400,
-          addAutomaticKeepAlives: true,
-          addRepaintBoundaries: true,
-          itemBuilder: (context, index) {
-            final item = merged[index];
-            if (item is Campaign) {
-              final c = item;
-              return _CampaignDiscoverCard(
-                campaign: c,
-                onOpenDetail: () {
-                  Navigator.of(context, rootNavigator: false).push<void>(
-                    MaterialPageRoute<void>(
-                      builder: (_) => CampaignDetailScreen(campaign: c),
-                    ),
-                  );
-                },
+    return RefreshIndicator(
+      color: AppColors.primary,
+      onRefresh: widget.repository.refresh,
+      child: ListView.builder(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: EdgeInsets.fromLTRB(0, 8, 0, 8 + ime),
+        itemCount: campaigns.length,
+        itemBuilder: (context, index) {
+          final c = campaigns[index];
+          return _CampaignDiscoverCard(
+            campaign: c,
+            onOpenDetail: () {
+              Navigator.of(context, rootNavigator: false).push<void>(
+                MaterialPageRoute<void>(
+                  builder: (_) => CampaignDetailScreen(campaign: c),
+                ),
               );
-            }
-            if (item is NativeAd) {
-              return RotalinkNativeAdTile(
-                key: ValueKey<int>(identityHashCode(item)),
-                ad: item,
-                scrollingListenable: _listScrolling,
-              );
-            }
-            return const SizedBox.shrink();
-          },
-        ),
+            },
+          );
+        },
       ),
     );
   }
@@ -399,12 +240,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                     final filtered = _loadError != null
                         ? const <Campaign>[]
                         : _filtered(_allCampaigns, filterQuery, audience);
-                    final merged = DiscoverNativeMerge.mergeFiltered(
-                      filtered,
-                      _nativeAds,
-                    );
                     final overlay = _overlayLoading();
-                    final campaignOnly = merged.whereType<Campaign>().length;
                     final emptyMsg = _emptyMessage(
                       overlayLoading: overlay,
                       all: _allCampaigns,
@@ -415,14 +251,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                     return _buildBody(
                       context: context,
                       overlay: overlay,
-                      merged: merged,
-                      campaignOnly: campaignOnly,
+                      campaigns: filtered,
                       emptyMsg: emptyMsg,
                     );
                   },
                 ),
               ),
-              RotalinkBannerAd(adsEnabled: AdService.adsEnabled),
             ],
           ),
         ),

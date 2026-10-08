@@ -25,13 +25,13 @@
 	</array>
 
 	<!--
-	  Flutter engine, Firebase, AdMob, shared_preferences ve geolocator
+	  Flutter engine, Firebase, shared_preferences ve geolocator
 	  tarafından kullanılan sistem API'leri.
 	  Apple, bu bildirimleri App Store Review sürecinde zorunlu tutar.
 	-->
 	<key>NSPrivacyAccessedAPITypes</key>
 	<array>
-		<!-- NSUserDefaults — shared_preferences, Firebase, AdMob -->
+		<!-- NSUserDefaults — shared_preferences, Firebase -->
 		<dict>
 			<key>NSPrivacyAccessedAPIType</key>
 			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>

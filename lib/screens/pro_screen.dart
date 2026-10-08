@@ -12,7 +12,7 @@ import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
 import '../widgets/free_pro_pass.dart';
 
-/// Rotalink Pro — ücretli özellikler ve reklamsız uygulamanın geliştirilmesine destek.
+/// Rotalink Pro — ücretli özellikler ve uygulamanın geliştirilmesine destek.
 class ProScreen extends StatefulWidget {
   const ProScreen({super.key});
 
@@ -314,7 +314,6 @@ class _Hero extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                _HeroChip(icon: Icons.block_rounded, label: 'Reklamsız'),
                 _HeroChip(
                   icon: Icons.event_repeat_rounded,
                   label: 'İstediğiniz zaman iptal',

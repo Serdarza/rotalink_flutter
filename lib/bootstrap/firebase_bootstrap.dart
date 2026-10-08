@@ -43,7 +43,6 @@ Future<void> _warmFirebaseServices() async {
 }
 
 /// Kotlin `MainActivity` içindeki `latest_version_code` varsayılanı ile uyumlu ön yükleme.
-/// Ayrıca reklam bekleme süresi için Remote Config başlatır.
 Future<void> primeRemoteConfig() async {
   try {
     final info = await PackageInfo.fromPlatform();
@@ -58,7 +57,6 @@ Future<void> primeRemoteConfig() async {
     );
     await rc.setDefaults(<String, dynamic>{
       'latest_version_code': build.toString(),
-      'reklam_bekleme_suresi': 5, // dakika cinsinden
     });
     await rc.fetchAndActivate();
   } catch (_) {
