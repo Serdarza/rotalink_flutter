@@ -1,0 +1,282 @@
+[
+  {
+    "il": "Bilecik",
+    "ilce": "Bilecik",
+    "isim": "Bilecik Belediyesi Atatürk Parkı",
+    "adres": "Şehir merkezi, Merkez/Bilecik",
+    "aciklama": "Bilecik Belediyesi Atatürk Parkı; dinlenme, yeme-içme, çocuk parkı ve etkinlik alanı olarak şehir merkezinde hizmet verir."
+  },
+  {
+    "il": "Bilecik",
+    "ilce": "Bilecik",
+    "isim": "Bilecik Belediyesi Kent Lokantası",
+    "adres": "Şehitler Parkı yanı, Merkez/Bilecik",
+    "aciklama": "Bilecik Belediyesi'nin hizmete açtığı kent lokantasıdır. Belediyenin duyurusunda lokanta, Şehitler Parkı yanında anılmaktadır."
+  },
+  {
+    "il": "Bilecik",
+    "ilce": "Bilecik",
+    "isim": "Bilecik Belediyesi Soğuksu Bahçesi",
+    "adres": "Orhangazi Mahallesi, Karasu kenarı, Merkez/Bilecik",
+    "aciklama": "Bilecik Belediyesi'nin Orhangazi Mahallesi'nde, Karasu kenarında hizmete açtığı dinlenme bahçesidir. Yemek ve kahvaltı imkânı sunar."
+  },
+  {
+    "il": "Bilecik",
+    "ilce": "Bilecik",
+    "isim": "Bilecik Belediyesi Vadipark Sosyal Tesisleri",
+    "adres": "İstasyon Mahallesi, Merkez/Bilecik",
+    "aciklama": "Bilecik Belediyesi'nin İstasyon Mahallesi'nde yeniden düzenleyerek hizmete açtığı sosyal tesistir. Piknik alanı, çocuk oyun alanı, spor salonu ve yeme-içme alanı bulunur."
+  },
+  {
+    "il": "Bilecik",
+    "ilce": "Bozüyük",
+    "isim": "Bozüyük Belediyesi Halkın Sofrası Kent Lokantası",
+    "adres": "Kasımpaşa Mahallesi, Köteşliler Caddesi No:17, Bozüyük/Bilecik",
+    "aciklama": "Bozüyük Belediyesi'nin işlettiği kent lokantasıdır. 23 Mart 2026'dan itibaren bu adreste, hafta içi öğle yemeği verir."
+  },
+  {
+    "il": "Bingöl",
+    "ilce": "Bingöl",
+    "isim": "Bingöl Belediyesi Kentpark",
+    "adres": "Selahattin Eyyübi Mahallesi, Merkez/Bingöl",
+    "aciklama": "Bingöl Belediyesi'nin Selahattin Eyyübi Mahallesi'ndeki kent parkıdır. Yürüyüş ve bisiklet yolları, spor sahası ve piknik alanları bulunur. 10 Kasım 2025'te yenilenen yüzüyle hizmettedir."
+  },
+  {
+    "il": "Bingöl",
+    "ilce": "Bingöl",
+    "isim": "Bingöl Belediyesi Sosyal Yaşam Merkezi",
+    "adres": "Selahaddin Eyyubi Mahallesi, 1504. Cadde (Kent Park sonu), Merkez/Bingöl",
+    "aciklama": "Bingöl Belediyesi Sosyal Yaşam Merkezi; eğitim, sanat, spor ve kültürel etkinlikler ile etüt alanı ve kütüphane sunar. Temmuz 2026 yaz kursları bu adreste açılmıştır."
+  },
+  {
+    "il": "Bitlis",
+    "ilce": "Ahlat",
+    "isim": "Ahlat Belediyesi Millet Bahçesi",
+    "adres": "Ahlat/Bitlis",
+    "aciklama": "Ahlat Belediyesi millet bahçesidir. Belediye, 26 Ağustos 2024 tarihli duyurusunda bahçeye yapılan ziyareti kaydetmiştir."
+  },
+  {
+    "il": "Bitlis",
+    "ilce": "Tatvan",
+    "isim": "Tatvan Belediyesi Sahil Parkı Piknik Alanı",
+    "adres": "Sahil şeridi, Tatvan/Bitlis",
+    "aciklama": "Tatvan Belediyesi'nin sahil şeridindeki piknik alanıdır. 2025 faaliyet raporunda yağmurlama sulama sistemi ve çocuk oyun alanı bakımı yapılmıştır."
+  },
+  {
+    "il": "Bitlis",
+    "ilce": "Tatvan",
+    "isim": "Tatvan Millet Bahçesi",
+    "adres": "Dumlupınar, Sosyal, Kültür, Fatih ve Aydınlar mahallelerinin kesiştiği alan, Tatvan/Bitlis",
+    "aciklama": "Tatvan'da yaklaşık 65 bin metrekarelik millet bahçesidir. Yürüyüş ve bisiklet yolları, spor alanları, çocuk oyun alanı ve millet kıraathanesi bulunur. Tatvan Belediyesi 2025 faaliyet raporunda aydınlatma, sulama ve oyun alanı bakımı yapılmıştır."
+  },
+  {
+    "il": "Burdur",
+    "ilce": "Bucak",
+    "isim": "Bucak Belediyesi Kent Lokantası",
+    "adres": "Camii Mahallesi, Ramazan Selen Bulvarı No:90, Bucak/Burdur",
+    "aciklama": "Bucak Belediyesi'nin işlettiği kent lokantasıdır. Adliye binasının yanındadır. Hafta içi 12.00-14.00 arasında self servis öğle yemeği verir; hafta sonu ve resmî tatillerde kapalıdır."
+  },
+  {
+    "il": "Burdur",
+    "ilce": "Bucak",
+    "isim": "Bucak Belediyesi Çay Bahçesi",
+    "adres": "Konak Mahallesi, 2729. Sokak No:8, Bucak/Burdur",
+    "aciklama": "Bucak Belediyesi çay bahçesidir. Konak Mahallesi'nde, ilçe milli eğitim müdürlüğünün yanındadır."
+  },
+  {
+    "il": "Burdur",
+    "ilce": "Bucak",
+    "isim": "Bucak Belediyesi İncirhan Mesire ve Piknik Alanı",
+    "adres": "İncirhan, Bucak/Burdur",
+    "aciklama": "Bucak Belediyesi'nin İncirhan'da hizmete açtığı mesire ve piknik alanıdır. Yürüyüş yolları, piknik masaları ve barbekü alanları bulunur."
+  },
+  {
+    "il": "Burdur",
+    "ilce": "Burdur",
+    "isim": "Burdur Belediyesi Kent Lokantası Sanayi Şubesi",
+    "adres": "Küçük Sanayi Sitesi Kooperatifi Salonu, Merkez/Burdur",
+    "aciklama": "Burdur Belediyesi Kent Lokantası'nın Küçük Sanayi Sitesi'ndeki şubesidir. Hafta içi 12.00-14.00 arasında öğle yemeği verir."
+  },
+  {
+    "il": "Burdur",
+    "ilce": "Burdur",
+    "isim": "Burdur Belediyesi İstasyon Park Restoran ve Çay Bahçesi",
+    "adres": "Burç Mahallesi, Merkez/Burdur",
+    "aciklama": "Burdur Belediyesi iktisadi işletmesi bünyesindeki İstasyon Park Restoran ve Çay Bahçesi, Burç Mahallesi'nde çay bahçesi ve restoran olarak hizmet verir. Aynı alanda Emekli Kafe de açılmıştır."
+  },
+  {
+    "il": "Burdur",
+    "ilce": "Burdur",
+    "isim": "Burdur Belediyesi Şehir Kulübü Kent Lokantası",
+    "adres": "Eski Şehir Kulübü, Merkez/Burdur",
+    "aciklama": "Burdur Belediyesi'nin eski şehir kulübündeki kent lokantasıdır. Belediye, lokantanın öğle yemeği ve Ramazan iftar servisini duyurmuştur."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Gemlik",
+    "isim": "BURFAŞ Atatepe Sosyal Tesisi",
+    "adres": "Ata Mahallesi, Aydınlar Sokak No:3, Gemlik/Bursa",
+    "aciklama": "Bursa Büyükşehir Belediyesi iştiraki BURFAŞ tarafından işletilen Atatepe Sosyal Tesisi, deniz manzarasına hakim konumu ve huzurlu atmosferiyle misafirlerine keyifli bir deneyim sunmaktadır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Mudanya",
+    "isim": "BURFAŞ B Kafe BUDO",
+    "adres": "Ömerbey Mahallesi BUDO Feribot İskelesi Mudanya / Bursa",
+    "aciklama": "BURFAŞ B Kafe BUDO, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Hafta içi 06.00 - 20.00, hafta sonu 07.00 - 20.00 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Mudanya",
+    "isim": "BURFAŞ B Kafe Mudanya",
+    "adres": "Ömerbey Mahallesi Bursa Asfaltı Caddesi No:1 Mudanya / Bursa",
+    "aciklama": "BURFAŞ B Kafe Mudanya, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Mudanya",
+    "isim": "BURFAŞ Mudanya Sosyal Tesisi",
+    "adres": "Ömerbey Mahallesi Bursa Asfaltı Caddesi No:1 Mudanya / Bursa",
+    "aciklama": "Bursa Büyükşehir Belediyesi iştiraki BURFAŞ tarafından işletilen Mudanya Sosyal Tesisi, deniz manzarası eşliğinde keyifli bir atmosfer sunmaktadır. Sahil kenarında konumlanır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Nilüfer",
+    "isim": "BURFAŞ B Kafe Ataevler",
+    "adres": "Ataevler Mah. Yılmaz Akkılıç Cd. No:19, 16140 Nilüfer/Bursa",
+    "aciklama": "BURFAŞ B Kafe Ataevler, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Nilüfer",
+    "isim": "BURFAŞ B Kafe Balkan",
+    "adres": "Balkan, Telli Turna Sk. No:11, 16159 Nilüfer/Bursa",
+    "aciklama": "BURFAŞ B Kafe Balkan, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Orhangazi",
+    "isim": "BURFAŞ B Kafe Orhangazi",
+    "adres": "Muradiye, Yalova Cad. Şehit Erhan Öztürk Parkı (Alis Yürüyüş Yolu) 16800 Orhangazi/Bursa",
+    "aciklama": "BURFAŞ B Kafe Orhangazi, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ B Kafe Cumhuriyet Caddesi",
+    "adres": "Reyhan Mh, Cumhuriyet Cd. Geyvehan Önü No:7, 16040 Osmangazi/Bursa",
+    "aciklama": "BURFAŞ B Kafe Cumhuriyet Caddesi, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ B Kafe Emek",
+    "adres": "Emek Adnan Menderes, Armağan Cd. 1I, 16150 Osmangazi/Bursa",
+    "aciklama": "BURFAŞ B Kafe Emek, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ B Kafe Kent Meydanı",
+    "adres": "Ulu, Kent Meydanı, 16040 Osmangazi/Bursa",
+    "aciklama": "BURFAŞ B Kafe Kent Meydanı, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ B Kafe Kültürpark",
+    "adres": "Altıparmak Mah. Stadyum Cad. No:1/1, Osmangazi/Bursa",
+    "aciklama": "BURFAŞ B Kafe Kültürpark, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ B Kafe Merinos AKM",
+    "adres": "Atatürk Kongre Kültür Merkezi, Merinos Parkı Osmangazi / BURSA",
+    "aciklama": "BURFAŞ B Kafe Merinos AKM, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ B Kafe Çarşıbaşı",
+    "adres": "Şehreküstü, Çırapazarı Sk. No:3, 16050 Osmangazi/Bursa",
+    "aciklama": "BURFAŞ B Kafe Çarşıbaşı, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ BUSKİ Sosyal Tesisi",
+    "adres": "Sırameşeler Mahallesi Avrupa Konseyi Bulvarı No:6/5 Osmangazi/BURSA",
+    "aciklama": "Açık hava düğünleri için uygun zemin ve oturma düzenine sahip alanıyla, hem gündüz hem akşam organizasyonlarına ev sahipliği yapabilen tesis; gelin-damat odası, sahne altyapısı, ışıklandırma, ses sistemi ve otopark gibi tüm teknik ihtiyaçlara da cevap verir."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ Doburca Sosyal Tesisi",
+    "adres": "Dobrucaköy Mahallesi 3. Zümrüt Sokak No:11/10 Osmangazi/BURSA",
+    "aciklama": "Bursa Büyükşehir Belediyesi iştiraki BURFAŞ tarafından işletilen Dobruca Sosyal Tesisi, şehrin en güzel manzaralarından birine sahip konumuyla hizmet vermektedir."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ Gölpark Sosyal Tesisi",
+    "adres": "Santralgaraj Mahallesi Ulubatlı Hasan Bulvarı No:1/4 Merinos Park İçi Osmangazi / BURSA",
+    "aciklama": "Tesis bünyesinde; açık ve kapalı davet alanları, ses ve ışık sistemi, gelin-damat odası, oturma planlaması ve organizasyon desteği gibi tüm ihtiyaçlar düşünülerek hizmet sunulmaktadır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ Merinos Kent Lokantası",
+    "adres": "Merinos Parkı, Osmangazi/BURSA",
+    "aciklama": "BURFAŞ Merinos Kent Lokantası, Bursa Büyükşehir Belediyesi iştirakinin Merinos Parkı'ndaki uygun fiyatlı lokantasıdır. Sıcak yemek, sembolik ücretle sunulur."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ Merinospark Kır Bahçesi",
+    "adres": "Santral Garaj Mahallesi Ulubatlı Hasan Bulvarı No:1/2 Merinos Parkı İçi Osmangazi/BURSA",
+    "aciklama": "150 kişiye kadar davetliyi ağırlayabilen kır bahçemiz; düğün, nişan, nikâh töreni ve benzeri özel organizasyonlar için profesyonel hizmet anlayışıyla sizleri bekliyor."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ Merinospark Sosyal Tesisi",
+    "adres": "Santral Garaj Mahallesi Ulubatlı Hasan Bulvarı No:1/2 Merinos Parkı İçi Osmangazi / BURSA",
+    "aciklama": "Bursa Büyükşehir Belediyesi iştiraki BURFAŞ tarafından işletilen Merinospark Sosyal Tesisi, kentin simgelerinden biri olan Merinos Parkı’nın yeşillikler içindeki huzurlu atmosferinde hizmet vermektedir."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Osmangazi",
+    "isim": "BURFAŞ Uludağ Sosyal Tesisi",
+    "adres": "Kirazlı Mahallesi Atatürk Caddesi 2. Oteller Bölgesi Kurbağakaya Teleferik İstasyonu Kat:2 Osmangazi / BURSA",
+    "aciklama": "BURFAŞ tarafından işletilen Uludağ Sosyal Tesisi , Bursa’nın simgesi haline gelmiş eşsiz Uludağ manzarasında, doğayla iç içe bir sosyal yaşam alanı sunmaktadır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Yıldırım",
+    "isim": "BURFAŞ B Kafe Yeşil",
+    "adres": "Emirsultan, Emirsultan Cd. No:2 Yıldırım/Bursa",
+    "aciklama": "BURFAŞ B Kafe Yeşil, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Yıldırım",
+    "isim": "BURFAŞ B Kafe Yiğitler",
+    "adres": "Yiğitler, Türkmenbaşı Cd., 16300 Yıldırım/Bursa",
+    "aciklama": "BURFAŞ B Kafe Yiğitler, Bursa Büyükşehir Belediyesi iştiraki BURFAŞ'ın hesaplı kafe noktasıdır. Her gün 08.00 - 22.30 saatleri arasında açıktır."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Yıldırım",
+    "isim": "BURFAŞ Vatan Kent Lokantası",
+    "adres": "Vatan, Bakırcı Sk., 16270 Yıldırım/Bursa",
+    "aciklama": "BURFAŞ Vatan Kent Lokantası, Bursa Büyükşehir Belediyesi iştirakinin Yıldırım'daki uygun fiyatlı lokantasıdır. Sıcak yemek, sembolik ücretle sunulur."
+  },
+  {
+    "il": "Bursa",
+    "ilce": "Yıldırım",
+    "isim": "BURFAŞ Yiğitler Kent Lokantası",
+    "adres": "Yiğitler, Türkmenbaşı Cd., 16300 Yıldırım/Bursa",
+    "aciklama": "BURFAŞ Yiğitler Kent Lokantası, Bursa Büyükşehir Belediyesi iştirakinin Yıldırım'daki uygun fiyatlı lokantasıdır. Sıcak yemek, sembolik ücretle sunulur."
+  }
+]
