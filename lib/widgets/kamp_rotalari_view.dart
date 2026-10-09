@@ -266,22 +266,24 @@ Future<void> showKampDetay(BuildContext context, KampAlani k) {
             Text(k.adres!, style: const TextStyle(color: Color(0xFF546E7A), height: 1.35)),
           ],
           const SizedBox(height: 14),
-          _satir('Ücret', _ucret(k)),
-          _satir('Çadır', _evet(k.cadir)),
-          _satir('Karavan', _evet(k.karavan)),
-          _satir('Motokaravan', _evet(k.motokaravan)),
-          _satir('Elektrik', _evet(k.elektrik)),
-          _satir('Tuvalet', _evet(k.tuvalet)),
-          _satir('Duş', _evet(k.dus)),
-          _satir('İçme suyu', _evet(k.icmeSuyu)),
-          _satir('Atık boşaltma', _evet(k.atik)),
-          _satir('Wi-Fi', _evet(k.wifi)),
-          _satir('Otopark', _evet(k.otopark)),
-          _satir('Denize yakın', _evet(k.denizeYakin)),
-          if (k.telefon != null) _satir('Telefon', k.telefon!),
-          if (k.rezervasyon != null) _satir('Rezervasyon', k.rezervasyon!),
+          ..._satirlar([
+            ('Ücret', k.resmiFiyat || k.ucret == 'ucretsiz' || k.ucret == 'ucretli' ? _ucret(k) : null),
+            ('Çadır', _evet(k.cadir)),
+            ('Karavan', _evet(k.karavan)),
+            ('Motokaravan', _evet(k.motokaravan)),
+            ('Elektrik', _evet(k.elektrik)),
+            ('Tuvalet', _evet(k.tuvalet)),
+            ('Duş', _evet(k.dus)),
+            ('İçme suyu', _evet(k.icmeSuyu)),
+            ('Atık boşaltma', _evet(k.atik)),
+            ('Wi-Fi', _evet(k.wifi)),
+            ('Otopark', _evet(k.otopark)),
+            ('Denize yakın', _evet(k.denizeYakin)),
+            ('Telefon', k.telefon),
+            ('Rezervasyon', k.rezervasyon),
+          ]),
           const SizedBox(height: 8),
-          _satir('Son kontrol', _tarih(k.sonKontrol)),
+          ..._satirlar([('Son kontrol', _tarih(k.sonKontrol))]),
           _satir('Doğrulama', k.dogrulama == 'resmi' ? 'Resmî kaynak' : 'Açık veri'),
           const SizedBox(height: 8),
           Align(
@@ -342,14 +344,20 @@ Widget _satir(String ad, String deger) {
   );
 }
 
-String _evet(bool? v) {
+/// Değeri bilinmeyen satır gösterilmez.
+List<Widget> _satirlar(List<(String, String?)> rows) => [
+      for (final (ad, deger) in rows)
+        if (deger != null && deger.trim().isNotEmpty) _satir(ad, deger),
+    ];
+
+String? _evet(bool? v) {
   if (v == true) return 'Var';
   if (v == false) return 'Yok';
-  return 'Bilinmiyor';
+  return null;
 }
 
-String _tarih(DateTime? d) {
-  if (d == null) return 'Bilinmiyor';
+String? _tarih(DateTime? d) {
+  if (d == null) return null;
   return '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
 }
 
