@@ -281,6 +281,7 @@ Future<void> showKampDetay(BuildContext context, KampAlani k) {
             ('Denize yakın', _evet(k.denizeYakin)),
             ('Telefon', k.telefon),
             ('Rezervasyon', k.rezervasyon),
+            ('Bakanlık belgesi', k.bakanlikBelgeNo == null ? null : 'Belgeli (No ${k.bakanlikBelgeNo})'),
           ]),
           const SizedBox(height: 8),
           ..._satirlar([('Son kontrol', _tarih(k.sonKontrol))]),

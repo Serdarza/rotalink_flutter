@@ -41,6 +41,7 @@ class KampAlani {
     this.fiyat,
     this.fiyatBirim,
     this.rezervasyon,
+    this.bakanlikBelgeNo,
   });
 
   final String id;
@@ -72,6 +73,7 @@ class KampAlani {
   final String? rezervasyon;
   final DateTime? sonKontrol;
   final String dogrulama;
+  final String? bakanlikBelgeNo;
 
   bool get resmiFiyat => fiyat != null && dogrulama == 'resmi';
 }
@@ -235,6 +237,7 @@ class KampRepository {
       rezervasyon: opt('rezervasyon'),
       sonKontrol: DateTime.tryParse((raw['son_kontrol'] ?? '').toString()),
       dogrulama: (raw['dogrulama'] ?? '').toString(),
+      bakanlikBelgeNo: opt('bakanlik_belge_no'),
     );
   }
 }
@@ -284,6 +287,8 @@ String kampTuruEtiket(String tur) {
       return 'Belediye';
     case 'milli_park':
       return 'Millî park';
+    case 'orman_parki':
+      return 'Orman parkı';
     case 'ozel':
       return 'Özel işletme';
     default:
