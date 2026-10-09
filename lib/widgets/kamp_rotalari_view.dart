@@ -190,7 +190,7 @@ class _KampSatir extends StatelessWidget {
       ),
       title: Text(item.ad, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14.5)),
       subtitle: Text(
-        '$yer · ${kampTuruEtiket(item.kampTuru)} · ${_ucret(item)}',
+        [yer, kampTuruEtiket(item.kampTuru), ?_ucret(item)].join(' · '),
         style: const TextStyle(fontSize: 12.5, color: Color(0xFF6B7C82)),
       ),
       trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFFB0BEC5)),
@@ -198,14 +198,14 @@ class _KampSatir extends StatelessWidget {
   }
 }
 
-String _ucret(KampAlani k) {
+String? _ucret(KampAlani k) {
   if (k.resmiFiyat) {
     final birim = k.fiyatBirim == null ? '' : ' / ${k.fiyatBirim}';
     return '${k.fiyat!.toStringAsFixed(k.fiyat! == k.fiyat!.roundToDouble() ? 0 : 2)} ₺$birim';
   }
   if (k.ucret == 'ucretsiz') return 'Ücretsiz';
   if (k.ucret == 'ucretli') return 'Ücretli';
-  return 'Ücret bilinmiyor';
+  return null;
 }
 
 class _KampHarita extends StatelessWidget {
@@ -267,7 +267,7 @@ Future<void> showKampDetay(BuildContext context, KampAlani k) {
           ],
           const SizedBox(height: 14),
           ..._satirlar([
-            ('Ücret', k.resmiFiyat || k.ucret == 'ucretsiz' || k.ucret == 'ucretli' ? _ucret(k) : null),
+            ('Ücret', _ucret(k)),
             ('Çadır', _evet(k.cadir)),
             ('Karavan', _evet(k.karavan)),
             ('Motokaravan', _evet(k.motokaravan)),
