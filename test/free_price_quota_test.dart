@@ -11,8 +11,8 @@ void main() {
     final quota = FreePriceQuota.instance;
     await quota.initialize();
 
-    expect(FreePriceQuota.limit, 3);
-    expect(quota.remaining, 2);
+    expect(FreePriceQuota.limit, 1);
+    expect(quota.remaining, 0);
     expect(quota.contains('Ankara\u0001A Tesisi'), isTrue);
     expect(quota.contains('Ankara\u0001B Tesisi'), isFalse);
     expect(PriceAccess.unlockedFor('Ankara\u0001A Tesisi'), isTrue);

@@ -64,7 +64,7 @@ class _ProScreenState extends State<ProScreen> {
     'Tesis bilgileri',
     'Kamu kampanyaları',
     'Resmî tatiller',
-    '3 tesisin fiyatı',
+    '1 tesisin fiyatı',
   ];
 
   final ProService _pro = ProService.instance;

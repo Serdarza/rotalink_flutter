@@ -11,7 +11,7 @@ class FreePriceQuota {
   FreePriceQuota._();
   static final FreePriceQuota instance = FreePriceQuota._();
 
-  static const int limit = 3;
+  static const int limit = 1;
   static const String _keyFacilities = 'rotalink_free_price_facilities';
   static const String _keyExhausted = 'rotalink_free_price_exhausted';
 
