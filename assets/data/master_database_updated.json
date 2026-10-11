@@ -25563,24 +25563,6 @@
       "longitude": 30.159315649889958
     },
     {
-      "isim": "Emirdağ Öğretmen Evi ve Akşam Sanat Okulu",
-      "tip": "Öğretmenevi",
-      "il": "Afyonkarahisar",
-      "adres": "Yeni Mahallesi, Eskişehir Caddesi No:56, Emirdağ/Afyonkarahisar",
-      "telefon": "(0272) 441 23 41",
-      "latitude": 39.0221293302068,
-      "longitude": 31.15225716527995
-    },
-    {
-      "isim": "İscehisar Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Afyonkarahisar",
-      "adres": "Eski Hamam Mahallesi, Afyon Caddesi, Özel İdare İşhanı Kat: 4/5, İscehisar-Afyonkarahisar",
-      "telefon": "02725125035",
-      "latitude": 38.86107741053074,
-      "longitude": 30.7487380824639
-    },
-    {
       "isim": "Afyon Öğretmenevi",
       "tip": "Öğretmenevi",
       "il": "Afyonkarahisar",
@@ -25615,15 +25597,6 @@
       "telefon": "(0272) 252 54 54",
       "latitude": 38.78870603803529,
       "longitude": 30.462915524789057
-    },
-    {
-      "isim": "Afyon Dsi Misafirhanesi",
-      "tip": "DSİ Misafirhanesi",
-      "il": "Afyonkarahisar",
-      "adres": "Zafer Mahallesi, Adnan Menderes Bulvarı No:40, Afyonkarahisar Merkez",
-      "telefon": "(0272) 216 85 65",
-      "latitude": 38.742133285374756,
-      "longitude": 30.556737097800507
     },
     {
       "isim": "Afyon Kocatepe Üniversitesi Konuk Evi",
@@ -25689,15 +25662,6 @@
       "telefon": "(0472) 215 29 76",
       "latitude": 39.71406069886244,
       "longitude": 43.011093497849494
-    },
-    {
-      "isim": "Ağrı Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Ağrı",
-      "adres": "Atatürk, Özgür Azer Kurak Cad., Özel İdare İş Hanı, 04900 Diyadin/Ağrı",
-      "telefon": "04722152889",
-      "latitude": 39.72112312513804,
-      "longitude": 43.0502427727
     },
     {
       "isim": "Eleşkirt Ögretmenevi Ve Akşam Sanat Okulu",
@@ -26136,15 +26100,6 @@
       "longitude": 32.79715262381375
     },
     {
-      "isim": "Ankara Yıldırım Beyazıt Üniversitesi Misafirhanesi",
-      "tip": "Üniversite Misafirhanesi",
-      "il": "Ankara",
-      "adres": "İncirli Mahallesi, Ahmet Şevik Kolaylı Caddesi, 97. Sokak No:7, İncirli, Keçiören, Ankara",
-      "telefon": "(0312) 906 20 00",
-      "latitude": 39.98762039571768,
-      "longitude": 32.84154936518537
-    },
-    {
       "isim": "Belediye - İş Sendikası Konuk Evi",
       "tip": "Sendika Tesisi",
       "il": "Ankara",
@@ -26233,24 +26188,6 @@
       "telefon": "(0312) 476 14 30",
       "latitude": 39.866553698182436,
       "longitude": 32.82269043819443
-    },
-    {
-      "isim": "Hacettepe Hastanesi Misafirhanesi",
-      "tip": "Hastane Misafirhanesi",
-      "il": "Ankara",
-      "adres": "Hacettepe Üniversitesi Sıhhiye Yerleşkesi Konukevi-1 Birimi, 06100 Sıhhiye, Ankara",
-      "telefon": "(0312) 305 15 78",
-      "latitude": 39.93055540176522,
-      "longitude": 32.8628621693115
-    },
-    {
-      "isim": "Halkbank Misafirhanesi",
-      "tip": "Banka Misafirhanesi",
-      "il": "Ankara",
-      "adres": "Dr. Mediha Eldem Sk., Kocatepe, Çankaya, Ankara",
-      "telefon": "03124331015",
-      "latitude": 39.92010521080008,
-      "longitude": 32.85998372470575
     },
     {
       "isim": "İlksan Ankara Konukevi",
@@ -26451,15 +26388,6 @@
       "longitude": 32.88026245975405
     },
     {
-      "isim": "Devlet Malzeme Ofisi Misafirhanesi",
-      "tip": "TCDD Misafirhanesi",
-      "il": "Ankara",
-      "adres": "TCDD Misafirhanesi, 2. Bölge, Tren Garı, Ankara",
-      "telefon": "03124103448",
-      "latitude": 40.07132784018508,
-      "longitude": 32.79237183820034
-    },
-    {
       "isim": "Demiryol İş Misafirhanesi",
       "tip": "TCDD Misafirhanesi",
       "il": "Ankara",
@@ -26613,15 +26541,6 @@
       "longitude": 35.84302089789846
     },
     {
-      "isim": "Amasya İl Özel İdaresi Misafirhanesi",
-      "tip": "İl Özel İdaresi Misafirhanesi",
-      "il": "Amasya",
-      "adres": "Sofular Mahallesi, Saraydüzü Cad., Piller Sk. No:1, Amasya",
-      "telefon": "0 358 218 23 58",
-      "latitude": 40.652902221592086,
-      "longitude": 35.83697086721289
-    },
-    {
       "isim": "Amasya Orman Bölge Müdürlüğü Misafirhanesi",
       "tip": "Orman Misafirhanesi",
       "il": "Amasya",
@@ -26674,15 +26593,6 @@
       "telefon": "0 242 349 39 00",
       "latitude": 36.85427486890357,
       "longitude": 30.793932036338187
-    },
-    {
-      "isim": "Side Eğitim Ve Dinlenme Merkezi",
-      "tip": "Orduevi",
-      "il": "Antalya",
-      "adres": "Manavgat-Side",
-      "telefon": "0 242 763 67 58",
-      "latitude": 36.81334089319713,
-      "longitude": 31.32540997284317
     },
     {
       "isim": "Akdeniz Üniversitesi Sosyal Tesisler",
@@ -38263,15 +38173,6 @@
       "longitude": 30.736942
     },
     {
-      "isim": "Antalya Manavgat Maliye Misafirhanesi",
-      "tip": "Maliye Misafirhanesi",
-      "il": "Antalya",
-      "adres": "Aşağı Pazarcı Mah., 1001.Sk.-Manavgat/ANTALYA",
-      "telefon": "(0242) 742 05 76",
-      "latitude": 36.7843137,
-      "longitude": 31.4508348
-    },
-    {
       "isim": "Bingöl Kışla Gazino Md.lüğü",
       "tip": "Orduevi",
       "il": "Bingöl",
@@ -41390,7 +41291,7 @@
       "tip": "Karayolları Misafirhanesi",
       "il": "Van",
       "adres": "Akköprü Mah., Şantiye Yolu Sk., No.:8, D.:11-Edremit/VAN",
-      "telefon": "(0432) 485 10 50",
+      "telefon": "0 432 485 70 88",
       "latitude": 38.5134838,
       "longitude": 43.3938156
     },
