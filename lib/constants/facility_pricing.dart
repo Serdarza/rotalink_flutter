@@ -59,8 +59,8 @@ abstract final class FacilityPricing {
   static const nationwideTitle = 'Fiyata göre';
   static const nationwideSubtitle = 'Türkiye geneli';
   static const nationwideEmpty = 'Fiyatı bilinen konaklama tesisi bulunamadı.';
-  static const nationwideSortLow = 'Düşükten yükseğe';
-  static const nationwideSortHigh = 'Yüksekten düşüğe';
+  static const nationwideSortLow = 'Fiyat artan';
+  static const nationwideSortHigh = 'Fiyat azalan';
   static const nationwideSortNear = 'Yakından uzağa';
   static const nationwideTeaserTitle = 'En uygun konaklamalar Pro’da';
   static const nationwideTeaserBody =

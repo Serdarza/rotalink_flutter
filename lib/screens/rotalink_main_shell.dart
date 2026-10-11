@@ -51,6 +51,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   Timer? _proSupportTimer;
   bool _showProSupportBanner = false;
   bool _proSupportScheduled = false;
+  bool _proSupportDelayElapsed = false;
 
   @override
   void initState() {
@@ -103,10 +104,6 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
         }
       });
     }
-    // Onboarding bittikten sonra bekleyen banner’ı gösterebiliriz.
-    if (!_onboarding.active) {
-      unawaited(_tryShowProSupportBanner());
-    }
   }
 
   void _onProChanged() {
@@ -121,12 +118,14 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     _proSupportScheduled = true;
     _proSupportTimer?.cancel();
     _proSupportTimer = Timer(ProSupportBannerPrefs.sessionDelay, () {
+      _proSupportDelayElapsed = true;
       unawaited(_tryShowProSupportBanner());
     });
   }
 
   Future<void> _tryShowProSupportBanner() async {
     if (!mounted || _showProSupportBanner) return;
+    if (!_proSupportDelayElapsed) return;
     if (ProService.instance.hasProAccess) return;
     if (_onboarding.active) return;
     if (await ProSupportBannerPrefs.wasShownToday()) return;
@@ -148,13 +147,9 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   }
 
   Future<void> _maybeStartOnboarding() async {
-    if (!await OnboardingPrefs.shouldShow()) return;
-    if (!mounted) return;
-    // Web linkiyle açıldıysa içeriği bozmasın; tanıtım sonraki açılışta.
-    if (DeepLinkService.instance.openedFromLink) return;
-    _goHome();
-    if (!mounted) return;
-    _onboarding.start();
+    if (await OnboardingPrefs.shouldShow()) {
+      await OnboardingPrefs.markCompleted();
+    }
   }
 
   @override
@@ -176,9 +171,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     );
     setState(() {
       _selected = RotalinkBottomNavItem.home;
-      // Mevcut tanıtım hedefleri harita üzerindedir; ilk açılış turunun
-      // davranışını bozmadan tur bittiğinde yeni ana sayfaya dön.
-      _showDashboard = !_onboarding.active;
+      _showDashboard = true;
       _showSearchHub = false;
       _showFavoritesHub = false;
     });
