@@ -42,7 +42,7 @@ class FacilityTypeFilterChips extends ConsumerWidget {
               side: BorderSide(
                 color: active == kFacilityTypeFilterOptions[i]
                     ? theme.colorScheme.primary
-                    : const Color(0x33007B8F),
+                    : AppColors.border,
               ),
               padding: const EdgeInsets.symmetric(horizontal: 4),
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,

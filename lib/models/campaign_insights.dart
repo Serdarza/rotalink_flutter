@@ -4,19 +4,20 @@ import 'campaign.dart';
 
 /// Keşfet filtresindeki kamu personeli grupları.
 enum CampaignAudience {
-  teacher('Öğretmen', Icons.school_outlined),
-  health('Sağlık', Icons.nightlight_outlined),
-  police('Emniyet', Icons.local_police_outlined),
-  military('TSK', Icons.military_tech_outlined),
-  gendarmerie('Jandarma', Icons.shield_outlined),
-  academic('Akademisyen', Icons.account_balance_outlined),
-  municipal('Belediye', Icons.location_city_outlined),
-  publicGeneral('Tüm Kamu', Icons.badge_outlined);
+  teacher('Öğretmen', Icons.school_outlined, Color(0xFF2E7D32)),
+  health('Sağlık', Icons.nightlight_outlined, Color(0xFFC62828)),
+  police('Emniyet', Icons.local_police_outlined, Color(0xFF1565C0)),
+  military('TSK', Icons.military_tech_outlined, Color(0xFF5D4037)),
+  gendarmerie('Jandarma', Icons.shield_outlined, Color(0xFF33691E)),
+  academic('Akademisyen', Icons.account_balance_outlined, Color(0xFF6A1B9A)),
+  municipal('Belediye', Icons.location_city_outlined, Color(0xFFEF6C00)),
+  publicGeneral('Tüm Kamu', Icons.badge_outlined, Color(0xFF007B8F));
 
-  const CampaignAudience(this.label, this.icon);
+  const CampaignAudience(this.label, this.icon, this.color);
 
   final String label;
   final IconData icon;
+  final Color color;
 
   static CampaignAudience? byName(String? name) {
     for (final a in values) {
@@ -38,6 +39,15 @@ class CampaignInsights {
 
   /// Kampanyanın hitap ettiği gruplar. [CampaignAudience.publicGeneral] tüm kamu personelini kapsar.
   final Set<CampaignAudience> audiences;
+
+  /// Kart rengi için en özel grup; yoksa tüm kamu.
+  CampaignAudience get primaryAudience {
+    for (final a in CampaignAudience.values) {
+      if (a == CampaignAudience.publicGeneral) continue;
+      if (audiences.contains(a)) return a;
+    }
+    return CampaignAudience.publicGeneral;
+  }
 
   /// Sendika / konfederasyon üyelerine özel kampanya.
   final bool isUnionOffer;

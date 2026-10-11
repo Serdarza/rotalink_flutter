@@ -229,7 +229,7 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
             _mapRow(
               iconBg: const Color(0xFF2E7D32),
               iconColor: Colors.white,
-              leading: const _EmergencyHilalIcon(),
+              leading: const EmergencyHilalIcon(),
               title: 'Nöbetçi Eczane',
               subtitle: 'En yakın nöbetçi eczaneleri bul',
               onTap: () => unawaited(_openMaps('nöbetçi eczane')),
@@ -238,7 +238,7 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
             _mapRow(
               iconBg: const Color(0xFFD32F2F),
               iconColor: Colors.white,
-              leading: const _EmergencyHilalIcon(),
+              leading: const EmergencyHilalIcon(),
               title: 'Acil Servis',
               subtitle: 'En yakın acil servisi bul ve yol al',
               onTap: () => unawaited(_openMaps('acil servis hastane')),
@@ -442,15 +442,22 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
   }
 }
 
-/// Acil sayfasında nöbetçi eczane / acil servis satırlarında artı yerine hilal.
-class _EmergencyHilalIcon extends StatelessWidget {
-  const _EmergencyHilalIcon();
+/// Acil yardım / eczane satırlarında kullanılan kızılay hilali.
+class EmergencyHilalIcon extends StatelessWidget {
+  const EmergencyHilalIcon({
+    super.key,
+    this.size = 26,
+    this.color = Colors.white,
+  });
+
+  final double size;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return const CustomPaint(
-      size: Size(26, 26),
-      painter: _HilalPainter(color: Colors.white),
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _HilalPainter(color: color),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,6 +12,7 @@ import '../billing/pro_service.dart';
 import '../constants/store_links.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
+import '../theme/system_ui.dart';
 
 /// Rotalink Pro — ücretli özellikler ve uygulamanın geliştirilmesine destek.
 class ProScreen extends StatefulWidget {
@@ -115,8 +117,18 @@ class _ProScreenState extends State<ProScreen> {
     final bottomInset = RotalinkShellScope.scrollBottomPadding(context);
     final muted = _mutedText(context);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Rotalink Pro')),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
+      child: Scaffold(
+        backgroundColor: AppColors.canvasOf(context),
+        appBar: AppBar(
+          title: const Text('Rotalink Pro'),
+          backgroundColor: AppColors.surfaceOf(context),
+          foregroundColor: AppColors.textStrongOf(context),
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
+        ),
       body: ValueListenableBuilder<bool>(
         valueListenable: _pro.isPro,
         builder: (context, isPro, _) {
@@ -174,6 +186,7 @@ class _ProScreenState extends State<ProScreen> {
           );
         },
       ),
+    ),
     );
   }
 }
@@ -248,12 +261,12 @@ class _Hero extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.primary, Color(0xFF00566B)],
+          colors: [Color(0xFFF6C343), Color(0xFFE09A12), Color(0xFFC47A00)],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.28),
+            color: const Color(0xFFE09A12).withValues(alpha: 0.32),
             blurRadius: 18,
             offset: const Offset(0, 8),
           ),
@@ -300,8 +313,8 @@ class _Hero extends StatelessWidget {
                       'özellikleri hesabınızda açık.'
                 : 'Konaklamada doğru fiyatı görün, bütçenize uygun tesisi '
                       'saniyeler içinde bulun.',
-            style: const TextStyle(
-              color: Color(0xFFD7F3F6),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.92),
               fontSize: 14,
               height: 1.45,
             ),
@@ -367,16 +380,12 @@ class _SupportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = isDark ? const Color(0xFFFDA4AF) : const Color(0xFFE11D48);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF3B1620) : const Color(0xFFFFF1F2),
+        color: AppColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark ? const Color(0xFF6B2536) : const Color(0xFFFECDD3),
-        ),
+        border: Border.all(color: AppColors.borderOf(context)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -385,10 +394,16 @@ class _SupportCard extends StatelessWidget {
             width: 38,
             height: 38,
             decoration: BoxDecoration(
-              color: accent.withValues(alpha: 0.14),
+              color: AppColors.isDark(context)
+                  ? AppColors.darkPrimarySoft
+                  : AppColors.primarySoft,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(Icons.favorite_rounded, color: accent, size: 20),
+            child: const Icon(
+              Icons.favorite_rounded,
+              color: AppColors.primary,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -399,13 +414,7 @@ class _SupportCard extends StatelessWidget {
                   isPro
                       ? 'Desteğiniz Rotalink\'i büyütüyor'
                       : 'Reklam yok, desteğiniz var',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: isDark
-                        ? const Color(0xFFFFE4E6)
-                        : const Color(0xFF881337),
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -417,12 +426,8 @@ class _SupportCard extends StatelessWidget {
                             'fiyatları güncel tutmak, yeni özellikler geliştirmek ve '
                             'sunucu giderlerini karşılamak Pro üyelerimizin '
                             'desteğiyle mümkün oluyor.',
-                  style: TextStyle(
-                    fontSize: 13,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     height: 1.5,
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.75)
-                        : const Color(0xFF9F1239),
                   ),
                 ),
               ],
@@ -443,11 +448,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
-        fontSize: 17,
-        fontWeight: FontWeight.w800,
-        letterSpacing: -0.1,
-      ),
+      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 18),
     );
   }
 }
@@ -471,17 +472,12 @@ class _BenefitTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : AppColors.primary.withValues(alpha: 0.14),
-        ),
+        color: AppColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderOf(context)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -490,7 +486,9 @@ class _BenefitTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: isDark ? 0.22 : 0.10),
+              color: AppColors.isDark(context)
+                  ? AppColors.darkPrimarySoft
+                  : AppColors.primarySoft,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(benefit.icon, size: 21, color: AppColors.primary),
@@ -724,7 +722,7 @@ class _PlanOption extends StatelessWidget {
       child: Material(
         color: selected
             ? AppColors.primary.withValues(alpha: isDark ? 0.16 : 0.06)
-            : Colors.transparent,
+            : AppColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
@@ -830,24 +828,20 @@ class _PlansUnavailable extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF7E6),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFF0C36D)),
+        color: AppColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.borderOf(context)),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info_outline, color: Color(0xFF8A6100), size: 22),
-          SizedBox(width: 12),
+          const Icon(Icons.info_outline, color: AppColors.warning, size: 22),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
               'Abonelik planları şu anda yüklenemedi. İnternet bağlantınızı '
               'kontrol edip tekrar deneyin.',
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.45,
-                color: Color(0xFF6B4E00),
-              ),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.45),
             ),
           ),
         ],
@@ -1139,13 +1133,9 @@ class _GiftCodeCardState extends State<_GiftCodeCard> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white,
+        color: AppColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : AppColors.primary.withValues(alpha: 0.18),
-        ),
+        border: Border.all(color: AppColors.borderOf(context)),
       ),
       child: ValueListenableBuilder<DateTime?>(
         valueListenable: widget.pro.giftEndsAt,

@@ -118,10 +118,10 @@ class _IlSearchSheetBodyState extends State<_IlSearchSheetBody> {
                         Expanded(
                           child: Text(
                             widget.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                              color: AppColors.textStrongOf(context),
                             ),
                           ),
                         ),
@@ -147,10 +147,10 @@ class _IlSearchSheetBodyState extends State<_IlSearchSheetBody> {
                           ),
                           label: Text(
                             '${AppStrings.routePlanSelectedIlChip}: ${widget.currentSelection!.trim()}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
-                              color: AppColors.textPrimary,
+                              color: AppColors.textStrongOf(context),
                             ),
                           ),
                           backgroundColor: AppColors.selectedBackground.withValues(alpha: 0.4),
@@ -170,7 +170,7 @@ class _IlSearchSheetBodyState extends State<_IlSearchSheetBody> {
                       AppStrings.routePlanSearchIlLabel,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary.withValues(alpha: 0.85),
+                            color: AppColors.textStrongOf(context).withValues(alpha: 0.85),
                           ),
                     ),
                   ),
@@ -230,9 +230,9 @@ class _IlSearchSheetBodyState extends State<_IlSearchSheetBody> {
                                 ),
                                 title: Text(
                                   il,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
+                                    color: AppColors.textStrongOf(context),
                                   ),
                                 ),
                                 trailing: sel

@@ -53,8 +53,8 @@ android {
 
     packaging {
         jniLibs {
-            // Bazı OEM’lerde sıkıştırılmamış .so + ADB aktarımında imza doğrulama hatası azalır.
-            useLegacyPackaging = true
+            // Play 16 KB sayfa boyutu: sıkıştırılmış .so hizalamayı bozar.
+            useLegacyPackaging = false
         }
     }
 

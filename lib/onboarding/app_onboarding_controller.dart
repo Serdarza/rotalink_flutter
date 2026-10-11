@@ -111,7 +111,7 @@ class AppOnboardingController extends ChangeNotifier {
       ensureHome: true,
     ),
     OnboardingStep(
-      title: 'Keşfet',
+      title: 'Kampanya',
       body:
           'Personel indirimleri, kampanyalar ve fırsatlar burada. İl veya kurum adıyla arayıp detaylara ve bağlantılara gidebilirsiniz.',
       icon: Icons.card_giftcard_rounded,
@@ -120,7 +120,7 @@ class AppOnboardingController extends ChangeNotifier {
       ensureHome: true,
     ),
     OnboardingStep(
-      title: 'Rota planla',
+      title: 'Rota',
       body:
           'Çok duraklı yolculuk planlayın. Her şehir için misafirhane, gezi ve yemek önerileri; rotayı haritada görüntüleyip kaydedin.',
       icon: Icons.alt_route_rounded,

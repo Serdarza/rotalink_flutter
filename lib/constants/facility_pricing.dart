@@ -56,6 +56,19 @@ abstract final class FacilityPricing {
   static const sortPrice = 'Ucuzdan pahalıya';
   static const unverifiedPrice = 'Teyit gerekli';
   static String unpricedHeader(int n) => 'Fiyat bilgisi olmayan tesisler ($n)';
+  static const nationwideTitle = 'Fiyata göre';
+  static const nationwideSubtitle = 'Türkiye geneli';
+  static const nationwideEmpty = 'Fiyatı bilinen konaklama tesisi bulunamadı.';
+  static const nationwideSortLow = 'Düşükten yükseğe';
+  static const nationwideSortHigh = 'Yüksekten düşüğe';
+  static const nationwideSortNear = 'Yakından uzağa';
+  static const nationwideTeaserTitle = 'En uygun konaklamalar Pro’da';
+  static const nationwideTeaserBody =
+      'Hangi tesisin daha uygun olduğu ve tutarlar yalnızca Pro’da görünür.';
+  static String nationwideTeaserCount(int tesis, int il) =>
+      'Fiyatı bilinen $tesis tesis · $il il';
+  static const nationwideTeaserCta = 'Pro ile sıralamayı aç';
+
   static const sortTeaserTitle = 'Fiyata göre sıralama Pro’da';
   static String sortTeaserCount(int n) =>
       'Bu aramada $n tesisin fiyatı mevcut.';

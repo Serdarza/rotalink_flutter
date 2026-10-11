@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../data/firebase_rota_repository.dart';
@@ -10,6 +11,7 @@ import '../models/route_plan_outcome.dart';
 import '../route/route_planning_notifier.dart';
 import '../screens/route_plan_advice_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/system_ui.dart';
 import '../widgets/route_plan/route_plan_city_input.dart';
 /// 1. adım: iller + günler. 2. adım tavsiye ekranına gider.
 class RoutePlanScreen extends StatelessWidget {
@@ -119,9 +121,11 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
         ? 16.0
         : 24.0 + MediaQuery.viewPaddingOf(context).bottom;
 
-    return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
+      child: Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: const Color(0xFFF4F7F8),
+      backgroundColor: AppColors.canvasOf(context),
       appBar: AppBar(
         leading: widget.embeddedInShell
             ? null
@@ -131,8 +135,9 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
               ),
         automaticallyImplyLeading: !widget.embeddedInShell,
         title: const Text(AppStrings.routePlanTitle),
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.surfaceOf(context),
+        foregroundColor: AppColors.textStrongOf(context),
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
         actions: [
           StreamBuilder<RotaDataState>(
@@ -189,12 +194,12 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                           child: ListView(
                             padding: EdgeInsets.fromLTRB(16, 16, 16, listBottomPad),
                             children: [
-                              const Text(
+                              Text(
                                 'Nereden nereye?',
                                 style: TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.w800,
-                                  color: AppColors.textPrimary,
+                                  color: AppColors.textStrongOf(context),
                                 ),
                               ),
                               const SizedBox(height: 18),
@@ -310,9 +315,10 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                                                     labelText:
                                                         'Varışta kaç gün kalacaksınız?',
                                                     filled: true,
-                                                    fillColor: AppColors
-                                                        .suggestionFieldBg
-                                                        .withValues(alpha: 0.65),
+                                                    fillColor: AppColors.isDark(context)
+                                                        ? AppColors.darkCanvas
+                                                        : AppColors.suggestionFieldBg
+                                                            .withValues(alpha: 0.65),
                                                     border: OutlineInputBorder(
                                                       borderRadius:
                                                           BorderRadius.circular(
@@ -392,6 +398,7 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
             );
           },
         ),
+    ),
     );
   }
 }
@@ -404,7 +411,7 @@ class _WhiteCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surfaceOf(context),
       borderRadius: BorderRadius.circular(_RoutePlanCitiesPageState._cardRadius),
       clipBehavior: Clip.antiAlias,
       child: Padding(
@@ -431,10 +438,16 @@ class _SavedCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Material(
-        color: Colors.white,
+        color: AppColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(14),
         child: ListTile(
-          title: Text(record.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+          title: Text(
+            record.name,
+            style: TextStyle(
+              fontWeight: FontWeight.w700,
+              color: AppColors.textStrongOf(context),
+            ),
+          ),
           subtitle: Text(
             record.stops.map((s) => s.city).join(' → '),
             maxLines: 2,

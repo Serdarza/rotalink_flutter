@@ -20,6 +20,7 @@ import '../data/app_rating_prefs.dart';
 import '../data/facility_address_repository.dart';
 import '../data/favorites_repository.dart';
 import '../data/firebase_rota_repository.dart';
+import '../data/recent_search_store.dart';
 import '../deeplink/deep_link_service.dart';
 import '../deeplink/deep_link_target.dart';
 import '../providers/rota_data_provider.dart';
@@ -67,6 +68,7 @@ import '../widgets/misafirhane_marker_info_popup.dart';
 import '../widgets/misafirhane_search_results_sheet.dart';
 import '../widgets/rotalink_tile_layer.dart';
 import '../widgets/map_weather_chip.dart';
+import '../widgets/rotalink_pro_chip.dart';
 import '../widgets/weather_bottom_sheet.dart';
 import '../widgets/drawer_social_section.dart';
 import '../services/review_repository.dart';
@@ -340,8 +342,59 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     bridge.openFavorites = _openFavoritesTab;
     bridge.openSearch = (ctx, data) =>
         _openSearchFromBottomNav(ctx, data ?? _cachedRotaData);
+    bridge.openSearchQuery = (ctx, query) async {
+      final data = _cachedRotaData;
+      if (data == null) {
+        _toast(ctx, AppStrings.mapDataLoading);
+        return;
+      }
+      _searchController.text = query.trim();
+      await _performSearch(ctx, data);
+      await _waitUntilSearchResultsVisible();
+    };
+    bridge.openCategory = _openCategoryFromDashboard;
     bridge.openRoutePlan = _openRoutePlanning;
+    bridge.applyRoutePlan = (outcome) async {
+      final data = _cachedRotaData;
+      if (data == null || !mounted) return;
+      await _applyRoutePlan(
+        context,
+        data,
+        outcome.stops,
+        precomputedSegments: outcome.segments,
+      );
+    };
+    bridge.openMenu = () => _scaffoldKey.currentState?.openDrawer();
+    bridge.openWeather = (ctx) => showWeatherBottomSheet(ctx);
+    bridge.openEmergency = (ctx) => showEmergencyBottomSheet(ctx);
+    bridge.hasActiveOverlay = () => _hasMainMapUiOverlay;
     bridge.handleSystemBack = _handleSystemBack;
+  }
+
+  Future<void> _openCategoryFromDashboard(
+    BuildContext context,
+    int tabIndex,
+  ) async {
+    final data = _cachedRotaData;
+    if (data == null) {
+      _toast(context, AppStrings.mapDataLoading);
+      return;
+    }
+    _popupController.hideAllPopups();
+    _searchController.clear();
+    setState(() {
+      _favoritesBrowseActive = false;
+      _mainMapFocusedCity = null;
+      _markerOverride = null;
+      _mapPreviewFacility = null;
+    });
+    final safeTabIndex = tabIndex < 0 ? 0 : (tabIndex > 5 ? 5 : tabIndex);
+    await _openTabbedSearchResults(
+      context,
+      data,
+      data.misafirhaneler,
+      initialTabIndex: safeTabIndex,
+    );
   }
 
   @override
@@ -401,7 +454,12 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     final open = await HolidayNotificationScheduler.consumePendingOpenHolidaysNavigation();
     final target = route ?? (open ? RotalinkShellRoutes.holidays : null);
     if (target == null || !mounted || !context.mounted) return;
-    await Navigator.of(context).pushNamed(target);
+    widget.navBridge?.onExternalSurfaceChanged?.call(true);
+    try {
+      await Navigator.of(context).pushNamed(target);
+    } finally {
+      widget.navBridge?.onExternalSurfaceChanged?.call(false);
+    }
   }
 
   Future<void> _checkForUpdate() async {
@@ -1399,6 +1457,20 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
         liveFavoriteList: true,
       );
     });
+    await WidgetsBinding.instance.endOfFrame;
+    await Future<void>.delayed(const Duration(milliseconds: 80));
+  }
+
+  /// Dashboard üstünde kalırken sonuç paneli çizilene kadar bekle.
+  Future<void> _waitUntilSearchResultsVisible() async {
+    if (_inlineTabbedSearchOpen) return;
+    if (_markerOverride == null || _markerOverride!.isEmpty) return;
+    final deadline = DateTime.now().add(const Duration(milliseconds: 1400));
+    while (mounted &&
+        !_inlineTabbedSearchOpen &&
+        DateTime.now().isBefore(deadline)) {
+      await Future<void>.delayed(const Duration(milliseconds: 32));
+    }
   }
 
   Future<void> _openSearchFromBottomNav(
@@ -1755,6 +1827,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       misafirhaneler: data.misafirhaneler,
     );
     final words = MainMapSearch.queryWords(_searchController.text);
+    if (words.isNotEmpty) {
+      unawaited(RecentSearchStore.instance.add(_searchController.text));
+    }
     if (words.isEmpty) {
       setState(() {
         readyToExit = false;
@@ -2092,7 +2167,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
+      child: Scaffold(
       key: _scaffoldKey,
       resizeToAvoidBottomInset: false,
       drawer: _buildDrawer(context),
@@ -2570,8 +2647,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const _ToolbarProButton(),
-                            const SizedBox(width: 8),
                             KeyedSubtree(
                               key: onboarding?.targetKey(OnboardingTarget.weather),
                               child: MapWeatherChip(
@@ -2585,6 +2660,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                                 rotaData: rotaForUi,
                               ),
                             ),
+                            const SizedBox(width: 8),
+                            const RotalinkProChip(),
                           ],
                         ),
                       ),
@@ -2617,6 +2694,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -3726,42 +3804,41 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            height: 180,
-            padding: const EdgeInsets.all(24),
+            height: 148,
+            padding: const EdgeInsets.fromLTRB(24, 36, 24, 20),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.drawerHeaderGradientStart,
-                  AppColors.drawerHeaderGradientEnd,
-                ],
-              ),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(28),
-                bottomRight: Radius.circular(28),
-              ),
+              color: AppColors.primarySoft,
+              border: Border(bottom: BorderSide(color: AppColors.border)),
             ),
-            child: const Align(
+            child: Align(
               alignment: Alignment.bottomLeft,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.asset(
+                      'assets/images/app_logo.png',
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  SizedBox(height: 10),
                   Text(
                     AppStrings.appName,
                     style: TextStyle(
-                      color: AppColors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 0.05,
+                      color: AppColors.textStrong,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   SizedBox(height: 4),
                   Text(
                     AppStrings.drawerSubtitle,
                     style: TextStyle(
-                      color: Color(0xFFB0E8EE),
+                      color: AppColors.textMuted,
                       fontSize: 13,
                     ),
                   ),
@@ -3865,7 +3942,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   }
 }
 
-/// Düz teal üst çubuk — yuvarlak köşe yok.
+/// Açık zeminli harita üst çubuğu — yeni ana sayfa ile aynı dil.
 class _RotalinkToolbar extends StatelessWidget {
   const _RotalinkToolbar({
     required this.onMenu,
@@ -3883,104 +3960,62 @@ class _RotalinkToolbar extends StatelessWidget {
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
     return Material(
-      elevation: 4,
-      color: AppColors.primary,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(4, top, 8, 0),
-        child: SizedBox(
-          height: kToolbarHeight,
-          child: Row(
-            children: [
-              KeyedSubtree(
-                key: menuAnchorKey,
-                child: IconButton(
-                  onPressed: onMenu,
-                  tooltip: AppStrings.menuOpen,
-                  icon: const Icon(Icons.menu, color: AppColors.white),
+      elevation: 0,
+      color: AppColors.surfaceOf(context),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.surfaceOf(context),
+          border: Border(bottom: BorderSide(color: AppColors.borderOf(context))),
+        ),
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(4, top, 8, 0),
+          child: SizedBox(
+            height: kToolbarHeight,
+            child: Row(
+              children: [
+                KeyedSubtree(
+                  key: menuAnchorKey,
+                  child: IconButton(
+                    onPressed: onMenu,
+                    tooltip: AppStrings.menuOpen,
+                    icon: Icon(Icons.menu_rounded, color: AppColors.textStrongOf(context)),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: InkWell(
-                    onTap: onTitleTap,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                      child: Text(
-                        AppStrings.appName,
-                        style: const TextStyle(
-                          color: AppColors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    'assets/images/app_logo.png',
+                    width: 28,
+                    height: 28,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: InkWell(
+                      onTap: onTitleTap,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                        child: Text(
+                          AppStrings.appName,
+                          style: TextStyle(
+                            color: AppColors.textStrongOf(context),
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              if (trailing != null) trailing!,
-            ],
+                if (trailing != null) trailing!,
+              ],
+            ),
           ),
         ),
       ),
-    );
-  }
-}
-
-/// Üst çubuk — hava durumunun solunda Pro girişi.
-class _ToolbarProButton extends StatelessWidget {
-  const _ToolbarProButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: ProService.instance.isPro,
-      builder: (context, isPro, _) {
-        return Tooltip(
-          message: isPro ? 'Rotalink Pro' : 'Fiyatları aç — Pro',
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () {
-                Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
-              },
-              borderRadius: BorderRadius.circular(14),
-              child: Ink(
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: isPro ? 0.22 : 0.14),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.28),
-                  ),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      isPro
-                          ? Icons.verified_outlined
-                          : Icons.workspace_premium_outlined,
-                      color: AppColors.white,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 4),
-                    const Text(
-                      'Pro',
-                      style: TextStyle(
-                        color: AppColors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

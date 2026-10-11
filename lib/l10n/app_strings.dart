@@ -23,7 +23,7 @@ abstract final class AppStrings {
   static const String bottomSearch = 'Ara';
   static const String bottomFavorites = 'Favorilerim';
   static const String favoritesEmpty = 'Favori listeniz boş.';
-  static const String bottomRoutePlan = 'Rota Planla';
+  static const String bottomRoutePlan = 'Rota';
 
   static const String routePlanTitle = 'Rota Planı Oluştur';
   static const String routePlanStartCity = 'Başlangıç şehri';
@@ -94,7 +94,7 @@ abstract final class AppStrings {
   static const String routePlanPreviewNoMetrics =
       'Canlı mesafe hesabına ulaşılamadı; haritada rota yine de çizilecek.';
   static const String routePlanInsufficientLocations = 'Rota için yeterli konum bulunamadı.';
-  static const String bottomDiscover = 'Keşfet';
+  static const String bottomDiscover = 'Kampanya';
   static const String drawerSubtitle = 'Akıllı Seyahat Rehberiniz';
   static const String drawerVersionPrefix = 'Sürüm: ';
 

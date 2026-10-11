@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 abstract final class ProSupportBannerPrefs {
   static const _kLastShownDay = 'rotalink_pro_support_banner_day';
 
+  static const sessionDelay = Duration(minutes: 1);
+
   static String _todayKey() {
     final n = DateTime.now();
     final m = n.month.toString().padLeft(2, '0');

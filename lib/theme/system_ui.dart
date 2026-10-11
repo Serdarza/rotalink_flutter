@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 /// Android 15+ (API 35/36) edge-to-edge uyumlu sistem çubuğu stili.
 ///
@@ -24,10 +25,20 @@ abstract final class RotalinkSystemUi {
     systemNavigationBarContrastEnforced: false,
   );
 
+  static SystemUiOverlayStyle forBrightness(Brightness brightness) {
+    return brightness == Brightness.dark ? lightIcons : darkIcons;
+  }
+
+  static SystemUiOverlayStyle forPlatform() {
+    return forBrightness(
+      WidgetsBinding.instance.platformDispatcher.platformBrightness,
+    );
+  }
+
   static Future<void> applyEdgeToEdge({
-    SystemUiOverlayStyle style = lightIcons,
+    SystemUiOverlayStyle? style,
   }) async {
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setSystemUIOverlayStyle(style);
+    SystemChrome.setSystemUIOverlayStyle(style ?? forPlatform());
   }
 }

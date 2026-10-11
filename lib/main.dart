@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
@@ -22,33 +23,51 @@ import 'theme/system_ui.dart';
 /// ısınması [runApp] sonrasına bırakılır.
 late final AnalyticsObserver analyticsObserver;
 
-Future<void> main() async {
-  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+final Stopwatch startupClock = Stopwatch();
 
-  // Yönlendirme UI'yı bloklamasın.
+void logStartup(String step) {
+  debugPrint('[açılış] $step ${startupClock.elapsedMilliseconds}ms');
+}
+
+Future<void> main() async {
+  startupClock.start();
+  WidgetsFlutterBinding.ensureInitialized();
+  logStartup('binding');
+
   unawaited(
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]),
   );
-  // API 35+: edge-to-edge; bar rengi deprecated API kullanılmadan.
   unawaited(RotalinkSystemUi.applyEdgeToEdge());
 
-  // Kritik: Firebase Core — harita / RTDB / splash buna ihtiyaç duyar.
+  analyticsObserver = AnalyticsObserver(FirebaseAnalyticsService.instance);
+  runApp(const ProviderScope(child: RotalinkApp()));
+  FlutterNativeSplash.remove();
+  logStartup('runApp');
+
+  unawaited(_startBackgroundServices());
+}
+
+/// Firebase ve diğer servisler ilk kareden sonra ısınır; açılışı bekletmez.
+Future<void> _startBackgroundServices() async {
   try {
     await initializeFirebase();
+    logStartup('firebase');
   } catch (e) {
     debugPrint('Firebase başlatılamadı: $e');
   }
-
-  analyticsObserver = AnalyticsObserver(FirebaseAnalyticsService.instance);
-
-  // rotalink.tr linkiyle açılış: hedef ana ekran veri yükleyince açılır.
   unawaited(DeepLinkService.instance.start());
-
-  runApp(const ProviderScope(child: RotalinkApp()));
-
-  // Analytics, abonelik, bildirim, tarih — ilk frame'den sonra.
+  unawaited(_requestRuntimePermissions());
   unawaited(_bootstrapSecondary());
+}
+
+Future<void> _requestRuntimePermissions() async {
+  await Future<void>.delayed(const Duration(seconds: 8));
+  try {
+    await FirebaseMessaging.instance.requestPermission();
+  } catch (_) {}
+  try {
+    await HolidayNotificationScheduler.requestPermissions();
+  } catch (_) {}
 }
 
 /// Açılış kritik yolunun dışında kalan servisler.

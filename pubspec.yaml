@@ -2,7 +2,7 @@ name: rotalink_flutter
 description: Rotalink — Flutter (Android + iOS), Kotlin uygulamasıyla aynı veri kaynağı.
 publish_to: 'none'
 
-version: 4.7.0+82
+version: 4.8.0+83
 
 environment:
   sdk: ^3.11.4
@@ -74,7 +74,6 @@ flutter_launcher_icons:
   remove_alpha_ios: true
 
 # dart run flutter_native_splash:create
-# İlk kare tam ekran kurumsal renk — Flutter splash ile aynı (#007B8F).
 flutter_native_splash:
   color: "#007B8F"
   android_gravity: center

@@ -4,6 +4,7 @@ import '../data/campaign_repository.dart';
 import '../data/facility_address_repository.dart';
 import '../data/facility_price_repository.dart';
 import '../data/gezi_yemek_repository.dart';
+import '../data/hediyelik_repository.dart';
 import '../data/kamp_repository.dart';
 import '../data/sosyal_menu_repository.dart';
 
@@ -16,5 +17,6 @@ Future<void> warmSecondaryData() async {
     GeziYemekRepository.instance.ensureLocalDataReady(),
     SosyalMenuRepository.instance.ensureLocalDataReady(),
     KampRepository.instance.ensureLoaded(),
+    HediyelikRepository.instance.ensureLoaded(),
   ]);
 }

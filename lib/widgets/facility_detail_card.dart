@@ -52,7 +52,7 @@ class FacilityDetailCard extends StatelessWidget {
     final brightness = Theme.of(context).brightness;
     final isDark = brightness == Brightness.dark;
 
-    final bg = isDark ? const Color(0xFF151A1C) : const Color(0xFFF7FAFB);
+    final bg = isDark ? const Color(0xFF151A1C) : AppColors.canvas;
     final cardBg = isDark ? const Color(0xFF1E2528) : Colors.white;
     final muted = isDark
         ? Colors.white.withValues(alpha: 0.55)
@@ -125,24 +125,10 @@ class FacilityDetailCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  TextButton(
-                    onPressed: onBack,
-                    style: TextButton.styleFrom(
-                      foregroundColor: muted,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 8,
-                      ),
-                      minimumSize: Size.zero,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text(
-                      'Kapat',
-                      style: TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+                  const Icon(
+                    Icons.bed_outlined,
+                    color: AppColors.primary,
+                    size: 22,
                   ),
                 ],
               ),
@@ -289,7 +275,7 @@ class FacilityDetailCard extends StatelessWidget {
                       children: [
                         _DetailAction(
                           icon: Icons.ios_share_rounded,
-                          color: const Color(0xFF039BE5),
+                          color: AppColors.primary,
                           label: 'Paylaş',
                           onTap: onShare,
                         ),
@@ -297,7 +283,7 @@ class FacilityDetailCard extends StatelessWidget {
                           icon: isFavorite
                               ? Icons.favorite_rounded
                               : Icons.favorite_border_rounded,
-                          color: const Color(0xFFC2185B),
+                          color: AppColors.primary,
                           label: 'Favori',
                           onTap: onFavorite,
                         ),
@@ -309,7 +295,7 @@ class FacilityDetailCard extends StatelessWidget {
                         ),
                         _DetailAction(
                           icon: Icons.chat_bubble_outline_rounded,
-                          color: const Color(0xFFE65100),
+                          color: AppColors.primary,
                           label: 'Yorum',
                           onTap: onReview,
                         ),
@@ -354,7 +340,7 @@ class FacilityDetailCard extends StatelessWidget {
                       child: _BottomButton(
                         icon: Icons.call_rounded,
                         label: 'Ara',
-                        color: const Color(0xFF2E7D32),
+                        color: AppColors.primary,
                         onPressed: onCall,
                       ),
                     ),

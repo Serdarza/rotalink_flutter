@@ -30,6 +30,7 @@ class RotalinkGlassBottomNav extends StatelessWidget {
 
   static const _barHeight = 64.0;
   static const _iconSize = 24.0;
+
   /// Material 3 [NavigationBar] etiket boyutu (12sp).
   static const _labelFontSize = 12.0;
 
@@ -42,14 +43,14 @@ class RotalinkGlassBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: AppColors.white,
+      color: AppColors.surfaceOf(context),
       elevation: 12,
-      shadowColor: Colors.black.withValues(alpha: 0.14),
+      shadowColor: Colors.black.withValues(alpha: AppColors.isDark(context) ? 0.4 : 0.14),
       child: SafeArea(
         top: false,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: AppColors.surfaceOf(context),
             border: Border(
               top: BorderSide(
                 color: AppColors.primary.withValues(alpha: 0.22),
@@ -75,7 +76,7 @@ class RotalinkGlassBottomNav extends StatelessWidget {
                   anchorKey: navTargetKeys[OnboardingTarget.navFavorites],
                 ),
                 _NavSlot(
-                  selected: false,
+                  selected: selected == RotalinkBottomNavItem.search,
                   icon: Icons.search_rounded,
                   label: AppStrings.bottomSearch,
                   onTap: onSearch,
@@ -139,18 +140,21 @@ class _NavSlot extends StatelessWidget {
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutCubic,
               padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 2),
+              margin: const EdgeInsets.symmetric(horizontal: 3, vertical: 5),
               decoration: BoxDecoration(
-                border: Border(
-                  top: BorderSide(
-                    color: selected ? AppColors.primary : Colors.transparent,
-                    width: 3,
-                  ),
-                ),
+                color: selected
+                    ? AppColors.primarySoftOf(context)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, color: color, size: RotalinkGlassBottomNav._iconSize),
+                  Icon(
+                    icon,
+                    color: color,
+                    size: RotalinkGlassBottomNav._iconSize,
+                  ),
                   const SizedBox(height: 4),
                   Text(
                     label,

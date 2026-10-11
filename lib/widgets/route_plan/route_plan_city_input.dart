@@ -140,7 +140,9 @@ class _IlAutocompleteFieldState extends State<IlAutocompleteField> {
               icon: const Icon(Icons.list_alt_rounded, color: AppColors.primary),
             ),
             filled: true,
-            fillColor: AppColors.suggestionFieldBg.withValues(alpha: 0.65),
+            fillColor: AppColors.isDark(context)
+                ? AppColors.darkCanvas
+                : AppColors.suggestionFieldBg.withValues(alpha: 0.65),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide.none,
@@ -178,7 +180,7 @@ class _IlAutocompleteFieldState extends State<IlAutocompleteField> {
             elevation: 4,
             borderRadius: BorderRadius.circular(12),
             clipBehavior: Clip.antiAlias,
-            color: Colors.white,
+            color: AppColors.surfaceOf(context),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxHeight: 180),
               child: ListView.separated(
@@ -195,7 +197,13 @@ class _IlAutocompleteFieldState extends State<IlAutocompleteField> {
                     dense: true,
                     visualDensity: VisualDensity.compact,
                     leading: Icon(Icons.location_city_rounded, size: 20, color: widget.iconColor),
-                    title: Text(city, style: const TextStyle(fontWeight: FontWeight.w600)),
+                    title: Text(
+                      city,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textStrongOf(context),
+                      ),
+                    ),
                     onTap: () => _commit(city),
                   );
                 },

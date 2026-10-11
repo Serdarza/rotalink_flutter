@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:share_plus/share_plus.dart';
@@ -14,6 +15,7 @@ import '../route/route_city_advice.dart';
 import '../route/route_enricher.dart';
 import '../services/osrm_route_service.dart';
 import '../theme/app_colors.dart';
+import '../theme/system_ui.dart';
 import '../utils/geo_helpers.dart';
 import '../utils/route_facility_lookup.dart';
 import '../utils/safe_map_coordinates.dart';
@@ -422,7 +424,7 @@ class _RoutePlanAdviceScreenState extends State<RoutePlanAdviceScreen> {
       return await showModalBottomSheet<T>(
         context: context,
         isScrollControlled: true,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surfaceOf(context),
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
@@ -487,7 +489,9 @@ class _RoutePlanAdviceScreenState extends State<RoutePlanAdviceScreen> {
                               hintText: 'Ara…',
                               prefixIcon: const Icon(Icons.search_rounded),
                               filled: true,
-                              fillColor: const Color(0xFFF5F9FA),
+                              fillColor: AppColors.isDark(ctx)
+                                  ? AppColors.darkCanvas
+                                  : const Color(0xFFF5F9FA),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14),
                                 borderSide: BorderSide.none,
@@ -512,8 +516,8 @@ class _RoutePlanAdviceScreenState extends State<RoutePlanAdviceScreen> {
                                         style: TextStyle(
                                           fontWeight: FontWeight.w600,
                                           color: already
-                                              ? AppColors.campaignSummaryMuted
-                                              : AppColors.textPrimary,
+                                              ? AppColors.textMutedOf(ctx)
+                                              : AppColors.textStrongOf(ctx),
                                         ),
                                       ),
                                       subtitle: subtitleOf(item).trim().isEmpty
@@ -628,8 +632,10 @@ class _RoutePlanAdviceScreenState extends State<RoutePlanAdviceScreen> {
         _catalogs.where((c) => c.role == RouteCityRole.arrival).toList();
     final skippedCount = _skippedCities.length;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F7F8),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
+      child: Scaffold(
+      backgroundColor: AppColors.canvasOf(context),
       appBar: AppBar(
         title: const Text('Rota tavsiyeleri'),
         backgroundColor: AppColors.primary,
@@ -847,6 +853,7 @@ class _RoutePlanAdviceScreenState extends State<RoutePlanAdviceScreen> {
                 ),
               ],
             ),
+    ),
     );
   }
 }
@@ -866,10 +873,10 @@ class _SectionTitle extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 17,
-              color: AppColors.textPrimary,
+              color: AppColors.textStrongOf(context),
             ),
           ),
           const SizedBox(height: 2),
@@ -903,7 +910,7 @@ class _HeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surfaceOf(context),
       borderRadius: BorderRadius.circular(16),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
@@ -912,10 +919,10 @@ class _HeaderCard extends StatelessWidget {
           children: [
             Text(
               '$start → $end',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w800,
                 fontSize: 16,
-                color: AppColors.textPrimary,
+                color: AppColors.textStrongOf(context),
                 height: 1.3,
               ),
             ),
@@ -978,7 +985,7 @@ class _CityCard extends StatelessWidget {
     final badgeColor = along ? const Color(0xFFEF6C00) : AppColors.primary;
 
     return Material(
-      color: Colors.white,
+      color: AppColors.surfaceOf(context),
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       child: Padding(
@@ -1008,10 +1015,10 @@ class _CityCard extends StatelessWidget {
                     children: [
                       Text(
                         catalog.city,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w800,
                           fontSize: 16,
-                          color: AppColors.textPrimary,
+                          color: AppColors.textStrongOf(context),
                         ),
                       ),
                       Text(
@@ -1169,7 +1176,9 @@ class _PickTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Material(
-        color: const Color(0xFFF6F8F9),
+        color: AppColors.isDark(context)
+            ? AppColors.darkCanvas
+            : const Color(0xFFF6F8F9),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),

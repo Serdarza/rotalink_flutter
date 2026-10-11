@@ -187,17 +187,14 @@ class _YorumScreenState extends State<YorumScreen> {
     return ScaffoldMessenger(
       key: _snackbarKey,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF0F4F5),
+        backgroundColor: AppColors.canvas,
         appBar: AppBar(
-          backgroundColor: _kTeal,
-          foregroundColor: Colors.white,
           title: Text(
             widget.facilityName,
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          elevation: 0,
         ),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),

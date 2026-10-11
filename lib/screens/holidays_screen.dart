@@ -239,9 +239,9 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F9FC),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFBBDEFB)),
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Text(
                   '2026–2027 milli ve dini tatiller ile açıklanan kamu idari izinleri. '

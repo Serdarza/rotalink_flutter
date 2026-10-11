@@ -149,11 +149,11 @@ class AboutScreen extends StatelessWidget {
 
                   Material(
 
-                    elevation: 6,
+                    elevation: 0,
 
-                    shadowColor: AppColors.primary.withValues(alpha: 0.35),
+                    color: AppColors.primarySoft,
 
-                    borderRadius: BorderRadius.zero,
+                    borderRadius: BorderRadius.circular(16),
 
                     clipBehavior: Clip.antiAlias,
 

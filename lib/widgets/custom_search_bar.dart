@@ -13,7 +13,7 @@ import '../utils/il_ilce.dart';
 const _kRadius = 24.0;
 const _kHeight = 56.0;
 const _kMaxWidth = 600.0;
-const _kBg = Color(0xFFF8F9FE); // Çok hafif soğuk beyaz
+const _kBg = AppColors.surface;
 const _kHintColor = Color(0xFF9E9E9E);
 
 // ── Widget ────────────────────────────────────────────────────────────────────
@@ -38,6 +38,7 @@ class CustomSearchBar extends StatefulWidget {
     this.onFilterPressed,
     this.onFocusChanged,
     this.ignoreKeyboardInset = false,
+    this.emphasized = false,
   });
 
   final TextEditingController controller;
@@ -61,6 +62,9 @@ class CustomSearchBar extends StatefulWidget {
 
   /// Klavye açılınca alt boşluk ekleme (ana harita sabit krom için true).
   final bool ignoreKeyboardInset;
+
+  /// Ana sayfada daha belirgin çerçeve ve gölge.
+  final bool emphasized;
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -334,6 +338,19 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
               offset: const Offset(0, 4),
             ),
           ]
+        : widget.emphasized
+        ? [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.22),
+              blurRadius: 18,
+              offset: const Offset(0, 5),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ]
         : [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
@@ -361,8 +378,15 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
               curve: Curves.easeOutCubic,
               height: _kHeight,
               decoration: BoxDecoration(
-                color: _kBg,
+                color: AppColors.isDark(context)
+                    ? AppColors.darkSurface
+                    : widget.emphasized
+                    ? const Color(0xFFF3FBFC)
+                    : _kBg,
                 borderRadius: BorderRadius.circular(_kRadius),
+                border: widget.emphasized
+                    ? Border.all(color: AppColors.primary, width: 1.6)
+                    : null,
                 boxShadow: shadow,
               ),
               child: ClipRRect(

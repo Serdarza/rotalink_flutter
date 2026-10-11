@@ -5,12 +5,10 @@ import '../constants/store_links.dart';
 import '../l10n/app_strings.dart';
 import '../theme/app_colors.dart';
 
-const _headerTop = Color(0xFF005F6B);
-const _headerBottom = Color(0xFF008898);
-const _pageBg = Color(0xFFF5FDFE);
-const _fieldBg = Color(0xFFFFFFFF);
-const _fieldText = Color(0xFF222222);
-const _sendBg = Color(0xFF007B8F);
+const _pageBg = AppColors.canvas;
+const _fieldBg = AppColors.surface;
+const _fieldText = AppColors.textStrong;
+const _sendBg = AppColors.primary;
 
 /// Kotlin [SuggestionActivity] + [activity_suggestion.xml].
 class SuggestionScreen extends StatefulWidget {
@@ -134,38 +132,32 @@ $suggestion'''
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Material(
-            elevation: 8,
-            borderRadius: const BorderRadius.vertical(
-              bottom: Radius.circular(28),
-            ),
+            color: AppColors.surface,
             child: Container(
               width: double.infinity,
               decoration: const BoxDecoration(
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(28),
-                ),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [_headerTop, _headerBottom],
-                ),
+                color: AppColors.surface,
+                border: Border(bottom: BorderSide(color: AppColors.border)),
               ),
-              padding: EdgeInsets.fromLTRB(8, top + 8, 8, 32),
+              padding: EdgeInsets.fromLTRB(8, top + 8, 8, 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back, color: AppColors.white),
+                    icon: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppColors.textStrong,
+                    ),
                   ),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       AppStrings.suggestionTitle,
                       style: TextStyle(
-                        color: AppColors.white,
+                        color: AppColors.textStrong,
                         fontSize: 24,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -174,7 +166,10 @@ $suggestion'''
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       AppStrings.suggestionSubtitle,
-                      style: TextStyle(color: Color(0xFFB0E8EE), fontSize: 14),
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 14,
+                      ),
                     ),
                   ),
                 ],
@@ -190,10 +185,10 @@ $suggestion'''
                 16 + MediaQuery.viewInsetsOf(context).bottom + MediaQuery.viewPaddingOf(context).bottom,
               ),
               child: Card(
-                elevation: 4,
                 color: _fieldBg,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
+                  side: const BorderSide(color: AppColors.border),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(20),

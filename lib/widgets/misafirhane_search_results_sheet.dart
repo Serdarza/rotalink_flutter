@@ -1503,7 +1503,7 @@ class MisafirhaneSearchResultsPanelState
       onTap: () => unawaited(_openFacilityDetail(m)),
       trailingCue: price != null
           ? FacilityNightPriceTag(price: price)
-          : _konaklamaDetailCue(),
+          : null,
     );
     final wrapped = flash
         ? _SearchHighlightFlash(
@@ -1514,42 +1514,6 @@ class MisafirhaneSearchResultsPanelState
           )
         : row;
     return KeyedSubtree(key: _keyForFacility(m), child: wrapped);
-  }
-
-  /// Konaklama satırı — karta geçişin anlaşılır olması için “Detay” ipucu.
-  Widget _konaklamaDetailCue() {
-    return Container(
-      margin: const EdgeInsets.only(left: 6),
-      padding: const EdgeInsets.fromLTRB(10, 7, 8, 7),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.09),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: AppColors.primary.withValues(alpha: 0.14),
-        ),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            'Detay',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.1,
-              height: 1,
-            ),
-          ),
-          SizedBox(width: 2),
-          Icon(
-            Icons.arrow_forward_rounded,
-            size: 15,
-            color: AppColors.primary,
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _geziYemekCompactRow(
@@ -1568,7 +1532,7 @@ class MisafirhaneSearchResultsPanelState
     final aciklama = g.aciklama.trim();
     final mapsQuery = '${g.il} ${g.isim}'.trim();
     final row = Material(
-      color: Colors.white,
+      color: AppColors.surface,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
         child: Column(
@@ -1582,18 +1546,8 @@ class MisafirhaneSearchResultsPanelState
                   height: 42,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.primary.withValues(alpha: 0.12),
-                        AppColors.primary.withValues(alpha: 0.05),
-                      ],
-                    ),
+                    color: AppColors.primarySoft,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.08),
-                    ),
                   ),
                   child: Icon(
                     isGezi
@@ -1611,11 +1565,10 @@ class MisafirhaneSearchResultsPanelState
                       Text(
                         g.isim,
                         style: const TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 15,
-                          height: 1.28,
+                          color: AppColors.textStrong,
+                          fontSize: 16,
+                          height: 1.25,
                           fontWeight: FontWeight.w600,
-                          letterSpacing: -0.2,
                         ),
                       ),
                       if (locationLine.isNotEmpty) ...[
@@ -1625,9 +1578,9 @@ class MisafirhaneSearchResultsPanelState
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Color(0xFF6B7C82),
-                            fontSize: 12.5,
-                            height: 1.25,
+                            color: AppColors.textMuted,
+                            fontSize: 12,
+                            height: 1.35,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -1643,11 +1596,10 @@ class MisafirhaneSearchResultsPanelState
                 aciklama,
                 softWrap: true,
                 style: const TextStyle(
-                  color: Color(0xFF455A64),
+                  color: AppColors.textMuted,
                   fontSize: 13,
-                  height: 1.45,
+                  height: 1.4,
                   fontWeight: FontWeight.w400,
-                  letterSpacing: -0.05,
                 ),
               ),
             ],
@@ -1725,7 +1677,7 @@ class MisafirhaneSearchResultsPanelState
     Widget? trailingCue,
   }) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surface,
       child: InkWell(
         onTap: onTap,
         splashColor: AppColors.primary.withValues(alpha: 0.06),
@@ -1740,18 +1692,8 @@ class MisafirhaneSearchResultsPanelState
                 height: 42,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.12),
-                      AppColors.primary.withValues(alpha: 0.05),
-                    ],
-                  ),
+                  color: AppColors.primarySoft,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.primary.withValues(alpha: 0.08),
-                  ),
                 ),
                 child: Icon(icon, size: 20, color: AppColors.primary),
               ),
@@ -1765,11 +1707,10 @@ class MisafirhaneSearchResultsPanelState
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 15,
-                        height: 1.28,
+                        color: AppColors.textStrong,
+                        fontSize: 16,
+                        height: 1.25,
                         fontWeight: FontWeight.w600,
-                        letterSpacing: -0.2,
                       ),
                     ),
                     if (subtitle != null && subtitle.isNotEmpty) ...[
@@ -1779,11 +1720,10 @@ class MisafirhaneSearchResultsPanelState
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          color: Color(0xFF6B7C82),
-                          fontSize: 12.5,
-                          height: 1.25,
+                          color: AppColors.textMuted,
+                          fontSize: 12,
+                          height: 1.35,
                           fontWeight: FontWeight.w500,
-                          letterSpacing: -0.05,
                         ),
                       ),
                     ],
@@ -1798,7 +1738,7 @@ class MisafirhaneSearchResultsPanelState
                     child: Icon(
                       Icons.chevron_right_rounded,
                       size: 22,
-                      color: Color(0xFFB0BEC5),
+                      color: AppColors.textMuted,
                     ),
                   ),
             ],
@@ -2159,7 +2099,7 @@ class MisafirhaneSearchResultsPanelState
     required VoidCallback onTap,
   }) {
     return Material(
-      color: const Color(0xFFF3F7F8),
+      color: AppColors.primarySoft,
       borderRadius: BorderRadius.circular(10),
       child: InkWell(
         onTap: onTap,
@@ -2536,7 +2476,7 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
               padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFEEF4F5),
+                  color: AppColors.surfaceMuted,
                   borderRadius: BorderRadius.circular(11),
                 ),
                 child: Padding(

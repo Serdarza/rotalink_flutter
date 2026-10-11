@@ -83,8 +83,6 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
       backgroundColor: AppColors.backgroundMain,
       appBar: AppBar(
         title: const Text('Kampanya'),
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
       ),
       body: SafeArea(
         top: false,

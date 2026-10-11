@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../data/campaign_filter_prefs.dart';
 import '../data/campaign_repository.dart';
@@ -8,11 +9,9 @@ import '../l10n/app_strings.dart';
 import '../models/campaign.dart';
 import '../models/campaign_insights.dart';
 import '../theme/app_colors.dart';
+import '../theme/system_ui.dart';
 import '../widgets/campaign_smart_icon.dart';
 import 'campaign_detail_screen.dart';
-
-const _headerTop = Color(0xFF005F6B);
-const _headerBottom = Color(0xFF008898);
 
 /// Kotlin [DiscoverActivity] + [DiscoverComposeScreen].
 class DiscoverScreen extends StatefulWidget {
@@ -59,6 +58,9 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   void initState() {
     super.initState();
+    unawaited(
+      RotalinkSystemUi.applyEdgeToEdge(),
+    );
     unawaited(
       CampaignFilterPrefs.getAudience().then((a) {
         if (mounted && a != null) _audience.value = a;
@@ -153,6 +155,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     required bool overlay,
     required List<Campaign> campaigns,
     required String emptyMsg,
+    required CampaignAudience? audience,
   }) {
     if (overlay) {
       return const _DiscoverLoadingBody();
@@ -181,6 +184,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           final c = campaigns[index];
           return _CampaignDiscoverCard(
             campaign: c,
+            audience: audience ?? CampaignInsights.of(c).primaryAudience,
             onOpenDetail: () {
               Navigator.of(context, rootNavigator: false).push<void>(
                 MaterialPageRoute<void>(
@@ -196,9 +200,11 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
+      child: Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: AppColors.backgroundMain,
+      backgroundColor: AppColors.canvasOf(context),
       // Üst şerit status bar’a taşsın; alt gest / üç tuş hep üstte kalsın (viewPadding klavyede de doğru).
       body: SafeArea(
         top: false,
@@ -213,8 +219,6 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             children: [
               _DiscoverHeader(
                 searchController: _search,
-                headerTop: _headerTop,
-                headerBottom: _headerBottom,
                 showBackButton: widget.showBackButton,
                 onBack: () => Navigator.of(context).pop(),
               ),
@@ -253,6 +257,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       overlay: overlay,
                       campaigns: filtered,
                       emptyMsg: emptyMsg,
+                      audience: audience,
                     );
                   },
                 ),
@@ -260,6 +265,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }
@@ -300,6 +306,7 @@ class _AudienceFilterBar extends StatelessWidget {
             label: 'Tümü',
             icon: Icons.apps_rounded,
             count: campaigns.length,
+            color: AppColors.primary,
             selected: selected == null,
             onTap: () => onSelected(null),
           ),
@@ -308,6 +315,7 @@ class _AudienceFilterBar extends StatelessWidget {
               label: a.label,
               icon: a.icon,
               count: counts[a] ?? 0,
+              color: a.color,
               selected: selected == a,
               onTap: () => onSelected(selected == a ? null : a),
             ),
@@ -322,6 +330,7 @@ class _AudienceChip extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.count,
+    required this.color,
     required this.selected,
     required this.onTap,
   });
@@ -329,12 +338,21 @@ class _AudienceChip extends StatelessWidget {
   final String label;
   final IconData icon;
   final int count;
+  final Color color;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final fg = selected ? AppColors.white : _headerTop;
+    final dark = AppColors.isDark(context);
+    final accent = dark ? Color.lerp(color, Colors.white, 0.22)! : color;
+    final fg = selected ? Colors.white : accent;
+    final bg = selected
+        ? accent
+        : Color.alphaBlend(
+            accent.withValues(alpha: dark ? 0.22 : 0.12),
+            AppColors.surfaceOf(context),
+          );
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: Semantics(
@@ -342,13 +360,13 @@ class _AudienceChip extends StatelessWidget {
         selected: selected,
         label: '$label, $count kampanya',
         child: Material(
-          color: selected ? _headerTop : AppColors.white,
+          color: bg,
           shape: StadiumBorder(
             side: BorderSide(
-              color: selected ? _headerTop : const Color(0x33005F6B),
+              color: accent.withValues(alpha: selected ? 1 : 0.35),
             ),
           ),
-          elevation: selected ? 2 : 0,
+          elevation: selected ? 1 : 0,
           child: InkWell(
             customBorder: const StadiumBorder(),
             onTap: onTap,
@@ -375,8 +393,8 @@ class _AudienceChip extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: selected
-                          ? const Color(0x33FFFFFF)
-                          : const Color(0x14005F6B),
+                          ? Colors.white.withValues(alpha: 0.22)
+                          : accent.withValues(alpha: 0.16),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
@@ -401,21 +419,26 @@ class _AudienceChip extends StatelessWidget {
 class _DisclaimerBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
     return Container(
       width: double.infinity,
-      color: const Color(0xFFFFF8E1),
+      color: dark ? const Color(0xFF3A2C14) : const Color(0xFFFFF8E1),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
       child: Row(
         children: [
-          const Icon(Icons.info_outline, size: 15, color: Color(0xFFE65100)),
+          Icon(
+            Icons.info_outline,
+            size: 15,
+            color: dark ? const Color(0xFFFFCC80) : const Color(0xFFE65100),
+          ),
           const SizedBox(width: 6),
-          const Expanded(
+          Expanded(
             child: Text(
               'Kampanyalar bağımsız kaynaklardan derlenmektedir. '
               'Rotalink hiçbir devlet kuruluşunu temsil etmemektedir.',
               style: TextStyle(
                 fontSize: 11,
-                color: Color(0xFF5D4037),
+                color: dark ? const Color(0xFFFFE0B2) : const Color(0xFF5D4037),
                 height: 1.4,
               ),
             ),
@@ -429,15 +452,11 @@ class _DisclaimerBanner extends StatelessWidget {
 class _DiscoverHeader extends StatelessWidget {
   const _DiscoverHeader({
     required this.searchController,
-    required this.headerTop,
-    required this.headerBottom,
     required this.onBack,
     this.showBackButton = true,
   });
 
   final TextEditingController searchController;
-  final Color headerTop;
-  final Color headerBottom;
   final VoidCallback onBack;
   final bool showBackButton;
 
@@ -445,21 +464,15 @@ class _DiscoverHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
     return Material(
-      elevation: 10,
-      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+      elevation: 0,
+      color: AppColors.surfaceOf(context),
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          borderRadius: const BorderRadius.vertical(
-            bottom: Radius.circular(28),
-          ),
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [headerTop, headerBottom],
-          ),
+          color: AppColors.surfaceOf(context),
+          border: Border(bottom: BorderSide(color: AppColors.borderOf(context))),
         ),
-        padding: EdgeInsets.fromLTRB(4, top + 4, 4, 20),
+        padding: EdgeInsets.fromLTRB(4, top + 4, 4, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -468,15 +481,18 @@ class _DiscoverHeader extends StatelessWidget {
                 if (showBackButton)
                   IconButton(
                     onPressed: onBack,
-                    icon: const Icon(Icons.arrow_back, color: AppColors.white),
+                    icon: Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppColors.textStrongOf(context),
+                    ),
                     tooltip: 'Geri',
                   ),
-                const Text(
+                Text(
                   AppStrings.bottomDiscover,
                   style: TextStyle(
-                    color: AppColors.white,
+                    color: AppColors.textStrongOf(context),
                     fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -505,27 +521,27 @@ class _DiscoverSearchField extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: TextField(
           controller: controller,
-          style: const TextStyle(color: AppColors.white),
-          cursorColor: AppColors.white,
-          decoration: const InputDecoration(
-            prefixIcon: Icon(Icons.search, color: Color(0xD9FFFFFF)),
+          style: TextStyle(color: AppColors.textStrongOf(context)),
+          cursorColor: AppColors.primary,
+          decoration: InputDecoration(
+            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary),
             hintText: AppStrings.discoverSearchHint,
-            hintStyle: TextStyle(color: Color(0xA6FFFFFF)),
+            hintStyle: TextStyle(color: AppColors.textMutedOf(context)),
             filled: true,
-            fillColor: Color(0x1FFFFFFF),
+            fillColor: AppColors.canvasOf(context),
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(14)),
-              borderSide: BorderSide(color: Color(0x80FFFFFF)),
+              borderRadius: const BorderRadius.all(Radius.circular(14)),
+              borderSide: BorderSide(color: AppColors.borderOf(context)),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(14)),
-              borderSide: BorderSide(color: Color(0x80FFFFFF)),
+              borderRadius: const BorderRadius.all(Radius.circular(14)),
+              borderSide: BorderSide(color: AppColors.borderOf(context)),
             ),
-            focusedBorder: OutlineInputBorder(
+            focusedBorder: const OutlineInputBorder(
               borderRadius: BorderRadius.all(Radius.circular(14)),
-              borderSide: BorderSide(color: AppColors.white),
+              borderSide: BorderSide(color: AppColors.primary, width: 1.5),
             ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           ),
         ),
       ),
@@ -663,10 +679,12 @@ class _Badge extends StatelessWidget {
 class _CampaignDiscoverCard extends StatelessWidget {
   const _CampaignDiscoverCard({
     required this.campaign,
+    required this.audience,
     required this.onOpenDetail,
   });
 
   final Campaign campaign;
+  final CampaignAudience audience;
   final VoidCallback onOpenDetail;
 
   @override
@@ -675,30 +693,42 @@ class _CampaignDiscoverCard extends StatelessWidget {
     final summary = campaign.summary;
     final tags = campaign.tags;
     final icon = campaignSmartIconData(title, summary);
-    final bg = campaignSmartIconBackground(title, summary);
-    final tint = campaignSmartIconTint(title, summary);
+    final dark = AppColors.isDark(context);
+    final tint = dark
+        ? Color.lerp(audience.color, Colors.white, 0.18)!
+        : audience.color;
+    final cardBg = Color.alphaBlend(
+      tint.withValues(alpha: dark ? 0.20 : 0.10),
+      AppColors.surfaceOf(context),
+    );
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
       child: Material(
-        elevation: 5,
+        color: cardBg,
         borderRadius: BorderRadius.circular(16),
-        color: AppColors.white,
         child: InkWell(
           onTap: onOpenDetail,
           borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: tint.withValues(alpha: 0.22)),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
-                  child: Icon(icon, color: tint, size: 26),
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: tint,
+                    borderRadius: BorderRadius.circular(13),
+                  ),
+                  child: Icon(icon, color: Colors.white, size: 24),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -707,51 +737,72 @@ class _CampaignDiscoverCard extends StatelessWidget {
                         title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        audience.label,
+                        style: TextStyle(
+                          color: tint,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       _CampaignBadges(insights: CampaignInsights.of(campaign)),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
                         summary,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: AppColors.campaignSummaryMuted,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                       if (tags.isNotEmpty) ...[
                         const SizedBox(height: 10),
                         Wrap(
-                          spacing: 8,
-                          runSpacing: 4,
+                          spacing: 6,
+                          runSpacing: 6,
                           children: tags
                               .where((t) => t.trim().isNotEmpty)
+                              .take(3)
                               .map(
-                                (t) => Chip(
-                                  label: Text(
+                                (t) => Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.surfaceOf(context)
+                                        .withValues(alpha: 0.7),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColors.borderOf(context),
+                                    ),
+                                  ),
+                                  child: Text(
                                     t.trim(),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 12),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textMutedOf(context),
+                                    ),
                                   ),
-                                  visualDensity: VisualDensity.compact,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
                                 ),
                               )
                               .toList(),
                         ),
                       ],
-                      Align(
+                      const SizedBox(height: 8),
+                      const Align(
                         alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: onOpenDetail,
-                          child: const Text(AppStrings.campaignDetailCta),
+                        child: Text(
+                          AppStrings.campaignDetailCta,
+                          style: TextStyle(
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],

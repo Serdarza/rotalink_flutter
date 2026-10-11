@@ -1,4 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,21 +9,21 @@ class FirebaseAnalyticsService {
   FirebaseAnalyticsService._();
   static final FirebaseAnalyticsService instance = FirebaseAnalyticsService._();
 
-  final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
+  bool get _ready => !kIsWeb && Firebase.apps.isNotEmpty;
 
-  FirebaseAnalytics get analytics => _analytics;
+  FirebaseAnalytics get analytics => FirebaseAnalytics.instance;
 
   /// Firebase Analytics'i başlatır ve temel ayarları yapar
   Future<void> initialize() async {
-    if (kIsWeb) return;
+    if (!_ready) return;
     // Analytics otomatik etkinlik koleksiyonunu etkinleştir
-    await _analytics.setAnalyticsCollectionEnabled(true);
+    await analytics.setAnalyticsCollectionEnabled(true);
   }
 
   /// Uygulama açılış etkinliğini loglar (app_open)
   Future<void> logAppOpen() async {
-    if (kIsWeb) return;
-    await _analytics.logAppOpen();
+    if (!_ready) return;
+    await analytics.logAppOpen();
   }
 
   /// Özel etkinlik: Tesis inceleme
@@ -34,8 +35,8 @@ class FirebaseAnalyticsService {
     required String tesisTipi,
     required String il,
   }) async {
-    if (kIsWeb) return;
-    await _analytics.logEvent(
+    if (!_ready) return;
+    await analytics.logEvent(
       name: 'tesis_inceleme',
       parameters: <String, Object>{
         'tesis_adi': tesisAdi,
@@ -52,14 +53,14 @@ class FirebaseAnalyticsService {
     required String aramaTerimi,
     String? aramaTipi,
   }) async {
-    if (kIsWeb) return;
+    if (!_ready) return;
     final parameters = <String, Object>{
       'arama_terimi': aramaTerimi,
     };
     if (aramaTipi != null) {
       parameters['arama_tipi'] = aramaTipi;
     }
-    await _analytics.logEvent(
+    await analytics.logEvent(
       name: 'arama_yapildi',
       parameters: parameters,
     );
@@ -67,8 +68,8 @@ class FirebaseAnalyticsService {
 
   /// Kullanıcı ID'sini ayarlar (opsiyonel, eğer oturum yönetimi varsa kullanılır)
   Future<void> setUserId(String? userId) async {
-    if (kIsWeb) return;
-    await _analytics.setUserId(id: userId);
+    if (!_ready) return;
+    await analytics.setUserId(id: userId);
   }
 
   /// Kullanıcı özelliklerini ayarlar
@@ -76,8 +77,8 @@ class FirebaseAnalyticsService {
     required String name,
     required String value,
   }) async {
-    if (kIsWeb) return;
-    await _analytics.setUserProperty(name: name, value: value);
+    if (!_ready) return;
+    await analytics.setUserProperty(name: name, value: value);
   }
 
   /// Mevcut ekranı loglar (AnalyticsObserver tarafından kullanılır)
@@ -85,8 +86,8 @@ class FirebaseAnalyticsService {
     required String screenName,
     String? screenClass,
   }) async {
-    if (kIsWeb) return;
-    await _analytics.logScreenView(
+    if (!_ready) return;
+    await analytics.logScreenView(
       screenName: screenName,
       screenClass: screenClass ?? 'Flutter',
     );
