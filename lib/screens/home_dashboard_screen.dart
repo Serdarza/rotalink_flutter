@@ -2,10 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-import '../constants/store_links.dart';
 import '../billing/pro_service.dart';
 import '../data/firebase_rota_repository.dart';
 import '../data/hediyelik_repository.dart';
@@ -18,8 +14,9 @@ import '../theme/app_colors.dart';
 import '../theme/system_ui.dart';
 import '../utils/main_map_search.dart';
 import '../widgets/custom_search_bar.dart';
-import '../widgets/drawer_social_section.dart';
 import '../widgets/emergency_bottom_sheet.dart';
+import '../widgets/rotalink_app_drawer.dart';
+import '../widgets/rotalink_app_header.dart';
 import '../widgets/map_weather_chip.dart';
 import '../widgets/nationwide_price_sheet.dart';
 import '../widgets/rotalink_pro_chip.dart';
@@ -117,7 +114,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
       child: Scaffold(
         key: _scaffoldKey,
         backgroundColor: AppColors.canvasOf(context),
-        drawer: _HomeMenu(
+        drawer: RotalinkAppDrawer(
           onOpenRoute: widget.onOpenNamedRoute,
           onOpenWeather: () => unawaited(_openWeather()),
         ),
@@ -191,40 +188,11 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   }
 
   Widget _buildHeader(BuildContext context, RotaDataState? data) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 12, 4),
-      child: Row(
+    return RotalinkAppHeader(
+      onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Semantics(
-            button: true,
-            label: AppStrings.menuOpen,
-            child: IconButton(
-              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-              icon: const Icon(Icons.menu_rounded),
-              color: AppColors.textStrongOf(context),
-              tooltip: AppStrings.menuOpen,
-            ),
-          ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: Image.asset(
-              'assets/images/app_logo.png',
-              width: 32,
-              height: 32,
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              AppStrings.appName,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineSmall?.copyWith(fontSize: 22),
-            ),
-          ),
-          const SizedBox(width: 8),
           MapWeatherChip(compact: true, rotaData: data),
           const SizedBox(width: 8),
           RotalinkProChip(
@@ -1017,168 +985,6 @@ class _InfoActionCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class _HomeMenu extends StatelessWidget {
-  const _HomeMenu({required this.onOpenRoute, required this.onOpenWeather});
-
-  final ValueChanged<String> onOpenRoute;
-  final VoidCallback onOpenWeather;
-
-  Future<void> _openWebsite(BuildContext context) async {
-    Navigator.pop(context);
-    final uri = Uri.parse('https://rotalink.tr/?web=1');
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
-        context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Web sitesi açılamadı.')));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    void openRoute(String route) {
-      Navigator.pop(context);
-      onOpenRoute(route);
-    }
-
-    return Drawer(
-      width: 300,
-      backgroundColor: AppColors.surfaceOf(context),
-      child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Image.asset(
-                      'assets/images/app_logo.png',
-                      width: 48,
-                      height: 48,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          AppStrings.appName,
-                          style: TextStyle(
-                            color: AppColors.textStrong,
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          AppStrings.drawerSubtitle,
-                          style: TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                children: [
-                  _MenuTile(
-                    icon: Icons.workspace_premium_outlined,
-                    title: 'Rotalink Pro',
-                    onTap: () => openRoute(RotalinkShellRoutes.pro),
-                  ),
-                  _MenuTile(
-                    icon: Icons.wb_sunny_outlined,
-                    title: AppStrings.drawerWeather,
-                    onTap: () {
-                      Navigator.pop(context);
-                      onOpenWeather();
-                    },
-                  ),
-                  _MenuTile(
-                    icon: Icons.calendar_month_outlined,
-                    title: AppStrings.drawerHolidays,
-                    onTap: () => openRoute(RotalinkShellRoutes.holidays),
-                  ),
-                  _MenuTile(
-                    icon: Icons.send_outlined,
-                    title: AppStrings.drawerSuggestion,
-                    onTap: () => openRoute(RotalinkShellRoutes.suggestion),
-                  ),
-                  _MenuTile(
-                    icon: Icons.language_outlined,
-                    title: AppStrings.drawerWebsite,
-                    onTap: () => unawaited(_openWebsite(context)),
-                  ),
-                  _MenuTile(
-                    icon: Icons.share_outlined,
-                    title: AppStrings.drawerShareApp,
-                    onTap: () {
-                      Navigator.pop(context);
-                      unawaited(Share.share(StoreLinks.drawerShareMessage()));
-                    },
-                  ),
-                  const DrawerSocialSection(),
-                  _MenuTile(
-                    icon: Icons.info_outline_rounded,
-                    title: AppStrings.drawerAbout,
-                    onTap: () => openRoute(RotalinkShellRoutes.about),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _MenuTile extends StatelessWidget {
-  const _MenuTile({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      minLeadingWidth: 24,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20),
-      leading: Icon(icon, color: AppColors.primary),
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: AppColors.textStrong,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      trailing: const Icon(
-        Icons.chevron_right_rounded,
-        color: AppColors.textMuted,
-      ),
-      onTap: onTap,
     );
   }
 }

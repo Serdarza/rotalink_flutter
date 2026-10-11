@@ -10,11 +10,9 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_map_marker_popup/src/state/popup_event.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../billing/pro_service.dart';
 import '../constants/store_links.dart';
 import '../data/app_rating_prefs.dart';
 import '../data/facility_address_repository.dart';
@@ -70,7 +68,8 @@ import '../widgets/rotalink_tile_layer.dart';
 import '../widgets/map_weather_chip.dart';
 import '../widgets/rotalink_pro_chip.dart';
 import '../widgets/weather_bottom_sheet.dart';
-import '../widgets/drawer_social_section.dart';
+import '../widgets/rotalink_app_drawer.dart';
+import '../widgets/rotalink_app_header.dart';
 import '../services/review_repository.dart';
 import 'route_plan_screen.dart';
 import 'yorum_screen.dart';
@@ -198,7 +197,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   /// Açılışta bir kez tam Türkiye görünümü (padding: arama / alt çubuk).
   bool _initialTurkeyBoundsApplied = false;
-  String _versionLabel = '—';
 
   /// Kotlin `filteredMisafirhaneList` / `lastSearchMisafirhaneList`; `null` = ana ekran (RTDB `misafirhaneler`).
   List<Misafirhane>? _markerOverride;
@@ -318,11 +316,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     WidgetsBinding.instance.addObserver(this);
     ref.listenManual<IlceSelection?>(facilityIlceFilterProvider, _onIlceFilterChanged);
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
-    PackageInfo.fromPlatform().then((p) {
-      if (mounted) {
-        setState(() => _versionLabel = '${p.version}+${p.buildNumber}');
-      }
-    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_maybeOpenHolidaysFromNotification());
       unawaited(_checkForUpdate());
@@ -2172,7 +2165,10 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       child: Scaffold(
       key: _scaffoldKey,
       resizeToAvoidBottomInset: false,
-      drawer: _buildDrawer(context),
+      drawer: RotalinkAppDrawer(
+        onOpenRoute: (route) => Navigator.of(context).pushNamed(route),
+        onOpenWeather: () => unawaited(showWeatherBottomSheet(context)),
+      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -2640,7 +2636,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                       top: 0,
                       left: 0,
                       right: 0,
-                      child: _RotalinkToolbar(
+                      child: RotalinkAppHeader(
+                        overlayOnMap: true,
                         onMenu: () => _scaffoldKey.currentState?.openDrawer(),
                         onTitleTap: _goToInitialMapHome,
                         menuAnchorKey: onboarding?.targetKey(OnboardingTarget.menu),
@@ -3796,228 +3793,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     });
   }
 
-  Widget _buildDrawer(BuildContext context) {
-    return Drawer(
-      width: 280,
-      backgroundColor: AppColors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            height: 148,
-            padding: const EdgeInsets.fromLTRB(24, 36, 24, 20),
-            decoration: const BoxDecoration(
-              color: AppColors.primarySoft,
-              border: Border(bottom: BorderSide(color: AppColors.border)),
-            ),
-            child: Align(
-              alignment: Alignment.bottomLeft,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      'assets/images/app_logo.png',
-                      width: 36,
-                      height: 36,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    AppStrings.appName,
-                    style: TextStyle(
-                      color: AppColors.textStrong,
-                      fontSize: 22,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    AppStrings.drawerSubtitle,
-                    style: TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              padding: EdgeInsets.zero,
-              children: [
-                _DrawerProTile(
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
-                  },
-                ),
-                const Divider(height: 1),
-                _DrawerTile(
-                  icon: Icons.wb_sunny_outlined,
-                  title: AppStrings.drawerWeather,
-                  onTap: () {
-                    Navigator.pop(context);
-                    unawaited(showWeatherBottomSheet(context));
-                  },
-                ),
-                _DrawerTile(
-                  icon: Icons.calendar_month_outlined,
-                  title: AppStrings.drawerHolidays,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).pushNamed(RotalinkShellRoutes.holidays);
-                  },
-                ),
-                _DrawerTile(
-                  icon: Icons.send_outlined,
-                  title: AppStrings.drawerSuggestion,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).pushNamed(RotalinkShellRoutes.suggestion);
-                  },
-                ),
-                _DrawerTile(
-                  icon: Icons.language_outlined,
-                  title: AppStrings.drawerWebsite,
-                  onTap: () => unawaited(_openDrawerWebsite(context)),
-                ),
-                _DrawerTile(
-                  icon: Icons.share_outlined,
-                  title: AppStrings.drawerShareApp,
-                  onTap: () => unawaited(_shareAppFromDrawer(context)),
-                ),
-                const DrawerSocialSection(),
-                _DrawerTile(
-                  icon: Icons.info_outline,
-                  title: AppStrings.drawerAbout,
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.of(context).pushNamed(RotalinkShellRoutes.about);
-                  },
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 12, bottom: 16),
-            child: Text(
-              '${AppStrings.drawerVersionPrefix}$_versionLabel',
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF212121),
-                letterSpacing: 0.04,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _openDrawerWebsite(BuildContext context) async {
-    Navigator.pop(context);
-    // web=1: telefondaki site uygulamaya / mağazaya geri yönlendirmesin.
-    final uri = Uri.parse('https://rotalink.tr/?web=1');
-    try {
-      final ok = await canLaunchUrl(uri);
-      if (ok) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) _toast(context, 'Web sitesi açılamadı.');
-      }
-    } catch (_) {
-      if (context.mounted) _toast(context, 'Web sitesi açılamadı.');
-    }
-  }
-
-  Future<void> _shareAppFromDrawer(BuildContext context) async {
-    Navigator.pop(context);
-    await Share.share(StoreLinks.drawerShareMessage());
-  }
-}
-
-/// Açık zeminli harita üst çubuğu — yeni ana sayfa ile aynı dil.
-class _RotalinkToolbar extends StatelessWidget {
-  const _RotalinkToolbar({
-    required this.onMenu,
-    required this.onTitleTap,
-    this.menuAnchorKey,
-    this.trailing,
-  });
-
-  final VoidCallback onMenu;
-  final VoidCallback onTitleTap;
-  final Key? menuAnchorKey;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final top = MediaQuery.paddingOf(context).top;
-    return Material(
-      elevation: 0,
-      color: AppColors.surfaceOf(context),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceOf(context),
-          border: Border(bottom: BorderSide(color: AppColors.borderOf(context))),
-        ),
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(4, top, 8, 0),
-          child: SizedBox(
-            height: kToolbarHeight,
-            child: Row(
-              children: [
-                KeyedSubtree(
-                  key: menuAnchorKey,
-                  child: IconButton(
-                    onPressed: onMenu,
-                    tooltip: AppStrings.menuOpen,
-                    icon: Icon(Icons.menu_rounded, color: AppColors.textStrongOf(context)),
-                  ),
-                ),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    'assets/images/app_logo.png',
-                    width: 28,
-                    height: 28,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: InkWell(
-                      onTap: onTitleTap,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                        child: Text(
-                          AppStrings.appName,
-                          style: TextStyle(
-                            color: AppColors.textStrongOf(context),
-                            fontSize: 20,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                if (trailing != null) trailing!,
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _EmergencyFab extends StatelessWidget {
@@ -4088,64 +3863,3 @@ class _OverviewCitySummary {
   double get markerSize => facilityCount >= 100 ? 30 : 26;
 }
 
-class _DrawerTile extends StatelessWidget {
-  const _DrawerTile({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-    this.trailing,
-  });
-
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
-      title: Text(title, style: const TextStyle(color: AppColors.textPrimary)),
-      trailing: trailing,
-      onTap: onTap,
-    );
-  }
-}
-
-/// Menüdeki Pro satırı — abonelik durumuna göre etiketi değişir.
-class _DrawerProTile extends StatelessWidget {
-  const _DrawerProTile({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: ProService.instance.isPro,
-      builder: (context, isPro, _) {
-        return _DrawerTile(
-          icon: Icons.workspace_premium_outlined,
-          title: isPro ? 'Rotalink Pro' : 'Rotalink Pro',
-          onTap: onTap,
-          trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-            decoration: BoxDecoration(
-              color: isPro
-                  ? const Color(0xFF1B7A4B)
-                  : AppColors.primary.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              isPro ? 'Aktif' : 'Pro',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                color: isPro ? AppColors.white : AppColors.primary,
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-}

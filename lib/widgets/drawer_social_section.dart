@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../constants/social_links.dart';
 import '../l10n/app_strings.dart';
 import '../theme/app_colors.dart';
+import 'rotalink_drawer_tile.dart';
 
 /// Hamburger menü — açılır «Sosyal Medya Hesaplarımız» sekmesi.
 class DrawerSocialSection extends StatefulWidget {
@@ -21,15 +22,12 @@ class _DrawerSocialSectionState extends State<DrawerSocialSection> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ListTile(
-          leading: const Icon(Icons.campaign_outlined, color: AppColors.primary),
-          title: Text(
-            AppStrings.drawerSocialMedia,
-            style: const TextStyle(color: AppColors.textPrimary),
-          ),
+        RotalinkDrawerTile(
+          icon: Icons.campaign_outlined,
+          title: AppStrings.drawerSocialMedia,
           trailing: Icon(
             _expanded ? Icons.expand_less : Icons.expand_more,
-            color: AppColors.primary,
+            color: AppColors.textMutedOf(context),
           ),
           onTap: () => setState(() => _expanded = !_expanded),
         ),
@@ -100,7 +98,7 @@ class _SocialLinkTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xFFF5F9FA),
+      color: AppColors.primarySoftOf(context),
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -125,8 +123,8 @@ class _SocialLinkTile extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        color: AppColors.textPrimary,
+                      style: TextStyle(
+                        color: AppColors.textStrongOf(context),
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -134,8 +132,8 @@ class _SocialLinkTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        color: Color(0xFF757575),
+                      style: TextStyle(
+                        color: AppColors.textMutedOf(context),
                         fontSize: 12,
                       ),
                       maxLines: 1,
