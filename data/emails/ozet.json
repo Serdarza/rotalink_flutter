@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-10-01",
+  "data_root": "/tmp/rotalink-data",
+  "province_count": 81,
+  "facility_count": 1909,
+  "email_found": 341,
+  "counts": {
+    "facility_verified": 12,
+    "parent_verified": 113,
+    "region_verified": 41,
+    "general_directorate_verified": 175,
+    "not_found": 1511,
+    "manual_review": 57
+  },
+  "kep": 79,
+  "excluded_outside_81_provinces": {
+    "Kıbrıs": 15
+  },
+  "sample": false
+}
