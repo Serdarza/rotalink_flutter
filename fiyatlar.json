@@ -76,15 +76,75 @@
     {
       "il": "Artvin",
       "isim": "Artvin Polisevi",
-      "fiyat_sivil": "1.050 – 4.410 TL",
-      "fiyat_kamu_personeli": "750 – 3.150 TL",
-      "fiyat_kurum_personeli": "525 – 2.205 TL",
-      "kaynak": "https://www.artvin.pol.tr/polisevi",
-      "gecerlilik": "2026 yılı oda ve yatak ücretleri",
+      "fiyat_sivil": "1.400 – 6.000 TL",
+      "fiyat_kamu_personeli": "700 – 3.000 TL",
+      "gecerlilik": "2026 yılı (görsel tarife; rezervasyonda teyit edilmeli)",
       "tarife": {
+        "baslik": "Artvin Polisevi 2026 Oda ve Yatak Ücretleri",
+        "donem": "2026",
+        "birim": "gecelik",
+        "dogrulama": "tesis_dogruladi",
+        "guncelleme": "2026-10-12",
+        "kategoriler": [
+          {
+            "id": "kamu",
+            "ad": "Kamu personeli"
+          },
+          {
+            "id": "sivil",
+            "ad": "Onaylı misafirler"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Çift kişilik odadaki yatak ücreti",
+                "birim": "kişi başı",
+                "fiyatlar": {
+                  "kamu": 700,
+                  "sivil": 1400
+                }
+              },
+              {
+                "ad": "Çift kişilik yataklı oda ücreti",
+                "birim": "oda",
+                "fiyatlar": {
+                  "kamu": 1400,
+                  "sivil": 2800
+                }
+              },
+              {
+                "ad": "Aile odası",
+                "birim": "oda",
+                "fiyatlar": {
+                  "kamu": 2100,
+                  "sivil": 4200
+                }
+              },
+              {
+                "ad": "Suit oda",
+                "birim": "oda",
+                "fiyatlar": {
+                  "kamu": 2450,
+                  "sivil": 4900
+                }
+              },
+              {
+                "ad": "Ultra VIP oda",
+                "birim": "oda",
+                "fiyatlar": {
+                  "kamu": 3000,
+                  "sivil": 6000
+                }
+              }
+            ]
+          }
+        ],
         "notlar": [
-          "Kahvaltı 08:00–09:30.",
-          "Spor salonu, sauna, restoran ve toplantı salonu hizmeti vardır."
+          "Toplam 32 oda.",
+          "Spor salonu, sauna, restoran ve toplantı salonu hizmeti vardır.",
+          "Kahvaltı 08:00–09:30."
         ]
       }
     },
