@@ -80,7 +80,708 @@
       "fiyat_kamu_personeli": "750 – 3.150 TL",
       "fiyat_kurum_personeli": "525 – 2.205 TL",
       "kaynak": "https://www.artvin.pol.tr/polisevi",
-      "gecerlilik": "2026 yılı oda ve yatak ücretleri"
+      "gecerlilik": "2026 yılı oda ve yatak ücretleri",
+      "tarife": {
+        "notlar": [
+          "Kahvaltı 08:00–09:30.",
+          "Spor salonu, sauna, restoran ve toplantı salonu hizmeti vardır."
+        ]
+      }
+    },
+    {
+      "il": "Artvin",
+      "isim": "Artvin Şavşat Öğretmenevi",
+      "fiyat_sivil": "1.300 TL",
+      "fiyat_kamu_personeli": "1.050 TL",
+      "fiyat_kurum_personeli": "850 TL",
+      "gecerlilik": "2026 yılı (görsel tarife; kişi başı; kahvaltı, KDV ve konaklama vergisi dahil; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Şavşat Öğretmenevi 2026 Konaklama Tarifesi",
+        "donem": "2026",
+        "birim": "kişi başı / gece",
+        "dogrulama": "tesis_dogruladi",
+        "kategoriler": [
+          {
+            "id": "ogretmen",
+            "ad": "MEB / öğretmen"
+          },
+          {
+            "id": "kamu",
+            "ad": "Kamu personeli"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Kişi başı konaklama",
+                "fiyatlar": {
+                  "ogretmen": 850,
+                  "kamu": 1050,
+                  "sivil": 1300
+                },
+                "birim": "kişi başı"
+              }
+            ]
+          }
+        ],
+        "dahil": [
+          "Kahvaltı",
+          "KDV",
+          "Konaklama vergisi"
+        ]
+      }
+    },
+    {
+      "il": "Artvin",
+      "isim": "Artvin Merkez Öğretmenevi",
+      "fiyat_sivil": "1.500 – 3.000 TL",
+      "fiyat_kamu_personeli": "1.250 – 2.500 TL",
+      "fiyat_kurum_personeli": "1.000 – 2.000 TL",
+      "gecerlilik": "Mayıs–Aralık 2026 (görsel tarife; yatak ücreti, odalar paylaşımlı; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Artvin Öğretmenevi ve ASO 2026 Konaklama Tarifesi",
+        "donem": "Mayıs – Aralık 2026",
+        "birim": "kişi başı yatak ücreti / gece",
+        "dogrulama": "tesis_dogruladi",
+        "kategoriler": [
+          {
+            "id": "ogretmen",
+            "ad": "MEB / öğretmen"
+          },
+          {
+            "id": "kamu",
+            "ad": "Kamu personeli"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "baslik": "Standart oda (yatak ücreti)",
+            "satirlar": [
+              {
+                "ad": "Standart oda",
+                "fiyatlar": {
+                  "ogretmen": 1000,
+                  "kamu": 1250,
+                  "sivil": 1500
+                },
+                "birim": "kişi başı"
+              }
+            ]
+          },
+          {
+            "baslik": "Suit oda",
+            "satirlar": [
+              {
+                "ad": "Suit oda",
+                "fiyatlar": {
+                  "ogretmen": 2000,
+                  "kamu": 2500,
+                  "sivil": 3000
+                },
+                "birim": "kişi başı"
+              }
+            ]
+          }
+        ],
+        "kurallar": [
+          "Odalar paylaşımlıdır; yatak ücreti tarifesi uygulanır.",
+          "Oda kapama durumunda oda ücreti alınır."
+        ],
+        "dahil": [
+          "Kahvaltı"
+        ],
+        "indirimler": [
+          "01 Ocak 2023 sonrası doğan çocuklar için konaklama bedeli alınmaz; yemek istenirse yemek bedelinin yarısı alınabilir.",
+          "01 Ocak 2020 – 01 Ocak 2023 arası doğan çocuklar için konaklama ve yemek bedelinin yarısı alınır."
+        ],
+        "notlar": [
+          "Odalarda saç kurutma makinesi, büro tipi buzdolabı, televizyon ve ücretsiz internet vardır."
+        ]
+      }
+    },
+    {
+      "il": "Artvin",
+      "isim": "AÇÜ Misafirhanesi",
+      "fiyat_kamu_personeli": "1.100 – 3.300 TL",
+      "fiyat_kurum_personeli": "950 – 2.850 TL",
+      "gecerlilik": "2026 yılı (görsel tarife; AÇÜ ve diğer kamu; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Artvin Çoruh Üniversitesi Konukevi konaklama tarifesi",
+        "donem": "2026",
+        "dogrulama": "tesis_dogruladi",
+        "kategoriler": [
+          {
+            "id": "kurum",
+            "ad": "Kamu personeli (AÇÜ)"
+          },
+          {
+            "id": "kamu",
+            "ad": "Diğer kamu personeli"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Standart oda",
+                "fiyatlar": {
+                  "kurum": 950,
+                  "kamu": 1100
+                },
+                "birim": "kişi başı"
+              },
+              {
+                "ad": "Standart oda 2 yataklı",
+                "fiyatlar": {
+                  "kurum": 1900,
+                  "kamu": 2200
+                },
+                "kisi": 2
+              },
+              {
+                "ad": "Standart oda 3 yataklı",
+                "fiyatlar": {
+                  "kurum": 2850,
+                  "kamu": 3300
+                },
+                "kisi": 3
+              },
+              {
+                "ad": "Double oda",
+                "fiyatlar": {
+                  "kurum": 2000,
+                  "kamu": 2200
+                },
+                "kisi": 2
+              },
+              {
+                "ad": "Suit oda",
+                "fiyatlar": {
+                  "kurum": 2600,
+                  "kamu": 2800
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "il": "Ardahan",
+      "isim": "Ardahan Üniversitesi Yenisey Konukevi",
+      "fiyat_sivil": "1.750 TL",
+      "fiyat_kamu_personeli": "1.500 TL",
+      "gecerlilik": "2026 yılı (görsel / ilan kaynaklı tarife; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Yenisey Konukevi konaklama tarifesi",
+        "donem": "2026",
+        "birim": "kişi başı / gece",
+        "dogrulama": "kullanici_bildirimi",
+        "kategoriler": [
+          {
+            "id": "kamu",
+            "ad": "Kamu personeli"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Konaklama",
+                "fiyatlar": {
+                  "kamu": 1500,
+                  "sivil": 1750
+                },
+                "birim": "kişi başı"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "il": "Ardahan",
+      "isim": "Göle Öğretmenevi",
+      "fiyat_sivil": "1.450 TL",
+      "fiyat_kamu_personeli": "1.350 TL",
+      "gecerlilik": "2026 yılı (görsel / ilan kaynaklı tarife; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Göle Öğretmenevi konaklama tarifesi",
+        "donem": "2026",
+        "birim": "kişi başı / gece",
+        "dogrulama": "kullanici_bildirimi",
+        "kategoriler": [
+          {
+            "id": "kamu",
+            "ad": "Kamu personeli"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Konaklama",
+                "fiyatlar": {
+                  "kamu": 1350,
+                  "sivil": 1450
+                },
+                "birim": "kişi başı"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "il": "Ardahan",
+      "isim": "Ardahan Öğretmenevi",
+      "gecerlilik": "2026 yılı (ilan aralığı; kategori ayrımı yok; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Ardahan Merkez Öğretmenevi ilan edilen oda fiyatları",
+        "donem": "2026",
+        "dogrulama": "teyit_gerekli",
+        "kategoriler": [
+          {
+            "id": "ilan",
+            "ad": "İlan edilen fiyat (kategori belirtilmedi)"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Tek yataklı oda",
+                "fiyatlar": {
+                  "ilan": "700 – 1.000 TL"
+                }
+              },
+              {
+                "ad": "Double (çift kişilik) oda",
+                "fiyatlar": {
+                  "ilan": "1.200 – 1.600 TL"
+                }
+              },
+              {
+                "ad": "Aile odası / suit oda",
+                "fiyatlar": {
+                  "ilan": "1.400 – 2.000 TL"
+                }
+              }
+            ]
+          }
+        ],
+        "notlar": [
+          "Kategori (öğretmen / kamu / sivil) ayrımı kaynakta yok; kimler kalabilir bilgisi öğretmenevi kurallarına göredir."
+        ]
+      }
+    },
+    {
+      "il": "Aydın",
+      "isim": "Aydın Sabancı Koçarlı Öğretmenevi",
+      "fiyat_sivil": "1.000 – 1.100 TL",
+      "fiyat_kamu_personeli": "750 – 850 TL",
+      "fiyat_kurum_personeli": "500 – 600 TL",
+      "gecerlilik": "2026 yılı (görsel fiyat listesi; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Koçarlı Sabancı Öğretmenevi 2026 Fiyat Listesi",
+        "donem": "2026",
+        "dogrulama": "tesis_dogruladi",
+        "giris_saati": "14:00",
+        "cikis_saati": "10:30",
+        "kategoriler": [
+          {
+            "id": "ogretmen",
+            "ad": "MEB personeli"
+          },
+          {
+            "id": "kamu",
+            "ad": "Kamu personeli / emekli"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Paylaşımlı yatak",
+                "fiyatlar": {
+                  "ogretmen": 500,
+                  "kamu": 750,
+                  "sivil": 1000
+                },
+                "birim": "kişi başı"
+              },
+              {
+                "ad": "Paylaşımsız oda",
+                "fiyatlar": {
+                  "ogretmen": 600,
+                  "kamu": 850,
+                  "sivil": 1100
+                },
+                "kisi": 1
+              }
+            ]
+          }
+        ],
+        "kurallar": [
+          "MEB personelinin eşi, çocukları, anne ve babası indirimli yararlanır.",
+          "Üniversite öğretim görevlileri ve sürücü kursu eğitimcileri kamu tarifesinden yararlanır.",
+          "7 yaş ve üzeri yetişkin sayılır.",
+          "Şehit yakınları ve gaziler kamu tarifesinden yararlanır.",
+          "Evcil hayvan kabul edilmez."
+        ],
+        "notlar": [
+          "Oda özelliği: WC + banyo + minibar + klima.",
+          "Emekliler kamu tarifesinden."
+        ]
+      }
+    },
+    {
+      "il": "Aydın",
+      "isim": "Adnan Menderes Üniversitesi Konukevi",
+      "fiyat_sivil": "1.100 – 1.500 TL",
+      "fiyat_kamu_personeli": "1.000 – 1.300 TL",
+      "fiyat_kurum_personeli": "1.000 – 1.300 TL",
+      "gecerlilik": "2026 yılı (görsel tarife; kişi başı / gece, kahvaltı dahil; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "ADÜ Konukevi ve Sosyal Tesisleri konaklama tarifesi",
+        "donem": "2026",
+        "birim": "kişi başı / gece",
+        "dogrulama": "tesis_dogruladi",
+        "giris_saati": "14:00",
+        "cikis_saati": "11:00",
+        "kategoriler": [
+          {
+            "id": "kamu",
+            "ad": "ADÜ / kamu personeli ve öğrenci"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "1 kişi",
+                "fiyatlar": {
+                  "kamu": 1300,
+                  "sivil": 1500
+                },
+                "birim": "kişi başı",
+                "kisi": 1
+              },
+              {
+                "ad": "2 kişi",
+                "fiyatlar": {
+                  "kamu": 1100,
+                  "sivil": 1300
+                },
+                "birim": "kişi başı"
+              },
+              {
+                "ad": "3 kişi",
+                "fiyatlar": {
+                  "kamu": 1000,
+                  "sivil": 1100
+                },
+                "birim": "kişi başı"
+              },
+              {
+                "ad": "4 kişi",
+                "fiyatlar": {
+                  "kamu": 1000,
+                  "sivil": 1100
+                },
+                "birim": "kişi başı"
+              }
+            ]
+          }
+        ],
+        "dahil": [
+          "Kahvaltı"
+        ],
+        "indirimler": [
+          "0–6 yaş ücretsizdir."
+        ],
+        "kurallar": [
+          "Otel ücreti peşin alınır.",
+          "48 saat öncesine kadar iptalde tam iade; 24–48 saat kala iptalde %20 kesinti uygulanır.",
+          "Çift kişilik odalarda evlilik şartı aranır."
+        ]
+      }
+    },
+    {
+      "il": "Aydın",
+      "isim": "Aydın TŞOF Didim Eğitim ve Dinlenme Tesisi",
+      "fiyat_sivil": "3.500 – 4.500 TL",
+      "fiyat_kurum_personeli": "2.500 – 3.500 TL",
+      "gecerlilik": "2026 yılı (görsel / ilan kaynaklı tarife; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Türkiye Şoförler Federasyonu Eğitim ve Dinlenme Tesisi",
+        "donem": "2026",
+        "dogrulama": "kullanici_bildirimi",
+        "kategoriler": [
+          {
+            "id": "uye",
+            "ad": "Üye"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Tek kişilik oda",
+                "fiyatlar": {
+                  "uye": 2500,
+                  "sivil": 3500
+                },
+                "kisi": 1
+              },
+              {
+                "ad": "Çift kişilik oda",
+                "fiyatlar": {
+                  "uye": 3500,
+                  "sivil": 4500
+                },
+                "kisi": 2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "il": "Aydın",
+      "isim": "Söke Öğretmenevi",
+      "fiyat_sivil": "1.300 – 1.850 TL",
+      "fiyat_kamu_personeli": "1.000 – 1.400 TL",
+      "fiyat_kurum_personeli": "750 – 1.025 TL",
+      "gecerlilik": "2026 yılı (görsel tarife; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Söke Öğretmenevi 2026 Konaklama Tarifesi",
+        "donem": "2026",
+        "dogrulama": "tesis_dogruladi",
+        "kategoriler": [
+          {
+            "id": "ogretmen",
+            "ad": "MEB / öğretmen"
+          },
+          {
+            "id": "kamu",
+            "ad": "Kamu personeli"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Paylaşımlı oda",
+                "fiyatlar": {
+                  "ogretmen": 750,
+                  "kamu": 1000,
+                  "sivil": 1300
+                },
+                "birim": "kişi başı"
+              },
+              {
+                "ad": "Paylaşımsız oda",
+                "fiyatlar": {
+                  "ogretmen": 1025,
+                  "kamu": 1400,
+                  "sivil": 1850
+                },
+                "kisi": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "il": "Aydın",
+      "isim": "Germencik Sabancı Öğretmenevi Ve Akşam Sanat Okulu",
+      "fiyat_sivil": "2.400 TL",
+      "fiyat_kamu_personeli": "2.000 TL",
+      "fiyat_kurum_personeli": "1.750 TL",
+      "gecerlilik": "2026 yılı (görsel / ilan kaynaklı tarife; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Sabancı Öğretmenevi ve Akşam Sanat Okulu konaklama tarifesi",
+        "donem": "2026",
+        "birim": "kişi başı / gece",
+        "dogrulama": "kullanici_bildirimi",
+        "kategoriler": [
+          {
+            "id": "ogretmen",
+            "ad": "MEB / öğretmen"
+          },
+          {
+            "id": "kamu",
+            "ad": "Kamu personeli"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Konaklama",
+                "fiyatlar": {
+                  "ogretmen": 1750,
+                  "kamu": 2000,
+                  "sivil": 2400
+                },
+                "birim": "kişi başı"
+              }
+            ]
+          }
+        ],
+        "notlar": [
+          "Kaynakta tesis adı “Sabancı Öğretmenevi ve Akşam Sanat Okulu”; Aydın’daki eşleşme Germencik Sabancı Öğretmenevi’dir (Koçarlı ayrı tarifededir)."
+        ]
+      }
+    },
+    {
+      "il": "Aydın",
+      "isim": "Aydın DSİ 21.Bölge Müdürlüğü",
+      "fiyat_sivil": "1.860 – 2.660 TL",
+      "fiyat_kamu_personeli": "1.247 – 1.706 TL",
+      "gecerlilik": "2026 yılı (görsel tarife; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "DSİ 21. Bölge Müdürlüğü Aydın misafirhane tarifesi",
+        "donem": "2026",
+        "dogrulama": "tesis_dogruladi",
+        "kategoriler": [
+          {
+            "id": "kamu",
+            "ad": "Kamu personeli"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Tek kişilik oda",
+                "fiyatlar": {
+                  "kamu": 1247,
+                  "sivil": 1860
+                },
+                "kisi": 1
+              },
+              {
+                "ad": "Çift kişilik oda",
+                "fiyatlar": {
+                  "kamu": 1706,
+                  "sivil": 2660
+                },
+                "kisi": 2
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "il": "Afyonkarahisar",
+      "isim": "Afyon Kocatepe Üniversitesi Konuk Evi",
+      "fiyat_sivil": "1.500 – 2.250 TL",
+      "fiyat_kamu_personeli": "1.000 – 1.500 TL",
+      "gecerlilik": "01.01.2026 – 30.06.2026 (görsel tarife; kahvaltı ve KDV dahil; rezervasyonda teyit edilmeli)",
+      "tarife": {
+        "baslik": "Afyon Kocatepe Üniversitesi Sosyal Tesisleri Konukevi",
+        "donem": "01.01.2026 – 30.06.2026",
+        "birim": "kişi başı / gece",
+        "dogrulama": "tesis_dogruladi",
+        "kategoriler": [
+          {
+            "id": "kamu",
+            "ad": "Kamu"
+          },
+          {
+            "id": "sivil",
+            "ad": "Diğer / sivil"
+          }
+        ],
+        "tablolar": [
+          {
+            "baslik": "Standart oda",
+            "satirlar": [
+              {
+                "ad": "Kişi başı",
+                "fiyatlar": {
+                  "kamu": "1.000 – 1.250 TL",
+                  "sivil": "1.500 – 1.875 TL"
+                },
+                "birim": "kişi başı"
+              }
+            ]
+          },
+          {
+            "baslik": "Suite oda (ör. 110, 113)",
+            "satirlar": [
+              {
+                "ad": "Kişi başı",
+                "fiyatlar": {
+                  "kamu": 1500,
+                  "sivil": 2250
+                },
+                "birim": "kişi başı"
+              },
+              {
+                "ad": "4 kişi",
+                "fiyatlar": {
+                  "kamu": 4000,
+                  "sivil": 6000
+                },
+                "kisi": 4
+              }
+            ]
+          }
+        ],
+        "dahil": [
+          "Kahvaltı",
+          "KDV"
+        ],
+        "kurallar": [
+          "6 yaş ve üzeri ücrete tabidir."
+        ]
+      }
     },
     {
       "il": "Balıkesir",
@@ -384,7 +1085,88 @@
       "fiyat_kamu_personeli": "950 – 1.400 TL",
       "fiyat_kurum_personeli": "950 – 1.400 TL",
       "kaynak": "https://istanbul.mgm.gov.tr/misafirhane.aspx",
-      "gecerlilik": "2026 yılı (paylaşımlı – paylaşımsız – VIP)"
+      "gecerlilik": "2026 yılı resmi tarife (paylaşımlı 950/1.425 – paylaşımsız 1.250/1.875 – VIP tek 1.400/2.100 – VIP çift 2.500/3.900 TL; katlanır yatak 500 TL; %2 konaklama vergisi hariç)",
+      "tarife": {
+        "baslik": "Bölgesel Eğitim Merkezi Misafirhane Hizmetleri 2026 Yılı Konaklama Fiyat Tarifesi / İstanbul",
+        "donem": "2026",
+        "birim": "günlük ücret (1 kişi için)",
+        "dogrulama": "resmi_kaynak",
+        "guncelleme": "2026-10-12",
+        "kategoriler": [
+          {
+            "id": "kamu",
+            "ad": "Kamu kurum ve kuruluşları personel ve emeklisi (eşleri, üst soy ve alt soyları dahil)"
+          },
+          {
+            "id": "sivil",
+            "ad": "Sivil / 1. madde dışında yararlandırılanlar (kamu tarifesinin en az %50 fazlası)"
+          }
+        ],
+        "tablolar": [
+          {
+            "satirlar": [
+              {
+                "ad": "Paylaşımlı oda",
+                "birim": "kişi başı",
+                "fiyatlar": {
+                  "kamu": 950,
+                  "sivil": 1425
+                }
+              },
+              {
+                "ad": "Paylaşımsız oda",
+                "birim": "kişi başı",
+                "fiyatlar": {
+                  "kamu": 1250,
+                  "sivil": 1875
+                }
+              },
+              {
+                "ad": "VIP oda (tek kişi)",
+                "kisi": 1,
+                "fiyatlar": {
+                  "kamu": 1400,
+                  "sivil": 2100
+                }
+              },
+              {
+                "ad": "VIP oda (çift kişi)",
+                "kisi": 2,
+                "fiyatlar": {
+                  "kamu": 2500,
+                  "sivil": 3900
+                }
+              },
+              {
+                "ad": "Katlanır yatak ilavesi",
+                "birim": "oda / gece",
+                "fiyatlar": {
+                  "kamu": 500,
+                  "sivil": 500
+                }
+              }
+            ]
+          }
+        ],
+        "kurallar": [
+          "Geçici görevli kamu personelinden alınacak konaklama bedeli, geçici görevlendirmenin ilk 10 günü için gündeliklerinin %60 artırımlı miktarının tamamını, daha sonraki günler için ise artırımsız gündeliklerinin ½'sini geçemez.",
+          "Geçici görevli denetim elemanlarından alınacak konaklama bedeli, yurtiçi gündeliklerinin %60 artırımlı miktarı olarak alınır.",
+          "Tesisler devamlılık arz edecek şekilde yurt, pansiyon ve bekâr lojmanı olarak kullanılamaz (Tebliğ madde 7/16)."
+        ],
+        "indirimler": [
+          "01 Ocak 2023 tarihinden sonra doğan çocuklar için konaklama bedeli alınmaz.",
+          "01 Ocak 2020 ile 01 Ocak 2023 tarihleri arasında (bu tarihler dahil) doğan çocuklar için gruplarında belirtilen tarifenin yarısı uygulanır.",
+          "Şehitlerin eş, anne, baba ve çocukları ile gaziler, harp ve vazife malulleri ve bunların eş, anne, baba ve çocukları kamu personeli fiyatlarından yararlanır (2006/16 Başbakanlık Genelgesi)."
+        ],
+        "ek_ucretler": [
+          "Odaya katlanır yatak ilavesi edilmesi halinde 500 TL ek ücret alınır.",
+          "14 Aralık 2022 tarih ve 32043 sayılı Konaklama Vergisi Uygulama Tebliği gereğince her konaklanan gece için %2 oranında konaklama vergisi alınır."
+        ],
+        "notlar": [
+          "2026-1 sayılı Kamu Sosyal Tesislerine İlişkin Tebliğ hükümleri uygulanır.",
+          "Kaynak: Meteoroloji Genel Müdürlüğü İstanbul Bölgesel Eğitim Merkezi 2026 yılı konaklama fiyat tarifesi."
+        ]
+      }
     },
     {
       "il": "İstanbul",
@@ -939,6 +1721,54 @@
       "fiyat_kamu_personeli": "3.200 TL",
       "fiyat_kurum_personeli": "2.600 TL",
       "gecerlilik": "2026 yılı (görsel kaynaklı tarife; rezervasyonda teyit edilmeli)"
+    },
+    {
+      "il": "Zonguldak",
+      "isim": "Devlet Su İşleri Misafirhanesi Zonguldak",
+      "fiyat_sivil": "1.969 TL",
+      "fiyat_kamu_personeli": "1.200 TL",
+      "fiyat_kurum_personeli": "1.200 TL",
+      "gecerlilik": "12.10.2026 tesis telefon teyidi; rezervasyonda teyit edilmeli"
+    },
+    {
+      "il": "Zonguldak",
+      "isim": "Zonguldak Polisevi",
+      "fiyat_sivil": null,
+      "fiyat_kamu_personeli": "700 TL",
+      "fiyat_kurum_personeli": "700 TL",
+      "gecerlilik": "12.10.2026 tesis telefon teyidi; rezervasyonda teyit edilmeli"
+    },
+    {
+      "il": "Zonguldak",
+      "isim": "Zonguldak TTK Misafirhanesi",
+      "fiyat_sivil": "1.875 TL",
+      "fiyat_kamu_personeli": "1.500 TL",
+      "fiyat_kurum_personeli": "1.500 TL",
+      "gecerlilik": "12.10.2026 tesis telefon teyidi; rezervasyonda teyit edilmeli"
+    },
+    {
+      "il": "Yozgat",
+      "isim": "DSİ Yozgat Misafirhanesi",
+      "fiyat_sivil": "1.010 – 1.379 TL",
+      "fiyat_kamu_personeli": "460 – 920 TL",
+      "fiyat_kurum_personeli": "460 – 920 TL",
+      "gecerlilik": "12.10.2026 tesis telefon teyidi; rezervasyonda teyit edilmeli"
+    },
+    {
+      "il": "Yozgat",
+      "isim": "Yozgat Karayolları 65.Şube Şefliği Misafirhanesi",
+      "fiyat_sivil": "900 TL",
+      "fiyat_kamu_personeli": "600 TL",
+      "fiyat_kurum_personeli": "600 TL",
+      "gecerlilik": "12.10.2026 tesis telefon teyidi; rezervasyonda teyit edilmeli"
+    },
+    {
+      "il": "Yozgat",
+      "isim": "Yozgat Uygulama Oteli",
+      "fiyat_sivil": "1.500 – 3.750 TL",
+      "fiyat_kamu_personeli": "1.500 – 3.750 TL",
+      "fiyat_kurum_personeli": "1.500 – 3.750 TL",
+      "gecerlilik": "12.10.2026 tesis telefon teyidi; rezervasyonda teyit edilmeli"
     }
   ]
 }
