@@ -1830,6 +1830,106 @@
       "fiyat_kamu_personeli": "1.500 – 3.750 TL",
       "fiyat_kurum_personeli": "1.500 – 3.750 TL",
       "gecerlilik": "12.10.2026 tesis telefon teyidi; rezervasyonda teyit edilmeli"
+    },
+    {
+      "il": "Aydın",
+      "isim": "Aydın İLKSAN Didim Sosyal Tesisi",
+      "fiyat_sivil": "2.750 – 4.500 TL",
+      "fiyat_kurum_personeli": "2.000 – 3.500 TL",
+      "gecerlilik": "2026 yılı yarım pansiyon, 7 günlük dönemler, kişi başı (kahvaltı + akşam yemeği + konaklama; KDV ve konaklama vergisi dahil)",
+      "tarife": {
+        "baslik": "İLKSAN Didim Tesis Şubesi 2026",
+        "donem": "04.05.2026 – 12.10.2026",
+        "birim": "kişi başı / 7 günlük dönem",
+        "dogrulama": "tesis_dogruladi",
+        "guncelleme": "2026-10-12",
+        "kategoriler": [
+          {
+            "id": "uye",
+            "ad": "Üye Fiyatı"
+          },
+          {
+            "id": "sivil",
+            "ad": "Münferit Fiyatı"
+          }
+        ],
+        "tablolar": [
+          {
+            "aciklama": "Yarım pansiyon (kahvaltı + akşam yemeği + konaklama, KDV ve konaklama vergisi dahil). 7 günlük dönemler için kişi başı fiyatlar.",
+            "satirlar": [
+              {
+                "ad": "1–2. dönem",
+                "aciklama": "04.05–18.05.2026",
+                "birim": "kişi başı",
+                "fiyatlar": {
+                  "uye": 2000,
+                  "sivil": 2750
+                }
+              },
+              {
+                "ad": "3–5. dönem",
+                "aciklama": "18.05–08.06.2026",
+                "birim": "kişi başı",
+                "fiyatlar": {
+                  "uye": 2500,
+                  "sivil": 3250
+                }
+              },
+              {
+                "ad": "6–9. dönem",
+                "aciklama": "08.06–06.07.2026",
+                "birim": "kişi başı",
+                "fiyatlar": {
+                  "uye": 3000,
+                  "sivil": 4000
+                }
+              },
+              {
+                "ad": "10–13. dönem",
+                "aciklama": "06.07–03.08.2026",
+                "birim": "kişi başı",
+                "fiyatlar": {
+                  "uye": 3500,
+                  "sivil": 4500
+                }
+              },
+              {
+                "ad": "14–18. dönem",
+                "aciklama": "03.08–07.09.2026",
+                "birim": "kişi başı",
+                "fiyatlar": {
+                  "uye": 3500,
+                  "sivil": 4500
+                }
+              },
+              {
+                "ad": "19–21. dönem",
+                "aciklama": "07.09–28.09.2026",
+                "birim": "kişi başı",
+                "fiyatlar": {
+                  "uye": 3000,
+                  "sivil": 4000
+                }
+              },
+              {
+                "ad": "22–23. dönem",
+                "aciklama": "28.09–12.10.2026",
+                "birim": "kişi başı",
+                "fiyatlar": {
+                  "uye": 2500,
+                  "sivil": 3250
+                }
+              }
+            ]
+          }
+        ],
+        "dahil": [
+          "Kahvaltı",
+          "Akşam yemeği",
+          "KDV",
+          "Konaklama vergisi"
+        ]
+      }
     }
   ]
 }
