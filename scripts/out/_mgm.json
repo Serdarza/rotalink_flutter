@@ -1,0 +1,544 @@
+[
+  {
+    "il": "Antalya",
+    "isim": "Alanya Meteoroloji Müdürlüğü ve Uluslararası Eğitim Tesisleri",
+    "fiyat_sivil": "1.800 – 2.160 TL",
+    "fiyat_kamu_personeli": "1.200 – 1.440 TL",
+    "fiyat_kurum_personeli": "1.200 – 1.440 TL",
+    "kaynak": "https://antalya.mgm.gov.tr/misafirhane.aspx",
+    "gecerlilik": "2026 tarifesi; Kaynak: resmî web sayfası “Meteoroloji 4. Bölge (Antalya) Müdürlüğüne bağlı Müdürlüklerimizdeki Misafirhane ve Eğitim Tesislerinin 2026 Yılı Ücret Tarifesi” (2026 yılı tarifesi); son kontrol 27.09.2026",
+    "tarife": {
+      "baslik": "Meteoroloji 4. Bölge Müdürlüğüne bağlı Müdürlüklerimizdeki Misafirhane ve Eğitim Tesislerinin 2026 Yılı Ücretleri — Alanya Meteoroloji Müdürlüğü",
+      "donem": "2026",
+      "birim": "gecelik",
+      "dogrulama": "resmi_kaynak",
+      "kategoriler": [
+        {
+          "id": "kamu",
+          "ad": "Kamu Kurum ve Kuruluşları Personeli ve Emeklisi Olanlar (Eşleri, Üst Soy ve Alt Soyları)"
+        },
+        {
+          "id": "kurum_disi",
+          "ad": "Kurum Dışından Olanlar (Kamu Personeli tarifesinin en az %50 fazlası)"
+        }
+      ],
+      "tablolar": [
+        {
+          "satirlar": [
+            {
+              "ad": "Kişi Başı Konaklama",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 1200,
+                "kurum_disi": 1800
+              }
+            },
+            {
+              "ad": "Çift Kişilik Odada Tek Konaklama",
+              "kisi": 1,
+              "fiyatlar": {
+                "kamu": 1440,
+                "kurum_disi": 2160
+              }
+            }
+          ]
+        }
+      ],
+      "kurallar": [
+        "Kurum ve 2008/5 sayılı Başbakanlık Genelgesi gereği sosyal tesisi olmayan kurum personeli (Çevre, Şehircilik ve İklim Değişikliği Bakanlığı ile bağlı kuruluş personeli dahil), kurum emeklisi ve bunların eşleri, üstsoy ve altsoylarından kamu personeli bedeli alınır.",
+        "Diğer kurum personeli, emeklileri ve bunların eşleri ile altsoy ve üstsoylarından kamu personeli bedeli alınır.",
+        "Bu kapsamda yer almayanlardan kamu personeli tarifesinin en az %50 fazlası alınır.",
+        "Geçici görevli kamu personeli: geçici görevlendirmelerde ilk 10 günü için gündeliklerinin %60 artırımlı miktarının tamamı, daha sonraki günler için artırımsız gündeliklerinin ½'si.",
+        "Geçici görevli denetim personeli: yurt içi gündeliklerinin %60 artırımlı miktarı."
+      ],
+      "indirimler": [
+        "01 Ocak 2023 tarihinden sonra doğan çocuklar için konaklama bedeli alınmaz; yemek istenmesi halinde yemek bedelinin yarısı alınır.",
+        "01 Ocak 2020 ile 01 Ocak 2023 tarihleri arasında (bu tarihler dahil) doğan çocuklar için konaklama ve yemek bedellerinin yarısı alınır.",
+        "Şehitlerin eş, anne, baba ve çocukları ile gaziler, harp ve vazife malulleri, bunların eş, anne, baba ve çocuklarından kamu personeli bedeli alınır (2006/16 sayılı Başbakanlık Genelgesi)."
+      ],
+      "ek_ucretler": [
+        "Her konaklanan gece için %2 oranında konaklama vergisi alınır (32043 sayılı Konaklama Vergisi Uygulama Tebliği)."
+      ],
+      "guncelleme": "2026-09-27"
+    }
+  },
+  {
+    "il": "Antalya",
+    "isim": "Finike Meteoroloji Misafirhanesi",
+    "fiyat_sivil": "1.350 – 1.500 TL",
+    "fiyat_kamu_personeli": "900 – 1.000 TL",
+    "fiyat_kurum_personeli": "900 – 1.000 TL",
+    "kaynak": "https://antalya.mgm.gov.tr/misafirhane.aspx",
+    "gecerlilik": "2026 tarifesi; Kaynak: resmî web sayfası “Meteoroloji 4. Bölge (Antalya) Müdürlüğüne bağlı Müdürlüklerimizdeki Misafirhane ve Eğitim Tesislerinin 2026 Yılı Ücret Tarifesi” (2026 yılı tarifesi); son kontrol 27.09.2026",
+    "tarife": {
+      "baslik": "Meteoroloji 4. Bölge Müdürlüğüne bağlı Müdürlüklerimizdeki Misafirhane ve Eğitim Tesislerinin 2026 Yılı Ücretleri — Finike Meteoroloji Müdürlüğü",
+      "donem": "2026",
+      "birim": "gecelik",
+      "dogrulama": "resmi_kaynak",
+      "kategoriler": [
+        {
+          "id": "kamu",
+          "ad": "Kamu Kurum ve Kuruluşları Personeli ve Emeklisi Olanlar (Eşleri, Üst Soy ve Alt Soyları)"
+        },
+        {
+          "id": "kurum_disi",
+          "ad": "Kurum Dışından Olanlar (Kamu Personeli tarifesinin en az %50 fazlası)"
+        }
+      ],
+      "tablolar": [
+        {
+          "satirlar": [
+            {
+              "ad": "Kişi Başı Konaklama",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 900,
+                "kurum_disi": 1350
+              }
+            },
+            {
+              "ad": "Çift Kişilik Odada Tek Konaklama",
+              "kisi": 1,
+              "fiyatlar": {
+                "kamu": 1000,
+                "kurum_disi": 1500
+              }
+            }
+          ]
+        }
+      ],
+      "kurallar": [
+        "Kurum ve 2008/5 sayılı Başbakanlık Genelgesi gereği sosyal tesisi olmayan kurum personeli (Çevre, Şehircilik ve İklim Değişikliği Bakanlığı ile bağlı kuruluş personeli dahil), kurum emeklisi ve bunların eşleri, üstsoy ve altsoylarından kamu personeli bedeli alınır.",
+        "Diğer kurum personeli, emeklileri ve bunların eşleri ile altsoy ve üstsoylarından kamu personeli bedeli alınır.",
+        "Bu kapsamda yer almayanlardan kamu personeli tarifesinin en az %50 fazlası alınır.",
+        "Geçici görevli kamu personeli: geçici görevlendirmelerde ilk 10 günü için gündeliklerinin %60 artırımlı miktarının tamamı, daha sonraki günler için artırımsız gündeliklerinin ½'si.",
+        "Geçici görevli denetim personeli: yurt içi gündeliklerinin %60 artırımlı miktarı."
+      ],
+      "indirimler": [
+        "01 Ocak 2023 tarihinden sonra doğan çocuklar için konaklama bedeli alınmaz; yemek istenmesi halinde yemek bedelinin yarısı alınır.",
+        "01 Ocak 2020 ile 01 Ocak 2023 tarihleri arasında (bu tarihler dahil) doğan çocuklar için konaklama ve yemek bedellerinin yarısı alınır.",
+        "Şehitlerin eş, anne, baba ve çocukları ile gaziler, harp ve vazife malulleri, bunların eş, anne, baba ve çocuklarından kamu personeli bedeli alınır (2006/16 sayılı Başbakanlık Genelgesi)."
+      ],
+      "ek_ucretler": [
+        "Her konaklanan gece için %2 oranında konaklama vergisi alınır (32043 sayılı Konaklama Vergisi Uygulama Tebliği)."
+      ],
+      "guncelleme": "2026-09-27"
+    }
+  },
+  {
+    "il": "İstanbul",
+    "isim": "Meteoroloji 1. Bölge Müdürlüğü Misafirhanesi",
+    "fiyat_sivil": "1.425 – 2.100 TL",
+    "fiyat_kamu_personeli": "950 – 1.400 TL",
+    "fiyat_kurum_personeli": "950 – 1.400 TL",
+    "kaynak": "https://istanbul.mgm.gov.tr/misafirhane.aspx",
+    "gecerlilik": "2026 tarifesi; Kaynak: resmî web sayfası “İstanbul Bölgesel Eğitim Merkezi Misafirhane Hizmetleri 2026 Yılı Konaklama Fiyat Tarifesi” (2026 yılı tarifesi); son kontrol 27.09.2026",
+    "tarife": {
+      "baslik": "İstanbul Bölgesel Eğitim Merkezi Misafirhane Hizmetleri 2026 Yılı Konaklama Fiyat Tarifesi",
+      "donem": "2026",
+      "birim": "günlük ücret (1 kişi için)",
+      "dogrulama": "resmi_kaynak",
+      "kategoriler": [
+        {
+          "id": "kamu",
+          "ad": "Kamu Kurum ve Kuruluşları Personel ve Emeklisi İçin (Bunların eşleri, üst soy ve alt soyları dahil)"
+        },
+        {
+          "id": "diger",
+          "ad": "1. Madde Dışında Yararlandırılanlar İçin (Kamu personeli için belirlenen tarifenin en az %50 fazlası uygulanır)"
+        }
+      ],
+      "tablolar": [
+        {
+          "satirlar": [
+            {
+              "ad": "Paylaşımlı Oda",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 950,
+                "diger": 1425
+              }
+            },
+            {
+              "ad": "Paylaşımsız Oda",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 1250,
+                "diger": 1875
+              }
+            },
+            {
+              "ad": "VIP Oda",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 1400,
+                "diger": 2100
+              }
+            }
+          ]
+        }
+      ],
+      "kurallar": [
+        "Geçici görevli kamu personelinden alınacak konaklama bedeli, geçici görevlendirmenin ilk on günü için gündeliklerinin %60 artırımlı miktarının tamamını, daha sonraki günler için ise artırımsız gündeliklerinin ½'sini; geçici görevli denetim elemanlarından alınacak konaklama bedeli ise yurtiçi gündeliklerinin %90 artırımlı miktarının tamamını geçemez.",
+        "Birinci derece kritik il güvenlik personeli hariç, tesisler devamlılık arz edecek şekilde pansiyon ve bekâr lojmanı olarak kullanılamaz."
+      ],
+      "indirimler": [
+        "01 Ocak 2023 tarihinden sonra doğan çocuklar için konaklama bedeli alınmaz; yemek istenmesi halinde yemek bedelinin yarısı alınır.",
+        "01 Ocak 2020 ile 01 Ocak 2023 tarihleri arasında (bu tarihler dahil) doğan çocuklar için konaklama ve yemek bedellerinin yarısı alınır.",
+        "Şehitlerin eş, anne, baba ve çocukları ile gaziler, harp ve vazife malulleri ve yakınları kurumun kendi personeline uyguladığı ücret tarifesine göre yararlandırılır."
+      ],
+      "ek_ucretler": [
+        "Her konaklanan gece için %2 oranında konaklama vergisi alınır."
+      ],
+      "notlar": [
+        "2026-1 sayılı Kamu Sosyal Tesislerine İlişkin Tebliğ hükümleri uygulanır."
+      ],
+      "guncelleme": "2026-09-27"
+    }
+  },
+  {
+    "il": "İzmir",
+    "isim": "Meteoroloji 2. Bölge Müdürlüğü Misafirhanesi",
+    "fiyat_sivil": "1.050 – 1.250 TL",
+    "fiyat_kamu_personeli": "695 – 820 TL",
+    "fiyat_kurum_personeli": "695 – 820 TL",
+    "kaynak": "https://izmir.mgm.gov.tr/misafirhane.aspx",
+    "gecerlilik": "2026 tarifesi; Kaynak: resmî web sayfası “Meteoroloji 2. Bölge Müdürlüğü (İzmir) Misafirhanesi 2026 Yılı Ücret Tarifesi” (2026 yılı tarifesi); son kontrol 27.09.2026",
+    "tarife": {
+      "baslik": "Meteoroloji 2. Bölge Müdürlüğü (İzmir) Misafirhanesi 2026 Yılı Ücret Tarifesi",
+      "donem": "2026",
+      "birim": "günlük ücret (1 kişi için)",
+      "dogrulama": "resmi_kaynak",
+      "kategoriler": [
+        {
+          "id": "kamu",
+          "ad": "Kamu Kurum ve Kuruluşları Personel ve Emeklisi İçin (Bunların eşleri, üst soy ve alt soyları dahil)"
+        },
+        {
+          "id": "diger",
+          "ad": "1. Madde Dışında Yararlandırılanlar İçin (Kamu personeli için belirlenen tarifenin en az %50 fazlası uygulanır)"
+        },
+        {
+          "id": "gecici",
+          "ad": "Geçici Görevli Kamu Personeli İçin"
+        },
+        {
+          "id": "denetim",
+          "ad": "Geçici Görevli Denetim Personeli İçin"
+        }
+      ],
+      "tablolar": [
+        {
+          "satirlar": [
+            {
+              "ad": "Paylaşımlı Oda",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 695,
+                "diger": 1050,
+                "denetim": "1657,843 ₺"
+              }
+            },
+            {
+              "ad": "Paylaşımsız Oda (Tek Kalınırsa)",
+              "kisi": 1,
+              "fiyatlar": {
+                "kamu": 820,
+                "diger": 1250
+              }
+            },
+            {
+              "ad": "Geçici görevli kamu personeli — ilk 10 gün için",
+              "fiyatlar": {
+                "gecici": 1333.33
+              }
+            },
+            {
+              "ad": "Geçici görevli kamu personeli — takip eden günler için",
+              "fiyatlar": {
+                "gecici": 416.66
+              }
+            }
+          ]
+        }
+      ],
+      "kurallar": [
+        "Geçici görevli kamu personelinden alınacak konaklama bedeli, geçici görevlendirmenin ilk on günü için gündeliklerinin %60 artırımlı miktarının tamamını, daha sonraki günler için ise artırımsız gündeliklerinin ½'sini; geçici görevli denetim elemanlarından alınacak konaklama bedeli ise yurtiçi gündeliklerinin %90 artırımlı miktarının tamamını geçemez.",
+        "Birinci derece kritik il güvenlik personeli hariç, tesisler devamlılık arz edecek şekilde pansiyon ve bekâr lojmanı olarak kullanılamaz."
+      ],
+      "indirimler": [
+        "01 Ocak 2023 tarihinden sonra doğan çocuklar için konaklama bedeli alınmaz; yemek istenmesi halinde yemek bedelinin yarısı alınır.",
+        "01 Ocak 2020 ile 01 Ocak 2023 tarihleri arasında (bu tarihler dâhil) doğan çocuklar için konaklama ve yemek bedellerinin yarısı alınır.",
+        "Şehitlerin eş, anne, baba ve çocukları ile gaziler, harp ve vazife malulleri ve yakınları kurumun kendi personeline uyguladığı ücret tarifesine göre yararlandırılır."
+      ],
+      "ek_ucretler": [
+        "Her konaklanan gece için %2 oranında konaklama vergisi alınır."
+      ],
+      "notlar": [
+        "2026-1 sayılı Kamu Sosyal Tesislerine İlişkin Tebliğ hükümleri uygulanır.",
+        "Geçici görevli denetim personeli: Türkiye genelinde teftiş, denetim veya inceleme yetkisine haiz geçici görevli denetim personeli için."
+      ],
+      "guncelleme": "2026-09-27"
+    }
+  },
+  {
+    "il": "Kayseri",
+    "isim": "Kayseri Meteoroloji Misafirhanesi",
+    "fiyat_sivil": "1.717 – 1.919 TL",
+    "fiyat_kamu_personeli": "757,50 – 1.262,50 TL",
+    "fiyat_kurum_personeli": "757,50 – 1.262,50 TL",
+    "kaynak": "https://kayseri.mgm.gov.tr/misafirhane.aspx",
+    "gecerlilik": "2026 tarifesi; Kaynak: resmî web sayfası “Meteoroloji 7. Bölge Misafirhane 2026 Yılı Konaklama Fiyat Tarifesi” (2026 yılı tarifesi (notta 30/04/2026 tarihli Cumhurbaşkanı Kararına atıf)); son kontrol 27.09.2026",
+    "tarife": {
+      "baslik": "Meteoroloji 7. Bölge Misafirhane 2026 Yılı Konaklama Fiyat Tarifesi",
+      "donem": "2026",
+      "birim": "günlük ücret (1 kişi için)",
+      "dogrulama": "resmi_kaynak",
+      "kategoriler": [
+        {
+          "id": "kamu",
+          "ad": "Kamu Kurum ve Kuruluşları Personel ve Emeklisi İçin (Bunların eşleri, üst soy ve alt soyları dahil)"
+        },
+        {
+          "id": "diger",
+          "ad": "1. Madde Dışında Yararlandırılanlar İçin (Kamu personeli için belirlenen tarifenin en az %50 fazlası uygulanır)"
+        }
+      ],
+      "tablolar": [
+        {
+          "satirlar": [
+            {
+              "ad": "Paylaşımlı Oda",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 757.5,
+                "diger": "1.161.50TL"
+              }
+            },
+            {
+              "ad": "Paylaşımsız Oda",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 1111,
+                "diger": 1717
+              }
+            },
+            {
+              "ad": "Suit Oda",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 1262.5,
+                "diger": 1919
+              }
+            }
+          ]
+        }
+      ],
+      "kurallar": [
+        "Geçici görevli kamu personelinden alınacak konaklama bedeli, geçici görevlendirmenin ilk on günü için gündeliklerinin %60 artırımlı miktarının tamamını, daha sonraki günler için ise artırımsız gündeliklerinin ½'sini; geçici görevli denetim elemanlarından alınacak konaklama bedeli ise yurtiçi gündeliklerinin %90 artırımlı miktarının tamamını geçemez.",
+        "Birinci derece kritik il güvenlik personeli hariç, tesisler devamlılık arz edecek şekilde pansiyon ve bekâr lojmanı olarak kullanılamaz."
+      ],
+      "dahil": [
+        "Her konaklanan gece için %1 oranında konaklama vergisi ücrete dahil edilmiştir (30/04/2026 tarihli ve 11263 sayılı Cumhurbaşkanı Kararı)."
+      ],
+      "indirimler": [
+        "01 Ocak 2023 tarihinden sonra doğan çocuklar için konaklama bedeli alınmaz; 01 Ocak 2020 ile 01 Ocak 2023 tarihleri arasında (bu tarihler dahil) doğan çocuklar için konaklama bedellerinin yarısı alınır.",
+        "Şehitlerin eş, anne, baba ve çocukları ile gaziler, harp ve vazife malulleri ve yakınları kurumun kendi personeline uyguladığı ücret tarifesine göre yararlandırılır."
+      ],
+      "notlar": [
+        "2026-1 sayılı Kamu Sosyal Tesislerine İlişkin Tebliğ hükümleri uygulanır.",
+        "Kaynakta paylaşımlı oda (1. madde dışı) ücreti \"1.161.50TL\" olarak yazılmıştır."
+      ],
+      "guncelleme": "2026-09-27"
+    }
+  },
+  {
+    "il": "Antalya",
+    "isim": "Antalya Kaş Meteoroloji Müdürlüğü Misafirhanesi",
+    "fiyat_sivil": "1.800 – 2.160 TL",
+    "fiyat_kamu_personeli": "1.200 – 1.440 TL",
+    "fiyat_kurum_personeli": "1.200 – 1.440 TL",
+    "kaynak": "https://antalya.mgm.gov.tr/misafirhane.aspx",
+    "gecerlilik": "2026 tarifesi; Kaynak: resmî web sayfası “Meteoroloji 4. Bölge (Antalya) Müdürlüğüne bağlı Müdürlüklerimizdeki Misafirhane ve Eğitim Tesislerinin 2026 Yılı Ücret Tarifesi” (2026 yılı tarifesi); son kontrol 27.09.2026",
+    "tarife": {
+      "baslik": "Meteoroloji 4. Bölge Müdürlüğüne bağlı Müdürlüklerimizdeki Misafirhane ve Eğitim Tesislerinin 2026 Yılı Ücretleri — Kaş Meteoroloji Müdürlüğü",
+      "donem": "2026",
+      "birim": "gecelik",
+      "dogrulama": "resmi_kaynak",
+      "kategoriler": [
+        {
+          "id": "kamu",
+          "ad": "Kamu Kurum ve Kuruluşları Personeli ve Emeklisi Olanlar (Eşleri, Üst Soy ve Alt Soyları)"
+        },
+        {
+          "id": "kurum_disi",
+          "ad": "Kurum Dışından Olanlar (Kamu Personeli tarifesinin en az %50 fazlası)"
+        }
+      ],
+      "tablolar": [
+        {
+          "satirlar": [
+            {
+              "ad": "Kişi Başı Konaklama",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 1200,
+                "kurum_disi": 1800
+              }
+            },
+            {
+              "ad": "Çift Kişilik Odada Tek Konaklama",
+              "kisi": 1,
+              "fiyatlar": {
+                "kamu": 1440,
+                "kurum_disi": 2160
+              }
+            }
+          ]
+        }
+      ],
+      "kurallar": [
+        "Kurum ve 2008/5 sayılı Başbakanlık Genelgesi gereği sosyal tesisi olmayan kurum personeli (Çevre, Şehircilik ve İklim Değişikliği Bakanlığı ile bağlı kuruluş personeli dahil), kurum emeklisi ve bunların eşleri, üstsoy ve altsoylarından kamu personeli bedeli alınır.",
+        "Diğer kurum personeli, emeklileri ve bunların eşleri ile altsoy ve üstsoylarından kamu personeli bedeli alınır.",
+        "Bu kapsamda yer almayanlardan kamu personeli tarifesinin en az %50 fazlası alınır.",
+        "Geçici görevli kamu personeli: geçici görevlendirmelerde ilk 10 günü için gündeliklerinin %60 artırımlı miktarının tamamı, daha sonraki günler için artırımsız gündeliklerinin ½'si.",
+        "Geçici görevli denetim personeli: yurt içi gündeliklerinin %60 artırımlı miktarı."
+      ],
+      "indirimler": [
+        "01 Ocak 2023 tarihinden sonra doğan çocuklar için konaklama bedeli alınmaz; yemek istenmesi halinde yemek bedelinin yarısı alınır.",
+        "01 Ocak 2020 ile 01 Ocak 2023 tarihleri arasında (bu tarihler dahil) doğan çocuklar için konaklama ve yemek bedellerinin yarısı alınır.",
+        "Şehitlerin eş, anne, baba ve çocukları ile gaziler, harp ve vazife malulleri, bunların eş, anne, baba ve çocuklarından kamu personeli bedeli alınır (2006/16 sayılı Başbakanlık Genelgesi)."
+      ],
+      "ek_ucretler": [
+        "Her konaklanan gece için %2 oranında konaklama vergisi alınır (32043 sayılı Konaklama Vergisi Uygulama Tebliği)."
+      ],
+      "guncelleme": "2026-09-27"
+    }
+  },
+  {
+    "il": "Muğla",
+    "isim": "Muğla Datça Meteoroloji Misafirhanesi",
+    "fiyat_sivil": "1.800 – 2.160 TL",
+    "fiyat_kamu_personeli": "1.200 – 1.440 TL",
+    "fiyat_kurum_personeli": "1.200 – 1.440 TL",
+    "kaynak": "https://antalya.mgm.gov.tr/misafirhane.aspx",
+    "gecerlilik": "2026 tarifesi; Kaynak: resmî web sayfası “Meteoroloji 4. Bölge (Antalya) Müdürlüğüne bağlı Müdürlüklerimizdeki Misafirhane ve Eğitim Tesislerinin 2026 Yılı Ücret Tarifesi” (2026 yılı tarifesi); son kontrol 27.09.2026",
+    "tarife": {
+      "baslik": "Meteoroloji 4. Bölge Müdürlüğüne bağlı Müdürlüklerimizdeki Misafirhane ve Eğitim Tesislerinin 2026 Yılı Ücretleri — Datça Meteoroloji Müdürlüğü",
+      "donem": "2026",
+      "birim": "gecelik",
+      "dogrulama": "resmi_kaynak",
+      "kategoriler": [
+        {
+          "id": "kamu",
+          "ad": "Kamu Kurum ve Kuruluşları Personeli ve Emeklisi Olanlar (Eşleri, Üst Soy ve Alt Soyları)"
+        },
+        {
+          "id": "kurum_disi",
+          "ad": "Kurum Dışından Olanlar (Kamu Personeli tarifesinin en az %50 fazlası)"
+        }
+      ],
+      "tablolar": [
+        {
+          "satirlar": [
+            {
+              "ad": "Kişi Başı Konaklama",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 1200,
+                "kurum_disi": 1800
+              }
+            },
+            {
+              "ad": "Çift Kişilik Odada Tek Konaklama",
+              "kisi": 1,
+              "fiyatlar": {
+                "kamu": 1440,
+                "kurum_disi": 2160
+              }
+            }
+          ]
+        }
+      ],
+      "kurallar": [
+        "Kurum ve 2008/5 sayılı Başbakanlık Genelgesi gereği sosyal tesisi olmayan kurum personeli (Çevre, Şehircilik ve İklim Değişikliği Bakanlığı ile bağlı kuruluş personeli dahil), kurum emeklisi ve bunların eşleri, üstsoy ve altsoylarından kamu personeli bedeli alınır.",
+        "Diğer kurum personeli, emeklileri ve bunların eşleri ile altsoy ve üstsoylarından kamu personeli bedeli alınır.",
+        "Bu kapsamda yer almayanlardan kamu personeli tarifesinin en az %50 fazlası alınır.",
+        "Geçici görevli kamu personeli: geçici görevlendirmelerde ilk 10 günü için gündeliklerinin %60 artırımlı miktarının tamamı, daha sonraki günler için artırımsız gündeliklerinin ½'si.",
+        "Geçici görevli denetim personeli: yurt içi gündeliklerinin %60 artırımlı miktarı."
+      ],
+      "indirimler": [
+        "01 Ocak 2023 tarihinden sonra doğan çocuklar için konaklama bedeli alınmaz; yemek istenmesi halinde yemek bedelinin yarısı alınır.",
+        "01 Ocak 2020 ile 01 Ocak 2023 tarihleri arasında (bu tarihler dahil) doğan çocuklar için konaklama ve yemek bedellerinin yarısı alınır.",
+        "Şehitlerin eş, anne, baba ve çocukları ile gaziler, harp ve vazife malulleri, bunların eş, anne, baba ve çocuklarından kamu personeli bedeli alınır (2006/16 sayılı Başbakanlık Genelgesi)."
+      ],
+      "ek_ucretler": [
+        "Her konaklanan gece için %2 oranında konaklama vergisi alınır (32043 sayılı Konaklama Vergisi Uygulama Tebliği)."
+      ],
+      "guncelleme": "2026-09-27"
+    }
+  },
+  {
+    "il": "Muğla",
+    "isim": "Muğla Marmaris Meteoroloji Misafirhanesi",
+    "fiyat_sivil": "1.800 – 2.160 TL",
+    "fiyat_kamu_personeli": "1.200 – 1.440 TL",
+    "fiyat_kurum_personeli": "1.200 – 1.440 TL",
+    "kaynak": "https://antalya.mgm.gov.tr/misafirhane.aspx",
+    "gecerlilik": "2026 tarifesi; Kaynak: resmî web sayfası “Meteoroloji 4. Bölge (Antalya) Müdürlüğüne bağlı Müdürlüklerimizdeki Misafirhane ve Eğitim Tesislerinin 2026 Yılı Ücret Tarifesi” (2026 yılı tarifesi); son kontrol 27.09.2026",
+    "tarife": {
+      "baslik": "Meteoroloji 4. Bölge Müdürlüğüne bağlı Müdürlüklerimizdeki Misafirhane ve Eğitim Tesislerinin 2026 Yılı Ücretleri — Marmaris Meteoroloji Müdürlüğü",
+      "donem": "2026",
+      "birim": "gecelik",
+      "dogrulama": "resmi_kaynak",
+      "kategoriler": [
+        {
+          "id": "kamu",
+          "ad": "Kamu Kurum ve Kuruluşları Personeli ve Emeklisi Olanlar (Eşleri, Üst Soy ve Alt Soyları)"
+        },
+        {
+          "id": "kurum_disi",
+          "ad": "Kurum Dışından Olanlar (Kamu Personeli tarifesinin en az %50 fazlası)"
+        }
+      ],
+      "tablolar": [
+        {
+          "satirlar": [
+            {
+              "ad": "Kişi Başı Konaklama",
+              "birim": "kişi başı",
+              "fiyatlar": {
+                "kamu": 1200,
+                "kurum_disi": 1800
+              }
+            },
+            {
+              "ad": "Çift Kişilik Odada Tek Konaklama",
+              "kisi": 1,
+              "fiyatlar": {
+                "kamu": 1440,
+                "kurum_disi": 2160
+              }
+            }
+          ]
+        }
+      ],
+      "kurallar": [
+        "Kurum ve 2008/5 sayılı Başbakanlık Genelgesi gereği sosyal tesisi olmayan kurum personeli (Çevre, Şehircilik ve İklim Değişikliği Bakanlığı ile bağlı kuruluş personeli dahil), kurum emeklisi ve bunların eşleri, üstsoy ve altsoylarından kamu personeli bedeli alınır.",
+        "Diğer kurum personeli, emeklileri ve bunların eşleri ile altsoy ve üstsoylarından kamu personeli bedeli alınır.",
+        "Bu kapsamda yer almayanlardan kamu personeli tarifesinin en az %50 fazlası alınır.",
+        "Geçici görevli kamu personeli: geçici görevlendirmelerde ilk 10 günü için gündeliklerinin %60 artırımlı miktarının tamamı, daha sonraki günler için artırımsız gündeliklerinin ½'si.",
+        "Geçici görevli denetim personeli: yurt içi gündeliklerinin %60 artırımlı miktarı."
+      ],
+      "indirimler": [
+        "01 Ocak 2023 tarihinden sonra doğan çocuklar için konaklama bedeli alınmaz; yemek istenmesi halinde yemek bedelinin yarısı alınır.",
+        "01 Ocak 2020 ile 01 Ocak 2023 tarihleri arasında (bu tarihler dahil) doğan çocuklar için konaklama ve yemek bedellerinin yarısı alınır.",
+        "Şehitlerin eş, anne, baba ve çocukları ile gaziler, harp ve vazife malulleri, bunların eş, anne, baba ve çocuklarından kamu personeli bedeli alınır (2006/16 sayılı Başbakanlık Genelgesi)."
+      ],
+      "ek_ucretler": [
+        "Her konaklanan gece için %2 oranında konaklama vergisi alınır (32043 sayılı Konaklama Vergisi Uygulama Tebliği)."
+      ],
+      "guncelleme": "2026-09-27"
+    }
+  }
+]
