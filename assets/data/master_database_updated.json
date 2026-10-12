@@ -27126,15 +27126,6 @@
       "longitude": 27.60183885940113
     },
     {
-      "isim": "Karacasu Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Aydın",
-      "adres": "Yaylalı Mahallesi, Sevenler Caddesi No:5, Karacasu, Aydın",
-      "telefon": "(0256) 441 24 71",
-      "latitude": 37.73299631931177,
-      "longitude": 28.608014580558677
-    },
-    {
       "isim": "Kuyucak Öğretmenevi",
       "tip": "Öğretmenevi",
       "il": "Aydın",
@@ -27630,15 +27621,6 @@
       "longitude": 41.1405639940604
     },
     {
-      "isim": "Batman DSİ Misafirhanesi",
-      "tip": "DSİ Misafirhanesi",
-      "il": "Batman",
-      "adres": "Demokrasi Bulvarı No:354/2 Batman",
-      "telefon": "0 488 221 17 68",
-      "latitude": 37.90593024890654,
-      "longitude": 41.133067684266194
-    },
-    {
       "isim": "Tüpraş Batman Rafinerisi Sosyal Tesisleri",
       "tip": "Sosyal Tesis",
       "il": "Batman",
@@ -28069,15 +28051,6 @@
       "telefon": "05304845797",
       "latitude": 40.398492954317646,
       "longitude": 30.783872536514608
-    },
-    {
-      "isim": "Seben Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Bolu",
-      "adres": "Çarşı Mahallesi. İsmetpaşa Caddesi.No:15. Seben – BOLU",
-      "telefon": "(0374) 411 24 11",
-      "latitude": 40.41388072034427,
-      "longitude": 31.567020276430092
     },
     {
       "isim": "Yeniçağa Öğretmenevi",
@@ -28595,15 +28568,6 @@
       "longitude": 26.33621065168146
     },
     {
-      "isim": "Gelibolu Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Çanakkale",
-      "adres": "Tuğsavul Caddesi. No:48 Gelibolu – ÇANAKKALE",
-      "telefon": "(0286) 566 18 10",
-      "latitude": 40.40516928824201,
-      "longitude": 26.676022738227008
-    },
-    {
       "isim": "Lapseki Öğretmenevi",
       "tip": "Öğretmenevi",
       "il": "Çanakkale",
@@ -28611,15 +28575,6 @@
       "telefon": "(0286) 512 15 04",
       "latitude": 40.34732061516085,
       "longitude": 26.68514525356772
-    },
-    {
-      "isim": "Yenice Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Çanakkale",
-      "adres": "Yeni Mahalle. Ortaokul Sokak. No:7.  Yenice – ÇANAKKALE",
-      "telefon": "02864743056",
-      "latitude": 39.9296055616616,
-      "longitude": 27.255309782378404
     },
     {
       "isim": "Çankırı Askeri Gazinosu",
@@ -38911,15 +38866,6 @@
       "longitude": 26.304552
     },
     {
-      "isim": "Aydın Kuşadası Güvercinada Uygulama Oteli",
-      "tip": "Uygulama Oteli",
-      "il": "Aydın",
-      "adres": "Kadınlar Denizi Mahallesi, Hüseyin Can Caddesi, 7. Sokak No:1, Kuşadası/Aydın",
-      "telefon": "(0256) 622 05 35",
-      "latitude": 37.8357922,
-      "longitude": 27.2404799
-    },
-    {
       "isim": "Muğla Fethiye Şehit Yüzbaşı Özgür Özekin Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
       "tip": "Uygulama Oteli",
       "il": "Muğla",
@@ -41429,15 +41375,6 @@
       "telefon": "(0338) 217 60 16",
       "latitude": 37.173479,
       "longitude": 33.25257000000001
-    },
-    {
-      "isim": "Batman Belediyesi Konukevi",
-      "tip": "Belediye Misafirhanesi",
-      "il": "Batman",
-      "adres": "Kültür Mah. Demokrasi Blv.-Merkez/BATMAN",
-      "telefon": "(0488) 221 24 85",
-      "latitude": 37.9191467,
-      "longitude": 41.1348951
     },
     {
       "isim": "Batman Defterdalığı Misafirhanesi",
