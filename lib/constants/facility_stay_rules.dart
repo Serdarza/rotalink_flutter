@@ -54,7 +54,13 @@ abstract final class FacilityStayRules {
     bool hasAny(List<String> ks) => ks.any(has);
 
     if (has('ogretmen')) return _ogretmenevi;
-    if (has('polis')) return _polisevi;
+    if (has('polis')) {
+      if (normalizeForSearch(m.il) == 'artvin' &&
+          normalizeForSearch(m.isim).contains('artvinpolisevi')) {
+        return _artvinPolisevi;
+      }
+      return _polisevi;
+    }
     if (hasAny(const ['ordu', 'jandarma', 'msb', 'askeri'])) return _orduevi;
     if (hasAny(const ['hakim', 'adalet', 'adliye', 'sayistay'])) {
       return _hakimevi;
@@ -157,6 +163,37 @@ abstract final class FacilityStayRules {
       'Siviller, referans olacak emniyet personelinin dilekçesi ve kurum '
           'kimlik fotokopisiyle tesis müdürlüğüne başvurur.',
       'Onay tesis yönetimine ve oda müsaitliğine bağlıdır.',
+    ],
+  );
+
+  /// Artvin Polisevi 2026 tarifesinde sivil kolonu yok.
+  static const _artvinPolisevi = FacilityStayRule(
+    authority: 'Emniyet Genel Müdürlüğü',
+    civilAccess: StayAccess.notAllowed,
+    groups: [
+      StayGroup(
+        'Emniyet mensupları',
+        'Görevdeki ve emekli polisler, bekçiler, emniyet sivil personeli ile '
+            'anne, baba, eş, çocuk, gelin ve damatları.',
+        StayAccess.allowed,
+      ),
+      StayGroup(
+        'Diğer kamu personeli',
+        'Kurum kimliğiyle kamu personeli tarifesinden kalınır.',
+        StayAccess.allowed,
+      ),
+      StayGroup(
+        'Sivil vatandaşlar',
+        '2026 tarifesinde sivil kolonu yoktur. Yalnızca kamu personeli ve '
+            'onaylı misafirler konaklar; sivil vatandaş kalamaz.',
+        StayAccess.notAllowed,
+      ),
+    ],
+    howTo: [
+      'Mensuplar teşkilat kimliği veya sosyal tesis giriş kartıyla doğrudan '
+          'başvurur.',
+      'Kamu personeli kurum kimliğiyle başvurur.',
+      'Sivil vatandaş kabul edilmez.',
     ],
   );
 
@@ -304,22 +341,31 @@ abstract final class FacilityStayRules {
 
   static const _belediye = FacilityStayRule(
     authority: 'Belediye',
-    civilAccess: StayAccess.allowed,
+    civilAccess: StayAccess.conditional,
     groups: [
       StayGroup(
-        'Herkes',
-        'Belediye misafirhaneleri genellikle tüm vatandaşlara açıktır.',
+        'Belediye personeli',
+        'Belediye başkanı, meclis üyeleri, belediye ve bağlı kuruluş '
+            'çalışanları öncelikli kalır.',
         StayAccess.allowed,
       ),
       StayGroup(
-        'Belediye personeli / ilçe halkı',
-        'Bazı tesislerde indirim veya öncelik uygulanabilir.',
+        'Kamu personeli',
+        'Memurlar ve diğer kamu çalışanları kurum kimliği veya '
+            'görevlendirme yazısıyla kalabilir.',
         StayAccess.allowed,
+      ),
+      StayGroup(
+        'Sivil vatandaşlar',
+        'Genel olarak herkese açık otel değildir. Sivil kabulü tesise ve '
+            'yer durumuna bağlıdır; rezervasyondan önce arayın.',
+        StayAccess.conditional,
       ),
     ],
     howTo: [
-      'Tesisi arayarak rezervasyon yapın.',
-      'Girişte nüfus cüzdanı yeterlidir.',
+      'Tesisi arayıp tarih, tarife ve kimlik şartını sorun.',
+      'Girişte nüfus cüzdanı ile birlikte belediye kimliği, mazbata veya '
+          'kurum kimliği gösterin.',
     ],
   );
 

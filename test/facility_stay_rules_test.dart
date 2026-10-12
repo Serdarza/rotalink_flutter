@@ -40,5 +40,40 @@ void main() {
     expect(civil('Öğretmenevi'), StayAccess.allowed);
     expect(civil('Polisevi'), StayAccess.conditional);
     expect(civil('Orduevi'), StayAccess.notAllowed);
+    expect(civil('Belediye Konukevi'), StayAccess.conditional);
+  });
+
+  test('belediye konuk evinde memur kalır, herkes açık değildir', () {
+    final rule = FacilityStayRules.forFacility(
+      _m('Belediye Konukevi', isim: 'Eskişehir Büyükşehir Belediyesi Porsuk Konuk Evi'),
+    );
+    expect(rule.groups.map((g) => g.title), isNot(contains('Herkes')));
+    expect(
+      rule.groups.singleWhere((g) => g.title == 'Kamu personeli').access,
+      StayAccess.allowed,
+    );
+    expect(
+      rule.groups.singleWhere((g) => g.title == 'Sivil vatandaşlar').access,
+      StayAccess.conditional,
+    );
+  });
+
+  test('Artvin Polisevi tarifesinde sivil kalamaz', () {
+    final rule = FacilityStayRules.forFacility(
+      Misafirhane(
+        isim: 'Artvin Polisevi',
+        il: 'Artvin',
+        adres: '',
+        telefon: '',
+        latitude: 0,
+        longitude: 0,
+        tip: 'Polisevi',
+      ),
+    );
+    expect(rule.civilAccess, StayAccess.notAllowed);
+    expect(
+      rule.groups.singleWhere((g) => g.title == 'Sivil vatandaşlar').access,
+      StayAccess.notAllowed,
+    );
   });
 }

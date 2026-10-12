@@ -76,9 +76,9 @@
     {
       "il": "Artvin",
       "isim": "Artvin Polisevi",
-      "fiyat_sivil": "1.400 – 6.000 TL",
+      "fiyat_sivil": null,
       "fiyat_kamu_personeli": "700 – 3.000 TL",
-      "gecerlilik": "2026 yılı (görsel tarife; rezervasyonda teyit edilmeli)",
+      "gecerlilik": "2026 yılı (görsel tarife; sivil tarife yok, yalnızca kamu personeli ve onaylı misafirler)",
       "tarife": {
         "baslik": "Artvin Polisevi 2026 Oda ve Yatak Ücretleri",
         "donem": "2026",
@@ -91,7 +91,7 @@
             "ad": "Kamu personeli"
           },
           {
-            "id": "sivil",
+            "id": "onayli",
             "ad": "Onaylı misafirler"
           }
         ],
@@ -103,7 +103,7 @@
                 "birim": "kişi başı",
                 "fiyatlar": {
                   "kamu": 700,
-                  "sivil": 1400
+                  "onayli": 1400
                 }
               },
               {
@@ -111,7 +111,7 @@
                 "birim": "oda",
                 "fiyatlar": {
                   "kamu": 1400,
-                  "sivil": 2800
+                  "onayli": 2800
                 }
               },
               {
@@ -119,7 +119,7 @@
                 "birim": "oda",
                 "fiyatlar": {
                   "kamu": 2100,
-                  "sivil": 4200
+                  "onayli": 4200
                 }
               },
               {
@@ -127,7 +127,7 @@
                 "birim": "oda",
                 "fiyatlar": {
                   "kamu": 2450,
-                  "sivil": 4900
+                  "onayli": 4900
                 }
               },
               {
@@ -135,13 +135,14 @@
                 "birim": "oda",
                 "fiyatlar": {
                   "kamu": 3000,
-                  "sivil": 6000
+                  "onayli": 6000
                 }
               }
             ]
           }
         ],
         "notlar": [
+          "Tarifede sivil kolonu yoktur; sivil vatandaş bu fiyatlardan kalamaz.",
           "Toplam 32 oda.",
           "Spor salonu, sauna, restoran ve toplantı salonu hizmeti vardır.",
           "Kahvaltı 08:00–09:30."
