@@ -156,6 +156,8 @@ class _ProScreenState extends State<ProScreen> {
                   const _SectionTitle('Planınızı seçin'),
                   const SizedBox(height: 12),
                   _PlanSection(pro: _pro),
+                ],
+                if (ProGiftCodes.enabledOnThisPlatform) ...[
                   const SizedBox(height: 18),
                   _GiftCodeCard(pro: _pro),
                 ],
@@ -1208,7 +1210,7 @@ class _GiftCodeCardState extends State<_GiftCodeCard> {
                 textCapitalization: TextCapitalization.characters,
                 autocorrect: false,
                 enableSuggestions: false,
-                maxLength: 32,
+                maxLength: 64,
                 textInputAction: TextInputAction.done,
                 onSubmitted: (_) => unawaited(_redeem()),
                 onChanged: (_) {

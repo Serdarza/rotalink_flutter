@@ -38,21 +38,31 @@ abstract final class FreePassDeviceGuard {
     ),
   );
 
+  static Future<String> _stableLocalId() async {
+    var id = await _storage.read(key: _keychainKey);
+    if (id == null || id.isEmpty) {
+      final rnd = Random.secure();
+      id = base64UrlEncode(List<int>.generate(24, (_) => rnd.nextInt(256)));
+      await _storage.write(key: _keychainKey, value: id);
+    }
+    return id;
+  }
+
   static Future<String?> _deviceId() async {
-    if (Platform.isAndroid) {
-      final id = await _channel.invokeMethod<String>('androidId');
-      return id == null || id.isEmpty ? null : 'android:$id';
-    }
-    if (Platform.isIOS) {
-      var id = await _storage.read(key: _keychainKey);
-      if (id == null || id.isEmpty) {
-        final rnd = Random.secure();
-        id = base64UrlEncode(List<int>.generate(24, (_) => rnd.nextInt(256)));
-        await _storage.write(key: _keychainKey, value: id);
+    try {
+      if (Platform.isAndroid) {
+        final id = await _channel.invokeMethod<String>('androidId');
+        if (id != null && id.isNotEmpty) return 'android:$id';
+        return 'android:${await _stableLocalId()}';
       }
-      return 'ios:$id';
+      if (Platform.isIOS) {
+        return 'ios:${await _stableLocalId()}';
+      }
+      return '${Platform.operatingSystem}:${await _stableLocalId()}';
+    } catch (e) {
+      debugPrint('[Pro] cihaz kimliği alınamadı: $e');
+      return null;
     }
-    return null;
   }
 
   static DocumentReference<Map<String, dynamic>> _docFor(String seed) {

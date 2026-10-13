@@ -78,9 +78,20 @@ abstract final class ProGiftCodes {
   static DateTime? _lockedUntil;
   static bool _busy = false;
 
-  /// Büyük harf, yalnız harf ve rakam: "ab12-cd34 ef56" → "AB12CD34EF56".
-  static String normalize(String raw) =>
-      raw.toUpperCase().replaceAll(RegExp(r'[^A-Z0-9]'), '');
+  /// App Store 3.1.1: iOS'ta lisans / hediye kodu ile Pro açılmaz.
+  static bool get enabledOnThisPlatform =>
+      defaultTargetPlatform != TargetPlatform.iOS;
+
+  /// Büyük harf, yalnız harf ve rakam.
+  ///
+  /// Not dosyasındaki `XXXX-XXXX-XXXX-XXXX   Verildi:` satırından yalnız kodu alır.
+  static String normalize(String raw) {
+    final upper = raw.toUpperCase();
+    final grouped = RegExp(r'[A-Z0-9]{4}(?:[\s\-]*[A-Z0-9]{4}){3}');
+    final match = grouped.firstMatch(upper);
+    final source = match?.group(0) ?? upper;
+    return source.replaceAll(RegExp(r'[^A-Z0-9]'), '');
+  }
 
   static String hash(String normalized) =>
       sha256.convert(utf8.encode('rotalink-pro-kod-v1:$normalized')).toString();
@@ -106,6 +117,12 @@ abstract final class ProGiftCodes {
   }
 
   static Future<GiftRedeemResult> redeem(String raw) async {
+    if (!enabledOnThisPlatform) {
+      return const GiftRedeemResult(
+        false,
+        'Hediye kodu bu platformda kullanılamaz.',
+      );
+    }
     if (_busy) return const GiftRedeemResult(false, 'Kod kontrol ediliyor…');
     final now = DateTime.now();
     final locked = _lockedUntil;
@@ -120,25 +137,12 @@ abstract final class ProGiftCodes {
       return const GiftRedeemResult(false, 'Kodu eksiksiz yazın.');
     }
     final pro = ProService.instance;
-    if (pro.isPro.value) {
-      return const GiftRedeemResult(
-        false,
-        'Zaten aktif bir Pro aboneliğiniz var.',
-      );
-    }
 
     _busy = true;
     try {
       final List<GiftCodeEntry> entries;
       try {
-        final res = await http
-            .get(
-              GithubProCodeConfig.uri,
-              headers: const {'User-Agent': _userAgent},
-            )
-            .timeout(const Duration(seconds: 20));
-        if (res.statusCode != 200) throw Exception('HTTP ${res.statusCode}');
-        entries = parse(responseText(res));
+        entries = await _fetchList();
       } catch (e) {
         debugPrint('[Pro] kod listesi okunamadı: $e');
         return const GiftRedeemResult(
@@ -209,12 +213,34 @@ abstract final class ProGiftCodes {
         case GiftClaimKind.unavailable:
           return const GiftRedeemResult(
             false,
-            'Kod şu anda doğrulanamadı. İnternet bağlantınızı kontrol edip '
-            'tekrar deneyin.',
+            'Kod geçerli görünüyor ancak kullanım kaydı alınamadı. '
+            'İnterneti kontrol edip biraz sonra tekrar deneyin.',
           );
       }
     } finally {
       _busy = false;
     }
+  }
+
+  static const _listHeaders = {
+    'User-Agent': _userAgent,
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+  };
+
+  static Future<List<GiftCodeEntry>> _fetchList() async {
+    Object? last;
+    for (final uri in [GithubProCodeConfig.uri, GithubProCodeConfig.fallbackUri]) {
+      try {
+        final res = await http
+            .get(uri, headers: _listHeaders)
+            .timeout(const Duration(seconds: 20));
+        if (res.statusCode != 200) throw Exception('HTTP ${res.statusCode}');
+        return parse(responseText(res));
+      } catch (e) {
+        last = e;
+      }
+    }
+    throw last ?? Exception('kod listesi yok');
   }
 }

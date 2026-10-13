@@ -1,9 +1,18 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:rotalink_flutter/billing/pro_gift_code.dart';
 
 void main() {
   test('kod özeti rotalink-data/pro_kod/kod_uret.py ile aynı', () {
     expect(ProGiftCodes.normalize('ab2c-3d4e fghj-kmnp'), 'AB2C3D4EFGHJKMNP');
+    expect(
+      ProGiftCodes.normalize('NHXA-ZY5M-TDVH-JJZ2   Verildi:'),
+      'NHXAZY5MTDVHJJZ2',
+    );
+    expect(
+      ProGiftCodes.normalize('  nhxa zy5m tdvh jjz2\nVerildi: Ahmet'),
+      'NHXAZY5MTDVHJJZ2',
+    );
     expect(
       ProGiftCodes.hash(ProGiftCodes.normalize('AB2C-3D4E-FGHJ-KMNP')),
       '2b3024260e20333fb79a0d7865feefd823576e2b74683935982e10034ae280ec',
@@ -25,5 +34,22 @@ void main() {
     expect(entries[1].sure, const Duration(days: 365));
     expect(entries[1].kullanim, 50);
     expect(entries[1].expiredAt(DateTime(2030)), isFalse);
+  });
+
+  test('iOS hediye kodu kapalı, Android açık', () {
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    expect(ProGiftCodes.enabledOnThisPlatform, isFalse);
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
+    expect(ProGiftCodes.enabledOnThisPlatform, isTrue);
+  });
+
+  test('iOS redeem hediye kodu kabul etmez', () async {
+    addTearDown(() => debugDefaultTargetPlatformOverride = null);
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    final result = await ProGiftCodes.redeem('NHXA-ZY5M-TDVH-JJZ2');
+    expect(result.ok, isFalse);
   });
 }
