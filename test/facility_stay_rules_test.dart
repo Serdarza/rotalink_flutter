@@ -76,4 +76,54 @@ void main() {
       StayAccess.notAllowed,
     );
   });
+
+  test('Yenipazar Öğretmenevi sivil kalamaz', () {
+    final rule = FacilityStayRules.forFacility(
+      Misafirhane(
+        isim: 'Yenipazar Öğretmenevi',
+        il: 'Bilecik',
+        adres: '',
+        telefon: '',
+        latitude: 0,
+        longitude: 0,
+        tip: 'Öğretmenevi',
+      ),
+    );
+    expect(rule.civilAccess, StayAccess.notAllowed);
+  });
+
+  test('Giresun Polisevi konaklama vermez', () {
+    final rule = FacilityStayRules.forFacility(
+      Misafirhane(
+        isim: 'Giresun Polisevi',
+        il: 'Giresun',
+        adres: '',
+        telefon: '',
+        latitude: 0,
+        longitude: 0,
+        tip: 'Sosyal Tesis',
+      ),
+    );
+    expect(rule.civilAccess, StayAccess.notAllowed);
+    expect(rule.groups.every((g) => g.access == StayAccess.notAllowed), isTrue);
+    expect(
+      rule.groups.singleWhere((g) => g.title == 'Emniyet mensupları').detail,
+      contains('Konaklama yoktur'),
+    );
+  });
+
+  test('GAP UTAEM Konukevi sivil kalamaz', () {
+    final rule = FacilityStayRules.forFacility(
+      Misafirhane(
+        isim: 'GAP Uluslararası Tarımsal Araştırma Ve Eğitim Merkezi Konukevi',
+        il: 'Diyarbakır',
+        adres: '',
+        telefon: '',
+        latitude: 0,
+        longitude: 0,
+        tip: 'Tarımsal Araştırma Merkez Konukevi',
+      ),
+    );
+    expect(rule.civilAccess, StayAccess.notAllowed);
+  });
 }

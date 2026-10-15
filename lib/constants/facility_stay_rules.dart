@@ -53,7 +53,17 @@ abstract final class FacilityStayRules {
     bool has(String k) => tip.contains(k) || (tip.isEmpty && isim.contains(k));
     bool hasAny(List<String> ks) => ks.any(has);
 
-    if (has('ogretmen')) return _ogretmenevi;
+    if (normalizeForSearch(m.il) == 'giresun' &&
+        normalizeForSearch(m.isim).contains('giresunpolisevi')) {
+      return _giresunPolisevi;
+    }
+    if (has('ogretmen')) {
+      if (normalizeForSearch(m.il) == 'bilecik' &&
+          normalizeForSearch(m.isim).contains('yenipazar')) {
+        return _yenipazarOgretmenevi;
+      }
+      return _ogretmenevi;
+    }
     if (has('polis')) {
       if (normalizeForSearch(m.il) == 'artvin' &&
           normalizeForSearch(m.isim).contains('artvinpolisevi')) {
@@ -81,6 +91,10 @@ abstract final class FacilityStayRules {
     ])) {
       return _uyelik;
     }
+    if (normalizeForSearch(m.il) == 'diyarbakir' &&
+        normalizeForSearch(m.isim).contains('gapuluslararasi')) {
+      return _gapUtaem;
+    }
     return _kurumMisafirhanesi(_institutionName(m.tip));
   }
 
@@ -104,6 +118,53 @@ abstract final class FacilityStayRules {
     const generic = {'', 'kamu', 'sosyal tesis', 'konuk', 'bakanlık'};
     return generic.contains(t.toLowerCase()) ? null : t;
   }
+
+  static const _yenipazarOgretmenevi = FacilityStayRule(
+    authority: 'Millî Eğitim Bakanlığı',
+    civilAccess: StayAccess.notAllowed,
+    groups: [
+      StayGroup(
+        'Eğitim çalışanları',
+        'Öğretmen ve MEB personeli kurum tarifesinden kalır.',
+        StayAccess.allowed,
+      ),
+      StayGroup(
+        'Diğer kamu personeli',
+        'Kurumun duyurusuna göre yalnızca kamu personeline hizmet verilir.',
+        StayAccess.allowed,
+      ),
+      StayGroup(
+        'Sivil vatandaşlar',
+        'Tesis duyurusunda sivil vatandaşa hizmet verilmediği yazıyor.',
+        StayAccess.notAllowed,
+      ),
+    ],
+    howTo: [
+      'Tesisi arayıp kamu personeli olduğunuzu belirtin.',
+      'Girişte kurum kimliği gösterin.',
+    ],
+  );
+
+  static const _gapUtaem = FacilityStayRule(
+    authority: 'Tarım ve Orman Bakanlığı / GAP UTAEM',
+    civilAccess: StayAccess.notAllowed,
+    groups: [
+      StayGroup(
+        'Kamu personeli',
+        'Kamu personeli konaklayabilir.',
+        StayAccess.allowed,
+      ),
+      StayGroup(
+        'Sivil vatandaşlar',
+        'Tesis sivil misafir kabul etmiyor.',
+        StayAccess.notAllowed,
+      ),
+    ],
+    howTo: [
+      'Tesisi arayıp kamu personeli olduğunuzu belirtin.',
+      'Girişte kurum kimliği gösterin.',
+    ],
+  );
 
   static const _ogretmenevi = FacilityStayRule(
     authority: 'Millî Eğitim Bakanlığı',
@@ -163,6 +224,33 @@ abstract final class FacilityStayRules {
       'Siviller, referans olacak emniyet personelinin dilekçesi ve kurum '
           'kimlik fotokopisiyle tesis müdürlüğüne başvurur.',
       'Onay tesis yönetimine ve oda müsaitliğine bağlıdır.',
+    ],
+  );
+
+  /// Giresun Polisevi resmi duyuru: konaklama yok, Kamelya 155 sosyal tesisi.
+  static const _giresunPolisevi = FacilityStayRule(
+    authority: 'Emniyet Genel Müdürlüğü',
+    civilAccess: StayAccess.notAllowed,
+    groups: [
+      StayGroup(
+        'Emniyet mensupları',
+        'Konaklama yoktur. Kamelya 155 sosyal tesisi (yemek, kafe) hizmet verir.',
+        StayAccess.notAllowed,
+      ),
+      StayGroup(
+        'Diğer kamu personeli',
+        'Konaklama yoktur. Sosyal tesisten yararlanma tesis yönetimine bağlıdır.',
+        StayAccess.notAllowed,
+      ),
+      StayGroup(
+        'Sivil vatandaşlar',
+        'Konaklama yoktur. Tesiste oda bulunmaz.',
+        StayAccess.notAllowed,
+      ),
+    ],
+    howTo: [
+      'Konaklama rezervasyonu alınmaz.',
+      'Sosyal tesis için (0454) 215 02 19 veya (0505) 318 28 21 numaralarını arayın.',
     ],
   );
 
