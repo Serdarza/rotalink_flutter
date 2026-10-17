@@ -12,6 +12,7 @@ import '../navigator_keys.dart';
 import '../screens/holidays_screen.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import 'announcement_notification_scheduler.dart';
+import 'campaign_push_service.dart';
 
 /// Arka planda bildirime tıklanınca (ayrı isolate); [pragma] zorunlu.
 @pragma('vm:entry-point')
@@ -49,6 +50,10 @@ class HolidayNotificationScheduler {
   static bool _initialized = false;
 
   static Future<void> handleBackgroundTap(NotificationResponse details) async {
+    if (details.payload == CampaignPushService.localPayload) {
+      await CampaignPushService.markPendingOpenInPrefs();
+      return;
+    }
     final route = _announcementRoute(details.payload);
     if (route != null) {
       await _setPendingRoute(route);
@@ -102,12 +107,22 @@ class HolidayNotificationScheduler {
         importance: Importance.high,
       ),
     );
+    await android?.createNotificationChannel(
+      const AndroidNotificationChannel(
+        CampaignPushService.channelId,
+        CampaignPushService.channelName,
+        description: CampaignPushService.channelDescription,
+        importance: Importance.high,
+      ),
+    );
 
     final launch = await _plugin.getNotificationAppLaunchDetails();
     if (launch?.didNotificationLaunchApp == true) {
       final payload = launch?.notificationResponse?.payload;
       final route = _announcementRoute(payload);
-      if (route != null) {
+      if (payload == CampaignPushService.localPayload) {
+        CampaignPushService.requestOpen();
+      } else if (route != null) {
         await _setPendingRoute(route);
       } else if (payload == payloadOpenHolidays) {
         await _setPendingNavigationFlag();
@@ -119,7 +134,41 @@ class HolidayNotificationScheduler {
     await scheduleUpcomingHolidayReminders();
   }
 
+  /// Ön planda gelen yeni kampanya bildirimini gösterir (tıklanınca Kampanya sekmesi açılır).
+  static Future<void> showCampaignNotification({
+    required String title,
+    required String body,
+  }) async {
+    if (!_initialized) await initialize();
+    final android = AndroidNotificationDetails(
+      CampaignPushService.channelId,
+      CampaignPushService.channelName,
+      channelDescription: CampaignPushService.channelDescription,
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: '@mipmap/ic_launcher',
+    );
+    const ios = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+    await _plugin.show(
+      _campaignNotificationId,
+      title,
+      body,
+      NotificationDetails(android: android, iOS: ios),
+      payload: CampaignPushService.localPayload,
+    );
+  }
+
+  static const int _campaignNotificationId = 940_000;
+
   static void _onForegroundNotificationResponse(NotificationResponse r) {
+    if (r.payload == CampaignPushService.localPayload) {
+      CampaignPushService.requestOpen();
+      return;
+    }
     final route = _announcementRoute(r.payload);
     if (route != null) {
       final shellNav = rotalinkShellBodyNavigatorKey.currentState;

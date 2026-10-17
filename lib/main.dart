@@ -15,6 +15,7 @@ import 'billing/pro_service.dart';
 import 'bootstrap/firebase_bootstrap.dart';
 import 'deeplink/deep_link_service.dart';
 import 'services/announcement_notification_scheduler.dart';
+import 'services/campaign_push_service.dart';
 import 'services/holiday_notification_scheduler.dart';
 import 'services/pro_update_notifier.dart';
 import 'theme/system_ui.dart';
@@ -56,6 +57,11 @@ Future<void> _startBackgroundServices() async {
     debugPrint('Firebase başlatılamadı: $e');
   }
   unawaited(DeepLinkService.instance.start());
+  unawaited(
+    CampaignPushService.initialize().catchError(
+      (Object e) => debugPrint('Kampanya bildirimleri başlatılamadı: $e'),
+    ),
+  );
   unawaited(_requestRuntimePermissions());
   unawaited(_bootstrapSecondary());
 }

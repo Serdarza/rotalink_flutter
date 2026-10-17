@@ -17,6 +17,7 @@ import '../navigator_keys.dart';
 import '../onboarding/app_onboarding_controller.dart';
 import '../onboarding/app_onboarding_overlay.dart';
 import '../onboarding/onboarding_prefs.dart';
+import '../services/campaign_push_service.dart';
 import '../theme/system_ui.dart';
 import '../widgets/pro_support_banner.dart';
 import '../widgets/rotalink_glass_bottom_nav.dart';
@@ -68,10 +69,29 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     _onboarding.addListener(_onOnboardingChanged);
     ProService.instance.isPro.addListener(_onProChanged);
     DeepLinkService.instance.pending.addListener(_onDeepLink);
+    CampaignPushService.openRequests.addListener(_onCampaignNotificationOpen);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_maybeStartOnboarding());
       _scheduleProSupportBanner();
+      // Uygulama kapalıyken kampanya bildirimine dokunulduysa istek zaten bekliyordur.
+      _onCampaignNotificationOpen();
     });
+  }
+
+  /// "Yeni kampanya" bildirimine dokunuldu (kapalı / arka plan / ön plan):
+  /// ana sayfa değil, doğrudan Kampanya sekmesi açılır.
+  void _onCampaignNotificationOpen() {
+    if (!CampaignPushService.hasPendingOpen) return;
+    unawaited(_openCampaignsFromNotification());
+  }
+
+  Future<void> _openCampaignsFromNotification() async {
+    for (var i = 0; i < 60 && mounted && _bodyNav == null; i++) {
+      await WidgetsBinding.instance.endOfFrame;
+    }
+    if (!mounted || _bodyNav == null) return;
+    if (!CampaignPushService.consumePendingOpen()) return;
+    _openDiscoverTab();
   }
 
   /// Web linki: içerik ana haritada açılır; alt menü de oraya döner.
@@ -159,6 +179,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     _onboarding.removeListener(_onOnboardingChanged);
     _onboarding.dispose();
     DeepLinkService.instance.pending.removeListener(_onDeepLink);
+    CampaignPushService.openRequests.removeListener(_onCampaignNotificationOpen);
     _navBridge.dispose();
     super.dispose();
   }

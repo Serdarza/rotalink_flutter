@@ -6,6 +6,7 @@ import '../constants/public_holidays_2026.dart';
 import '../l10n/app_strings.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../services/announcement_notification_scheduler.dart';
+import '../services/campaign_push_service.dart';
 import '../theme/app_colors.dart';
 
 /// 2026–2027 resmi tatiller ve idari izinler — liste, kart ve geri sayım.
@@ -62,6 +63,7 @@ class _HolidayCardStyle {
 class _HolidaysScreenState extends State<HolidaysScreen> {
   late final Timer _tick;
   bool? _announcementsEnabled;
+  bool? _campaignPushEnabled;
 
   @override
   void initState() {
@@ -70,11 +72,32 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
       if (mounted) setState(() {});
     });
     unawaited(_loadAnnouncementsEnabled());
+    unawaited(_loadCampaignPushEnabled());
   }
 
   Future<void> _loadAnnouncementsEnabled() async {
     final enabled = await AnnouncementNotificationScheduler.isEnabled();
     if (mounted) setState(() => _announcementsEnabled = enabled);
+  }
+
+  Future<void> _loadCampaignPushEnabled() async {
+    final enabled = await CampaignPushService.isEnabled();
+    if (mounted) setState(() => _campaignPushEnabled = enabled);
+  }
+
+  Future<void> _toggleCampaignPush(bool value) async {
+    setState(() => _campaignPushEnabled = value);
+    final permitted = await CampaignPushService.setEnabled(value);
+    if (value && !permitted && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Bildirim izni kapalı. Bildirim almak için telefon ayarlarından '
+            'Rotalink bildirimlerine izin verin.',
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _toggleAnnouncements(bool value) async {
@@ -264,29 +287,57 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFFBBDEFB)),
                 ),
-                child: SwitchListTile.adaptive(
-                  value: _announcementsEnabled ?? true,
-                  onChanged: _announcementsEnabled == null
-                      ? null
-                      : _toggleAnnouncements,
-                  secondary: const Icon(
-                    Icons.notifications_active_outlined,
-                    color: Color(0xFF1565C0),
-                  ),
-                  title: Text(
-                    'Duyuru bildirimleri',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
+                child: Column(
+                  children: [
+                    SwitchListTile.adaptive(
+                      value: _announcementsEnabled ?? true,
+                      onChanged: _announcementsEnabled == null
+                          ? null
+                          : _toggleAnnouncements,
+                      secondary: const Icon(
+                        Icons.notifications_active_outlined,
+                        color: Color(0xFF1565C0),
+                      ),
+                      title: Text(
+                        'Duyuru bildirimleri',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Haftada en fazla bir kez, Perşembe 21:00 civarı tatil, '
+                        'tesis ve kampanya önerileri.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.campaignSummaryMuted,
+                          height: 1.3,
+                        ),
+                      ),
                     ),
-                  ),
-                  subtitle: Text(
-                    'Haftada en fazla bir kez, Perşembe 21:00 civarı tatil, '
-                    'tesis ve kampanya önerileri.',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.campaignSummaryMuted,
-                      height: 1.3,
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                    SwitchListTile.adaptive(
+                      value: _campaignPushEnabled ?? true,
+                      onChanged: _campaignPushEnabled == null
+                          ? null
+                          : _toggleCampaignPush,
+                      secondary: const Icon(
+                        Icons.campaign_outlined,
+                        color: Color(0xFF1565C0),
+                      ),
+                      title: Text(
+                        CampaignPushService.settingTitle,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: Text(
+                        CampaignPushService.settingDescription,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.campaignSummaryMuted,
+                          height: 1.3,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             );
