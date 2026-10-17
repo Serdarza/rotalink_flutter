@@ -32276,10 +32276,10 @@
       "longitude": 36.91799992759254
     },
     {
-      "isim": "Andırın Öğretmenevi",
+      "isim": "Andırın Şehit Hakan Taşgıt Öğretmenevi ve Akşam Sanat Okulu",
       "tip": "Öğretmenevi",
       "il": "Kahramanmaraş",
-      "adres": "Yeni Mahalle.No:34. Andırın – KAHRAMANMARAŞ",
+      "adres": "Tufan Paşa Mah. 3077 Cad. No:57A, Andırın / Kahramanmaraş",
       "telefon": "0344 561 25 48",
       "latitude": 37.57992584084809,
       "longitude": 36.360881737339426
@@ -42241,6 +42241,87 @@
       "telefon": "(0266) 718 66 67",
       "latitude": 40.353707,
       "longitude": 27.971405
+    },
+    {
+      "isim": "Ermenek Konukevi",
+      "tip": "Konukevi",
+      "il": "Karaman",
+      "adres": "Seyran Mah. Hastane Sok. No:1, Ermenek / Karaman",
+      "telefon": "0338 716 34 46",
+      "latitude": 36.633949,
+      "longitude": 32.906778
+    },
+    {
+      "isim": "Ordu Orman Fidanlık Müdürlüğü Misafirhanesi",
+      "tip": "Orman Fidanlık Müdürlüğü Misafirhanesi",
+      "il": "Ordu",
+      "adres": "Ordu / Merkez",
+      "telefon": "",
+      "latitude": 40.9534,
+      "longitude": 37.895
+    },
+    {
+      "isim": "Osman Sungur Motel",
+      "tip": "Konukevi",
+      "il": "Denizli",
+      "adres": "Karahayıt, Pamukkale / Denizli",
+      "telefon": "",
+      "latitude": 37.785,
+      "longitude": 29.117
+    },
+    {
+      "isim": "İslahiye Merinos Ali Erdemoğlu Öğretmenevi ve Akşam Sanat Okulu",
+      "tip": "Öğretmenevi",
+      "il": "Gaziantep",
+      "adres": "İslahiye / Gaziantep",
+      "telefon": "",
+      "latitude": 37.0196,
+      "longitude": 36.6281
+    },
+    {
+      "isim": "Tarsus Ashabi Kehf Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Mersin",
+      "adres": "Tarsus / Mersin",
+      "telefon": "0324 614 23 32",
+      "latitude": 36.9176,
+      "longitude": 34.8956
+    },
+    {
+      "isim": "Şehit Yüzbaşı Özgür Özekin Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "Düzce",
+      "adres": "Merkez, Çıraklık Meslek Okulu yanı / Düzce",
+      "telefon": "",
+      "latitude": 40.8438,
+      "longitude": 31.1565
+    },
+    {
+      "isim": "İstanbul Üniversitesi Sosyal Tesisleri Baltalimanı",
+      "tip": "Üniversite Sosyal Tesisi",
+      "il": "İstanbul",
+      "adres": "Baltalimanı, Sarıyer/İstanbul",
+      "telefon": "",
+      "latitude": 41.1655,
+      "longitude": 29.055
+    },
+    {
+      "isim": "Mehmet İhsan Mercerci Uygulama Oteli",
+      "tip": "Uygulama Oteli",
+      "il": "İstanbul",
+      "adres": "Merkezefendi, Mevlevihane Cd., Zeytinburnu/İstanbul",
+      "telefon": "05330475768",
+      "latitude": 41.005,
+      "longitude": 28.905
+    },
+    {
+      "isim": "Doç. Dr. İbrahim Üzümcü Öğrenci Yurdu Konukevi (Buca Misafirhanesi)",
+      "tip": "Üniversite Konukevi",
+      "il": "İzmir",
+      "adres": "Dokuz Eylül Üniversitesi, Buca/İzmir",
+      "telefon": "",
+      "latitude": 38.395,
+      "longitude": 27.18
     }
   ],
   "sosyal": [
