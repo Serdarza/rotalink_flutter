@@ -32285,15 +32285,6 @@
       "longitude": 36.360881737339426
     },
     {
-      "isim": "Çağlayancerit Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Kahramanmaraş",
-      "adres": "Fatih Mahallesi. Atatürk Caddesi. No:184. Çağlayancerit – KAHRAMANMARAŞ",
-      "telefon": "0344 351 24 45",
-      "latitude": 37.74738119115665,
-      "longitude": 37.28148580851471
-    },
-    {
       "isim": "Elbistan Öğretmenevi",
       "tip": "Öğretmenevi",
       "il": "Kahramanmaraş",
@@ -32328,15 +32319,6 @@
       "telefon": "0344 211 06 90",
       "latitude": 37.598440529937605,
       "longitude": 36.84072551449398
-    },
-    {
-      "isim": "Kahramanmaraş Merkez Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Kahramanmaraş",
-      "adres": "İsmetpaşa Mahallesi. Zübeyde Hanım Caddesi. No: 22. KAHRAMANMARAŞ",
-      "telefon": "0344 225 55 80",
-      "latitude": 37.576104930516784,
-      "longitude": 36.92929329501073
     },
     {
       "isim": "Kahramanmaraş Orduevi",
@@ -32382,15 +32364,6 @@
       "telefon": "0344 471 24 11",
       "latitude": 37.9660725810725,
       "longitude": 37.42662298154411
-    },
-    {
-      "isim": "Türkoğlu Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Kahramanmaraş",
-      "adres": "İstasyon Mahallesi. Atatürk Caddesi. Akasya Sokak. No:7. Türkoğlu – KAHRAMANMARAŞ",
-      "telefon": "(0344) 618 10 38",
-      "latitude": 37.38440277051717,
-      "longitude": 36.847846737326485
     },
     {
       "isim": "Karabük jandarma sosyal tesisleri",
@@ -32694,7 +32667,7 @@
       "tip": "Üniversite Sosyal Tesisi",
       "il": "Kastamonu",
       "adres": "Bostan Köyü Ilgaz Dağı Milli Parklar Kastamonu Merkez, Kastamonu",
-      "telefon": "(0312) 215 55 62",
+      "telefon": "(0312) 215 55 62 / (0366) 239 10 61",
       "latitude": 41.074585379118375,
       "longitude": 33.72916735441342
     },
@@ -32882,10 +32855,11 @@
       "isim": "Tosya Öğretmenevi",
       "tip": "Öğretmenevi",
       "il": "Kastamonu",
-      "adres": "Kargı Mahallesi. Banka Sokak. No: 1/3. Tosya – KASTAMONU",
+      "adres": "Bahçelievler Mahallesi, Aşağı Tekke Sokak No:16, Tosya / Kastamonu",
       "telefon": "0366 313 10 54",
       "latitude": 41.01696391890389,
-      "longitude": 34.03689995441064
+      "longitude": 34.03689995441064,
+      "ilce": "Tosya"
     },
     {
       "isim": "Bünyan Sabancı Öğretmenevi",
@@ -32940,15 +32914,6 @@
       "telefon": "05335782238",
       "latitude": 38.69991265366754,
       "longitude": 35.53548546964187
-    },
-    {
-      "isim": "Felahiye İstikbal Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Kayseri",
-      "adres": "Kale Mahallesi. Metin Balkaya Caddesi. No:20. Felahiye – KAYSERİ",
-      "telefon": "(0352) 781 22 28",
-      "latitude": 39.09021918910277,
-      "longitude": 35.56894262177197
     },
     {
       "isim": "Hunat Otel Kamu Misafirhanesi Konukevii",
@@ -33044,10 +33009,11 @@
       "isim": "Kayseri Öğretmenevi",
       "tip": "Öğretmenevi",
       "il": "Kayseri",
-      "adres": "Sahabiye Mah. Mete Cad. No 13 Posta Kodu 38010 Kocasinan / Kayseri",
-      "telefon": "0352 222 26 06",
-      "latitude": 38.725077556075156,
-      "longitude": 35.48638750826319
+      "adres": "Kiçiköy Mah. Sağlık Cad. No:20, Talas / Kayseri",
+      "telefon": "(0352) 222 26 06 / 0531 104 37 64",
+      "latitude": 38.691525,
+      "longitude": 35.55576,
+      "ilce": "Talas"
     },
     {
       "isim": "Kayseri Pınarbaşı Öğretmenevi İnönü",
@@ -35735,28 +35701,21 @@
       "isim": "Akyazı Öğretmenevi",
       "tip": "Öğretmenevi",
       "il": "Sakarya",
-      "adres": "Cumhuriyet Mahallesi. Yıldırım Beyazıt Caddesi. Akyazı – SAKARYA",
+      "adres": "Cumhuriyet Mahallesi, Yıldırım Beyazıt Caddesi No:30/1, Akyazı / Sakarya",
       "telefon": "0264 418 14 96",
       "latitude": 40.69042420266262,
-      "longitude": 30.624967810213004
+      "longitude": 30.624967810213004,
+      "ilce": "Akyazı"
     },
     {
       "isim": "Geyve Öğretmenevi",
       "tip": "Öğretmenevi",
       "il": "Sakarya",
-      "adres": "Camikebir Mahallesi. Uzunçarşı Sokak. No:34. Geyve – SAKARYA",
+      "adres": "Camikebir Mah. Uzunçarşı Sk. No:36 İç Kapı No:1, Geyve / Sakarya",
       "telefon": "0264 517 24 11",
       "latitude": 40.50969784226831,
-      "longitude": 30.289072489297773
-    },
-    {
-      "isim": "Hendek Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Sakarya",
-      "adres": "Kemaliye Mahallesi. Şehit Ali Gaffar Okkan Caddesi. No : 41. Hendek – SAKARYA",
-      "telefon": "0264 614 79 55",
-      "latitude": 40.7956699155701,
-      "longitude": 30.744358923709445
+      "longitude": 30.289072489297773,
+      "ilce": "Geyve"
     },
     {
       "isim": "Kefken Özel Eğitim Merkezi K.lığı",
@@ -36009,15 +35968,6 @@
       "telefon": "03622381153",
       "latitude": 41.26937875404568,
       "longitude": 36.370204111775735
-    },
-    {
-      "isim": "Samsun Polisevi",
-      "tip": "Polisevi",
-      "il": "Samsun",
-      "adres": "Zafer, Atatürk Blv. No:16, 55060 İlkadım/Samsun",
-      "telefon": "0362 230 89 00",
-      "latitude": 41.28728500660815,
-      "longitude": 36.338774925588005
     },
     {
       "isim": "Samsun PTT Misafirhanesi",

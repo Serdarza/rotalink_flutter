@@ -331,17 +331,18 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   Future<void> _handleShellBack() async {
     if (!mounted) return;
 
-    // Üst sayfa (yorum, kampanya, keşfet vb.) → bir adım geri.
+    // Üst sayfa (yorum, karşılaştırma, keşfet vb.) → bir adım geri.
     final nav = _bodyNav;
     if (nav != null && nav.canPop()) {
-      // Keşfet vb. sekmeden ana haritaya dönüşte reset; ana harita üstü
-      // (Yorum vb.) kapanınca arama panelini bozma.
-      final leavingSecondaryTab = _selected != RotalinkBottomNavItem.home;
+      // Keşfet tam sayfa sekmedir; son rota kapanınca ana menüye dön.
+      // Arama/favori/rota harita üstündedir — Yorum/karşılaştır kapanınca
+      // listeyi bozma.
+      final leavingDiscover = _selected == RotalinkBottomNavItem.discover;
       nav.pop();
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final canStillPop = _bodyNav?.canPop() ?? false;
-        if (!canStillPop && leavingSecondaryTab) {
+        if (!canStillPop && leavingDiscover) {
           setState(() {
             _selected = RotalinkBottomNavItem.home;
             _showDashboard = true;
@@ -354,18 +355,30 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
       return;
     }
 
-    // Alt menüde ana sayfa dışı sekme seçiliyse → ana harita.
+    if (_showSearchHub || _showFavoritesHub) {
+      _goHome();
+      return;
+    }
+
+    // Haritada kart / arama listesi / rota varsa önce onları kapat.
+    if (!_showDashboard) {
+      final overlay = _navBridge.hasActiveOverlay?.call() ?? false;
+      if (overlay) {
+        final handler = _navBridge.handleSystemBack;
+        if (handler != null) {
+          await handler();
+          return;
+        }
+      }
+      _goHome();
+      return;
+    }
+
     if (_selected != RotalinkBottomNavItem.home) {
       _goHome();
       return;
     }
 
-    if (!_showDashboard && !(_navBridge.hasActiveOverlay?.call() ?? false)) {
-      _goHome();
-      return;
-    }
-
-    // Ana haritada arama / çift basış çıkış kuralları.
     final handler = _navBridge.handleSystemBack;
     if (handler != null) {
       await handler();

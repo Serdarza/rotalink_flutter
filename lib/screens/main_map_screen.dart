@@ -655,19 +655,20 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   }
 
   /// Arama paneli geri yığını:
-  /// detay → liste ↓ → FAB ↑ tekrar liste → liste ↓ → ana ekran.
+  /// detay kartı → liste → (kategori) ana menü / (arama) sheet küçült.
   Future<bool> _handleSearchPanelBack() async {
     if (!_inlineTabbedSearchOpen) return false;
 
-    if (_searchController.text.trim().isEmpty) {
-      _resetSearchToHome();
+    _lastExitBackAt = null;
+
+    // Konaklama detay kartı — arama metni boş olsa da önce listeye dön.
+    if (_searchResultsPanelKey.currentState?.closeDetailIfOpen() ?? false) {
       return true;
     }
 
-    _lastExitBackAt = null;
-
-    // Konaklama detay kartı (sayacı tüketmez)
-    if (_searchResultsPanelKey.currentState?.closeDetailIfOpen() ?? false) {
+    if (_searchController.text.trim().isEmpty) {
+      _resetSearchToHome();
+      RotalinkShellScope.find(context)?.goHome();
       return true;
     }
 
@@ -1174,9 +1175,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       (_activeRouteStops == null || _activeRouteStops!.isEmpty);
 
   bool get _hasMainMapUiOverlay {
-    if (_inlineTabbedSearchOpen && _searchController.text.trim().isNotEmpty) {
-      return false;
-    }
+    if (_inlineTabbedSearchOpen) return true;
     return !_isMainMapOverviewActive ||
         _attachedBottomSheet != null ||
         _mainMapFocusedCity != null ||

@@ -5,6 +5,7 @@ import '../billing/price_access.dart';
 import '../constants/facility_pricing.dart';
 import '../data/facility_compare_selection.dart';
 import '../models/misafirhane.dart';
+import '../navigator_keys.dart';
 import '../screens/facility_compare_screen.dart';
 import '../theme/app_colors.dart';
 import 'facility_sort_bar.dart' show showProFeatureTeaser;
@@ -13,11 +14,13 @@ const _gold = Color(0xFFF2C14E);
 const _goldDeep = Color(0xFFB8860B);
 
 Future<void> openFacilityCompare(BuildContext context, {LatLng? userLocation}) {
-  return Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => FacilityCompareScreen(userLocation: userLocation),
-    ),
+  final route = MaterialPageRoute<void>(
+    builder: (_) => FacilityCompareScreen(userLocation: userLocation),
   );
+  if (rotalinkShellBodyNavigatorKey.currentState != null) {
+    return pushOnShellNavigator<void>(route);
+  }
+  return Navigator.of(context).push(route);
 }
 
 Future<void> showCompareProTeaser(BuildContext context) => showProFeatureTeaser(

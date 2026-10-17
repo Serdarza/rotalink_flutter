@@ -22,6 +22,11 @@ class RotalinkShellScope extends InheritedWidget {
         .dependOnInheritedWidgetOfExactType<RotalinkShellScope>();
   }
 
+  /// Geri tuşu gibi build dışı çağrılar için — [maybeOf] bağımlılık kaydeder.
+  static RotalinkShellScope? find(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<RotalinkShellScope>();
+  }
+
   static bool isInShell(BuildContext context) => maybeOf(context) != null;
 
   /// Kaydırılabilir içerik alt boşluğu — kabuk menüsünün altına taşmayı önler.
