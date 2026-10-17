@@ -7,6 +7,7 @@ import 'package:in_app_purchase_android/in_app_purchase_android.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'pro_products.dart';
+import 'store_entitlement.dart';
 
 /// Rotalink Pro abonelik durumu.
 ///
@@ -57,16 +58,17 @@ class ProService {
   /// Mevcut dönemin tahmini bitiş anı (geri sayım için).
   final ValueNotifier<DateTime?> expiryAt = ValueNotifier<DateTime?>(null);
 
-  /// Hediye kodla açılan Pro'nun bitişi (yoksa veya bittiyse null).
-  final ValueNotifier<DateTime?> giftEndsAt = ValueNotifier<DateTime?>(null);
+  /// Eski uygulama içi hediye kodundan kalan bitiş (yeni kod yazılmaz).
+  final ValueNotifier<DateTime?> legacyGiftEndsAt = ValueNotifier<DateTime?>(null);
 
-  String? _giftPlan;
+  String? _legacyGiftPlan;
 
-  /// Hediye kodun planı: `aylik` / `yillik`.
-  String? get giftPlan => _giftPlan;
+  /// Eski hediye planı: `aylik` / `yillik`. Yeni kayıt açılmaz.
+  String? get legacyGiftPlan => _legacyGiftPlan;
 
-  bool get giftActive {
-    final end = giftEndsAt.value;
+  /// Daha önce verilen hediye Pro, kayıtlı bitişe kadar sürer.
+  bool get legacyGiftActive {
+    final end = legacyGiftEndsAt.value;
     return end != null && end.isAfter(DateTime.now());
   }
 
@@ -104,7 +106,7 @@ class ProService {
   ///
   /// Aktif abonelik (dönem bitişi gelecekte) veya süren hediye Pro.
   /// Abonelik süresi dolmuşsa anında false döner ve arka planda hak düşürülür.
-  bool get hasProAccess => _subscriptionActive || giftActive;
+  bool get hasProAccess => _subscriptionActive || legacyGiftActive;
 
   bool get _subscriptionActive {
     if (!isPro.value) return false;
@@ -262,36 +264,34 @@ class ProService {
   }
 
   Future<void> _handlePurchase(PurchaseDetails purchase) async {
-    if (!ProProducts.ids.contains(purchase.productID)) {
-      if (purchase.pendingCompletePurchase) {
-        await _iap.completePurchase(purchase);
-      }
-      return;
-    }
+    final expiry = ProProducts.ids.contains(purchase.productID)
+        ? _resolveExpiry(purchase)
+        : null;
+    final decision = StoreEntitlement.decide(
+      productId: purchase.productID,
+      status: purchase.status,
+      expiry: expiry,
+      now: DateTime.now(),
+    );
 
-    switch (purchase.status) {
-      case PurchaseStatus.pending:
-        purchasePending.value = true;
-        return;
-
-      case PurchaseStatus.purchased:
-      case PurchaseStatus.restored:
-        final expiry = _resolveExpiry(purchase);
-
-        // Geri yüklemede dönemi çoktan bitmiş işlem gelirse (iOS geçmişi tüm
-        // yenilemeleri döndürür) hak verilmez.
-        if (purchase.status == PurchaseStatus.restored &&
-            expiry != null &&
-            !expiry.isAfter(DateTime.now())) {
-          if (purchase.pendingCompletePurchase) {
-            await _iap.completePurchase(purchase);
-          }
+    switch (decision) {
+      case StoreGrant.ignoreUnknownProduct:
+      case StoreGrant.ignoreExpiredRestore:
+        if (purchase.pendingCompletePurchase) {
+          await _iap.completePurchase(purchase);
+        }
+        if (decision == StoreGrant.ignoreExpiredRestore) {
           debugPrint(
             '[Pro] süresi geçmiş işlem yok sayıldı: ${purchase.productID}',
           );
-          return;
         }
+        return;
 
+      case StoreGrant.pending:
+        purchasePending.value = true;
+        return;
+
+      case StoreGrant.activate:
         _sawEntitlementDuringRestore = true;
         await _setEntitlement(
           true,
@@ -310,7 +310,7 @@ class ProService {
         }
         return;
 
-      case PurchaseStatus.error:
+      case StoreGrant.failed:
         debugPrint('[Pro] satın alma hatası: ${purchase.error}');
         if (purchase.pendingCompletePurchase) {
           await _iap.completePurchase(purchase);
@@ -319,7 +319,7 @@ class ProService {
         _emit('Satın alma tamamlanamadı. Ücret yansımadıysa tekrar deneyin.');
         return;
 
-      case PurchaseStatus.canceled:
+      case StoreGrant.canceled:
         purchasePending.value = false;
         return;
     }
@@ -526,39 +526,33 @@ class ProService {
     _messages.add(message);
   }
 
-  /// Hediye kodla Pro'yu [end] anına kadar açar ve yerelde saklar.
-  Future<void> grantGift({required String plan, required DateTime end}) async {
-    _giftPlan = plan;
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(_keyGiftEndMs, end.millisecondsSinceEpoch);
-      await prefs.setString(_keyGiftPlan, plan);
-    } catch (e) {
-      debugPrint('[Pro] hediye Pro kaydedilemedi: $e');
-    }
-    _setGiftEnd(end);
-  }
-
+  /// Eski hediye kaydını okur. Yeni bitiş yazılmaz; süre dolunca kapanır.
   Future<void> _loadGift() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final endMs = prefs.getInt(_keyGiftEndMs);
-      _giftPlan = prefs.getString(_keyGiftPlan);
+      _legacyGiftPlan = prefs.getString(_keyGiftPlan);
       if (endMs != null) {
-        _setGiftEnd(DateTime.fromMillisecondsSinceEpoch(endMs));
+        _setLegacyGiftEnd(DateTime.fromMillisecondsSinceEpoch(endMs));
       }
     } catch (e) {
-      debugPrint('[Pro] hediye Pro okunamadı: $e');
+      debugPrint('[Pro] eski hediye Pro okunamadı: $e');
     }
   }
 
-  void _setGiftEnd(DateTime? end) {
+  void _setLegacyGiftEnd(DateTime? end) {
     _giftTimer?.cancel();
     _giftTimer = null;
     final active = end != null && end.isAfter(DateTime.now());
-    giftEndsAt.value = active ? end : null;
+    legacyGiftEndsAt.value = active ? end : null;
+    if (!active && end != null) {
+      _legacyGiftPlan = null;
+    }
     if (active) {
-      _giftTimer = Timer(end.difference(DateTime.now()), () => _setGiftEnd(null));
+      _giftTimer = Timer(
+        end.difference(DateTime.now()),
+        () => _setLegacyGiftEnd(null),
+      );
     }
     _isPro.ping();
   }

@@ -1,0 +1,13 @@
+// Firebase Console → rotalink-d738c → Firestore → Rules
+// Mevcut kurallarınızın İÇİNE ekleyin (tümünü silip yapıştırmayın).
+//
+// Ücretsiz fiyat hakkı hâlâ bu koleksiyonu kullanır.
+// Uygulama içi hediye kuponu kaldırıldı; yeni hediye Pro kaydı yazılmaz.
+// Eski hediye bitişleri cihazda (SharedPreferences) durur, Firestore'da değil.
+
+    match /freePassClaims/{claimId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['createdAt', 'platform'])
+        && request.resource.data.platform is string;
+      allow update, delete: if false;
+    }

@@ -10,6 +10,10 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 ///
 /// Fiyat uygulamada tanımlı değildir; mağazadan okunur. Fiyat değişikliği
 /// uygulama güncellemesi gerektirmez.
+///
+/// Play Console promo kodu ve App Store Connect abonelik teklif kodu aynı
+/// kimlikleri kullanır. Kod mağazada kullanılır; uygulama satın alma akışında
+/// normal abonelik olarak görür.
 abstract final class ProProducts {
   static const String monthly = 'rotalink_pro_monthly';
   static const String yearly = 'rotalink_pro_yearly';
