@@ -56,20 +56,10 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
   }
 
   Future<void> _share() async {
-    final buf = StringBuffer()
-      ..writeln(campaign.title.trim())
-      ..writeln()
-      ..writeln(campaign.summary.trim());
-    final link = campaign.linkUrl?.trim();
-    if (link != null && link.isNotEmpty) {
-      buf.writeln();
-      buf.writeln(link);
-    }
-    buf
-      ..writeln()
-      ..writeln(StoreLinks.shareDownloadFooter());
     await Share.share(
-      buf.toString(),
+      StoreLinks.shareMessage(campaign.title.trim(), [
+        campaign.summary.trim(),
+      ]),
       subject: campaign.title.trim(),
     );
   }
@@ -92,10 +82,10 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
           children: [
             Text(
               campaign.title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
+                color: AppColors.textStrongOf(context),
               ),
             ),
             if (campaign.organization.isNotEmpty) ...[
@@ -112,18 +102,18 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
             const SizedBox(height: 12),
             Text(
               _dateText,
-              style: const TextStyle(
-                color: AppColors.campaignSummaryMuted,
+              style: TextStyle(
+                color: AppColors.textMutedOf(context),
                 fontSize: 13,
               ),
             ),
             const SizedBox(height: 16),
             Text(
               campaign.summary,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 height: 1.4,
-                color: AppColors.textPrimary,
+                color: AppColors.textStrongOf(context),
               ),
             ),
             if (campaign.tags.isNotEmpty) ...[

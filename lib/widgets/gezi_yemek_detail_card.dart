@@ -3,6 +3,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../map_location_state.dart';
 import '../models/gezi_yemek_item.dart';
+import '../services/view_counter_service.dart';
 import '../theme/app_colors.dart';
 import 'distance_permission_chip.dart';
 import 'rotalink_cached_image.dart';
@@ -52,6 +53,14 @@ class _GeziYemekDetailCardState extends State<GeziYemekDetailCard> {
   void initState() {
     super.initState();
     _page = PageController();
+    // Bu detay açıldığında ortak görüntülenme sayacı (oturum başına bir kez).
+    ViewCounterService.instance.recordView(
+      ViewCounterService.keyFor(
+        widget.isGezi ? ViewCategory.gezi : ViewCategory.yemek,
+        widget.item.il,
+        widget.item.isim,
+      ),
+    );
   }
 
   @override
@@ -75,9 +84,10 @@ class _GeziYemekDetailCardState extends State<GeziYemekDetailCard> {
     final cardBg = isDark ? const Color(0xFF1E2528) : Colors.white;
     final muted = isDark
         ? Colors.white.withValues(alpha: 0.55)
-        : AppColors.textPrimary.withValues(alpha: 0.55);
-    final titleColor =
-        isDark ? Colors.white.withValues(alpha: 0.96) : AppColors.textPrimary;
+        : AppColors.textStrongOf(context).withValues(alpha: 0.55);
+    final titleColor = isDark
+        ? Colors.white.withValues(alpha: 0.96)
+        : AppColors.textStrongOf(context);
     final hairline = isDark
         ? Colors.white.withValues(alpha: 0.08)
         : AppColors.primary.withValues(alpha: 0.08);
@@ -155,8 +165,9 @@ class _GeziYemekDetailCardState extends State<GeziYemekDetailCard> {
                                     children: List.generate(urls.length, (i) {
                                       final on = i == _index;
                                       return AnimatedContainer(
-                                        duration:
-                                            const Duration(milliseconds: 180),
+                                        duration: const Duration(
+                                          milliseconds: 180,
+                                        ),
                                         margin: const EdgeInsets.symmetric(
                                           horizontal: 3,
                                         ),
@@ -165,10 +176,12 @@ class _GeziYemekDetailCardState extends State<GeziYemekDetailCard> {
                                         decoration: BoxDecoration(
                                           color: on
                                               ? Colors.white
-                                              : Colors.white
-                                                  .withValues(alpha: 0.45),
-                                          borderRadius:
-                                              BorderRadius.circular(99),
+                                              : Colors.white.withValues(
+                                                  alpha: 0.45,
+                                                ),
+                                          borderRadius: BorderRadius.circular(
+                                            99,
+                                          ),
                                         ),
                                       );
                                     }),
@@ -179,8 +192,7 @@ class _GeziYemekDetailCardState extends State<GeziYemekDetailCard> {
                                 left: 8,
                                 child: DecoratedBox(
                                   decoration: BoxDecoration(
-                                    color:
-                                        Colors.black.withValues(alpha: 0.45),
+                                    color: Colors.black.withValues(alpha: 0.45),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Padding(
@@ -260,7 +272,8 @@ class _GeziYemekDetailCardState extends State<GeziYemekDetailCard> {
                           DistancePermissionChip(
                             userLocation: widget.mapLocationState.userLocation,
                             locationPermissionGranted: widget
-                                .mapLocationState.locationPermissionGranted,
+                                .mapLocationState
+                                .locationPermissionGranted,
                             facilityPoint: widget.facilityPoint,
                             onRequestLocation: widget.onRequestLocation,
                             spacingAbove: 0,
@@ -275,7 +288,7 @@ class _GeziYemekDetailCardState extends State<GeziYemekDetailCard> {
                             style: TextStyle(
                               color: isDark
                                   ? Colors.white.withValues(alpha: 0.78)
-                                  : AppColors.campaignSummaryMuted,
+                                  : AppColors.textMutedOf(context),
                               fontSize: 13.5,
                               height: 1.45,
                               fontWeight: FontWeight.w500,
@@ -305,26 +318,25 @@ class _GeziYemekDetailCardState extends State<GeziYemekDetailCard> {
                               ? Icons.map_outlined
                               : Icons.image_search,
                           color: AppColors.primary,
-                          label: 'İncele',
+                          label: widget.isGezi ? 'Harita' : 'Fotoğraf',
                           onTap: widget.onInspect,
                         ),
                         if (widget.onSecondaryCta != null)
                           _DetailAction(
-                            icon: widget.secondaryCtaIcon ??
-                                Icons.map_rounded,
-                            color: const Color(0xFF2E7D32),
+                            icon: widget.secondaryCtaIcon ?? Icons.map_rounded,
+                            color: AppColors.primary,
                             label: widget.secondaryCtaLabel ?? 'Git',
                             onTap: widget.onSecondaryCta!,
                           ),
                         _DetailAction(
                           icon: Icons.ios_share_rounded,
-                          color: const Color(0xFF039BE5),
+                          color: AppColors.primary,
                           label: 'Paylaş',
                           onTap: widget.onShare,
                         ),
                         _DetailAction(
                           icon: Icons.chat_bubble_outline_rounded,
-                          color: const Color(0xFFE65100),
+                          color: AppColors.primary,
                           label: 'Yorum',
                           onTap: widget.onReview,
                         ),

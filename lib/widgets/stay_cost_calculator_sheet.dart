@@ -18,7 +18,7 @@ Future<void> showStayCostCalculator(BuildContext context, Misafirhane priced) {
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,
-    backgroundColor: Colors.white,
+    backgroundColor: AppColors.surfaceOf(context),
     builder: (ctx) => DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.9,
@@ -167,16 +167,13 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
       '$_adults yetişkin',
       if (_children > 0) '$_children çocuk',
     ].join(', ');
-    final b = StringBuffer()
-      ..writeln(widget.facility.isim)
-      ..writeln('${o.row.ad} · $_catName')
-      ..writeln('$_nights gece · $people')
-      ..writeln()
-      ..writeln('Tahmini toplam: ${formatTl(r.total)}')
-      ..writeln('(Tarifeye göre hesaplandı; kesin tutar için tesisle görüşün.)')
-      ..writeln()
-      ..write(StoreLinks.shareDownloadFooter());
-    await Share.share(b.toString());
+    await Share.share(
+      StoreLinks.shareMessage(widget.facility.isim, [
+        '${o.row.ad} · $_catName',
+        '$_nights gece · $people',
+        'Tahmini toplam: ${formatTl(r.total)}',
+      ]),
+    );
   }
 
   @override
@@ -245,7 +242,7 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
           initialValue: _optionIndex,
           key: ValueKey(_catId),
           isExpanded: true,
-          decoration: _fieldDecoration(),
+          decoration: _fieldDecoration(context),
           items: [
             for (final (i, opt) in _options.indexed)
               DropdownMenuItem(
@@ -368,9 +365,12 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
           ),
           if (_breakfastOn && _breakfastRowAmount == null)
             TextField(
+              cursorColor: AppColors.primary,
+              style: TextStyle(color: AppColors.searchTextOf(context)),
               controller: _breakfastCtrl,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               decoration: _fieldDecoration(
+                context,
                 hint: 'Kişi başı günlük kahvaltı ücreti (TL)',
               ),
               onChanged: (_) => setState(() {}),
@@ -406,11 +406,12 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
     );
   }
 
-  static InputDecoration _fieldDecoration({String? hint}) => InputDecoration(
+  static InputDecoration _fieldDecoration(BuildContext context, {String? hint}) =>
+      InputDecoration(
         hintText: hint,
         isDense: true,
         filled: true,
-        fillColor: const Color(0xFFF3F7F8),
+        fillColor: AppColors.fieldFillOf(context),
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -429,10 +430,10 @@ class _SectionTitle extends StatelessWidget {
         padding: const EdgeInsets.only(top: 18, bottom: 8),
         child: Text(
           text,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
+            color: AppColors.textStrongOf(context),
           ),
         ),
       );

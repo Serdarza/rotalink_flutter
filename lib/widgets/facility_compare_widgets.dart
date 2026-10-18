@@ -79,12 +79,14 @@ class FacilityCompareButton extends StatelessWidget {
                     onPressed: () => _onToggle(context),
                     style: TextButton.styleFrom(
                       alignment: Alignment.centerLeft,
-                      foregroundColor: AppColors.primary,
+                      // Yazı nötr koyu; renk yalnız ikonda.
+                      foregroundColor: isDark ? Colors.white : const Color(0xFF2B3A40),
                       textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
                     ),
                     icon: Icon(
                       inList ? Icons.check_circle_rounded : Icons.compare_arrows_rounded,
                       size: 20,
+                      color: AppColors.primary,
                     ),
                     label: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -147,8 +149,8 @@ class FacilityCompareBar extends StatelessWidget {
                       : FacilityPricing.compareNeedTwo,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: AppColors.textStrongOf(context),
                     fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                   ),
@@ -195,10 +197,10 @@ class CompareProBadge extends StatelessWidget {
         gradient: const LinearGradient(colors: [_gold, _goldDeep]),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const Text(
+      child: Text(
         'PRO',
         style: TextStyle(
-          color: Colors.white,
+          color: AppColors.surfaceOf(context),
           fontSize: 9.5,
           fontWeight: FontWeight.w900,
           letterSpacing: 0.5,

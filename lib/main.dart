@@ -19,6 +19,7 @@ import 'services/campaign_push_service.dart';
 import 'services/holiday_notification_scheduler.dart';
 import 'services/pro_update_notifier.dart';
 import 'theme/system_ui.dart';
+import 'theme/theme_mode_prefs.dart';
 
 /// AnalyticsObserver — MaterialApp içinde kullanılır; Firebase Analytics
 /// ısınması [runApp] sonrasına bırakılır.
@@ -41,6 +42,7 @@ Future<void> main() async {
   unawaited(RotalinkSystemUi.applyEdgeToEdge());
 
   analyticsObserver = AnalyticsObserver(FirebaseAnalyticsService.instance);
+  await ThemeModePrefs.load();
   runApp(const ProviderScope(child: RotalinkApp()));
   FlutterNativeSplash.remove();
   logStartup('runApp');
@@ -108,9 +110,11 @@ Future<void> _bootstrapSecondary() async {
       } catch (e) {
         debugPrint('Bildirim zamanlayıcı başlatılamadı: $e');
       }
-      unawaited(AnnouncementNotificationScheduler.sync().catchError(
-        (Object e) => debugPrint('Duyuru bildirimleri zamanlanamadı: $e'),
-      ));
+      unawaited(
+        AnnouncementNotificationScheduler.sync().catchError(
+          (Object e) => debugPrint('Duyuru bildirimleri zamanlanamadı: $e'),
+        ),
+      );
       try {
         await ProUpdateNotifier.initialize();
       } catch (e) {

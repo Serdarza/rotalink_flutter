@@ -43,6 +43,12 @@ ThemeData buildRotalinkTheme() {
         height: 1.25,
         fontWeight: FontWeight.w600,
       ),
+      bodyLarge: TextStyle(
+        color: AppColors.textStrong,
+        fontSize: 16,
+        height: 1.4,
+        fontWeight: FontWeight.w400,
+      ),
       bodyMedium: TextStyle(
         color: AppColors.textStrong,
         fontSize: 14,
@@ -88,6 +94,9 @@ ThemeData buildRotalinkTheme() {
       filled: true,
       fillColor: AppColors.searchBarBg,
       hintStyle: const TextStyle(color: AppColors.searchBarHint, fontSize: 16),
+      labelStyle: const TextStyle(color: AppColors.textMuted),
+      prefixIconColor: AppColors.textMuted,
+      suffixIconColor: AppColors.textMuted,
       border: InputBorder.none,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       enabledBorder: OutlineInputBorder(
@@ -126,6 +135,11 @@ ThemeData buildRotalinkTheme() {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
     ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: AppColors.primary,
+      selectionHandleColor: AppColors.primary,
+      selectionColor: AppColors.primary.withValues(alpha: 0.28),
+    ),
   );
 }
 
@@ -137,6 +151,14 @@ ThemeData buildRotalinkDarkTheme() {
     onSecondary: AppColors.white,
     surface: AppColors.darkCanvas,
     onSurface: AppColors.darkTextStrong,
+    onSurfaceVariant: AppColors.darkTextMuted,
+    surfaceContainerLowest: AppColors.darkCanvas,
+    surfaceContainerLow: AppColors.darkSurface,
+    surfaceContainer: AppColors.darkSurface,
+    surfaceContainerHigh: const Color(0xFF243033),
+    surfaceContainerHighest: const Color(0xFF2C3C40),
+    outline: AppColors.darkBorder,
+    outlineVariant: AppColors.darkBorder,
     error: AppColors.emergencyLabel,
     onError: AppColors.white,
   );
@@ -168,6 +190,12 @@ ThemeData buildRotalinkDarkTheme() {
         fontSize: 16,
         height: 1.25,
         fontWeight: FontWeight.w600,
+      ),
+      bodyLarge: TextStyle(
+        color: AppColors.darkTextStrong,
+        fontSize: 16,
+        height: 1.4,
+        fontWeight: FontWeight.w400,
       ),
       bodyMedium: TextStyle(
         color: AppColors.darkTextStrong,
@@ -214,6 +242,10 @@ ThemeData buildRotalinkDarkTheme() {
       filled: true,
       fillColor: AppColors.darkSurface,
       hintStyle: const TextStyle(color: AppColors.darkTextMuted, fontSize: 16),
+      labelStyle: const TextStyle(color: AppColors.darkTextMuted),
+      floatingLabelStyle: const TextStyle(color: AppColors.purple200),
+      prefixIconColor: AppColors.darkTextMuted,
+      suffixIconColor: AppColors.darkTextMuted,
       border: InputBorder.none,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       enabledBorder: OutlineInputBorder(
@@ -252,6 +284,89 @@ ThemeData buildRotalinkDarkTheme() {
         side: const BorderSide(color: AppColors.primary),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
+    ),
+    iconTheme: const IconThemeData(color: AppColors.darkTextMuted),
+    listTileTheme: const ListTileThemeData(
+      textColor: AppColors.darkTextStrong,
+      iconColor: AppColors.darkTextMuted,
+    ),
+    dialogTheme: const DialogThemeData(
+      backgroundColor: AppColors.darkSurface,
+      surfaceTintColor: Colors.transparent,
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: AppColors.darkSurface,
+      modalBackgroundColor: AppColors.darkSurface,
+      surfaceTintColor: Colors.transparent,
+    ),
+    popupMenuTheme: const PopupMenuThemeData(
+      color: AppColors.darkSurface,
+      surfaceTintColor: Colors.transparent,
+      textStyle: TextStyle(color: AppColors.darkTextStrong),
+    ),
+    dropdownMenuTheme: const DropdownMenuThemeData(
+      textStyle: TextStyle(color: AppColors.darkTextStrong),
+    ),
+    dividerTheme: const DividerThemeData(color: AppColors.darkBorder),
+    chipTheme: ChipThemeData(
+      backgroundColor: AppColors.darkPrimarySoft,
+      labelStyle: const TextStyle(color: AppColors.darkTextStrong),
+      side: const BorderSide(color: AppColors.darkBorder),
+    ),
+    expansionTileTheme: const ExpansionTileThemeData(
+      textColor: AppColors.darkTextStrong,
+      collapsedTextColor: AppColors.darkTextStrong,
+      iconColor: AppColors.darkTextMuted,
+      collapsedIconColor: AppColors.darkTextMuted,
+    ),
+    checkboxTheme: CheckboxThemeData(
+      checkColor: const WidgetStatePropertyAll(AppColors.white),
+      fillColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.primary
+            : AppColors.darkBorder,
+      ),
+    ),
+    radioTheme: RadioThemeData(
+      fillColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.primary
+            : AppColors.darkTextMuted,
+      ),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.primary
+            : AppColors.darkTextMuted,
+      ),
+      trackColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? AppColors.primary.withValues(alpha: 0.45)
+            : AppColors.darkBorder,
+      ),
+    ),
+    sliderTheme: const SliderThemeData(
+      activeTrackColor: AppColors.primary,
+      thumbColor: AppColors.primary,
+      inactiveTrackColor: AppColors.darkBorder,
+    ),
+    datePickerTheme: const DatePickerThemeData(
+      backgroundColor: AppColors.darkSurface,
+    ),
+    timePickerTheme: const TimePickerThemeData(
+      backgroundColor: AppColors.darkSurface,
+    ),
+    progressIndicatorTheme: const ProgressIndicatorThemeData(
+      color: AppColors.primary,
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: AppColors.primary,
+      selectionHandleColor: AppColors.primary,
+      selectionColor: AppColors.primary.withValues(alpha: 0.35),
+    ),
+    tooltipTheme: const TooltipThemeData(
+      textStyle: TextStyle(color: AppColors.darkTextStrong),
     ),
   );
 }

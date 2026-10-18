@@ -1,6 +1,9 @@
 package com.serdarza.rotalink
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.os.Bundle
+import android.provider.CalendarContract
 import android.provider.Settings
 import androidx.core.view.WindowCompat
 import io.flutter.embedding.android.FlutterActivity
@@ -26,6 +29,36 @@ class MainActivity : FlutterActivity() {
                     )
                 } else {
                     result.notImplemented()
+                }
+            }
+
+        // Konaklama detayı → "Takvime Ekle": sistem takviminin etkinlik ekleme
+        // ekranını açar. Kaydı kullanıcı onaylar; izin gerekmez.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "rotalink/calendar")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "addEvent") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                val begin = (call.argument<Number>("beginMillis"))?.toLong()
+                    ?: System.currentTimeMillis()
+                val end = (call.argument<Number>("endMillis"))?.toLong()
+                    ?: (begin + 60L * 60L * 1000L)
+                val intent = Intent(Intent.ACTION_INSERT).apply {
+                    data = CalendarContract.Events.CONTENT_URI
+                    putExtra(CalendarContract.Events.TITLE, call.argument<String>("title") ?: "")
+                    putExtra(
+                        CalendarContract.Events.DESCRIPTION,
+                        call.argument<String>("notes") ?: "",
+                    )
+                    putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, begin)
+                    putExtra(CalendarContract.EXTRA_EVENT_END_TIME, end)
+                }
+                try {
+                    startActivity(intent)
+                    result.success(true)
+                } catch (e: ActivityNotFoundException) {
+                    result.success(false)
                 }
             }
     }

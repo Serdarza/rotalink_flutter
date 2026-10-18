@@ -55,8 +55,8 @@ class KamiBubble extends StatelessWidget {
                           message,
                           maxLines: 3,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: AppColors.textStrongOf(context),
                             fontSize: 11,
                             height: 1.3,
                             fontWeight: FontWeight.w600,

@@ -83,6 +83,9 @@
                 <data android:host="rotalink.tr" />
                 <data android:pathPrefix="/sehir/" />
                 <data android:pathPrefix="/tesis/" />
+                <!-- Takvim etkinliği notundaki bağlantı: https://rotalink.tr/indir/ →
+                     uygulamayı normal açılış ekranıyla açar (tesis detayına gitmez). -->
+                <data android:pathPrefix="/indir" />
             </intent-filter>
             <!-- Web sitesinden uygulamaya geçiş: rotalink://open/sehir/kayseri/ -->
             <intent-filter>

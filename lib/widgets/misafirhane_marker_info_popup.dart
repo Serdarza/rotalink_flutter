@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/misafirhane.dart';
+import '../theme/app_colors.dart';
 import '../utils/maps_launch.dart';
 
 /// Kotlin `res/layout/marker_info_window_small.xml` ile hizalı bilgi kutusu:
@@ -94,7 +95,7 @@ class MisafirhaneMarkerInfoPopup extends StatelessWidget {
     return Material(
       elevation: 8,
       borderRadius: BorderRadius.circular(5),
-      color: Colors.white,
+      color: AppColors.surfaceOf(context),
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
         width: _cardWidth,

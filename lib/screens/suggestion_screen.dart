@@ -5,9 +5,6 @@ import '../constants/store_links.dart';
 import '../l10n/app_strings.dart';
 import '../theme/app_colors.dart';
 
-const _pageBg = AppColors.canvas;
-const _fieldBg = AppColors.surface;
-const _fieldText = AppColors.textStrong;
 const _sendBg = AppColors.primary;
 
 /// Kotlin [SuggestionActivity] + [activity_suggestion.xml].
@@ -127,16 +124,16 @@ $suggestion'''
     final top = MediaQuery.paddingOf(context).top;
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: _pageBg,
+      backgroundColor: AppColors.canvasOf(context),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Material(
-            color: AppColors.surface,
+            color: AppColors.surfaceOf(context),
             child: Container(
               width: double.infinity,
-              decoration: const BoxDecoration(
-                color: AppColors.surface,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceOf(context),
                 border: Border(bottom: BorderSide(color: AppColors.border)),
               ),
               padding: EdgeInsets.fromLTRB(8, top + 8, 8, 20),
@@ -145,29 +142,29 @@ $suggestion'''
                 children: [
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.arrow_back_rounded,
-                      color: AppColors.textStrong,
+                      color: AppColors.textStrongOf(context),
                     ),
                   ),
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       AppStrings.suggestionTitle,
                       style: TextStyle(
-                        color: AppColors.textStrong,
+                        color: AppColors.textStrongOf(context),
                         fontSize: 24,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
                   const SizedBox(height: 6),
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       AppStrings.suggestionSubtitle,
                       style: TextStyle(
-                        color: AppColors.textMuted,
+                        color: AppColors.textMutedOf(context),
                         fontSize: 14,
                       ),
                     ),
@@ -185,7 +182,7 @@ $suggestion'''
                 16 + MediaQuery.viewInsetsOf(context).bottom + MediaQuery.viewPaddingOf(context).bottom,
               ),
               child: Card(
-                color: _fieldBg,
+                color: AppColors.surfaceOf(context),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                   side: const BorderSide(color: AppColors.border),
@@ -197,42 +194,42 @@ $suggestion'''
                     children: [
                       TextField(
                         controller: _name,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: AppStrings.suggestionNameHint,
                           border: InputBorder.none,
                           filled: true,
-                          fillColor: _fieldBg,
+                          fillColor: AppColors.fieldFillOf(context),
                           contentPadding: EdgeInsets.all(12),
                         ),
-                        style: const TextStyle(color: _fieldText),
+                        style: TextStyle(color: AppColors.searchTextOf(context)),
                         textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 10),
                       TextField(
                         controller: _email,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: AppStrings.suggestionEmailHint,
                           border: InputBorder.none,
                           filled: true,
-                          fillColor: _fieldBg,
+                          fillColor: AppColors.fieldFillOf(context),
                           contentPadding: EdgeInsets.all(12),
                         ),
-                        style: const TextStyle(color: _fieldText),
+                        style: TextStyle(color: AppColors.searchTextOf(context)),
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 10),
                       TextField(
                         controller: _suggestion,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: AppStrings.suggestionBodyHint,
                           border: InputBorder.none,
                           filled: true,
-                          fillColor: _fieldBg,
+                          fillColor: AppColors.fieldFillOf(context),
                           contentPadding: EdgeInsets.all(16),
                           alignLabelWithHint: true,
                         ),
-                        style: const TextStyle(color: _fieldText),
+                        style: TextStyle(color: AppColors.searchTextOf(context)),
                         minLines: 6,
                         maxLines: 12,
                         keyboardType: TextInputType.multiline,

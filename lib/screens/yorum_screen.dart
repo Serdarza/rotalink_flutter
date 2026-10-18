@@ -10,9 +10,26 @@ import '../theme/app_colors.dart';
 // ── Argo Filtresi ─────────────────────────────────────────────────────────────
 
 const _kArgoBlacklist = {
-  'orospu', 'siktir', 'amk', 'piç', 'oç', 'göt', 'yarrak', 'amına',
-  'ibne', 'kahpe', 'pezevenk', 'pezevek', 'sikik', 'oğlancı',
-  'gerizekalı', 'dangalak', 'aptal', 'salak', 'mal', 'götü',
+  'orospu',
+  'siktir',
+  'amk',
+  'piç',
+  'oç',
+  'göt',
+  'yarrak',
+  'amına',
+  'ibne',
+  'kahpe',
+  'pezevenk',
+  'pezevek',
+  'sikik',
+  'oğlancı',
+  'gerizekalı',
+  'dangalak',
+  'aptal',
+  'salak',
+  'mal',
+  'götü',
 };
 
 bool _containsBlacklisted(String text) {
@@ -36,7 +53,8 @@ Future<String> _getOrCreateUserId() async {
   const key = 'rotalink_user_id';
   var id = prefs.getString(key);
   if (id == null || id.isEmpty) {
-    id = DateTime.now().millisecondsSinceEpoch.toString() +
+    id =
+        DateTime.now().millisecondsSinceEpoch.toString() +
         UniqueKey().toString();
     await prefs.setString(key, id);
   }
@@ -82,11 +100,14 @@ class _YorumScreenState extends State<YorumScreen> {
     _userId = await _getOrCreateUserId();
     _reviewSub = ReviewRepository.instance
         .getReviewsStream(widget.facilityId)
-        .listen((list) {
-      if (mounted) setState(() => _reviews = list);
-    }, onError: (_) {
-      if (mounted) setState(() => _reviews = []);
-    });
+        .listen(
+          (list) {
+            if (mounted) setState(() => _reviews = list);
+          },
+          onError: (_) {
+            if (mounted) setState(() => _reviews = []);
+          },
+        );
   }
 
   @override
@@ -108,8 +129,9 @@ class _YorumScreenState extends State<YorumScreen> {
       return;
     }
     if (_containsBlacklisted(trimmed)) {
-      setState(() =>
-          _errorMsg = 'Lütfen topluluk kurallarına uygun bir dil kullanın.');
+      setState(
+        () => _errorMsg = 'Lütfen topluluk kurallarına uygun bir dil kullanın.',
+      );
       return;
     }
     setState(() {
@@ -187,7 +209,7 @@ class _YorumScreenState extends State<YorumScreen> {
     return ScaffoldMessenger(
       key: _snackbarKey,
       child: Scaffold(
-        backgroundColor: AppColors.canvas,
+        backgroundColor: AppColors.canvasOf(context),
         appBar: AppBar(
           title: Text(
             widget.facilityName,
@@ -200,39 +222,44 @@ class _YorumScreenState extends State<YorumScreen> {
           onTap: () => FocusScope.of(context).unfocus(),
           child: ListView(
             controller: _scrollController,
-            padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.viewPaddingOf(context).bottom),
+            padding: EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              16 + MediaQuery.viewPaddingOf(context).bottom,
+            ),
             children: [
               _RatingInputCard(
                 selectedRating: _selectedRating,
                 textController: _textController,
                 isSubmitting: _isSubmitting,
                 errorMsg: _errorMsg,
-                onRatingChange: (v) =>
-                    setState(() {
-                      _selectedRating = v;
-                      _errorMsg = null;
-                    }),
-                onTextChange: (_) =>
-                    setState(() => _errorMsg = null),
+                onRatingChange: (v) => setState(() {
+                  _selectedRating = v;
+                  _errorMsg = null;
+                }),
+                onTextChange: (_) => setState(() => _errorMsg = null),
                 onSubmit: _submitReview,
               ),
               const SizedBox(height: 16),
               _ReviewsHeader(reviews: _reviews),
               const SizedBox(height: 12),
-              if (_reviews == null)
-                ...[for (int i = 0; i < 3; i++) const _ShimmerCard()]
-              else if (_reviews!.isEmpty)
+              if (_reviews == null) ...[
+                for (int i = 0; i < 3; i++) const _ShimmerCard(),
+              ] else if (_reviews!.isEmpty)
                 const _EmptyReviewsMessage()
               else
-                ..._reviews!.map((r) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: _ReviewCard(
-                        review: r,
-                        currentUserId: _userId,
-                        onDeleteTap: () => _confirmDelete(r),
-                        onLikeTap: () => _toggleLike(r),
-                      ),
-                    )),
+                ..._reviews!.map(
+                  (r) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _ReviewCard(
+                      review: r,
+                      currentUserId: _userId,
+                      onDeleteTap: () => _confirmDelete(r),
+                      onLikeTap: () => _toggleLike(r),
+                    ),
+                  ),
+                ),
               const SizedBox(height: 24),
             ],
           ),
@@ -245,12 +272,14 @@ class _YorumScreenState extends State<YorumScreen> {
     showDialog<void>(
       context: context,
       builder: (_) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Yorumu Sil',
-            style: TextStyle(fontWeight: FontWeight.w600)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'Yorumu Sil',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
         content: const Text(
-            'Bu yorumunuzu kalıcı olarak silmek istediğinizden emin misiniz?'),
+          'Bu yorumunuzu kalıcı olarak silmek istediğinizden emin misiniz?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -261,9 +290,10 @@ class _YorumScreenState extends State<YorumScreen> {
               Navigator.of(context).pop();
               _deleteReview(r);
             },
-            child: const Text('Evet, Sil',
-                style: TextStyle(
-                    color: _kDeleteRed, fontWeight: FontWeight.bold)),
+            child: const Text(
+              'Evet, Sil',
+              style: TextStyle(color: _kDeleteRed, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
@@ -305,9 +335,10 @@ class _RatingInputCard extends StatelessWidget {
             const Text(
               'Yorum & Puan Ekle',
               style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: _kTeal),
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: _kTeal,
+              ),
             ),
             const SizedBox(height: 14),
             // Yıldız seçici
@@ -332,14 +363,15 @@ class _RatingInputCard extends StatelessWidget {
             const SizedBox(height: 12),
             TextField(
               controller: textController,
+              cursorColor: AppColors.primary,
+              style: TextStyle(color: AppColors.searchTextOf(context)),
               onChanged: onTextChange,
               minLines: 3,
               maxLines: 6,
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 hintText: 'Deneyiminizi paylaşın...',
-                hintStyle:
-                    TextStyle(color: Colors.grey.shade500),
+                hintStyle: TextStyle(color: AppColors.textMutedOf(context)),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -353,8 +385,10 @@ class _RatingInputCard extends StatelessWidget {
             ),
             if (errorMsg != null) ...[
               const SizedBox(height: 6),
-              Text(errorMsg!,
-                  style: const TextStyle(color: Colors.red, fontSize: 13)),
+              Text(
+                errorMsg!,
+                style: const TextStyle(color: Colors.red, fontSize: 13),
+              ),
             ],
             const SizedBox(height: 14),
             ElevatedButton.icon(
@@ -364,18 +398,22 @@ class _RatingInputCard extends StatelessWidget {
                       width: 18,
                       height: 18,
                       child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2),
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
                     )
                   : const Icon(Icons.send, size: 18),
-              label: const Text('Gönder',
-                  style: TextStyle(
-                      fontSize: 15, fontWeight: FontWeight.w600)),
+              label: const Text(
+                'Gönder',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _kTeal,
                 foregroundColor: Colors.white,
                 minimumSize: const Size.fromHeight(48),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ],
@@ -400,30 +438,35 @@ class _ReviewsHeader extends StatelessWidget {
       children: [
         const Text(
           'Son 1 Yılın Yorumları',
-          style:
-              TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
         if (list != null && list.isNotEmpty)
-          Row(children: [
-            const Icon(Icons.star, size: 16, color: _kStarGold),
-            const SizedBox(width: 3),
-            Text(
-              list.map((r) => r.rating).reduce((a, b) => a + b) /
-                          list.length >=
-                      0
-                  ? (list.map((r) => r.rating).reduce((a, b) => a + b) /
-                          list.length)
-                      .toStringAsFixed(1)
-                  : '0.0',
-              style: const TextStyle(
-                  fontSize: 14, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              ' | ${list.length} Yorum',
-              style: const TextStyle(
-                  fontSize: 13, color: Colors.grey),
-            ),
-          ]),
+          Row(
+            children: [
+              const Icon(Icons.star, size: 16, color: _kStarGold),
+              const SizedBox(width: 3),
+              Text(
+                list.map((r) => r.rating).reduce((a, b) => a + b) /
+                            list.length >=
+                        0
+                    ? (list.map((r) => r.rating).reduce((a, b) => a + b) /
+                              list.length)
+                          .toStringAsFixed(1)
+                    : '0.0',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                ' | ${list.length} Yorum',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textMutedOf(context),
+                ),
+              ),
+            ],
+          ),
       ],
     );
   }
@@ -450,13 +493,14 @@ class _ReviewCard extends StatelessWidget {
     final likeCount = review.likes.length;
     final isOwner = review.userId == currentUserId;
     final dateStr = review.createdAt > 0
-        ? DateFormat('dd.MM.yyyy HH:mm', 'tr').format(
-            DateTime.fromMillisecondsSinceEpoch(review.createdAt))
+        ? DateFormat(
+            'dd.MM.yyyy HH:mm',
+            'tr',
+          ).format(DateTime.fromMillisecondsSinceEpoch(review.createdAt))
         : '';
 
     return Card(
-      shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 1,
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -469,8 +513,11 @@ class _ReviewCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 19,
                   backgroundColor: _kTeal,
-                  child: const Icon(Icons.person,
-                      color: Colors.white, size: 22),
+                  child: const Icon(
+                    Icons.person,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -491,10 +538,13 @@ class _ReviewCard extends StatelessWidget {
                           }),
                           if (dateStr.isNotEmpty) ...[
                             const SizedBox(width: 6),
-                            Text(dateStr,
-                                style: const TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.grey)),
+                            Text(
+                              dateStr,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.textMutedOf(context),
+                              ),
+                            ),
                           ],
                         ],
                       ),
@@ -506,8 +556,11 @@ class _ReviewCard extends StatelessWidget {
                     onTap: onDeleteTap,
                     child: const Padding(
                       padding: EdgeInsets.only(left: 4),
-                      child: Icon(Icons.delete_outline,
-                          color: _kDeleteRed, size: 22),
+                      child: Icon(
+                        Icons.delete_outline,
+                        color: _kDeleteRed,
+                        size: 22,
+                      ),
                     ),
                   ),
               ],
@@ -517,8 +570,7 @@ class _ReviewCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               review.text,
-              style:
-                  const TextStyle(fontSize: 14, height: 1.5),
+              style: const TextStyle(fontSize: 14, height: 1.5),
             ),
             const SizedBox(height: 10),
             Row(
@@ -538,15 +590,17 @@ class _ReviewCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       color: isLiked ? _kTeal : Colors.grey,
-                      fontWeight: isLiked
-                          ? FontWeight.w600
-                          : FontWeight.normal,
+                      fontWeight: isLiked ? FontWeight.w600 : FontWeight.normal,
                     ),
                   )
                 else
-                  const Text('Faydalı mıydı?',
-                      style:
-                          TextStyle(fontSize: 12, color: Colors.grey)),
+                  Text(
+                    'Faydalı mıydı?',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textMutedOf(context),
+                    ),
+                  ),
               ],
             ),
           ],
@@ -571,20 +625,25 @@ class _EmptyReviewsMessage extends StatelessWidget {
             CircleAvatar(
               radius: 40,
               backgroundColor: Colors.blueGrey.shade100,
-              child: Icon(Icons.chat_bubble_outline,
-                  size: 40, color: Colors.blueGrey.shade400),
+              child: Icon(
+                Icons.chat_bubble_outline,
+                size: 40,
+                color: Colors.blueGrey.shade400,
+              ),
             ),
             const SizedBox(height: 16),
             const Text(
               'Henüz hiç yorum yapılmamış',
-              style: TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
+            Text(
               'Bu tesisle ilgili deneyimini paylaş,\ndiğer kullanıcılara yardımcı ol.',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 14,
+                color: AppColors.textMutedOf(context),
+              ),
             ),
             const SizedBox(height: 12),
             const Row(
@@ -595,9 +654,10 @@ class _EmptyReviewsMessage extends StatelessWidget {
                 Text(
                   'İlk yorumu sen yaz!',
                   style: TextStyle(
-                      color: _kStarGold,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14),
+                    color: _kStarGold,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
                 ),
               ],
             ),
@@ -643,65 +703,84 @@ class _ShimmerCardState extends State<_ShimmerCard>
     return AnimatedBuilder(
       animation: _anim,
       builder: (_, _) {
+        final shimmerBase = AppColors.isDark(context)
+            ? const Color(0xFF2A383C)
+            : _kShimmerLight;
+        final shimmerHighlight = AppColors.isDark(context)
+            ? const Color(0xFF3A4C51)
+            : _kShimmerBright;
         final shimmer = LinearGradient(
-          colors: const [_kShimmerLight, _kShimmerBright, _kShimmerLight],
+          colors: [shimmerBase, shimmerHighlight, shimmerBase],
           stops: const [0.0, 0.5, 1.0],
           begin: Alignment(-1 + _anim.value * 2, 0),
           end: Alignment(1 + _anim.value * 2, 0),
         );
         return Card(
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12)),
+            borderRadius: BorderRadius.circular(12),
+          ),
           elevation: 1,
           margin: const EdgeInsets.only(bottom: 10),
           child: Padding(
             padding: const EdgeInsets.all(12),
-            child: Column(children: [
-              Row(children: [
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 38,
+                      height: 38,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: shimmer,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            height: 12,
+                            width: 120,
+                            decoration: BoxDecoration(
+                              gradient: shimmer,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Container(
+                            height: 10,
+                            width: 80,
+                            decoration: BoxDecoration(
+                              gradient: shimmer,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
                 Container(
-                  width: 38,
-                  height: 38,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: shimmer,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                          height: 12,
-                          width: 120,
-                          decoration: BoxDecoration(
-                              gradient: shimmer,
-                              borderRadius: BorderRadius.circular(6))),
-                      const SizedBox(height: 6),
-                      Container(
-                          height: 10,
-                          width: 80,
-                          decoration: BoxDecoration(
-                              gradient: shimmer,
-                              borderRadius: BorderRadius.circular(6))),
-                    ],
-                  ),
-                ),
-              ]),
-              const SizedBox(height: 10),
-              Container(
                   height: 14,
                   decoration: BoxDecoration(
-                      gradient: shimmer,
-                      borderRadius: BorderRadius.circular(6))),
-              const SizedBox(height: 6),
-              Container(
+                    gradient: shimmer,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Container(
                   height: 14,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                      gradient: shimmer,
-                      borderRadius: BorderRadius.circular(6))),
-            ]),
+                    gradient: shimmer,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },

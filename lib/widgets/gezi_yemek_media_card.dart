@@ -47,7 +47,7 @@ class _GeziYemekMediaCardState extends State<GeziYemekMediaCard> {
     final urls = _urls;
 
     return Material(
-      color: Colors.white,
+      color: AppColors.surfaceOf(context),
       child: InkWell(
         onTap: widget.onTap,
         child: Padding(
@@ -144,10 +144,10 @@ class _GeziYemekMediaCardState extends State<GeziYemekMediaCard> {
                       children: [
                         Text(
                           g.isim,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.w700,
                             fontSize: 15,
-                            color: AppColors.textPrimary,
+                            color: AppColors.textStrongOf(context),
                             height: 1.2,
                           ),
                         ),
@@ -168,10 +168,10 @@ class _GeziYemekMediaCardState extends State<GeziYemekMediaCard> {
                             g.aciklama,
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12.5,
                               height: 1.35,
-                              color: AppColors.campaignSummaryMuted,
+                              color: AppColors.textMutedOf(context),
                             ),
                           ),
                         ],

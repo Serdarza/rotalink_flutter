@@ -29,6 +29,7 @@ import 'home_dashboard_screen.dart';
 import 'holidays_screen.dart';
 import 'pro_screen.dart';
 import 'search_hub_screen.dart';
+import 'settings_screen.dart';
 import 'suggestion_screen.dart';
 
 /// Uygulama ana iskeleti — tüm sayfalarda sabit alt menü.
@@ -179,7 +180,9 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     _onboarding.removeListener(_onOnboardingChanged);
     _onboarding.dispose();
     DeepLinkService.instance.pending.removeListener(_onDeepLink);
-    CampaignPushService.openRequests.removeListener(_onCampaignNotificationOpen);
+    CampaignPushService.openRequests.removeListener(
+      _onCampaignNotificationOpen,
+    );
     _navBridge.dispose();
     super.dispose();
   }
@@ -187,9 +190,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   NavigatorState? get _bodyNav => rotalinkShellBodyNavigatorKey.currentState;
 
   void _goHome() {
-    unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
-    );
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() {
       _selected = RotalinkBottomNavItem.home;
       _showDashboard = true;
@@ -201,18 +202,16 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   }
 
   void _openMap() {
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
+      _openMapSurface(() async {
+        _navBridge.resetToHome?.call();
+      }, selected: RotalinkBottomNavItem.home),
     );
-    unawaited(_openMapSurface(() async {
-      _navBridge.resetToHome?.call();
-    }, selected: RotalinkBottomNavItem.home));
   }
 
   void _openFavorites() {
-    unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
-    );
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() {
       _selected = RotalinkBottomNavItem.favorites;
       _showSearchHub = false;
@@ -222,9 +221,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   }
 
   void _openFavoritesOnMap() {
-    unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
-    );
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     unawaited(() async {
       await _ensureMapReady();
       if (!mounted) return;
@@ -242,9 +239,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   }
 
   void _openSearch() {
-    unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
-    );
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() {
       _selected = RotalinkBottomNavItem.search;
       _showSearchHub = true;
@@ -255,20 +250,18 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
 
   void _submitSearchQuery(String query) {
     unawaited(RecentSearchStore.instance.add(query));
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
+      _openMapSurface(() async {
+        final ctx = _bodyNav?.context;
+        if (ctx == null) return;
+        await _navBridge.openSearchQuery?.call(ctx, query);
+      }, selected: RotalinkBottomNavItem.search),
     );
-    unawaited(_openMapSurface(() async {
-      final ctx = _bodyNav?.context;
-      if (ctx == null) return;
-      await _navBridge.openSearchQuery?.call(ctx, query);
-    }, selected: RotalinkBottomNavItem.search));
   }
 
   void _openRoutePlan() {
-    unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
-    );
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() => _selected = RotalinkBottomNavItem.route);
     _bodyNav?.popUntil((route) => route.isFirst);
     unawaited(() async {
@@ -278,14 +271,19 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   }
 
   void _openDiscoverTab() {
-    unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
-    );
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() => _selected = RotalinkBottomNavItem.discover);
-    _bodyNav?.pushNamedAndRemoveUntil(
-      RotalinkShellRoutes.discover,
-      (route) => route.settings.name == RotalinkShellRoutes.home,
-    );
+    final nav = _bodyNav;
+    if (nav != null && nav.canPop()) {
+      // Rota gibi üst sayfa varken önce ana rotaya inmek, geçiş animasyonunda
+      // ana ekranı gösterir. Üst sayfanın yerine Kampanya konur.
+      nav.pushReplacementNamed(RotalinkShellRoutes.discover);
+    } else {
+      nav?.pushNamedAndRemoveUntil(
+        RotalinkShellRoutes.discover,
+        (route) => route.settings.name == RotalinkShellRoutes.home,
+      );
+    }
     unawaited(_revealAfterRoutePush(null));
   }
 
@@ -407,14 +405,14 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   }
 
   void _openCategory(int tabIndex) {
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
+      _openMapSurface(() async {
+        final ctx = _bodyNav?.context;
+        if (ctx == null) return;
+        await _navBridge.openCategory?.call(ctx, tabIndex);
+      }, selected: RotalinkBottomNavItem.search),
     );
-    unawaited(_openMapSurface(() async {
-      final ctx = _bodyNav?.context;
-      if (ctx == null) return;
-      await _navBridge.openCategory?.call(ctx, tabIndex);
-    }, selected: RotalinkBottomNavItem.search));
   }
 
   Future<void> _openDashboardRoute(String routeName) async {
@@ -441,6 +439,11 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
         return MaterialPageRoute<void>(
           settings: settings,
           builder: (_) => const AboutScreen(),
+        );
+      case RotalinkShellRoutes.settings:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const SettingsScreen(),
         );
       case RotalinkShellRoutes.holidays:
         return MaterialPageRoute<void>(
@@ -473,6 +476,9 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   Widget build(BuildContext context) {
     _navBridge.onRoutePlanningDismissed = () {
       if (!mounted) return;
+      // Başka sekmeye geçildiyse rota sayfası da kapanır; bunu ana sayfaya
+      // dönüş sayma. Aksi halde Kampanya açılırken ana ekran bir an görünür.
+      if (_selected != RotalinkBottomNavItem.route) return;
       setState(() {
         _selected = RotalinkBottomNavItem.home;
         _showDashboard = true;

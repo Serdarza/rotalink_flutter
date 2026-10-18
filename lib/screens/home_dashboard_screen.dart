@@ -8,9 +8,9 @@ import '../data/hediyelik_repository.dart';
 import '../models/misafirhane.dart';
 import '../data/kamp_repository.dart';
 import '../data/recent_search_store.dart';
-import '../l10n/app_strings.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import '../theme/app_colors.dart';
+import '../theme/ara_ui.dart';
 import '../theme/system_ui.dart';
 import '../utils/main_map_search.dart';
 import '../widgets/custom_search_bar.dart';
@@ -66,9 +66,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     super.initState();
     _dataStream = widget.repository.watchRoot();
     unawaited(RecentSearchStore.instance.ensureLoaded());
-    unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
-    );
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(HediyelikRepository.instance.ensureLoaded());
       unawaited(KampRepository.instance.ensureLoaded());
@@ -98,8 +96,8 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     final facilities = data == null
         ? const <Misafirhane>[]
         : (data.aramaIcinTumTesisler.isNotEmpty
-            ? data.aramaIcinTumTesisler
-            : data.misafirhaneler);
+              ? data.aramaIcinTumTesisler
+              : data.misafirhaneler);
     return showNationwidePriceSheet(
       context,
       facilities: facilities,
@@ -113,7 +111,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
       value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
       child: Scaffold(
         key: _scaffoldKey,
-        backgroundColor: AppColors.canvasOf(context),
+        backgroundColor: AraUi.pageOf(context),
         drawer: RotalinkAppDrawer(
           onOpenRoute: widget.onOpenNamedRoute,
           onOpenWeather: () => unawaited(_openWeather()),
@@ -174,7 +172,9 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         const SizedBox(height: 18),
                         _AssistantCard(onTap: widget.onOpenKami),
                         const SizedBox(height: 12),
-                        _EmergencyCard(onTap: () => unawaited(_openEmergency())),
+                        _EmergencyCard(
+                          onTap: () => unawaited(_openEmergency()),
+                        ),
                       ],
                     ),
                   ),
@@ -313,7 +313,9 @@ class _CategoryGrid extends StatelessWidget {
             return _CategoryGridBody(
               data: data,
               onSelected: onSelected,
-              hediyelikCount: HediyelikRepository.instance.forIller(const {}).length,
+              hediyelikCount: HediyelikRepository.instance
+                  .forIller(const {})
+                  .length,
               kampCount: kampAlanlari.length,
             );
           },
@@ -338,12 +340,19 @@ class _CategoryGridBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final d = data;
+    final konaklamaCount = d == null
+        ? null
+        : MainMapSearch.tesisKaynagiArama(
+            aramaIcinTumTesisler: d.aramaIcinTumTesisler,
+            misafirhaneler: d.misafirhaneler,
+          ).length;
     final items = [
       (
         'Konaklama',
         'Misafirhane ve orduevi',
         Icons.bed_rounded,
-        data?.misafirhaneler.length,
+        konaklamaCount,
         const Color(0xFF007B8F),
         const Color(0xFFD4F3F6),
       ),
@@ -402,7 +411,10 @@ class _CategoryGridBody extends StatelessWidget {
       itemBuilder: (context, index) {
         final item = items[index];
         final cardBg = AppColors.isDark(context)
-            ? Color.alphaBlend(item.$5.withValues(alpha: 0.22), AppColors.darkSurface)
+            ? Color.alphaBlend(
+                item.$5.withValues(alpha: 0.22),
+                AppColors.darkSurface,
+              )
             : item.$6;
         return Material(
           color: cardBg,
@@ -429,18 +441,14 @@ class _CategoryGridBody extends StatelessWidget {
                           color: item.$5,
                           borderRadius: BorderRadius.circular(11),
                         ),
-                        child: Icon(
-                          item.$3,
-                          color: Colors.white,
-                          size: 22,
-                        ),
+                        child: Icon(item.$3, color: Colors.white, size: 22),
                       ),
                       const Spacer(),
                       if (item.$4 != null)
                         Text(
                           '${item.$4}',
-                          style: const TextStyle(
-                            color: AppColors.textMuted,
+                          style: TextStyle(
+                            color: AppColors.textMutedOf(context),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -503,8 +511,9 @@ class _MapDiscoverCard extends StatelessWidget {
                   children: [
                     Text(
                       'Haritada keşfet',
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(color: Colors.white),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.headlineSmall?.copyWith(color: Colors.white),
                     ),
                     const SizedBox(height: 5),
                     Text(
@@ -603,8 +612,9 @@ class _QuickActions extends StatelessWidget {
                 icon: Icons.payments_rounded,
                 label: 'Fiyat',
                 color: dark ? const Color(0xFFF2C14E) : const Color(0xFFB8860B),
-                background:
-                    dark ? const Color(0xFF3A2E14) : const Color(0xFFFFF3D0),
+                background: dark
+                    ? const Color(0xFF3A2E14)
+                    : const Color(0xFFFFF3D0),
                 badge: pro ? null : 'Pro',
                 onTap: onPrice,
               );
@@ -655,8 +665,11 @@ class _QuickAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bg = AppColors.isDark(context)
+        ? Color.alphaBlend(color.withValues(alpha: 0.28), AppColors.darkSurface)
+        : background;
     return Material(
-      color: background,
+      color: bg,
       borderRadius: BorderRadius.circular(14),
       child: InkWell(
         onTap: onTap,
@@ -889,7 +902,9 @@ class _AssistantCard extends StatelessWidget {
       title: 'KAMİ’ye sor',
       subtitle: 'Gezi, yemek ve rota önerilerini keşfet.',
       actionLabel: 'Asistanı aç',
-      background: const Color(0xFFDFF4F6),
+      background: AppColors.isDark(context)
+          ? AppColors.darkPrimarySoft
+          : const Color(0xFFDFF4F6),
       borderColor: const Color(0xFF007B8F).withValues(alpha: 0.22),
       onTap: onTap,
     );
@@ -917,7 +932,9 @@ class _EmergencyCard extends StatelessWidget {
       subtitle: 'Yardım numaraları ve önemli bilgilere ulaşın.',
       actionLabel: 'Acil yardım',
       actionColor: AppColors.danger,
-      background: const Color(0xFFFFE8E9),
+      background: AppColors.isDark(context)
+          ? const Color(0xFF3A2224)
+          : const Color(0xFFFFE8E9),
       borderColor: AppColors.danger.withValues(alpha: 0.22),
       onTap: onTap,
     );
@@ -969,7 +986,10 @@ class _InfoActionCard extends StatelessWidget {
                   children: [
                     Text(title, style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 2),
-                    Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),

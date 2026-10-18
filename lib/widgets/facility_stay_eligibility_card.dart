@@ -52,10 +52,10 @@ class _FacilityStayEligibilityCardState
         : AppColors.primary.withValues(alpha: 0.08);
     final titleColor = isDark
         ? Colors.white.withValues(alpha: 0.96)
-        : AppColors.textPrimary;
+        : AppColors.textStrongOf(context);
     final muted = isDark
         ? Colors.white.withValues(alpha: 0.60)
-        : AppColors.textPrimary.withValues(alpha: 0.60);
+        : AppColors.textStrongOf(context).withValues(alpha: 0.60);
     final badgeColor = _accessColor(rule.civilAccess);
 
     return DecoratedBox(

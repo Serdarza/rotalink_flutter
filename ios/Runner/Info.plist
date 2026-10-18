@@ -97,6 +97,10 @@
 		<string>Sesli arama için mikrofon izni gerekir.</string>
 		<key>NSSpeechRecognitionUsageDescription</key>
 		<string>Konuşmanızı metne çevirmek için konuşma tanıma izni gerekir.</string>
+		<key>NSCalendarsUsageDescription</key>
+		<string>Seçtiğiniz konaklama tesisini takviminize etkinlik olarak eklemeniz için takvim erişimi gerekir.</string>
+		<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
+		<string>Seçtiğiniz konaklama tesisini takviminize etkinlik olarak eklemeniz için takvim erişimi gerekir.</string>
 		<key>UISupportedInterfaceOrientations~ipad</key>
 		<array>
 			<string>UIInterfaceOrientationPortrait</string>

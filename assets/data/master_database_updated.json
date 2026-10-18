@@ -26595,7 +26595,7 @@
       "longitude": 32.82565210000254
     },
     {
-      "isim": "TEİAŞ Enerji Misafirhanesi",
+      "isim": "TEİAŞ Enerji Misafirhanesi Balgat",
       "tip": "TEDAŞ Misafirhanesi",
       "il": "Ankara",
       "adres": "Nasuh Akar Mahallesi, Türk Ocağı Caddesi No:2, 06520 Balgat, Çankaya, Ankara",
@@ -30755,15 +30755,6 @@
       "longitude": 28.8595
     },
     {
-      "isim": "Adile Mermerci Uygulama Oteli",
-      "tip": "Öğretmenevi",
-      "il": "İstanbul",
-      "adres": "Aşağı Dudullu Mh. Cami cd. No:32. Ümraniye-İSTANBUL",
-      "telefon": "02125108790",
-      "latitude": 41.06304866242968,
-      "longitude": 28.91107618473919
-    },
-    {
       "isim": "Alemdağ 15. Füze Üssü Vardiya Yatakhane",
       "tip": "Orduevi",
       "il": "İstanbul",
@@ -30834,15 +30825,6 @@
       "telefon": "(0212) 502 24 11",
       "latitude": 41.00531770506645,
       "longitude": 28.8598
-    },
-    {
-      "isim": "Bakırköy Başöğretmen Lokali ve Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "İstanbul",
-      "adres": "Kilitahir Sk. No:6 Ataköy 4.Kısım Bakırköy-İSTANBUL",
-      "telefon": "0212 559 59 52",
-      "latitude": 40.981439464645106,
-      "longitude": 28.85701099408211
     },
     {
       "isim": "Balkan Vakfı Konukevi",
@@ -31313,15 +31295,6 @@
       "longitude": 28.84897874625967
     },
     {
-      "isim": "Küçük Çamlıca Misafirhanesi",
-      "tip": "Öğretmenevi",
-      "il": "İstanbul",
-      "adres": "02128759100",
-      "telefon": "02164540064",
-      "latitude": 41.011596791741376,
-      "longitude": 29.063736069461086
-    },
-    {
       "isim": "Küçükçekmece Öğretmenevi (ASO)",
       "tip": "Öğretmenevi",
       "il": "İstanbul",
@@ -31329,15 +31302,6 @@
       "telefon": "02125410505",
       "latitude": 40.992887128230336,
       "longitude": 28.789065782443362
-    },
-    {
-      "isim": "Marmara Üniversitesi Konukevi",
-      "tip": "Üniversite Konukevi",
-      "il": "İstanbul",
-      "adres": "Marmara Üniversitesi Göztepe Kampüsü, Zirvebey Caddesi, Kuyubaşı- İSTANBUL",
-      "telefon": "02167774190",
-      "latitude": 40.986017746793145,
-      "longitude": 29.04942804990201
     },
     {
       "isim": "Marmara Üniversitesi Misafirhanesi",
@@ -31493,15 +31457,6 @@
       "longitude": 29.024483539070737
     },
     {
-      "isim": "Sarıyer Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "İstanbul",
-      "adres": "Mesherburnu Cd.No:43 Sarıyer / İSTANBUL",
-      "telefon": "0212 218 24 11",
-      "latitude": 41.165745513846545,
-      "longitude": 29.055747609437727
-    },
-    {
       "isim": "Sarıyer Polis Moral Eğitim Tesisleri",
       "tip": "Polisevi",
       "il": "İstanbul",
@@ -31655,15 +31610,6 @@
       "longitude": 29.29682552476296
     },
     {
-      "isim": "Ümraniye Öğretmenevi ASO",
-      "tip": "Öğretmenevi",
-      "il": "İstanbul",
-      "adres": "Aşağı Dudullu Mh. Cami cd. No:32. Ümraniye-İSTANBUL",
-      "telefon": "0216 612 64 29",
-      "latitude": 41.01844694387469,
-      "longitude": 29.163737584297426
-    },
-    {
       "isim": "Üsküdar Adile Sultan Kasrı Öğretmenevi",
       "tip": "Öğretmenevi",
       "il": "İstanbul",
@@ -31790,15 +31736,6 @@
       "longitude": 27.22072345232512
     },
     {
-      "isim": "Çeşme Remzi Yurtsever Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "İzmir",
-      "adres": "Ilıca Mahallesi. 5065 Sokak. No: 20. Çeşme – İZMİR",
-      "telefon": "0232 723 21 01",
-      "latitude": 38.307287511935534,
-      "longitude": 26.362467822044678
-    },
-    {
       "isim": "Çiğli 2.Hava Ana Jet Üssü Misafirhane",
       "tip": "orduevi",
       "il": "İzmir",
@@ -31833,15 +31770,6 @@
       "telefon": "(0232) 274 26 26",
       "latitude": 38.2924,
       "longitude": 27.157
-    },
-    {
-      "isim": "Dikili Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "İzmir",
-      "adres": "İsmetpaşa Mahallesi. Atatürk Caddesi. No:14. Dikili – İZMİR",
-      "telefon": "0232 671 24 11",
-      "latitude": 39.0735838927543,
-      "longitude": 26.88823350860415
     },
     {
       "isim": "Dz.K.K. Narlıdere Sosyal Tesisleri",
@@ -31880,15 +31808,6 @@
       "longitude": 26.739488511966865
     },
     {
-      "isim": "Foça Yenifoça Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "İzmir",
-      "adres": "Atatürk Mahallesi. Eriş Sokak. No:2 Yenifoça, Foça – İZMİR",
-      "telefon": "0232 814 57 70",
-      "latitude": 38.747534160485245,
-      "longitude": 26.85225828344739
-    },
-    {
       "isim": "Hava Eğitim Komutanlığı Gazinosu",
       "tip": "Orduevi",
       "il": "İzmir",
@@ -31902,18 +31821,9 @@
       "tip": "orduevi",
       "il": "İzmir",
       "adres": "Mithat Paşa Cad.",
-      "telefon": " 0 232 753 07 00",
+      "telefon": "0232 753 07 00",
       "latitude": 38.41130854660645,
       "longitude": 26.68746724079189
-    },
-    {
-      "isim": "Ilıksu Yerel Özel Eğitim Merkezi",
-      "tip": "orduevi",
-      "il": "İzmir",
-      "adres": "Özbek Mah.",
-      "telefon": "02327530700",
-      "latitude": 38.41132536021044,
-      "longitude": 26.687381410101903
     },
     {
       "isim": "İlksan İzmir Konukevi",
@@ -32006,15 +31916,6 @@
       "longitude": 27.076083368800163
     },
     {
-      "isim": "İzmir Konak Hasan Sağlam Merkez Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "İzmir",
-      "adres": "İki Çeşmelik Caddesi. No: 2. Eşrefpaşa, Konak – İZMİR",
-      "telefon": "0232 446 45 10",
-      "latitude": 38.41351889637839,
-      "longitude": 27.131282865091727
-    },
-    {
       "isim": "İzmir Metoroloji Bölge Müdürlüğü Misafirhanesi",
       "tip": "Meteoroloji Misafirhanesi",
       "il": "İzmir",
@@ -32076,15 +31977,6 @@
       "telefon": "(0232) 464 78 41",
       "latitude": 38.43995083443756,
       "longitude": 27.14706485345389
-    },
-    {
-      "isim": "İzmir Tınaztepe Üniversitesi Konukevi",
-      "tip": "Öğretmenevi",
-      "il": "İzmir",
-      "adres": "Cumhuriyet Meydanı. Cumhuriyet Caddesi. No:1. Tire – İZMİR",
-      "telefon": "02329992017",
-      "latitude": 38.373606230055465,
-      "longitude": 27.185199213106657
     },
     {
       "isim": "İzmir Vilayetler Evi Atakent",
@@ -32373,15 +32265,6 @@
       "telefon": "03704152526",
       "latitude": 41.199856636120806,
       "longitude": 32.622341409270355
-    },
-    {
-      "isim": "Karabük jandarma sosyal tesisleri",
-      "tip": "Üniversite Uygulama Oteli",
-      "il": "Karabük",
-      "adres": "Yunus Emre Yerleşkesi /KARAMAN",
-      "telefon": "0370 415 25 26",
-      "latitude": 41.196692089763296,
-      "longitude": 32.62268472743709
     },
     {
       "isim": "Karabük Orman İşletme Müdürlüğü Misafirhanesi",
@@ -33862,15 +33745,6 @@
       "longitude": 32.50804895778419
     },
     {
-      "isim": "Konya İl Jandarma Komutanlığı Misafirhanesi",
-      "tip": "Çevre ve Şehircilik Misafirhanesi",
-      "il": "Konya",
-      "adres": "Gaybiefendi, Atatürk Blv. No:93, 43020 Kütahya Merkez/Konya",
-      "telefon": "03322359010",
-      "latitude": 37.90130339159136,
-      "longitude": 32.5053566435088
-    },
-    {
       "isim": "Konya Karayolları Bölge Müdürlüğü Misafirhanesi",
       "tip": "Karayolları Misafirhanesi",
       "il": "Konya",
@@ -34123,15 +33997,6 @@
       "longitude": 28.975209267806896
     },
     {
-      "isim": "Akçadağ Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Malatya",
-      "adres": "Doğu Mahallesi. İstasyon Caddesi. No:25. Akçadağ – MALATYA",
-      "telefon": "0422 417 13 43",
-      "latitude": 38.34154108513105,
-      "longitude": 37.97369932173604
-    },
-    {
       "isim": "Beydağı Tabiat Parkı İdari Tanıtım Ziyaretçi Konaklama Merkezi",
       "tip": "Tabiat Parkı Misafirhanesi",
       "il": "Malatya",
@@ -34148,15 +34013,6 @@
       "telefon": "0422 165 16 55",
       "latitude": 38.55781082311059,
       "longitude": 37.48997262545396
-    },
-    {
-      "isim": "Doğanşehir Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Malatya",
-      "adres": "Yeni Mahalle. Belediye Pasajı. No:1/2. Doğanşehir – MALATYA",
-      "telefon": "0422 517 14 36",
-      "latitude": 38.08442617647424,
-      "longitude": 37.87983439474147
     },
     {
       "isim": "Hekimhan Öğretmenevi",
@@ -34220,15 +34076,6 @@
       "telefon": "0 422 341 06 60",
       "latitude": 38.3387424766997,
       "longitude": 38.42603575427974
-    },
-    {
-      "isim": "Malatya Merkez Öğretmenevi",
-      "tip": "Öğretmenevi",
-      "il": "Malatya",
-      "adres": "İnönü Caddesi. MALATYA",
-      "telefon": "(0422) 325 54 00",
-      "latitude": 38.348585297377745,
-      "longitude": 38.30712752359018
     },
     {
       "isim": "Malatya Orduevi",
@@ -34555,10 +34402,10 @@
       "longitude": 41.33917303358809
     },
     {
-      "isim": "Şatana Konağı (Maü Uygulama Oteli)",
-      "tip": "Karayolları Misafirhanesi",
+      "isim": "Mardin Artuklu Üniversitesi Uygulama Oteli",
+      "tip": "Üniversite Konukevi",
       "il": "Mardin",
-      "adres": "Çağlar, Diyarbakır Mardin Yolu, 47100 Artuklu/Mardin",
+      "adres": "Medrese, Cumhuriyet Cd. No:240, 47100 Artuklu/Mardin",
       "telefon": "04822129990",
       "latitude": 37.31662973905979,
       "longitude": 40.74285209612867
@@ -36478,7 +36325,7 @@
       "tip": "Öğretmenevi",
       "il": "Sivas",
       "adres": "Cumhuriyet Mahallesi. Hoca Ahmet Yesevi Caddesi. No:42. Akıncılar – SİVAS",
-      "telefon": "0346 361 55 93",
+      "telefon": "0346 361 55 93 / 0534 662 96 90",
       "latitude": 40.08246539803624,
       "longitude": 38.34330281756656
     },
@@ -36499,15 +36346,6 @@
       "telefon": "0346 219 10 10",
       "latitude": 39.70945625154995,
       "longitude": 37.03347452365566
-    },
-    {
-      "isim": "Divriği Öğretmenevi Akşam Sanat Okulu",
-      "tip": "Öğretmenevi",
-      "il": "Sivas",
-      "adres": "Hacı Osman Mescit Mahallesi. No.30/A. Divriği – SİVAS",
-      "telefon": "0346 418 19 68 ",
-      "latitude": 39.395406055693826,
-      "longitude": 38.11767428766576
     },
     {
       "isim": "Gemerek Sabancı Öğretmenevi",
@@ -39183,15 +39021,6 @@
       "longitude": 41.98554559999999
     },
     {
-      "isim": "Muğla Bodrum Turgut Reis Turizm Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
-      "tip": "Uygulama Oteli",
-      "il": "Muğla",
-      "adres": "Akçaalan Mah. Cumhuriyet Bulvarı No:136, PK:48400, Bodrum/Muğla",
-      "telefon": "",
-      "latitude": 37.0197477,
-      "longitude": 27.2802233
-    },
-    {
       "isim": "Muğla Sıtkı Koçman Üniversitesi Akyaka Uygulama Oteli",
       "tip": "Uygulama Oteli",
       "il": "Muğla",
@@ -40711,15 +40540,6 @@
       "telefon": "(0324) 237 73 93",
       "latitude": 36.8043081,
       "longitude": 34.6478897
-    },
-    {
-      "isim": "Mersin Çağ Üniversitesi Yaşar Bayboğan Konukevi",
-      "tip": "Üniversite Konukevi",
-      "il": "Mersin",
-      "adres": "Yenice Mah., Atatürk Blv.-Tarsus/MERSİN",
-      "telefon": "(0324) 651 48 00",
-      "latitude": 36.97257,
-      "longitude": 35.0522
     },
     {
       "isim": "İstanbul Alemdağ Jandarma Tabur K.lığı Vardiya Yatakhanesi Md.lüğü",

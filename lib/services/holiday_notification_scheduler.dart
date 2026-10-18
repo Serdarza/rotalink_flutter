@@ -29,6 +29,13 @@ class HolidayNotificationScheduler {
 
   static const String payloadOpenHolidays = 'open_holidays';
 
+  static const prefKey = 'rotalink_holiday_reminders_enabled';
+
+  static const settingTitle = 'Resmi tatil hatırlatması';
+
+  static const settingDescription =
+      'Her resmi tatilden 1 hafta önce, sabah 09:00\'da hatırlatma.';
+
   static const String _prefPendingNav =
       'rotalink_pending_open_holidays_from_notification';
 
@@ -97,8 +104,10 @@ class HolidayNotificationScheduler {
           rotalinkHolidayNotificationBackgroundTap,
     );
 
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     await android?.createNotificationChannel(
       const AndroidNotificationChannel(
         _channelId,
@@ -187,9 +196,9 @@ class HolidayNotificationScheduler {
     }
     final ctx = rotalinkNavigatorKey.currentContext;
     if (ctx != null && ctx.mounted) {
-      Navigator.of(ctx).push(
-        MaterialPageRoute<void>(builder: (_) => const HolidaysScreen()),
-      );
+      Navigator.of(
+        ctx,
+      ).push(MaterialPageRoute<void>(builder: (_) => const HolidaysScreen()));
       return;
     }
     unawaited(_setPendingNavigationFlag());
@@ -223,25 +232,66 @@ class HolidayNotificationScheduler {
 
   /// İzin diyaloğunu UI hazır olduktan sonra göstermek için ayrı metot.
   /// [app.dart] içindeki post-frame callback'ten çağrılır.
-  static Future<void> requestPermissions() async {
-    final android = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
+  /// Açık reddedilirse `false` döner.
+  static Future<bool> requestPermissions() async {
+    var permitted = true;
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
     if (defaultTargetPlatform == TargetPlatform.android) {
-      await android?.requestNotificationsPermission();
+      final granted = await android?.requestNotificationsPermission();
+      if (granted == false) permitted = false;
     }
-    final ios = _plugin.resolvePlatformSpecificImplementation<
-        IOSFlutterLocalNotificationsPlugin>();
+    final ios = _plugin
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
     if (defaultTargetPlatform == TargetPlatform.iOS) {
-      await ios?.requestPermissions(alert: true, badge: true, sound: true);
+      final granted = await ios?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      if (granted == false) permitted = false;
     }
+    return permitted;
   }
 
-  static Future<void> scheduleUpcomingHolidayReminders() async {
+  static Future<bool> isEnabled() async {
+    final p = await SharedPreferences.getInstance();
+    return p.getBool(prefKey) ?? true;
+  }
+
+  /// Tercihi kaydeder. Kapatınca bekleyen tatil hatırlatmalarını siler;
+  /// açınca yeniden planlar. İzin verilmezse `false` döner.
+  static Future<bool> setEnabled(bool enabled) async {
+    final p = await SharedPreferences.getInstance();
+    await p.setBool(prefKey, enabled);
+    if (!enabled) {
+      await _cancelHolidayReminders();
+      return true;
+    }
+    if (!_initialized) await initialize();
+    final permitted = await requestPermissions();
+    await scheduleUpcomingHolidayReminders();
+    return permitted;
+  }
+
+  static Future<void> _cancelHolidayReminders() async {
+    if (!_initialized) return;
     final holidays = kPublicHolidays;
     for (var i = 0; i < holidays.length; i++) {
       await _plugin.cancel(_idBase + i);
     }
+  }
 
+  static Future<void> scheduleUpcomingHolidayReminders() async {
+    if (!_initialized) return;
+    await _cancelHolidayReminders();
+    if (!await isEnabled()) return;
+
+    final holidays = kPublicHolidays;
     final now = DateTime.now();
     for (var i = 0; i < holidays.length; i++) {
       final h = holidays[i];
@@ -265,9 +315,9 @@ class HolidayNotificationScheduler {
       const sourceLine = 'Rotalink uygulamasından hatırlatma';
       final body = isIdari
           ? 'Kamu idari izninize 7 gün kaldı. Tarih: ${h.dateLine}.\n'
-              '$sourceLine — dokunarak uygulamayı açın.'
+                '$sourceLine — dokunarak uygulamayı açın.'
           : 'Resmi tatilinize 7 gün kaldı. Tatil: ${h.dateLine}.\n'
-              '$sourceLine — dokunarak uygulamayı açın.';
+                '$sourceLine — dokunarak uygulamayı açın.';
 
       final androidDetails = AndroidNotificationDetails(
         _channelId,
@@ -275,7 +325,10 @@ class HolidayNotificationScheduler {
         channelDescription: _channelDescription,
         importance: Importance.high,
         priority: Priority.high,
-        styleInformation: BigTextStyleInformation(body, summaryText: 'Rotalink'),
+        styleInformation: BigTextStyleInformation(
+          body,
+          summaryText: 'Rotalink',
+        ),
         icon: '@mipmap/ic_launcher',
       );
 

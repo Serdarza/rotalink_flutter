@@ -655,7 +655,7 @@ class _RoutePlanAdviceScreenState extends State<RoutePlanAdviceScreen> {
         ],
       ),
       body: _loading
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -670,7 +670,7 @@ class _RoutePlanAdviceScreenState extends State<RoutePlanAdviceScreen> {
                     'Yol üzerindeki iller bulunuyor',
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppColors.campaignSummaryMuted,
+                      color: AppColors.textMutedOf(context),
                     ),
                   ),
                 ],
@@ -736,21 +736,21 @@ class _RoutePlanAdviceScreenState extends State<RoutePlanAdviceScreen> {
                           padding: const EdgeInsets.only(bottom: 10),
                           child: Text(
                             '$skippedCount il pas geçildi',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.campaignSummaryMuted,
+                              color: AppColors.textMutedOf(context),
                             ),
                           ),
                         ),
                       if (along.isEmpty)
-                        const Padding(
+                        Padding(
                           padding: EdgeInsets.only(bottom: 12),
                           child: Text(
                             'Gösterilecek yol üstü ili kalmadı. Varış önerilerine bakabilirsiniz.',
                             style: TextStyle(
                               fontSize: 13,
-                              color: AppColors.campaignSummaryMuted,
+                              color: AppColors.textMutedOf(context),
                               height: 1.35,
                             ),
                           ),
@@ -885,7 +885,7 @@ class _SectionTitle extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               height: 1.35,
-              color: AppColors.campaignSummaryMuted.withValues(alpha: 0.95),
+              color: AppColors.textMutedOf(context).withValues(alpha: 0.95),
             ),
           ),
         ],
@@ -932,7 +932,7 @@ class _HeaderCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 height: 1.35,
-                color: AppColors.campaignSummaryMuted.withValues(alpha: 0.95),
+                color: AppColors.textMutedOf(context).withValues(alpha: 0.95),
               ),
             ),
             const SizedBox(height: 10),
@@ -1147,9 +1147,9 @@ class _CategoryBlock extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 4),
             child: Text(
               emptyLabel,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
-                color: AppColors.campaignSummaryMuted,
+                color: AppColors.textMutedOf(context),
               ),
             ),
           )
@@ -1202,9 +1202,9 @@ class _PickTile extends StatelessWidget {
                         subtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.campaignSummaryMuted,
+                          color: AppColors.textMutedOf(context),
                         ),
                       ),
                   ],
@@ -1214,7 +1214,7 @@ class _PickTile extends StatelessWidget {
                 tooltip: AppStrings.routePlanRemove,
                 onPressed: onRemove,
                 icon: const Icon(Icons.close_rounded, size: 20),
-                color: AppColors.campaignSummaryMuted,
+                color: AppColors.textMutedOf(context),
               ),
             ],
           ),

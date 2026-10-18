@@ -191,16 +191,16 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
         : AppColors.primary.withValues(alpha: 0.12);
     final labelColor = isDark
         ? Colors.white.withValues(alpha: 0.62)
-        : AppColors.textPrimary.withValues(alpha: 0.58);
+        : AppColors.textStrongOf(context).withValues(alpha: 0.58);
     final valueColor = isDark
         ? Colors.white.withValues(alpha: 0.95)
-        : AppColors.textPrimary;
+        : AppColors.textStrongOf(context);
     final unavailableColor = isDark
         ? const Color(0xFFFF8A80)
         : const Color(0xFFC62828);
     final titleColor = isDark
         ? Colors.white.withValues(alpha: 0.92)
-        : AppColors.textPrimary;
+        : AppColors.textStrongOf(context);
 
     if (!priced.hasFiyatBilgisi) {
       return Padding(
@@ -596,10 +596,10 @@ class _ProPreview extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final labelColor = isDark
         ? Colors.white.withValues(alpha: 0.62)
-        : AppColors.textPrimary.withValues(alpha: 0.58);
+        : AppColors.textStrongOf(context).withValues(alpha: 0.58);
     final titleColor = isDark
         ? Colors.white.withValues(alpha: 0.92)
-        : AppColors.textPrimary;
+        : AppColors.textStrongOf(context);
     final entry = facility.fiyatKaydi;
     final tariff = entry?.tarife;
     final firstTable = tariff?.hasTables == true
@@ -847,7 +847,7 @@ class _TariffDetails extends StatelessWidget {
           style: TextStyle(
             color: isDark
                 ? Colors.white.withValues(alpha: 0.92)
-                : AppColors.textPrimary,
+                : AppColors.textStrongOf(context),
             fontSize: 14,
             fontWeight: FontWeight.w800,
           ),
@@ -860,7 +860,7 @@ class _TariffDetails extends StatelessWidget {
               style: TextStyle(
                 color: isDark
                     ? Colors.white.withValues(alpha: 0.62)
-                    : AppColors.textPrimary.withValues(alpha: 0.58),
+                    : AppColors.textStrongOf(context).withValues(alpha: 0.58),
                 fontSize: 11.5,
               ),
             ),

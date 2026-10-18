@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rotalink_flutter/screens/holidays_screen.dart';
+import 'package:rotalink_flutter/screens/settings_screen.dart';
 import 'package:rotalink_flutter/services/announcement_notification_scheduler.dart';
 import 'package:rotalink_flutter/services/campaign_push_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -220,9 +220,9 @@ void main() {
       );
     });
   });
-  group('Resmî Tatiller ekranı', () {
+  group('Ayarlar ekranı', () {
     Future<void> pump(WidgetTester tester) async {
-      await tester.pumpWidget(const MaterialApp(home: HolidaysScreen()));
+      await tester.pumpWidget(const MaterialApp(home: SettingsScreen()));
       await tester.pump(const Duration(milliseconds: 50));
     }
 
@@ -234,12 +234,20 @@ void main() {
         find.text('Rotalink\'e yeni kampanyalar eklendiğinde bildirim al.'),
         findsOneWidget,
       );
-      expect(find.byType(Switch), findsNWidgets(2));
+      expect(find.text('Resmi tatil hatırlatması'), findsOneWidget);
+      expect(find.byType(Switch), findsNWidgets(4));
     });
 
     testWidgets('anahtar yalnızca kampanya tercihini değiştirir', (tester) async {
       await pump(tester);
-      final campaignSwitch = find.byType(Switch).at(1);
+      final campaignTile = find.ancestor(
+        of: find.text('Yeni Kampanya Bildirimleri'),
+        matching: find.byType(SwitchListTile),
+      );
+      final campaignSwitch = find.descendant(
+        of: campaignTile,
+        matching: find.byType(Switch),
+      );
       await tester.tap(campaignSwitch);
       await tester.pump(const Duration(milliseconds: 50));
 

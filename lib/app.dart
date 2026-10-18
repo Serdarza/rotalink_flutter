@@ -13,27 +13,35 @@ import 'l10n/app_strings.dart';
 import 'screens/rotalink_main_shell.dart';
 import 'theme/app_theme.dart';
 import 'theme/system_ui.dart';
+import 'theme/theme_mode_prefs.dart';
 
 class RotalinkApp extends StatelessWidget {
   const RotalinkApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: rotalinkNavigatorKey,
-      title: AppStrings.appName,
-      debugShowCheckedModeBanner: false,
-      theme: buildRotalinkTheme(),
-      darkTheme: buildRotalinkDarkTheme(),
-      themeMode: ThemeMode.system,
-      builder: (context, child) {
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
-          child: child ?? const SizedBox.shrink(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeModePrefs.mode,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
+          navigatorKey: rotalinkNavigatorKey,
+          title: AppStrings.appName,
+          debugShowCheckedModeBanner: false,
+          theme: buildRotalinkTheme(),
+          darkTheme: buildRotalinkDarkTheme(),
+          themeMode: themeMode,
+          builder: (context, child) {
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: RotalinkSystemUi.forBrightness(
+                Theme.of(context).brightness,
+              ),
+              child: child ?? const SizedBox.shrink(),
+            );
+          },
+          home: const _ConnectivityGate(),
+          navigatorObservers: [analyticsObserver],
         );
       },
-      home: const _ConnectivityGate(),
-      navigatorObservers: [analyticsObserver],
     );
   }
 }

@@ -7,26 +7,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../models/misafirhane.dart';
 
-/// Paylaşım (metin / WhatsApp vb.) için Google Haritalar araması: **il + misafirhane adı** (Tesis sekmesi).
-String googleMapsShareUrlForMisafirhane(Misafirhane m) {
-  final il = m.il.trim();
-  final isim = m.isim.trim();
-  final raw = il.isEmpty
-      ? isim
-      : isim.isEmpty
-          ? il
-          : '$il $isim';
-  if (raw.isNotEmpty) {
-    return 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(raw)}';
-  }
-  final lat = m.latitude;
-  final lng = m.longitude;
-  if (lat != 0 && lng != 0) {
-    return 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
-  }
-  return 'https://www.google.com/maps';
-}
-
 /// Android’de Google Haritalar, iOS’ta Apple Haritalar; güvenilir yedek olarak https Google Maps araması.
 Future<void> openInNativeMaps(
   BuildContext context, {

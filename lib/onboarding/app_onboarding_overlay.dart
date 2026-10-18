@@ -215,10 +215,10 @@ class _StepCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       step.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textStrongOf(context),
                         height: 1.2,
                       ),
                     ),
@@ -231,7 +231,7 @@ class _StepCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 14.5,
                   height: 1.45,
-                  color: AppColors.textPrimary.withValues(alpha: 0.88),
+                  color: AppColors.textStrongOf(context).withValues(alpha: 0.88),
                 ),
               ),
               const SizedBox(height: 16),
@@ -242,7 +242,7 @@ class _StepCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.campaignSummaryMuted,
+                      color: AppColors.textMutedOf(context),
                     ),
                   ),
                   const Spacer(),

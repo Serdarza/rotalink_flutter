@@ -11,8 +11,10 @@ import '../models/route_plan_outcome.dart';
 import '../route/route_planning_notifier.dart';
 import '../screens/route_plan_advice_screen.dart';
 import '../theme/app_colors.dart';
+import '../theme/ara_ui.dart';
 import '../theme/system_ui.dart';
 import '../widgets/route_plan/route_plan_city_input.dart';
+
 /// 1. adım: iller + günler. 2. adım tavsiye ekranına gider.
 class RoutePlanScreen extends StatelessWidget {
   RoutePlanScreen({
@@ -85,10 +87,7 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
 
     final outcome = await Navigator.of(context).push<RoutePlanOutcome>(
       MaterialPageRoute(
-        builder: (_) => RoutePlanAdviceScreen(
-          data: data,
-          stops: raw,
-        ),
+        builder: (_) => RoutePlanAdviceScreen(data: data, stops: raw),
       ),
     );
     if (!mounted || outcome == null) return;
@@ -104,11 +103,8 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
 
     final outcome = await Navigator.of(context).push<RoutePlanOutcome>(
       MaterialPageRoute(
-        builder: (_) => RoutePlanAdviceScreen(
-          data: data,
-          stops: raw,
-          restoreSaved: true,
-        ),
+        builder: (_) =>
+            RoutePlanAdviceScreen(data: data, stops: raw, restoreSaved: true),
       ),
     );
     if (!mounted || outcome == null) return;
@@ -124,47 +120,47 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
       child: Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: AppColors.canvasOf(context),
-      appBar: AppBar(
-        leading: widget.embeddedInShell
-            ? null
-            : IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-        automaticallyImplyLeading: !widget.embeddedInShell,
-        title: const Text(AppStrings.routePlanTitle),
-        backgroundColor: AppColors.surfaceOf(context),
-        foregroundColor: AppColors.textStrongOf(context),
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          StreamBuilder<RotaDataState>(
-            stream: _rotaStream,
-            initialData: _initialRota,
-            builder: (context, snap) {
-              final data = snap.data;
-              return Consumer<RoutePlanningNotifier>(
-                builder: (context, n, _) {
-                  return IconButton(
-                    icon: const Icon(Icons.bookmark_add_outlined),
-                    tooltip: AppStrings.routePlanSaveTitle,
-                    onPressed: data == null || n.calculating
-                        ? null
-                        : () async {
-                            final raw = n.collectStops(data, _snack);
-                            if (raw == null) return;
-                            await n.promptSaveRoute(context, raw, _snack);
-                          },
-                  );
-                },
-              );
-            },
-          ),
-        ],
-      ),
-      body: StreamBuilder<RotaDataState>(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: AraUi.pageOf(context),
+        appBar: AppBar(
+          leading: widget.embeddedInShell
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+          automaticallyImplyLeading: !widget.embeddedInShell,
+          title: const Text(AppStrings.routePlanTitle),
+          backgroundColor: AppColors.surfaceOf(context),
+          foregroundColor: AppColors.textStrongOf(context),
+          surfaceTintColor: Colors.transparent,
+          elevation: 0,
+          actions: [
+            StreamBuilder<RotaDataState>(
+              stream: _rotaStream,
+              initialData: _initialRota,
+              builder: (context, snap) {
+                final data = snap.data;
+                return Consumer<RoutePlanningNotifier>(
+                  builder: (context, n, _) {
+                    return IconButton(
+                      icon: const Icon(Icons.bookmark_add_outlined),
+                      tooltip: AppStrings.routePlanSaveTitle,
+                      onPressed: data == null || n.calculating
+                          ? null
+                          : () async {
+                              final raw = n.collectStops(data, _snack);
+                              if (raw == null) return;
+                              await n.promptSaveRoute(context, raw, _snack);
+                            },
+                    );
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+        body: StreamBuilder<RotaDataState>(
           stream: _rotaStream,
           initialData: _initialRota,
           builder: (context, snapshot) {
@@ -192,7 +188,12 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                       children: [
                         Expanded(
                           child: ListView(
-                            padding: EdgeInsets.fromLTRB(16, 16, 16, listBottomPad),
+                            padding: EdgeInsets.fromLTRB(
+                              16,
+                              16,
+                              16,
+                              listBottomPad,
+                            ),
                             children: [
                               Text(
                                 'Nereden nereye?',
@@ -206,17 +207,17 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                               if (saved.isNotEmpty) ...[
                                 Text(
                                   AppStrings.routePlanSavedTitle,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleSmall
+                                  style: Theme.of(context).textTheme.titleSmall
                                       ?.copyWith(fontWeight: FontWeight.w800),
                                 ),
                                 const SizedBox(height: 8),
-                                ...saved.map((r) => _SavedCard(
-                                      record: r,
-                                      onTap: () => _loadSaved(r, data),
-                                      onDelete: () => n.deleteSaved(r.name),
-                                    )),
+                                ...saved.map(
+                                  (r) => _SavedCard(
+                                    record: r,
+                                    onTap: () => _loadSaved(r, data),
+                                    onDelete: () => n.deleteSaved(r.name),
+                                  ),
+                                ),
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: TextButton(
@@ -228,7 +229,8 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                               ],
                               _WhiteCard(
                                 child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
                                   children: [
                                     IlAutocompleteField(
                                       controller: n.startCity,
@@ -239,7 +241,11 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                                       iconColor: const Color(0xFF2E7D32),
                                       onCommitted: (_) => n.touchDraft(),
                                     ),
-                                    for (var i = 0; i < n.intermediate.length; i++) ...[
+                                    for (
+                                      var i = 0;
+                                      i < n.intermediate.length;
+                                      i++
+                                    ) ...[
                                       const SizedBox(height: 14),
                                       Builder(
                                         builder: (_) {
@@ -258,11 +264,18 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                                                           : 'Yolda mola ili (opsiyonel)',
                                                       style: TextStyle(
                                                         fontSize: 11,
-                                                        fontWeight: FontWeight.w700,
-                                                        color: (isArrival
-                                                                ? const Color(0xFFC62828)
-                                                                : AppColors.primary)
-                                                            .withValues(alpha: 0.95),
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color:
+                                                            (isArrival
+                                                                    ? const Color(
+                                                                        0xFFC62828,
+                                                                      )
+                                                                    : AppColors
+                                                                          .primary)
+                                                                .withValues(
+                                                                  alpha: 0.95,
+                                                                ),
                                                       ),
                                                     ),
                                                   ),
@@ -297,12 +310,12 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                                                 iconColor: isArrival
                                                     ? const Color(0xFFC62828)
                                                     : const Color(0xFFEF6C00),
-                                                onCommitted: (v) => n
-                                                    .trimStopSelectionsForCity(
-                                                  i,
-                                                  v,
-                                                  data,
-                                                ),
+                                                onCommitted: (v) =>
+                                                    n.trimStopSelectionsForCity(
+                                                      i,
+                                                      v,
+                                                      data,
+                                                    ),
                                               ),
                                               if (isArrival) ...[
                                                 const SizedBox(height: 10),
@@ -315,28 +328,40 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                                                     labelText:
                                                         'Varışta kaç gün kalacaksınız?',
                                                     filled: true,
-                                                    fillColor: AppColors.isDark(context)
+                                                    fillColor:
+                                                        AppColors.isDark(
+                                                          context,
+                                                        )
                                                         ? AppColors.darkCanvas
-                                                        : AppColors.suggestionFieldBg
-                                                            .withValues(alpha: 0.65),
+                                                        : AppColors
+                                                              .suggestionFieldBg
+                                                              .withValues(
+                                                                alpha: 0.65,
+                                                              ),
                                                     border: OutlineInputBorder(
                                                       borderRadius:
                                                           BorderRadius.circular(
-                                                              14),
+                                                            14,
+                                                          ),
                                                       borderSide:
                                                           BorderSide.none,
                                                     ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              14),
-                                                      borderSide: BorderSide(
-                                                        color: AppColors.primary
-                                                            .withValues(
-                                                                alpha: 0.12),
-                                                      ),
-                                                    ),
+                                                          borderRadius:
+                                                              BorderRadius.circular(
+                                                                14,
+                                                              ),
+                                                          borderSide:
+                                                              BorderSide(
+                                                                color: AppColors
+                                                                    .primary
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.12,
+                                                                    ),
+                                                              ),
+                                                        ),
                                                     isDense: true,
                                                   ),
                                                 ),
@@ -354,7 +379,9 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                                         icon: const Icon(
                                           Icons.add_circle_outline_rounded,
                                         ),
-                                        label: const Text('Yolda mola ili ekle'),
+                                        label: const Text(
+                                          'Yolda mola ili ekle',
+                                        ),
                                       ),
                                     ),
                                   ],
@@ -374,7 +401,9 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
                                 style: FilledButton.styleFrom(
                                   backgroundColor: AppColors.primary,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 15),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 15,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(14),
                                   ),
@@ -398,7 +427,7 @@ class _RoutePlanCitiesPageState extends State<_RoutePlanCitiesPage> {
             );
           },
         ),
-    ),
+      ),
     );
   }
 }
@@ -412,7 +441,9 @@ class _WhiteCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.surfaceOf(context),
-      borderRadius: BorderRadius.circular(_RoutePlanCitiesPageState._cardRadius),
+      borderRadius: BorderRadius.circular(
+        _RoutePlanCitiesPageState._cardRadius,
+      ),
       clipBehavior: Clip.antiAlias,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(14, 16, 14, 10),

@@ -5,13 +5,14 @@ import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../services/simple_location_service.dart';
+import '../theme/app_colors.dart';
 
 /// Kotlin [MainActivity.showEmergencySheet] + [bottom_sheet_emergency.xml].
 Future<void> showEmergencyBottomSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
+    backgroundColor: AppColors.surfaceOf(context),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
@@ -267,7 +268,7 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Row(
                 children: [
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                  Expanded(child: Divider(color: AppColors.borderOf(context))),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text(
@@ -275,12 +276,12 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey.shade600,
+                        color: AppColors.textMutedOf(context),
                         letterSpacing: 0.9,
                       ),
                     ),
                   ),
-                  Expanded(child: Divider(color: Colors.grey.shade300)),
+                  Expanded(child: Divider(color: AppColors.borderOf(context))),
                 ],
               ),
             ),
@@ -307,7 +308,7 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
               child: Text(
                 'Harita yönlendirmesi Google Maps ile · Numaralar çevirici ekranında açılır',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                style: TextStyle(fontSize: 11, color: AppColors.textMutedOf(context)),
               ),
             ),
           ],
@@ -333,7 +334,7 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
     final avatarChild = leading ??
         Icon(icon!, color: iconColor, size: 24);
     return Material(
-      color: Colors.white,
+      color: AppColors.surfaceOf(context),
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -366,7 +367,7 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey.shade400),
+              Icon(Icons.chevron_right, color: AppColors.textMutedOf(context)),
             ],
           ),
         ),
@@ -383,7 +384,7 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
     required VoidCallback onTap,
   }) {
     return Material(
-      color: Colors.white,
+      color: AppColors.surfaceOf(context),
       child: InkWell(
         onTap: onTap,
         child: Padding(

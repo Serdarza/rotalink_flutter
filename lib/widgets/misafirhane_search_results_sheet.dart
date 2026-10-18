@@ -17,8 +17,10 @@ import '../providers/facility_filter_provider.dart';
 import '../navigator_keys.dart';
 import '../screens/yorum_screen.dart';
 import '../services/review_repository.dart';
+import '../services/view_counter_service.dart';
 import '../data/favorites_repository.dart';
 import '../data/facility_address_repository.dart';
+import '../data/facility_price_repository.dart';
 import '../data/firebase_rota_repository.dart';
 import '../data/gezi_yemek_repository.dart';
 import '../data/hediyelik_repository.dart';
@@ -34,27 +36,19 @@ import 'kamp_rotalari_view.dart';
 import '../utils/geo_helpers.dart';
 import '../utils/il_ilce.dart';
 import '../utils/main_map_search.dart';
-import '../utils/maps_launch.dart';
 import '../utils/safe_map_coordinates.dart';
 import '../utils/best_value_facility.dart';
 import '../utils/search_normalize.dart';
+import '../theme/ara_ui.dart';
+import 'ara_action_button.dart';
+import 'view_count_label.dart';
 import 'best_value_pro_card.dart';
 import 'distance_permission_chip.dart';
 import 'facility_compare_widgets.dart';
 import 'facility_detail_card.dart';
 import 'facility_location_filter_bar.dart';
 import 'facility_sort_bar.dart';
-import 'rotalink_glass_bottom_nav.dart';
 import 'sosyal_menu_sheet.dart';
-
-/// Arama sonucu alt paneli: liste için yarı ekran.
-const double kMisafirhaneSearchSheetOpenExtent = 0.5;
-
-/// Konaklama detay kartı: alt menünün hemen üstünde bitsin (çok yukarı açılmasın).
-const double kMisafirhaneSearchSheetDetailExtent = 0.68;
-
-/// [Scaffold.bottomNavigationBar] yüksekliğine yakın — liste alt boşluğu (dış [Padding] yok).
-const double kMisafirhaneSearchSheetMainBottomBarReserve = 56;
 
 /// Kotlin [MisafirhaneBottomSheet] (arama modu): Tesis / Gezi / Yemek / Sosyal sekmeleri.
 /// Ana harita gövdesindeki [Stack] içine yerleştirilir; üstteki toolbar ve arama çubuğu sheet’ten sonra
@@ -62,7 +56,9 @@ const double kMisafirhaneSearchSheetMainBottomBarReserve = 56;
 class MisafirhaneSearchResultsPanel extends ConsumerStatefulWidget {
   const MisafirhaneSearchResultsPanel({
     super.key,
-    required this.sheetExtentController,
+    required this.listVisible,
+    required this.topInset,
+    required this.onViewModeChanged,
     required this.rotaData,
     required this.mapLocationState,
     this.highlightTarget,
@@ -76,7 +72,14 @@ class MisafirhaneSearchResultsPanel extends ConsumerStatefulWidget {
     this.onSelectIl,
   });
 
-  final DraggableScrollableController sheetExtentController;
+  /// `true`: liste görünümü (harita gizli); `false`: harita görünümü.
+  final bool listVisible;
+
+  /// Liste yüzeyinin başladığı üst boşluk (başlık + arama çubuğu + tür filtreleri).
+  final double topInset;
+
+  /// Liste / Harita geçişi (`true` = liste).
+  final ValueChanged<bool> onViewModeChanged;
 
   final RotaDataState rotaData;
   final MapLocationState mapLocationState;
@@ -114,7 +117,7 @@ class MisafirhaneSearchResultsPanelState
   /// Sistem geri tuşu: detay açıksa kapatır ve `true` döner.
   bool closeDetailIfOpen() {
     if (_detailFacility != null) {
-      unawaited(_closeFacilityDetail(animateSheet: false));
+      unawaited(_closeFacilityDetail());
       return true;
     }
     return false;
@@ -128,30 +131,6 @@ class MisafirhaneSearchResultsPanelState
     unawaited(_openFacilityDetail(m));
   }
 
-  Future<void> _animateSheetToDetail() async {
-    final c = widget.sheetExtentController;
-    if (!c.isAttached) return;
-    try {
-      await c.animateTo(
-        kMisafirhaneSearchSheetDetailExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-      );
-    } catch (_) {}
-  }
-
-  Future<void> _animateSheetToList() async {
-    final c = widget.sheetExtentController;
-    if (!c.isAttached) return;
-    try {
-      await c.animateTo(
-        kMisafirhaneSearchSheetOpenExtent,
-        duration: const Duration(milliseconds: 260),
-        curve: Curves.easeOutCubic,
-      );
-    } catch (_) {}
-  }
-
   void _rememberListScroll() {
     final scroll = _listScroll;
     if (scroll != null && scroll.hasClients) {
@@ -162,16 +141,13 @@ class MisafirhaneSearchResultsPanelState
   Future<void> _openFacilityDetail(Misafirhane m) async {
     _rememberListScroll();
     setState(() => _detailFacility = m);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      unawaited(_animateSheetToDetail());
-    });
+    // Haritadan (marker / önizleme) açıldıysa detay liste yüzeyinde gösterilir.
+    if (!widget.listVisible) widget.onViewModeChanged(true);
   }
 
-  Future<void> _closeFacilityDetail({bool animateSheet = true}) async {
+  Future<void> _closeFacilityDetail() async {
     if (_detailFacility == null) return;
     final returnTo = _detailFacility!;
-    if (animateSheet) await _animateSheetToList();
     if (mounted) setState(() => _detailFacility = null);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -203,12 +179,16 @@ class MisafirhaneSearchResultsPanelState
     if (ctx == null) {
       // Lazy list: satır henüz build edilmediyse yaklaşık ofsete git.
       final facilities = ref.read(filteredTesisListProvider);
-      final idx = facilities.indexWhere((f) => f.sameFavoriteIdentity(facility));
+      final idx = facilities.indexWhere(
+        (f) => f.sameFavoriteIdentity(facility),
+      );
       if (idx >= 0 && scroll.hasClients) {
         const kTabBarH = _TabBarHeaderDelegate.height;
         const kApproxItemH = 92.0;
-        final approx = (kTabBarH + idx * kApproxItemH)
-            .clamp(0.0, scroll.position.maxScrollExtent);
+        final approx = (kTabBarH + idx * kApproxItemH).clamp(
+          0.0,
+          scroll.position.maxScrollExtent,
+        );
         scroll.jumpTo(approx);
         await Future<void>.delayed(const Duration(milliseconds: 64));
         if (!mounted) return;
@@ -227,8 +207,8 @@ class MisafirhaneSearchResultsPanelState
     }
   }
 
-  /// [DraggableScrollableSheet] dış denetleyicisi — ömrü [MainMapScreen] tarafından sheet kapanınca dispose edilir.
-  ScrollController? _listScroll;
+  /// Sabit tam yükseklik liste kaydırma denetleyicisi (harita görünümünde de korunur).
+  ScrollController? _listScroll = ScrollController();
 
   /// İl [ExpansionTile] içindeki satırlar için — vurgu kaydırması.
   final Map<String, GlobalKey> _facilityRowKeys = {};
@@ -263,8 +243,6 @@ class MisafirhaneSearchResultsPanelState
 
   /// Pro: tek kişi / gece fiyatı için üst limit (TL); null ise bütçe filtresi kapalı.
   double? _budgetMax;
-
-  static String _shareAppDownloadFooter() => StoreLinks.shareDownloadFooter();
 
   /// Sosyal satırında ilçe satırı (açıklama ayrı gösterilir).
   static String _sosyalIlceLine(SosyalItem s) {
@@ -332,10 +310,12 @@ class MisafirhaneSearchResultsPanelState
 
   void _selectPriceSort(List<Misafirhane> facilities) {
     if (!PriceAccess.unlocked) {
-      unawaited(showPriceSortProTeaser(
-        context,
-        countFacilitiesWithNightPrice(facilities),
-      ));
+      unawaited(
+        showPriceSortProTeaser(
+          context,
+          countFacilitiesWithNightPrice(facilities),
+        ),
+      );
       return;
     }
     if (_sortByPrice) return;
@@ -353,25 +333,33 @@ class MisafirhaneSearchResultsPanelState
 
   Future<void> _openBudgetPicker(List<Misafirhane> facilities) async {
     if (!PriceAccess.unlocked) {
-      unawaited(showProFeatureTeaser(
-        context,
-        icon: Icons.account_balance_wallet_outlined,
-        title: FacilityPricing.budgetTeaserTitle,
-        headline: FacilityPricing.budgetTeaserCount(
-          countFacilitiesWithNightPrice(facilities),
+      unawaited(
+        showProFeatureTeaser(
+          context,
+          icon: Icons.account_balance_wallet_outlined,
+          title: FacilityPricing.budgetTeaserTitle,
+          headline: FacilityPricing.budgetTeaserCount(
+            countFacilitiesWithNightPrice(facilities),
+          ),
+          perks: FacilityPricing.budgetTeaserPerks,
         ),
-        perks: FacilityPricing.budgetTeaserPerks,
-      ));
+      );
       return;
     }
     var basis = _priceBasis;
     var range = nightPriceRange(facilities, basis);
     if (range == null) {
-      basis = basis == BestValueBasis.sivil ? BestValueBasis.kamu : BestValueBasis.sivil;
+      basis = basis == BestValueBasis.sivil
+          ? BestValueBasis.kamu
+          : BestValueBasis.sivil;
       range = nightPriceRange(facilities, basis);
     }
     if (range == null) return;
-    final picked = await showBudgetPicker(context, range: range, current: _budgetMax);
+    final picked = await showBudgetPicker(
+      context,
+      range: range,
+      current: _budgetMax,
+    );
     if (!mounted || picked == null) return;
     setState(() {
       _budgetMax = picked.isNaN ? null : picked;
@@ -418,7 +406,8 @@ class MisafirhaneSearchResultsPanelState
     super.didUpdateWidget(oldWidget);
     final ho = oldWidget.highlightTarget;
     final hn = widget.highlightTarget;
-    final hlChanged = (ho == null) != (hn == null) ||
+    final hlChanged =
+        (ho == null) != (hn == null) ||
         (ho != null && hn != null && !ho.sameFavoriteIdentity(hn));
     if (hlChanged) {
       if (hn == null) {
@@ -436,6 +425,8 @@ class MisafirhaneSearchResultsPanelState
 
   @override
   void dispose() {
+    _listScroll?.dispose();
+    _listScroll = null;
     ProService.instance.isPro.removeListener(_onProChanged);
     FacilityCompareSelection.instance.removeListener(_onCompareChanged);
     widget.mapLocationState.removeListener(_onMapLocationChanged);
@@ -460,17 +451,8 @@ class MisafirhaneSearchResultsPanelState
   Future<void> _expandSheetAndScrollToGeziYemek() async {
     final hl = widget.geziYemekHighlight;
     if (hl == null || !mounted) return;
-    final ext = widget.sheetExtentController;
     await Future<void>.delayed(const Duration(milliseconds: 120));
     if (!mounted) return;
-    if (ext.isAttached && ext.size < 0.12) {
-      await ext.animateTo(
-        kMisafirhaneSearchSheetOpenExtent,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOut,
-      );
-      if (!mounted) return;
-    }
     for (var w = 0; w < 50; w++) {
       if (_listScroll != null && _listScroll!.hasClients) break;
       await Future<void>.delayed(const Duration(milliseconds: 16));
@@ -500,8 +482,10 @@ class MisafirhaneSearchResultsPanelState
     if (rowKey.currentContext == null) {
       const kTabBarH = _TabBarHeaderDelegate.height;
       const kApproxItemH = 88.0;
-      final approx = (kTabBarH + targetIdx * kApproxItemH)
-          .clamp(0.0, scroll.position.maxScrollExtent);
+      final approx = (kTabBarH + targetIdx * kApproxItemH).clamp(
+        0.0,
+        scroll.position.maxScrollExtent,
+      );
       await scroll.animateTo(
         approx,
         duration: const Duration(milliseconds: 360),
@@ -529,16 +513,6 @@ class MisafirhaneSearchResultsPanelState
 
     await Future<void>.delayed(const Duration(milliseconds: 80));
     if (!mounted || widget.highlightTarget == null || _tabIndex != 0) return;
-
-    final ext = widget.sheetExtentController;
-    if (ext.isAttached && ext.size < 0.12) {
-      await ext.animateTo(
-        kMisafirhaneSearchSheetOpenExtent,
-        duration: const Duration(milliseconds: 280),
-        curve: Curves.easeOut,
-      );
-      if (!mounted || widget.highlightTarget == null || _tabIndex != 0) return;
-    }
 
     for (var w = 0; w < 50; w++) {
       if (_listScroll != null && _listScroll!.hasClients) break;
@@ -568,7 +542,10 @@ class MisafirhaneSearchResultsPanelState
       if (rowKey.currentContext != null) break;
       if (_listScroll == null || !_listScroll!.hasClients) return;
       final pos = _listScroll!.position;
-      final next = (_listScroll!.offset + 160.0).clamp(0.0, pos.maxScrollExtent);
+      final next = (_listScroll!.offset + 160.0).clamp(
+        0.0,
+        pos.maxScrollExtent,
+      );
       if (next <= _listScroll!.offset + 0.5) break;
       _listScroll!.jumpTo(next);
       await Future<void>.delayed(const Duration(milliseconds: 24));
@@ -647,14 +624,14 @@ class MisafirhaneSearchResultsPanelState
   final Map<int, String> _unknownIlceTabs = {};
 
   String _ilceOfGezi(GeziYemekItem g) => _inferredIlce.putIfAbsent(
-        'g\u0001${g.il}\u0001${g.isim}\u0001${g.adres}',
-        () => IlIlce.inferIlce(g.il, adres: g.adres),
-      );
+    'g\u0001${g.il}\u0001${g.isim}\u0001${g.adres}',
+    () => IlIlce.inferIlce(g.il, adres: g.adres),
+  );
 
   String _ilceOfSosyal(SosyalItem s) => _inferredIlce.putIfAbsent(
-        's\u0001${s.il}\u0001${s.ilce}\u0001${s.isim}\u0001${s.adres}',
-        () => IlIlce.inferIlce(s.il, ilce: s.ilce, adres: s.adres),
-      );
+    's\u0001${s.il}\u0001${s.ilce}\u0001${s.isim}\u0001${s.adres}',
+    () => IlIlce.inferIlce(s.il, ilce: s.ilce, adres: s.adres),
+  );
 
   /// Gezi / sosyal sekmesinde aktif ilçe; null → tüm ilçeler.
   String? _listIlceFor(int tab) {
@@ -686,10 +663,11 @@ class MisafirhaneSearchResultsPanelState
         _unknownIlceTabs.clear();
       }
     });
-    ref.read(facilityIlceFilterProvider.notifier).state =
-        value == null || value == kIlceUnknown
-            ? null
-            : IlceSelection(il: il, ilce: value);
+    ref
+        .read(facilityIlceFilterProvider.notifier)
+        .state = value == null || value == kIlceUnknown
+        ? null
+        : IlceSelection(il: il, ilce: value);
   }
 
   Widget _listLocationBar<T>({
@@ -813,16 +791,10 @@ class MisafirhaneSearchResultsPanelState
       _tabIndex = index;
       _detailFacility = null;
     });
-    final c = widget.sheetExtentController;
-    if (c.isAttached) {
-      unawaited(
-        c.animateTo(
-          kMisafirhaneSearchSheetOpenExtent,
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-        ),
-      );
-    }
+    // Kategori değişince kaydırma başa döner; harita görünümündeysek listeye geç.
+    final scroll = _listScroll;
+    if (scroll != null && scroll.hasClients) scroll.jumpTo(0);
+    if (!widget.listVisible) widget.onViewModeChanged(true);
     if (index == 0) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         unawaited(_expandSheetAndScrollToHighlight());
@@ -856,8 +828,7 @@ class MisafirhaneSearchResultsPanelState
 
     try {
       // Önce açık sekme — kullanıcı bekleyen satırları önce görsün.
-      Future<void> gezi() =>
-          _hydrateGeziYemekCoords(_geziFiltered, gen: gen);
+      Future<void> gezi() => _hydrateGeziYemekCoords(_geziFiltered, gen: gen);
       // Yemek: mesafe yok → geocode yok. Konaklama: dokunulmaz.
       Future<void> sosyal() => _hydrateSosyalCoords(gen: gen);
 
@@ -884,7 +855,8 @@ class MisafirhaneSearchResultsPanelState
           return !_geocodeSosyal.containsKey(_keySosyal(s));
         });
         if ((unresolvedGezi || unresolvedSosyal) && mounted) {
-          final hadOnlyErrors = _geziFiltered.any((g) {
+          final hadOnlyErrors =
+              _geziFiltered.any((g) {
                 if (g.enlem != null && g.boylam != null) return false;
                 final k = _keyGeziYemek(g);
                 return !_geocodeGeziYemek.containsKey(k) &&
@@ -1077,9 +1049,9 @@ class MisafirhaneSearchResultsPanelState
   Future<void> _dialPhone(BuildContext ctx, String phone) async {
     final p = phone.trim();
     if (p.isEmpty) {
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        const SnackBar(content: Text('Telefon numarası yok')),
-      );
+      ScaffoldMessenger.of(
+        ctx,
+      ).showSnackBar(const SnackBar(content: Text('Telefon numarası yok')));
       return;
     }
     final uri = Uri(scheme: 'tel', path: p.replaceAll(RegExp(r'\s'), ''));
@@ -1087,19 +1059,20 @@ class MisafirhaneSearchResultsPanelState
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (ctx.mounted) {
-        ScaffoldMessenger.of(ctx).showSnackBar(
-          const SnackBar(content: Text('Arama başlatılamadı')),
-        );
+        ScaffoldMessenger.of(
+          ctx,
+        ).showSnackBar(const SnackBar(content: Text('Arama başlatılamadı')));
       }
     }
   }
 
   Future<void> _shareMisafirhane(Misafirhane m) async {
-    final mapsUrl = googleMapsShareUrlForMisafirhane(m);
-    final text = '${m.isim}\n$mapsUrl\n\n'
-        'Telefon: ${m.telefon.isEmpty ? 'Yok' : m.telefon}\n\n'
-        '${_shareAppDownloadFooter()}';
-    await Share.share(text);
+    final phone = m.telefon.trim();
+    await Share.share(
+      StoreLinks.shareMessage(m.isim, [
+        if (phone.isNotEmpty) 'Telefon: $phone',
+      ]),
+    );
   }
 
   Future<void> _openGoogleImages(String query) async {
@@ -1114,39 +1087,25 @@ class MisafirhaneSearchResultsPanelState
   }
 
   Future<void> _shareGeziYemek(GeziYemekItem g) async {
-    final name = g.isim.trim();
-    final desc = g.aciklama.trim();
-    final body = StringBuffer(name);
-    if (desc.isNotEmpty) {
-      body.write('\n\n');
-      body.write(desc);
-    }
-    body.write('\n\n');
-    body.write(_shareAppDownloadFooter());
-    await Share.share(body.toString());
+    await Share.share(
+      StoreLinks.shareMessage(g.isim.trim(), [
+        if (g.aciklama.trim().isNotEmpty) g.aciklama.trim(),
+      ]),
+    );
   }
 
   Future<void> _shareSosyal(SosyalItem s) async {
-    final name = s.isim.trim();
-    final ilce = _sosyalIlceLine(s);
-    final aciklama = s.aciklama.trim();
-    final body = StringBuffer(name);
-    if (ilce.isNotEmpty) {
-      body.write('\n');
-      body.write(ilce);
-    }
-    if (aciklama.isNotEmpty) {
-      body.write('\n\n');
-      body.write(aciklama);
-    }
-    body.write('\n\n');
-    body.write(_shareAppDownloadFooter());
-    await Share.share(body.toString());
+    await Share.share(
+      StoreLinks.shareMessage(s.isim.trim(), [
+        _sosyalIlceLine(s),
+        s.aciklama.trim(),
+      ]),
+    );
   }
 
   SliverToBoxAdapter _listBottomInset(BuildContext context) {
-    final h = RotalinkGlassBottomNav.totalHeight(context) + 24;
-    return SliverToBoxAdapter(child: SizedBox(height: h));
+    // Liste gövdesi alt menünün üstünde biter; yalnızca küçük nefes payı.
+    return const SliverToBoxAdapter(child: SizedBox(height: 16));
   }
 
   @override
@@ -1166,142 +1125,175 @@ class MisafirhaneSearchResultsPanelState
         final mq = MediaQuery.of(context);
         return MediaQuery(
           data: mq.copyWith(viewInsets: EdgeInsets.zero),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              // [StackFit.expand] üst üste tam ekran sıkı kısıt veriyordu; sheet tüm ekranı
-              // hit-test edip harita ve arama çubuğunu kilitleyordu. Alta hizalı gevşek kısıt ile
-              // yalnızca panel dokunuşları sheet’e gider.
+          child: Builder(
+            builder: (context) {
+              final scrollController = _listScroll!;
+              final detail = _detailFacility;
+              final counts = <int>[
+                tesisFacilities.length,
+                _geziShown.length,
+                _yemekFiltered.length,
+                _sosyalShown.length,
+                _hediyelikFiltered.length,
+                _kampFiltered.length,
+              ];
+              final showViewBar =
+                  detail == null && _tabIndex != _TabBarHeaderDelegate.kampTab;
+              final viewBar = _ViewModeBar(
+                showList: widget.listVisible,
+                tabIndex: _tabIndex,
+                counts: counts,
+                onViewModeChanged: widget.onViewModeChanged,
+                onTabChanged: _onTabChanged,
+              );
               return Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: constraints.maxWidth,
-                        maxHeight: constraints.maxHeight,
-                      ),
-                      child: DraggableScrollableSheet(
-                        controller: widget.sheetExtentController,
-                        expand: false,
-                        minChildSize: 0,
-                        initialChildSize: kMisafirhaneSearchSheetOpenExtent,
-                        maxChildSize: isDetailOpen
-                            ? kMisafirhaneSearchSheetDetailExtent
-                            : kMisafirhaneSearchSheetOpenExtent,
-                        builder: (context, scrollController) {
-                          _listScroll = scrollController;
-                          final detail = _detailFacility;
-                          return Material(
-                            color: Colors.white,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(16),
-                            ),
-                            clipBehavior: Clip.antiAlias,
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 280),
-                              switchInCurve: Curves.easeOutCubic,
-                              switchOutCurve: Curves.easeInCubic,
-                              transitionBuilder: (child, animation) {
-                                final offset = Tween<Offset>(
-                                  begin: const Offset(0.08, 0),
-                                  end: Offset.zero,
-                                ).animate(animation);
-                                return FadeTransition(
-                                  opacity: animation,
-                                  child: SlideTransition(
-                                    position: offset,
-                                    child: child,
-                                  ),
-                                );
-                              },
-                              child: detail != null
-                                  ? KeyedSubtree(
-                                      key: ValueKey<String>(
-                                        'detail-${detail.stableFacilityId}',
-                                      ),
-                                      child: FacilityDetailCard(
-                                        misafirhane: detail,
-                                        mapLocationState:
-                                            widget.mapLocationState,
-                                        isFavorite: _favorites.any(
-                                          (f) => f.sameFavoriteIdentity(detail),
+                  // Liste görünümü: harita gizli, tam yükseklik. Harita görünümünde
+                  // Offstage ile durum (sekme, kaydırma, filtre) korunur.
+                  Offstage(
+                    offstage: !widget.listVisible,
+                    child: TickerMode(
+                      enabled: widget.listVisible,
+                      child: SizedBox.expand(
+                        child: ColoredBox(
+                          // Üst alan (arama + filtre + başlık + sekmeler) hafif turkuaz
+                          // tonlu yüzey: beyaz arama kutusu ve beyaz kartlar ayrışır.
+                          color: AraUi.chromeFillOf(context),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              SizedBox(height: widget.topInset),
+                              if (showViewBar) viewBar,
+                              Expanded(
+                                child: Material(
+                                  color: detail != null
+                                      ? AppColors.surfaceOf(context)
+                                      : AraUi.pageOf(context),
+                                  clipBehavior: Clip.hardEdge,
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(milliseconds: 280),
+                                    switchInCurve: Curves.easeOutCubic,
+                                    switchOutCurve: Curves.easeInCubic,
+                                    transitionBuilder: (child, animation) {
+                                      final offset = Tween<Offset>(
+                                        begin: const Offset(0.08, 0),
+                                        end: Offset.zero,
+                                      ).animate(animation);
+                                      return FadeTransition(
+                                        opacity: animation,
+                                        child: SlideTransition(
+                                          position: offset,
+                                          child: child,
                                         ),
-                                        onBack: () => unawaited(
-                                          _closeFacilityDetail(),
-                                        ),
-                                        onCall: () => _dialPhone(
-                                          context,
-                                          detail.telefon,
-                                        ),
-                                        onShare: () =>
-                                            unawaited(_shareMisafirhane(detail)),
-                                        onFavorite: () =>
-                                            unawaited(_toggleFavorite(detail)),
-                                        onInspect: () => unawaited(
-                                          openMapSearch(
-                                            context,
-                                            detail.il,
-                                            detail.isim,
-                                          ),
-                                        ),
-                                        onReview: () => unawaited(
-                                          pushOnShellNavigator<void>(
-                                            MaterialPageRoute<void>(
-                                              builder: (_) => YorumScreen(
-                                                facilityId: ReviewRepository
-                                                    .sanitizeFacilityId(
-                                                  detail.stableFacilityId,
-                                                ),
-                                                facilityName: detail.isim,
-                                              ),
+                                      );
+                                    },
+                                    child: detail != null
+                                        ? KeyedSubtree(
+                                            key: ValueKey<String>(
+                                              'detail-${detail.stableFacilityId}',
                                             ),
-                                          ),
-                                        ),
-                                        onShowOnMap: () => unawaited(
-                                          openMapSearch(
-                                            context,
-                                            detail.il,
-                                            detail.isim,
-                                          ),
-                                        ),
-                                        onRequestLocation: widget
-                                                .onRequestLocationPermission ??
-                                            () async {},
-                                      ),
-                                    )
-                                  : KeyedSubtree(
-                                      key: const ValueKey<String>('list'),
-                                      child: CustomScrollView(
-                                        controller: scrollController,
-                                        physics:
-                                            const ClampingScrollPhysics(),
-                                        slivers: [
-                                          SliverPersistentHeader(
-                                            pinned: true,
-                                            delegate: _TabBarHeaderDelegate(
-                                              tabIndex: _tabIndex,
-                                              onTabChanged: _onTabChanged,
-                                              counts: [
-                                                tesisFacilities.length,
-                                                _geziShown.length,
-                                                _yemekFiltered.length,
-                                                _sosyalShown.length,
-                                                _hediyelikFiltered.length,
-                                                _kampFiltered.length,
+                                            child: FacilityDetailCard(
+                                              misafirhane: detail,
+                                              mapLocationState:
+                                                  widget.mapLocationState,
+                                              isFavorite: _favorites.any(
+                                                (f) => f.sameFavoriteIdentity(
+                                                  detail,
+                                                ),
+                                              ),
+                                              onBack: () => unawaited(
+                                                _closeFacilityDetail(),
+                                              ),
+                                              onCall: () => _dialPhone(
+                                                context,
+                                                detail.telefon,
+                                              ),
+                                              onShare: () => unawaited(
+                                                _shareMisafirhane(detail),
+                                              ),
+                                              onFavorite: () => unawaited(
+                                                _toggleFavorite(detail),
+                                              ),
+                                              onInspect: () => unawaited(
+                                                openMapSearch(
+                                                  context,
+                                                  detail.il,
+                                                  detail.isim,
+                                                ),
+                                              ),
+                                              onReview: () => unawaited(
+                                                pushOnShellNavigator<void>(
+                                                  MaterialPageRoute<void>(
+                                                    builder: (_) => YorumScreen(
+                                                      facilityId:
+                                                          ReviewRepository.sanitizeFacilityId(
+                                                            detail
+                                                                .stableFacilityId,
+                                                          ),
+                                                      facilityName: detail.isim,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                              onShowOnMap: () => unawaited(
+                                                openMapSearch(
+                                                  context,
+                                                  detail.il,
+                                                  detail.isim,
+                                                ),
+                                              ),
+                                              onRequestLocation:
+                                                  widget
+                                                      .onRequestLocationPermission ??
+                                                  () async {},
+                                            ),
+                                          )
+                                        : KeyedSubtree(
+                                            key: const ValueKey<String>('list'),
+                                            child: CustomScrollView(
+                                              controller: scrollController,
+                                              physics:
+                                                  const ClampingScrollPhysics(),
+                                              slivers: [
+                                                SliverPersistentHeader(
+                                                  pinned: true,
+                                                  delegate:
+                                                      _TabBarHeaderDelegate(
+                                                        tabIndex: _tabIndex,
+                                                        onTabChanged:
+                                                            _onTabChanged,
+                                                        counts: counts,
+                                                      ),
+                                                ),
+                                                ..._tabSlivers(context),
                                               ],
                                             ),
                                           ),
-                                          ..._tabSlivers(context),
-                                        ],
-                                      ),
-                                    ),
-                            ),
-                          );
-                        },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
+                  // Harita görünümü: başlık/arama altında kompakt Liste/Harita çubuğu.
+                  if (!widget.listVisible && showViewBar)
+                    Positioned(
+                      top: widget.topInset + 6,
+                      left: 10,
+                      right: 10,
+                      child: Material(
+                        elevation: 3,
+                        shadowColor: Colors.black26,
+                        borderRadius: BorderRadius.circular(14),
+                        color: AppColors.surfaceOf(context),
+                        clipBehavior: Clip.antiAlias,
+                        child: viewBar,
+                      ),
+                    ),
                 ],
               );
             },
@@ -1334,8 +1326,10 @@ class MisafirhaneSearchResultsPanelState
     }
   }
 
-
-  List<Widget> _tesisTabSlivers(BuildContext context, List<Misafirhane> facilities) {
+  List<Widget> _tesisTabSlivers(
+    BuildContext context,
+    List<Misafirhane> facilities,
+  ) {
     final locationBar = SliverToBoxAdapter(
       child: FacilityLocationFilterBar(
         allFacilities: MainMapSearch.tesisKaynagiArama(
@@ -1347,7 +1341,8 @@ class MisafirhaneSearchResultsPanelState
     );
     if (facilities.isEmpty) {
       final ilceActive = ref.watch(facilityIlceFilterProvider) != null;
-      final typeActive = ref.watch(facilityTypeFilterProvider) != kFacilityFilterAll;
+      final typeActive =
+          ref.watch(facilityTypeFilterProvider) != kFacilityFilterAll;
       final Widget empty;
       if (ilceActive) {
         empty = _emptyTabState(
@@ -1355,20 +1350,22 @@ class MisafirhaneSearchResultsPanelState
               ? 'Bu ilçede seçili türde kamu konaklama tesisi bulunamadı.'
               : 'Bu ilçede kayıtlı kamu konaklama tesisi bulunamadı.',
           actionLabel: 'İl genelindeki tesisleri göster',
-          onAction: () => ref.read(facilityIlceFilterProvider.notifier).state = null,
+          onAction: () =>
+              ref.read(facilityIlceFilterProvider.notifier).state = null,
         );
       } else if (typeActive) {
         empty = _emptyTabState(
           'Bu ilde seçili türde kamu konaklama tesisi bulunamadı.',
           actionLabel: 'Tüm tesis türlerini göster',
-          onAction: () =>
-              ref.read(facilityTypeFilterProvider.notifier).state = kFacilityFilterAll,
+          onAction: () => ref.read(facilityTypeFilterProvider.notifier).state =
+              kFacilityFilterAll,
         );
       } else {
         empty = _emptyTabState('Bu aramada konaklama kaydı yok');
       }
       return [
         locationBar,
+        _kListGap,
         SliverFillRemaining(
           hasScrollBody: false,
           child: SafeArea(
@@ -1414,6 +1411,7 @@ class MisafirhaneSearchResultsPanelState
       final unpriced = split.unpriced;
       return [
         locationBar,
+        _kListGap,
         ?sortBar,
         ?compareBar,
         if (budget != null && (split.overBudget > 0 || priced.isEmpty))
@@ -1424,25 +1422,21 @@ class MisafirhaneSearchResultsPanelState
             ),
           ),
         SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (ctx, index) {
-              if (index.isOdd) return _kListDivider;
-              final e = priced[index ~/ 2];
-              return _tesisFacilityRow(context, e.$1, price: e.$2);
-            },
-            childCount: priced.isEmpty ? 0 : priced.length * 2 - 1,
-          ),
+          delegate: SliverChildBuilderDelegate((ctx, index) {
+            if (index.isOdd) return _kListDivider;
+            final e = priced[index ~/ 2];
+            return _tesisFacilityRow(context, e.$1, price: e.$2);
+          }, childCount: priced.isEmpty ? 0 : priced.length * 2 - 1),
         ),
         if (unpriced.isNotEmpty) ...[
-          SliverToBoxAdapter(child: FacilityUnpricedHeader(count: unpriced.length)),
+          SliverToBoxAdapter(
+            child: FacilityUnpricedHeader(count: unpriced.length),
+          ),
           SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (ctx, index) {
-                if (index.isOdd) return _kListDivider;
-                return _tesisFacilityRow(context, unpriced[index ~/ 2]);
-              },
-              childCount: unpriced.length * 2 - 1,
-            ),
+            delegate: SliverChildBuilderDelegate((ctx, index) {
+              if (index.isOdd) return _kListDivider;
+              return _tesisFacilityRow(context, unpriced[index ~/ 2]);
+            }, childCount: unpriced.length * 2 - 1),
           ),
         ],
         _listBottomInset(context),
@@ -1454,25 +1448,26 @@ class MisafirhaneSearchResultsPanelState
     final bestValue = pickBestValueFacility(facilities);
     return [
       locationBar,
+      _kListGap,
       ?sortBar,
       ?compareBar,
       if (bestValue != null)
         SliverToBoxAdapter(
           child: BestValueProCard(
-            key: ValueKey<String>('best-${bestValue.facility.stableFacilityId}'),
+            key: ValueKey<String>(
+              'best-${bestValue.facility.stableFacilityId}',
+            ),
             pick: bestValue,
-            onOpenFacility: () => unawaited(_openFacilityDetail(bestValue.facility)),
+            onOpenFacility: () =>
+                unawaited(_openFacilityDetail(bestValue.facility)),
           ),
         ),
       SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (ctx, index) {
-            if (index.isOdd) return _kListDivider;
-            final i = index ~/ 2;
-            return _tesisFacilityRow(context, facilities[i]);
-          },
-          childCount: childCount,
-        ),
+        delegate: SliverChildBuilderDelegate((ctx, index) {
+          if (index.isOdd) return _kListDivider;
+          final i = index ~/ 2;
+          return _tesisFacilityRow(context, facilities[i]);
+        }, childCount: childCount),
       ),
       _listBottomInset(context),
     ];
@@ -1484,12 +1479,15 @@ class MisafirhaneSearchResultsPanelState
     FacilityNightPrice? price,
   }) {
     final resolved = FacilityAddressRepository.instance.resolveFacility(m);
-    final flash = _flashFacility != null &&
-        m.sameFavoriteIdentity(_flashFacility!);
+    final flash =
+        _flashFacility != null && m.sameFavoriteIdentity(_flashFacility!);
     final konum = IlIlce.label(resolved.il, resolved.ilce);
     final row = _searchListTile(
       icon: Icons.hotel_rounded,
       title: resolved.isim,
+      showFiyatBilgisi:
+          FacilityPriceRepository.instance.lookup(m.il, m.isim)?.hasFiyatBilgisi ==
+              true,
       subtitle: konum.isEmpty ? null : konum,
       distance: DistancePermissionChip(
         userLocation: widget.mapLocationState.userLocation,
@@ -1500,16 +1498,15 @@ class MisafirhaneSearchResultsPanelState
         spacingAbove: 8,
         fullWidthSingleLine: true,
       ),
+      footer: ViewCountLabel(
+        viewId: ViewCounterService.keyFor(ViewCategory.konaklama, m.il, m.isim),
+      ),
       onTap: () => unawaited(_openFacilityDetail(m)),
-      trailingCue: price != null
-          ? FacilityNightPriceTag(price: price)
-          : null,
+      trailingCue: price != null ? FacilityNightPriceTag(price: price) : null,
     );
     final wrapped = flash
         ? _SearchHighlightFlash(
-            key: ValueKey<String>(
-              'hl-$_flashGen-${m.stableFacilityId}',
-            ),
+            key: ValueKey<String>('hl-$_flashGen-${m.stableFacilityId}'),
             child: row,
           )
         : row;
@@ -1531,8 +1528,7 @@ class MisafirhaneSearchResultsPanelState
     }();
     final aciklama = g.aciklama.trim();
     final mapsQuery = '${g.il} ${g.isim}'.trim();
-    final row = Material(
-      color: AppColors.surface,
+    final row = _rowCard(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
         child: Column(
@@ -1541,21 +1537,9 @@ class MisafirhaneSearchResultsPanelState
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySoft,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    isGezi
-                        ? Icons.landscape_rounded
-                        : Icons.restaurant_rounded,
-                    size: 20,
-                    color: AppColors.primary,
-                  ),
+                _categoryIcon(
+                  isGezi ? Icons.landscape_rounded : Icons.restaurant_rounded,
+                  isGezi ? AraUi.gezi : AraUi.yemek,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1564,8 +1548,8 @@ class MisafirhaneSearchResultsPanelState
                     children: [
                       Text(
                         g.isim,
-                        style: const TextStyle(
-                          color: AppColors.textStrong,
+                        style: TextStyle(
+                          color: AppColors.textStrongOf(context),
                           fontSize: 16,
                           height: 1.25,
                           fontWeight: FontWeight.w600,
@@ -1577,8 +1561,8 @@ class MisafirhaneSearchResultsPanelState
                           locationLine,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: AppColors.textMuted,
+                          style: TextStyle(
+                            color: AppColors.textMutedOf(context),
                             fontSize: 12,
                             height: 1.35,
                             fontWeight: FontWeight.w500,
@@ -1595,8 +1579,8 @@ class MisafirhaneSearchResultsPanelState
               Text(
                 aciklama,
                 softWrap: true,
-                style: const TextStyle(
-                  color: AppColors.textMuted,
+                style: TextStyle(
+                  color: AppColors.textMutedOf(context),
                   fontSize: 13,
                   height: 1.4,
                   fontWeight: FontWeight.w400,
@@ -1615,20 +1599,19 @@ class MisafirhaneSearchResultsPanelState
                 fullWidthSingleLine: true,
               ),
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            AraActionRow(
               children: [
                 _sosyalActionChip(
                   icon: Icons.map_outlined,
                   label: 'Harita',
-                  onTap: () =>
-                      unawaited(openMapSearch(context, g.il, g.isim)),
+                  primary: isGezi,
+                  onTap: () => unawaited(openMapSearch(context, g.il, g.isim)),
                 ),
                 if (!isGezi)
                   _sosyalActionChip(
                     icon: Icons.image_search,
-                    label: 'Gör',
+                    label: 'Fotoğraf',
+                    primary: true,
                     onTap: () {
                       if (mapsQuery.isEmpty) return;
                       unawaited(_openGoogleImages(mapsQuery));
@@ -1661,8 +1644,7 @@ class MisafirhaneSearchResultsPanelState
         ),
       ),
     );
-    final wrapped =
-        isHl ? _SearchHighlightFlash(child: row) : row;
+    final wrapped = isHl ? _SearchHighlightFlash(child: row) : row;
     return KeyedSubtree(key: _keyForGeziYemek(g), child: wrapped);
   }
 
@@ -1670,14 +1652,15 @@ class MisafirhaneSearchResultsPanelState
   Widget _searchListTile({
     required IconData icon,
     required String title,
+    bool showFiyatBilgisi = false,
     String? subtitle,
     Widget? distance,
+    Widget? footer,
     required VoidCallback onTap,
     List<Widget> trailingActions = const [],
     Widget? trailingCue,
   }) {
-    return Material(
-      color: AppColors.surface,
+    return _rowCard(
       child: InkWell(
         onTap: onTap,
         splashColor: AppColors.primary.withValues(alpha: 0.06),
@@ -1687,31 +1670,33 @@ class MisafirhaneSearchResultsPanelState
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 42,
-                height: 42,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, size: 20, color: AppColors.primary),
-              ),
+              _categoryIcon(icon, AraUi.stay),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.textStrong,
-                        fontSize: 16,
-                        height: 1.25,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: AppColors.textStrongOf(context),
+                              fontSize: 16,
+                              height: 1.25,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        if (showFiyatBilgisi) ...[
+                          const SizedBox(width: 8),
+                          const _UcretBilgisiLabel(),
+                        ],
+                      ],
                     ),
                     if (subtitle != null && subtitle.isNotEmpty) ...[
                       const SizedBox(height: 3),
@@ -1719,8 +1704,8 @@ class MisafirhaneSearchResultsPanelState
                         subtitle,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: AppColors.textMuted,
+                        style: TextStyle(
+                          color: AppColors.textMutedOf(context),
                           fontSize: 12,
                           height: 1.35,
                           fontWeight: FontWeight.w500,
@@ -1728,17 +1713,18 @@ class MisafirhaneSearchResultsPanelState
                       ),
                     ],
                     if (distance != null) distance,
+                    ?footer,
                   ],
                 ),
               ),
               ...trailingActions,
               trailingCue ??
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.only(left: 2),
                     child: Icon(
                       Icons.chevron_right_rounded,
                       size: 22,
-                      color: AppColors.textMuted,
+                      color: AppColors.textMutedOf(context),
                     ),
                   ),
             ],
@@ -1748,22 +1734,39 @@ class MisafirhaneSearchResultsPanelState
     );
   }
 
-  static const _kListDivider = Divider(
-    height: 1,
-    thickness: 1,
-    indent: 70,
-    endIndent: 0,
-    color: Color(0xFFEEF2F3),
-  );
+  /// Kartlar arası boşluk (zemin [AraUi.pageOf(context)] görünür).
+  static const _kListDivider = SizedBox(height: 10);
+  static const _kListGap = SliverToBoxAdapter(child: SizedBox(height: 10));
 
-  List<Widget> _geziTabSlivers(BuildContext context, List<GeziYemekItem> items) {
+  /// Liste satırı kartı: beyaz yüzey + ince çerçeve + yuvarlak köşe; canvas üzerinde ayrışır.
+  Widget _rowCard({required Widget child}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Material(
+        color: AppColors.surfaceOf(context),
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: AraUi.cardBorderOf(context)),
+        ),
+        child: child,
+      ),
+    );
+  }
+
+  List<Widget> _geziTabSlivers(
+    BuildContext context,
+    List<GeziYemekItem> items,
+  ) {
     final locationBar = SliverToBoxAdapter(
       child: _listLocationBar<GeziYemekItem>(
         tab: 1,
         noun: 'yer',
         inIl: _geziFiltered,
-        all: GeziYemekRepository.instance
-            .mergeWithMaster(widget.rotaData.gezi, gezi: true),
+        all: GeziYemekRepository.instance.mergeWithMaster(
+          widget.rotaData.gezi,
+          gezi: true,
+        ),
         ilOf: (g) => g.il,
         ilceOf: _ilceOfGezi,
         shown: items.length,
@@ -1772,6 +1775,7 @@ class MisafirhaneSearchResultsPanelState
     if (items.isEmpty) {
       return [
         locationBar,
+        _kListGap,
         SliverFillRemaining(
           hasScrollBody: false,
           child: SafeArea(
@@ -1790,20 +1794,21 @@ class MisafirhaneSearchResultsPanelState
     }
     return [
       locationBar,
+      _kListGap,
       SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (ctx, index) {
-            if (index.isOdd) return _kListDivider;
-            return _geziYemekCompactRow(context, items[index ~/ 2], isGezi: true);
-          },
-          childCount: items.length * 2 - 1,
-        ),
+        delegate: SliverChildBuilderDelegate((ctx, index) {
+          if (index.isOdd) return _kListDivider;
+          return _geziYemekCompactRow(context, items[index ~/ 2], isGezi: true);
+        }, childCount: items.length * 2 - 1),
       ),
       _listBottomInset(context),
     ];
   }
 
-  List<Widget> _yemekTabSlivers(BuildContext context, List<GeziYemekItem> items) {
+  List<Widget> _yemekTabSlivers(
+    BuildContext context,
+    List<GeziYemekItem> items,
+  ) {
     if (items.isEmpty) {
       return [
         SliverFillRemaining(
@@ -1820,13 +1825,14 @@ class MisafirhaneSearchResultsPanelState
     }
     return [
       SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (ctx, index) {
-            if (index.isOdd) return _kListDivider;
-            return _geziYemekCompactRow(context, items[index ~/ 2], isGezi: false);
-          },
-          childCount: items.length * 2 - 1,
-        ),
+        delegate: SliverChildBuilderDelegate((ctx, index) {
+          if (index.isOdd) return _kListDivider;
+          return _geziYemekCompactRow(
+            context,
+            items[index ~/ 2],
+            isGezi: false,
+          );
+        }, childCount: items.length * 2 - 1),
       ),
       _listBottomInset(context),
     ];
@@ -1857,13 +1863,10 @@ class MisafirhaneSearchResultsPanelState
     }
     return [
       SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (ctx, index) {
-            if (index.isOdd) return _kListDivider;
-            return _hediyelikRow(context, items[index ~/ 2]);
-          },
-          childCount: items.length * 2 - 1,
-        ),
+        delegate: SliverChildBuilderDelegate((ctx, index) {
+          if (index.isOdd) return _kListDivider;
+          return _hediyelikRow(context, items[index ~/ 2]);
+        }, childCount: items.length * 2 - 1),
       ),
       _listBottomInset(context),
     ];
@@ -1873,7 +1876,8 @@ class MisafirhaneSearchResultsPanelState
     final k = kategori.toLowerCase();
     if (k.contains('el sanat')) return Icons.palette_outlined;
     if (k.contains('tatlı')) return Icons.cake_outlined;
-    if (k.contains('bal') || k.contains('peynir')) return Icons.egg_alt_outlined;
+    if (k.contains('bal') || k.contains('peynir'))
+      return Icons.egg_alt_outlined;
     if (k.contains('meyve')) return Icons.eco_outlined;
     if (k.contains('yağ') || k.contains('baharat')) return Icons.spa_outlined;
     if (k.contains('içecek')) return Icons.local_cafe_outlined;
@@ -1881,20 +1885,17 @@ class MisafirhaneSearchResultsPanelState
   }
 
   Future<void> _shareHediyelik(HediyelikItem h) async {
-    final body = StringBuffer('${h.il} hediyelik: ${h.ad}');
-    if (h.aciklama.isNotEmpty) {
-      body.write('\n\n');
-      body.write(h.aciklama);
-    }
-    body.write('\n\n');
-    body.write(_shareAppDownloadFooter());
-    await Share.share(body.toString());
+    await Share.share(
+      StoreLinks.shareMessage(h.ad, [
+        h.il.trim(),
+        h.aciklama.trim(),
+      ]),
+    );
   }
 
   Widget _hediyelikRow(BuildContext context, HediyelikItem h) {
     final meta = [h.il, if (h.kategori.isNotEmpty) h.kategori].join(' · ');
-    return Material(
-      color: Colors.white,
+    return _rowCard(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 14, 14, 14),
         child: Column(
@@ -1903,30 +1904,7 @@ class MisafirhaneSearchResultsPanelState
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        AppColors.primary.withValues(alpha: 0.12),
-                        AppColors.primary.withValues(alpha: 0.05),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.08),
-                    ),
-                  ),
-                  child: Icon(
-                    _hediyelikIcon(h.kategori),
-                    size: 20,
-                    color: AppColors.primary,
-                  ),
-                ),
+                _categoryIcon(_hediyelikIcon(h.kategori), AraUi.hediyelik),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -1934,8 +1912,8 @@ class MisafirhaneSearchResultsPanelState
                     children: [
                       Text(
                         h.ad,
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                        style: TextStyle(
+                          color: AppColors.textStrongOf(context),
                           fontSize: 15,
                           height: 1.28,
                           fontWeight: FontWeight.w600,
@@ -2005,13 +1983,12 @@ class MisafirhaneSearchResultsPanelState
               ),
             ],
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            AraActionRow(
               children: [
                 _sosyalActionChip(
                   icon: Icons.image_search,
-                  label: 'Gör',
+                  label: 'Fotoğraf',
+                  primary: true,
                   onTap: () => unawaited(_openGoogleImages('${h.ad} ${h.il}')),
                 ),
                 _sosyalActionChip(
@@ -2093,37 +2070,19 @@ class MisafirhaneSearchResultsPanelState
     );
   }
 
+  /// Kart eylemi. [primary]: karttaki ana eylem (açık turkuaz yüzey, güçlü yazı);
+  /// diğerleri beyaz yüzey + ince çerçeve (ikincil).
   Widget _sosyalActionChip({
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    bool primary = false,
   }) {
-    return Material(
-      color: AppColors.primarySoft,
-      borderRadius: BorderRadius.circular(10),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 15, color: AppColors.primary),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.primary,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.1,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return AraActionButton(
+      icon: icon,
+      label: label,
+      onTap: onTap,
+      primary: primary,
     );
   }
 
@@ -2132,8 +2091,7 @@ class MisafirhaneSearchResultsPanelState
     final aciklama = s.aciklama.trim();
     final ll = _latLngSosyal(s);
     final menu = SosyalMenuRepository.instance.lookup(s.il, s.isim);
-    return Material(
-      color: Colors.white,
+    return _rowCard(
       child: InkWell(
         onTap: () => unawaited(openMapSearch(context, s.il, s.isim)),
         splashColor: AppColors.primary.withValues(alpha: 0.06),
@@ -2146,30 +2104,7 @@ class MisafirhaneSearchResultsPanelState
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          AppColors.primary.withValues(alpha: 0.12),
-                          AppColors.primary.withValues(alpha: 0.05),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.08),
-                      ),
-                    ),
-                    child: const Icon(
-                      Icons.apartment_rounded,
-                      size: 20,
-                      color: AppColors.primary,
-                    ),
-                  ),
+                  _categoryIcon(Icons.apartment_rounded, AraUi.tesis),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -2177,8 +2112,8 @@ class MisafirhaneSearchResultsPanelState
                       children: [
                         Text(
                           s.isim,
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: AppColors.textStrongOf(context),
                             fontSize: 15,
                             height: 1.28,
                             fontWeight: FontWeight.w600,
@@ -2239,19 +2174,20 @@ class MisafirhaneSearchResultsPanelState
                 ),
               ],
               const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
+              AraActionRow(
                 children: [
                   if (menu != null)
                     _sosyalActionChip(
                       icon: Icons.restaurant_menu_rounded,
                       label: 'Menü',
-                      onTap: () => unawaited(showSosyalMenuSheet(context, menu)),
+                      primary: true,
+                      onTap: () =>
+                          unawaited(showSosyalMenuSheet(context, menu)),
                     ),
                   _sosyalActionChip(
                     icon: Icons.map_outlined,
                     label: 'Harita',
+                    primary: menu == null,
                     onTap: () =>
                         unawaited(openMapSearch(context, s.il, s.isim)),
                   ),
@@ -2300,6 +2236,7 @@ class MisafirhaneSearchResultsPanelState
     if (items.isEmpty) {
       return [
         locationBar,
+        _kListGap,
         SliverFillRemaining(
           hasScrollBody: false,
           child: SafeArea(
@@ -2318,14 +2255,12 @@ class MisafirhaneSearchResultsPanelState
     }
     return [
       locationBar,
+      _kListGap,
       SliverList(
-        delegate: SliverChildBuilderDelegate(
-          (ctx, index) {
-            if (index.isOdd) return _kListDivider;
-            return _sosyalFacilityRow(context, items[index ~/ 2]);
-          },
-          childCount: items.length * 2 - 1,
-        ),
+        delegate: SliverChildBuilderDelegate((ctx, index) {
+          if (index.isOdd) return _kListDivider;
+          return _sosyalFacilityRow(context, items[index ~/ 2]);
+        }, childCount: items.length * 2 - 1),
       ),
       _listBottomInset(context),
     ];
@@ -2408,9 +2343,7 @@ class _SearchHighlightFlashState extends State<_SearchHighlightFlash>
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     color: fill,
-                    border: Border(
-                      left: BorderSide(color: accent, width: 3),
-                    ),
+                    border: Border(left: BorderSide(color: accent, width: 3)),
                   ),
                 ),
               ),
@@ -2419,6 +2352,212 @@ class _SearchHighlightFlashState extends State<_SearchHighlightFlash>
         );
       },
       child: widget.child,
+    );
+  }
+}
+
+/// Kart başındaki küçük kategori ikonu (yalnız ikon alanında kategori tonu).
+Widget _categoryIcon(IconData icon, AraTone tone) {
+  return Container(
+    width: 42,
+    height: 42,
+    alignment: Alignment.center,
+    decoration: BoxDecoration(
+      color: tone.bg,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Icon(icon, size: 20, color: tone.fg),
+  );
+}
+
+/// Sonuç sayısı + Liste / Harita geçişi (liste ve harita görünümünde aynı çubuk).
+///
+/// Harita görünümünde kategori adı açılır menü olur; seçim yapınca liste görünümüne dönülür.
+class _ViewModeBar extends StatelessWidget {
+  const _ViewModeBar({
+    required this.showList,
+    required this.tabIndex,
+    required this.counts,
+    required this.onViewModeChanged,
+    required this.onTabChanged,
+  });
+
+  final bool showList;
+  final int tabIndex;
+  final List<int> counts;
+  final ValueChanged<bool> onViewModeChanged;
+  final ValueChanged<int> onTabChanged;
+
+  static const double height = 46;
+  static const _labels = [
+    'Konaklama',
+    'Gezi',
+    'Yemek',
+    'Tesisler',
+    'Hediyelik',
+    'Kamp',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final i = tabIndex.clamp(0, _labels.length - 1);
+    final count = i < counts.length ? counts[i] : 0;
+    // Bilgi başlığı: buton değil; kategori koyu, sonuç sayısı daha hafif.
+    final title = Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(
+            text: _labels[i],
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: AraUi.inactiveForegroundOf(context),
+            ),
+          ),
+          TextSpan(
+            text: '  $count sonuç',
+            style: TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+              color: AraUi.mutedTextOf(context),
+            ),
+          ),
+        ],
+      ),
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+    );
+    final Widget left = showList
+        ? title
+        : PopupMenuButton<int>(
+            tooltip: 'Kategori',
+            position: PopupMenuPosition.under,
+            color: AppColors.surfaceOf(context),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            onSelected: onTabChanged,
+            itemBuilder: (_) => [
+              for (var k = 0; k < _labels.length; k++)
+                PopupMenuItem<int>(
+                  value: k,
+                  child: Row(
+                    children: [
+                      Expanded(child: Text(_labels[k])),
+                      Text(
+                        '${k < counts.length ? counts[k] : 0}',
+                        style: const TextStyle(color: Color(0xFF8A9A9F)),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+            child: Row(
+              children: [
+                Flexible(child: title),
+                const Icon(
+                  Icons.arrow_drop_down_rounded,
+                  size: 22,
+                  color: AppColors.primary,
+                ),
+              ],
+            ),
+          );
+    return SizedBox(
+      height: height,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Row(
+          children: [
+            Expanded(child: left),
+            const SizedBox(width: 8),
+            _ViewToggle(showList: showList, onChanged: onViewModeChanged),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ViewToggle extends StatelessWidget {
+  const _ViewToggle({required this.showList, required this.onChanged});
+
+  final bool showList;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AraUi.secondaryActionBorderOf(context)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _segment(
+              context,
+              icon: Icons.view_list_rounded,
+              label: 'Liste',
+              selected: showList,
+              onTap: () => onChanged(true),
+            ),
+            _segment(
+              context,
+              icon: Icons.map_rounded,
+              label: 'Harita',
+              selected: !showList,
+              onTap: () => onChanged(false),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _segment(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    final fg = selected ? AraUi.activeForeground : AraUi.inactiveForegroundOf(context);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: selected ? null : onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          constraints: const BoxConstraints(minHeight: 38),
+          padding: const EdgeInsets.symmetric(horizontal: 11),
+          decoration: BoxDecoration(
+            color: selected ? AraUi.activeFill : Colors.transparent,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: fg),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                  color: fg,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -2464,9 +2603,13 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Material(
-      color: Colors.white,
+      color: AraUi.chromeFillOf(context),
       elevation: overlapsContent ? 1.5 : 0,
       shadowColor: Colors.black12,
       child: Column(
@@ -2476,24 +2619,25 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
               padding: const EdgeInsets.fromLTRB(10, 6, 10, 6),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceMuted,
-                  borderRadius: BorderRadius.circular(11),
+                  color: AppColors.surfaceOf(context),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AraUi.secondaryActionBorderOf(context)),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(3),
                   child: Row(
                     children: [
                       for (var i = 0; i < _labels.length; i++)
-                        Expanded(child: _segment(i)),
-                      _moreSegment(),
+                        Expanded(child: _segment(context, i)),
+                      _moreSegment(context),
                     ],
                   ),
                 ),
               ),
             ),
           ),
-          const ColoredBox(
-            color: Color(0xFFEEF2F3),
+          ColoredBox(
+            color: AraUi.secondaryActionBorderOf(context),
             child: SizedBox(height: 1, width: double.infinity),
           ),
         ],
@@ -2501,18 +2645,20 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _moreSegment() {
+  Widget _moreSegment(BuildContext context) {
     final sel = tabIndex == hediyelikTab || tabIndex == kampTab;
     final selIndex = tabIndex == kampTab ? kampTab : hediyelikTab;
     final count = selIndex < counts.length ? counts[selIndex] : 0;
-    final hediyelikSayisi = hediyelikTab < counts.length ? counts[hediyelikTab] : 0;
+    final hediyelikSayisi = hediyelikTab < counts.length
+        ? counts[hediyelikTab]
+        : 0;
     final kampSayisi = kampTab < counts.length ? counts[kampTab] : 0;
-    final fg = sel ? Colors.white : const Color(0xFF5A6B70);
+    final fg = sel ? AraUi.activeForeground : AraUi.inactiveForegroundOf(context);
     return PopupMenuButton<int>(
       tooltip: 'Diğer sekmeler',
       position: PopupMenuPosition.under,
       offset: const Offset(0, 8),
-      color: Colors.white,
+      color: AppColors.surfaceOf(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       onSelected: onTabChanged,
       itemBuilder: (_) => [
@@ -2526,7 +2672,7 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                 color: AppColors.primary,
               ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -2536,7 +2682,7 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textStrongOf(context),
                       ),
                     ),
                     Text(
@@ -2561,9 +2707,13 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
           value: kampTab,
           child: Row(
             children: [
-              const Icon(Icons.park_rounded, size: 20, color: AppColors.primary),
+              const Icon(
+                Icons.park_rounded,
+                size: 20,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -2573,7 +2723,7 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
-                        color: AppColors.textPrimary,
+                        color: AppColors.textStrongOf(context),
                       ),
                     ),
                     Text(
@@ -2624,11 +2774,11 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                     tabIndex == kampTab
                         ? 'Kamp'
                         : tabIndex == hediyelikTab
-                            ? 'Hediyelik'
-                            : 'Daha',
+                        ? 'Hediyelik'
+                        : 'Daha',
                     style: TextStyle(
                       color: fg,
-                      fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                      fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
                       fontSize: 12.5,
                       height: 1.05,
                       letterSpacing: -0.2,
@@ -2655,7 +2805,7 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
     );
   }
 
-  Widget _segment(int index) {
+  Widget _segment(BuildContext context, int index) {
     final sel = tabIndex == index;
     final count = (index < counts.length) ? counts[index] : 0;
     return AnimatedContainer(
@@ -2693,8 +2843,10 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: sel ? Colors.white : const Color(0xFF5A6B70),
-                        fontWeight: sel ? FontWeight.w700 : FontWeight.w500,
+                        color: sel
+                            ? AraUi.activeForeground
+                            : AraUi.inactiveForegroundOf(context),
+                        fontWeight: sel ? FontWeight.w800 : FontWeight.w500,
                         fontSize: 12.5,
                         height: 1.05,
                         letterSpacing: -0.2,
@@ -2707,8 +2859,8 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                       style: TextStyle(
                         color: sel
                             ? Colors.white.withValues(alpha: 0.9)
-                            : const Color(0xFF8A9A9F),
-                        fontWeight: FontWeight.w600,
+                            : AraUi.mutedTextOf(context),
+                        fontWeight: FontWeight.w500,
                         fontSize: 11,
                         height: 1.0,
                       ),
@@ -2716,6 +2868,39 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                   ],
                 ),
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Fiyat kaydı olan tesis kartında, ad satırının sağındaki salt okunur etiket.
+/// Kartın kendisi tıklanır; bu etiket ayrı bir düğme değildir.
+class _UcretBilgisiLabel extends StatelessWidget {
+  const _UcretBilgisiLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = AppColors.isDark(context);
+    return IgnorePointer(
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: dark ? const Color(0xFF1B4D34) : const Color(0xFFE5F6EA),
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          child: Text(
+            'Fiyat Bilgisi',
+            maxLines: 1,
+            softWrap: false,
+            style: TextStyle(
+              color: dark ? const Color(0xFFB7E7C6) : const Color(0xFF146C39),
+              fontSize: 11,
+              height: 1.1,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),

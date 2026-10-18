@@ -21,10 +21,10 @@ class MainMapSearchChrome extends StatelessWidget {
   static const double searchBarHeight = 56;
   static const double filterChipsHeight = 40;
   static const double gap = 4;
+
   /// Toolbar altı boşluk — arama çubuğu konumu.
-  static const double topGapBelowToolbar = 28;
-  static const double blockHeight =
-      searchBarHeight + gap + filterChipsHeight;
+  static const double topGapBelowToolbar = 20;
+  static const double blockHeight = searchBarHeight + gap + filterChipsHeight;
 
   final Key? anchorKey;
   final double top;
@@ -58,6 +58,7 @@ class MainMapSearchChrome extends StatelessWidget {
               onSearchCleared: onSearchCleared,
               onFocusChanged: onFocusChanged,
               ignoreKeyboardInset: true,
+              restrained: true,
             ),
           ),
           const SizedBox(height: gap),

@@ -14,7 +14,6 @@ const _kRadius = 24.0;
 const _kHeight = 56.0;
 const _kMaxWidth = 600.0;
 const _kBg = AppColors.surface;
-const _kHintColor = Color(0xFF9E9E9E);
 
 // ── Widget ────────────────────────────────────────────────────────────────────
 
@@ -39,6 +38,7 @@ class CustomSearchBar extends StatefulWidget {
     this.onFocusChanged,
     this.ignoreKeyboardInset = false,
     this.emphasized = false,
+    this.restrained = false,
   });
 
   final TextEditingController controller;
@@ -65,6 +65,9 @@ class CustomSearchBar extends StatefulWidget {
 
   /// Ana sayfada daha belirgin çerçeve ve gölge.
   final bool emphasized;
+
+  /// Ara ekranı: sade beyaz yüzey, ince gri çerçeve, odakta turkuaz çerçeve.
+  final bool restrained;
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -173,15 +176,16 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           controller: controller,
           focusNode: focusNode,
           textInputAction: TextInputAction.search,
+          cursorColor: AppColors.primary,
+          style: TextStyle(
+            color: AppColors.searchTextOf(context),
+            fontSize: 15.5,
+            fontWeight: FontWeight.w500,
+          ),
           onSubmitted: (_) {
             FocusManager.instance.primaryFocus?.unfocus();
             SchedulerBinding.instance.addPostFrameCallback((_) => onSubmit());
           },
-          style: const TextStyle(
-            color: AppColors.searchBarText,
-            fontSize: 15.5,
-            fontWeight: FontWeight.w500,
-          ),
           decoration: const InputDecoration(
             isDense: true,
             border: InputBorder.none,
@@ -235,8 +239,9 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
   Widget build(BuildContext context) {
     final focused = _focusNode.hasFocus;
     final showClear = widget.controller.text.isNotEmpty;
-    final imeBottom =
-        widget.ignoreKeyboardInset ? 0.0 : MediaQuery.viewInsetsOf(context).bottom;
+    final imeBottom = widget.ignoreKeyboardInset
+        ? 0.0
+        : MediaQuery.viewInsetsOf(context).bottom;
     final iller = widget.ilOptionsSorted;
     final useAuto = iller != null && iller.isNotEmpty;
 
@@ -250,8 +255,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             onSelected: (il) {
               widget.controller.text = il;
               FocusManager.instance.primaryFocus?.unfocus();
-              SchedulerBinding.instance
-                  .addPostFrameCallback((_) => _submit());
+              SchedulerBinding.instance.addPostFrameCallback((_) => _submit());
             },
             fieldViewBuilder: (_, ctrl, fn, onFsub) => _buildField(
               controller: ctrl,
@@ -263,8 +267,10 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             ),
             optionsViewBuilder: (_, onSel, options) {
               if (options.isEmpty) return const SizedBox.shrink();
-              final maxW =
-                  (MediaQuery.sizeOf(context).width - 32).clamp(0.0, 568.0);
+              final maxW = (MediaQuery.sizeOf(context).width - 32).clamp(
+                0.0,
+                568.0,
+              );
               return Align(
                 alignment: Alignment.topLeft,
                 child: Material(
@@ -272,10 +278,9 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                   shadowColor: Colors.black26,
                   borderRadius: BorderRadius.circular(16),
                   clipBehavior: Clip.antiAlias,
-                  color: AppColors.white,
+                  color: AppColors.surfaceOf(context),
                   child: ConstrainedBox(
-                    constraints:
-                        BoxConstraints(maxHeight: 320, maxWidth: maxW),
+                    constraints: BoxConstraints(maxHeight: 320, maxWidth: maxW),
                     child: ListView.builder(
                       padding: const EdgeInsets.symmetric(vertical: 6),
                       shrinkWrap: true,
@@ -293,8 +298,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                           ),
                           title: Text(
                             isIlce ? parts[1] : opt,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
+                            style: TextStyle(
+                              color: AppColors.textStrongOf(context),
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
                             ),
@@ -302,8 +307,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                           subtitle: isIlce
                               ? Text(
                                   '${parts[0]} · ilçe',
-                                  style: const TextStyle(
-                                    color: AppColors.campaignSummaryMuted,
+                                  style: TextStyle(
+                                    color: AppColors.textMutedOf(context),
                                     fontSize: 12.5,
                                   ),
                                 )
@@ -324,7 +329,16 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           );
 
     // ── Gölge: dingin vs. odaklı ─────────────────────────────────────────
-    final List<BoxShadow> shadow = focused
+    final radius = widget.restrained ? 16.0 : _kRadius;
+    final List<BoxShadow> shadow = widget.restrained
+        ? [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: focused ? 0.07 : 0.04),
+              blurRadius: focused ? 10 : 6,
+              offset: const Offset(0, 2),
+            ),
+          ]
+        : focused
         ? [
             BoxShadow(
               color: AppColors.primary.withValues(alpha: 0.14),
@@ -370,7 +384,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: _kMaxWidth),
           child: AnimatedScale(
-            scale: focused ? 1.015 : 1.0,
+            scale: focused && !widget.restrained ? 1.015 : 1.0,
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
             child: AnimatedContainer(
@@ -383,14 +397,21 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                     : widget.emphasized
                     ? const Color(0xFFF3FBFC)
                     : _kBg,
-                borderRadius: BorderRadius.circular(_kRadius),
-                border: widget.emphasized
+                borderRadius: BorderRadius.circular(radius),
+                border: widget.restrained
+                    ? Border.all(
+                        color: focused
+                            ? AppColors.primary
+                            : AppColors.borderOf(context),
+                        width: focused ? 1.6 : 1,
+                      )
+                    : widget.emphasized
                     ? Border.all(color: AppColors.primary, width: 1.6)
                     : null,
                 boxShadow: shadow,
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(_kRadius),
+                borderRadius: BorderRadius.circular(radius),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Row(
@@ -401,7 +422,9 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                         child: Icon(
                           Icons.search,
                           key: ValueKey<bool>(focused),
-                          color: focused
+                          color: widget.restrained
+                              ? AppColors.textMutedOf(context)
+                              : focused
                               ? AppColors.primary
                               : AppColors.primary.withValues(alpha: 0.65),
                           size: 22,
@@ -432,7 +455,6 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                         tooltip: 'Sesli ara',
                         onPressed: _onMicPressed,
                       ),
-
                     ],
                   ),
                 ),
@@ -539,8 +561,8 @@ class _TypewriterHintState extends State<_TypewriterHint> {
       '$_prefix$shown',
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: const TextStyle(
-        color: _kHintColor,
+      style: TextStyle(
+        color: AppColors.searchHintOf(context),
         fontSize: 13.0,
         fontWeight: FontWeight.w400,
         letterSpacing: 0.1,

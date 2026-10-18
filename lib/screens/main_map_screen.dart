@@ -88,30 +88,6 @@ const _kLocationStreamSettings = LocationSettings(
 
 const double _kOverviewCityZoomThreshold = 8;
 
-const List<String> _kOverviewCityNames = <String>[
-  'İstanbul',
-  'Ankara',
-  'İzmir',
-  'Bursa',
-  'Antalya',
-  'Adana',
-  'Konya',
-  'Eskişehir',
-  'Samsun',
-  'Kastamonu',
-  'Trabzon',
-  'Erzurum',
-  'Diyarbakır',
-  'Mardin',
-  'Van',
-  'Kayseri',
-  'Gaziantep',
-  'Mersin',
-  'Denizli',
-  'Muğla',
-  'Aydın',
-];
-
 String _normalizeCityKey(String raw) {
   const replacements = <String, String>{
     'ı': 'i',
@@ -135,9 +111,6 @@ String _normalizeCityKey(String raw) {
   }
   return sb.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
 }
-
-final Set<String> _kOverviewCityKeys =
-    _kOverviewCityNames.map(_normalizeCityKey).toSet();
 
 final Map<String, LatLng> _kOverviewCityAnchorPoints = <String, LatLng>{
   'istanbul': LatLng(41.0082, 28.9784),
@@ -166,11 +139,7 @@ final Map<String, LatLng> _kOverviewCityAnchorPoints = <String, LatLng>{
 /// `activity_main.xml` + `MainActivity` ana iskeleti: çekmece, teal toolbar,
 /// harita alanı, arama kartı, FAB’lar, banner alanı, alt gezinme çubuğu.
 class MainMapScreen extends ConsumerStatefulWidget {
-  const MainMapScreen({
-    super.key,
-    required this.repository,
-    this.navBridge,
-  });
+  const MainMapScreen({super.key, required this.repository, this.navBridge});
 
   final FirebaseRotaRepository repository;
   final MainMapNavBridge? navBridge;
@@ -179,7 +148,8 @@ class MainMapScreen extends ConsumerStatefulWidget {
   ConsumerState<MainMapScreen> createState() => _MainMapScreenState();
 }
 
-class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindingObserver {
+class _MainMapScreenState extends ConsumerState<MainMapScreen>
+    with WidgetsBindingObserver {
   /// Harita pan/zoom event'lerinde sadece önizleme kartını yeniden çizmek için.
   /// [setState] yerine bu notifier güncellenir → tüm ekran rebuild olmaz.
   final ValueNotifier<int> _previewPositionTick = ValueNotifier<int>(0);
@@ -243,18 +213,12 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   /// [showBottomSheet] ile açılan kalıcı alt sayfa — modal bariyer yok; yenisi açılmadan kapatılır.
   PersistentBottomSheetController? _attachedBottomSheet;
 
-  /// Arama sonucu sekmeli panel ([DraggableScrollableSheet]) görünür mü.
+  /// Arama sonuç paneli: `true` = Liste görünümü (varsayılan, harita gizli),
+  /// `false` = Harita görünümü. Panel/harita widget'ları yeniden oluşturulmaz.
   bool isSheetVisible = true;
-
-  /// Geri tuşu sayacı (arama sekmesi):
-  /// 1↓ küçült → 2↑ tekrar aç → 3↓ küçült → 4 ana ekran.
-  int _searchBackPressCount = 0;
 
   /// Geri tuşu / arama paneli durumu.
   bool readyToExit = false;
-
-  /// Yalnızca açık arama sonuçları paneline bağlı; her açılışta yenilenir.
-  DraggableScrollableController? _searchSheetExtentController;
 
   /// Arama sonuçları paneli — detay kartı geri tuşu için.
   final GlobalKey<MisafirhaneSearchResultsPanelState> _searchResultsPanelKey =
@@ -314,14 +278,19 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     _cachedRotaData = widget.repository.currentState;
     _rotaStream = widget.repository.watchRoot();
     WidgetsBinding.instance.addObserver(this);
-    ref.listenManual<IlceSelection?>(facilityIlceFilterProvider, _onIlceFilterChanged);
+    ref.listenManual<IlceSelection?>(
+      facilityIlceFilterProvider,
+      _onIlceFilterChanged,
+    );
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(_maybeOpenHolidaysFromNotification());
       unawaited(_checkForUpdate());
     });
     unawaited(_reloadFavoritesCache());
-    _mapPreviewDismissSub = _mapController.mapEventStream.listen(_onMapControllerEvent);
+    _mapPreviewDismissSub = _mapController.mapEventStream.listen(
+      _onMapControllerEvent,
+    );
     unawaited(_syncLocationUiFromPermissionOnly());
     _registerNavBridge();
     DeepLinkService.instance.pending.addListener(_onDeepLinkPending);
@@ -392,12 +361,15 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
       _stopLocationStream(); // Arka planda stream durdur — pil tasarrufu
     }
     if (state == AppLifecycleState.resumed) {
       unawaited(_refreshLocationStateOnResume());
-      unawaited(HolidayNotificationScheduler.scheduleUpcomingHolidayReminders());
+      unawaited(
+        HolidayNotificationScheduler.scheduleUpcomingHolidayReminders(),
+      );
       unawaited(AnnouncementNotificationScheduler.sync(forceFetch: false));
       unawaited(_maybeOpenHolidaysFromNotification());
     }
@@ -409,32 +381,33 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   /// Konum değişince [_mapLocationState] güncellenir → arama listesinde mesafe yenilenir.
   void _startLocationStream() {
     if (_locationStreamSub != null) return;
-    _locationStreamSub = Geolocator.getPositionStream(
-      locationSettings: _kLocationStreamSettings,
-    ).listen(
-      (pos) {
-        if (!mounted) return;
-        if (!isValidWgs84LatLng(pos.latitude, pos.longitude)) return;
-        final ll = LatLng(pos.latitude, pos.longitude);
-        _userLocationLatLng = ll;
-        unawaited(UserLocationCache.save(ll));
-        _mapLocationState.update(ll, true);
-      },
-      onError: (_) {
-        _stopLocationStream();
-        // Kısa süre sonra yeniden dene — tek hatada mesafe sonsuza kadar donmasın.
-        Future<void>.delayed(const Duration(seconds: 8), () {
-          if (!mounted) return;
-          unawaited(() async {
-            if (await SimpleLocationService.isLocationGranted() &&
-                await Geolocator.isLocationServiceEnabled()) {
-              _startLocationStream();
-            }
-          }());
-        });
-      },
-      cancelOnError: false,
-    );
+    _locationStreamSub =
+        Geolocator.getPositionStream(
+          locationSettings: _kLocationStreamSettings,
+        ).listen(
+          (pos) {
+            if (!mounted) return;
+            if (!isValidWgs84LatLng(pos.latitude, pos.longitude)) return;
+            final ll = LatLng(pos.latitude, pos.longitude);
+            _userLocationLatLng = ll;
+            unawaited(UserLocationCache.save(ll));
+            _mapLocationState.update(ll, true);
+          },
+          onError: (_) {
+            _stopLocationStream();
+            // Kısa süre sonra yeniden dene — tek hatada mesafe sonsuza kadar donmasın.
+            Future<void>.delayed(const Duration(seconds: 8), () {
+              if (!mounted) return;
+              unawaited(() async {
+                if (await SimpleLocationService.isLocationGranted() &&
+                    await Geolocator.isLocationServiceEnabled()) {
+                  _startLocationStream();
+                }
+              }());
+            });
+          },
+          cancelOnError: false,
+        );
   }
 
   void _stopLocationStream() {
@@ -443,8 +416,10 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   }
 
   Future<void> _maybeOpenHolidaysFromNotification() async {
-    final route = await HolidayNotificationScheduler.consumePendingRouteFromNotification();
-    final open = await HolidayNotificationScheduler.consumePendingOpenHolidaysNavigation();
+    final route =
+        await HolidayNotificationScheduler.consumePendingRouteFromNotification();
+    final open =
+        await HolidayNotificationScheduler.consumePendingOpenHolidaysNavigation();
     final target = route ?? (open ? RotalinkShellRoutes.holidays : null);
     if (target == null || !mounted || !context.mounted) return;
     widget.navBridge?.onExternalSurfaceChanged?.call(true);
@@ -457,15 +432,17 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   Future<void> _checkForUpdate() async {
     if (!mounted || !context.mounted) return;
-    
-    final isUpdateRequired = await VersionCheckService.instance.isUpdateRequired();
+
+    final isUpdateRequired = await VersionCheckService.instance
+        .isUpdateRequired();
     if (!isUpdateRequired) return;
-    
-    final currentVersion = await VersionCheckService.instance.getCurrentVersionInfo();
+
+    final currentVersion = await VersionCheckService.instance
+        .getCurrentVersionInfo();
     final message = await VersionCheckService.instance.getUpdateMessage();
     final storeUrl = await VersionCheckService.instance.getStoreUrl();
     if (!mounted || !context.mounted) return;
-    
+
     await UpdateRequiredDialog.show(
       context,
       currentVersion: currentVersion,
@@ -485,7 +462,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     _previewPositionTick.dispose();
     _stopLocationStream();
     _dismissAttachedBottomSheet();
-    _disposeSearchSheetExtentController();
     _mapPreviewDismissSub?.cancel();
     _viewportRefreshDebounce?.cancel();
     _searchController.dispose();
@@ -495,54 +471,17 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     super.dispose();
   }
 
-  void _disposeSearchSheetExtentController() {
-    final c = _searchSheetExtentController;
-    if (c == null) return;
-    c.removeListener(_onSearchSheetExtentChanged);
-    _searchSheetExtentController = null;
-    try {
-      c.dispose();
-    } catch (_) {}
+  /// Liste (`true`) / Harita (`false`) görünümü. Arama, filtre, kategori ve
+  /// marker seçimi korunur; harita yalnızca açığa çıkar/gizlenir.
+  void _setSearchListVisible(bool showList) {
+    if (!mounted || !_inlineTabbedSearchOpen) return;
+    if (showList == isSheetVisible) return;
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() => isSheetVisible = showList);
   }
 
-  /// Önceki sheet kapandıktan sonra çağrılmalı. Her sheet için tek kullanımlık denetleyici.
-  DraggableScrollableController _allocateSearchSheetExtentController() {
-    _disposeSearchSheetExtentController();
-    final c = DraggableScrollableController();
-    c.addListener(_onSearchSheetExtentChanged);
-    _searchSheetExtentController = c;
-    return c;
-  }
-
-  void _onSearchSheetExtentChanged() {
-    if (!mounted) return;
-    final c = _searchSheetExtentController;
-    if (c == null || !c.isAttached) return;
-    final visible = c.size > 0.06;
-    if (visible != isSheetVisible) {
-      setState(() => isSheetVisible = visible);
-    }
-  }
-
-  Future<void> _collapseSearchResultsSheet() async {
-    final c = _searchSheetExtentController;
-    if (c == null || !c.isAttached) return;
-    await c.animateTo(
-      0,
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  Future<void> _expandSearchResultsSheet() async {
-    final c = _searchSheetExtentController;
-    if (c == null || !c.isAttached) return;
-    await c.animateTo(
-      kMisafirhaneSearchSheetOpenExtent,
-      duration: const Duration(milliseconds: 320),
-      curve: Curves.easeInOut,
-    );
-  }
+  /// Arama paneli açık ve Liste görünümü ön planda (harita gizli).
+  bool get _searchListShowing => _inlineTabbedSearchOpen && isSheetVisible;
 
   void _syncSearchPanelOpen(bool open) {
     ref.read(searchPanelOpenProvider.notifier).state = open;
@@ -556,7 +495,11 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   void _onIlceFilterChanged(IlceSelection? prev, IlceSelection? next) {
     final base = _markerOverride;
     if (prev == next || base == null || base.isEmpty || !mounted) return;
-    final shown = filterFacilities(base, ref.read(facilityTypeFilterProvider), next);
+    final shown = filterFacilities(
+      base,
+      ref.read(facilityTypeFilterProvider),
+      next,
+    );
     if (shown.isNotEmpty) _fitFacilitiesCamera(shown);
   }
 
@@ -582,12 +525,17 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
             child: Text(
               'Hangi ${options.first.ilce}?',
-              style: Theme.of(ctx).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+              style: Theme.of(
+                ctx,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
           ),
           for (final o in options)
             ListTile(
-              leading: const Icon(Icons.place_outlined, color: AppColors.primary),
+              leading: const Icon(
+                Icons.place_outlined,
+                color: AppColors.primary,
+              ),
               title: Text(IlIlce.label(o.il, o.ilce!)),
               trailing: Text(
                 countOf(o) == 0 ? 'Tesis yok' : '${countOf(o)} tesis',
@@ -649,13 +597,12 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       _tabbedSheetHighlight = null;
       _tabbedSheetInitialTab = 0;
       _tabbedSheetGeziYemekHighlight = null;
-      _searchBackPressCount = 0;
+      isSheetVisible = true;
     });
-    _disposeSearchSheetExtentController();
   }
 
   /// Arama paneli geri yığını:
-  /// detay kartı → liste → (kategori) ana menü / (arama) sheet küçült.
+  /// detay kartı / marker önizleme → harita → liste → liste → önceki menü.
   Future<bool> _handleSearchPanelBack() async {
     if (!_inlineTabbedSearchOpen) return false;
 
@@ -666,35 +613,18 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       return true;
     }
 
-    if (_searchController.text.trim().isEmpty) {
-      _resetSearchToHome();
-      RotalinkShellScope.find(context)?.goHome();
+    // Harita görünümü → Liste görünümü (filtre / kategori / sorgu korunur).
+    if (!isSheetVisible) {
+      _setSearchListVisible(true);
       return true;
     }
 
-    _searchBackPressCount++;
-
-    switch (_searchBackPressCount) {
-      case 1:
-        // Sekmeyi aşağı indir → FAB çıksın
-        await _collapseSearchResultsSheet();
-        if (mounted) setState(() => isSheetVisible = false);
-        return true;
-      case 2:
-        // FAB varken ana menüye gitme → sekmeyi tekrar aç
-        await _expandSearchResultsSheet();
-        if (mounted) setState(() => isSheetVisible = true);
-        return true;
-      case 3:
-        // Tekrar aşağı indir → FAB
-        await _collapseSearchResultsSheet();
-        if (mounted) setState(() => isSheetVisible = false);
-        return true;
-      default:
-        // Bundan sonra ana ekran
-        _resetSearchToHome();
-        return true;
-    }
+    // Liste görünümü → önceki menü: kategori ile açıldıysa ana menü,
+    // arama ile açıldıysa temiz harita.
+    final fromCategory = _searchController.text.trim().isEmpty;
+    _resetSearchToHome();
+    if (fromCategory) RotalinkShellScope.find(context)?.goHome();
+    return true;
   }
 
   /// Arama paneli + harita: ilk açılış görünümüne dön.
@@ -708,7 +638,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     _closeInlineTabbedSearchPanel();
     _searchController.clear();
     setState(() {
-      _searchBackPressCount = 0;
       readyToExit = false;
       isSheetVisible = true;
       _markerOverride = null;
@@ -743,7 +672,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
         _zoom < _kOverviewCityZoomThreshold) {
       return;
     }
-    final shouldRefresh = e is MapEventMove ||
+    final shouldRefresh =
+        e is MapEventMove ||
         e is MapEventFlingAnimation ||
         e is MapEventScrollWheelZoom ||
         e is MapEventDoubleTapZoom;
@@ -768,7 +698,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   bool _shouldDismissPreviewForMapEvent(MapEvent e) {
     if (e is MapEventMove) {
-      return e.source == MapEventSource.onDrag || e.source == MapEventSource.onMultiFinger;
+      return e.source == MapEventSource.onDrag ||
+          e.source == MapEventSource.onMultiFinger;
     }
     if (e is MapEventFlingAnimation) return true;
     if (e is MapEventDoubleTapZoom) return true;
@@ -968,7 +899,10 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
           _mapController.move(pts.first, z);
         } catch (_) {
           try {
-            _mapController.move(kTurkeyMapFallbackCenter, kTurkeyMapFallbackZoom);
+            _mapController.move(
+              kTurkeyMapFallbackCenter,
+              kTurkeyMapFallbackZoom,
+            );
           } catch (_) {}
         }
       }
@@ -976,7 +910,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   }
 
   List<Misafirhane> _markersSource(RotaDataState? snapshotData) {
-    final effective = (snapshotData != null && snapshotData.errorMessage != null)
+    final effective =
+        (snapshotData != null && snapshotData.errorMessage != null)
         ? _cachedRotaData
         : (snapshotData ?? _cachedRotaData);
     if (_favoritesBrowseActive) {
@@ -998,36 +933,35 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       return _cachedOverviewCities!;
     }
 
-    final groups = <String, List<Misafirhane>>{
-      for (final city in _kOverviewCityNames) _normalizeCityKey(city): <Misafirhane>[],
-    };
-    final seenByCity = <String, Set<String>>{
-      for (final city in _kOverviewCityNames) _normalizeCityKey(city): <String>{},
-    };
+    final groups = <String, List<Misafirhane>>{};
+    final seenByCity = <String, Set<String>>{};
+    final displayName = <String, String>{};
 
-    // Tüm tesisler üzerinden il bazlı sayım — misafirhaneler yalnızca il başına 1 kayıt içerir.
+    // Tüm iller: tesisin ili neyse o dairenin sayısına eklenir.
     for (final facility in effective.aramaIcinTumTesisler) {
       if (!facilityMatchesTypeFilter(facility.tip, typeFilter)) continue;
-      final cityKey = _normalizeCityKey(facility.il);
-      if (!_kOverviewCityKeys.contains(cityKey)) continue;
-      final citySeen = seenByCity[cityKey]!;
+      final cityName = IlIlce.canonicalIl(facility.il) ?? facility.il.trim();
+      if (cityName.isEmpty) continue;
+      final cityKey = _normalizeCityKey(cityName);
+      final citySeen = seenByCity.putIfAbsent(cityKey, () => <String>{});
       if (!citySeen.add(facility.stableFacilityId)) continue;
-      groups[cityKey]!.add(facility);
+      groups.putIfAbsent(cityKey, () => <Misafirhane>[]).add(facility);
+      displayName.putIfAbsent(cityKey, () => cityName);
     }
 
     final summaries = <_OverviewCitySummary>[];
-    for (final city in _kOverviewCityNames) {
-      final cityKey = _normalizeCityKey(city);
-      final facilities = groups[cityKey]!;
+    for (final entry in groups.entries) {
+      final facilities = entry.value;
       if (facilities.isEmpty) continue;
       summaries.add(
         _OverviewCitySummary(
-          cityName: city,
+          cityName: displayName[entry.key]!,
           facilities: List<Misafirhane>.unmodifiable(facilities),
-          center: _overviewCityCenter(cityKey, facilities),
+          center: _overviewCityCenter(entry.key, facilities),
         ),
       );
     }
+    summaries.sort((a, b) => a.cityName.compareTo(b.cityName));
 
     _cachedOverviewCitiesData = effective;
     _cachedOverviewCitiesFilter = typeFilter;
@@ -1136,9 +1070,13 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     return _cachedIlOptions;
   }
 
-  void _onMisafirhanePopupEvent(PopupEvent event, List<Marker> selectedMarkers) {
-    _misafirhaneFacilityPopupOpen =
-        selectedMarkers.any((m) => m is MisafirhaneMapMarker);
+  void _onMisafirhanePopupEvent(
+    PopupEvent event,
+    List<Marker> selectedMarkers,
+  ) {
+    _misafirhaneFacilityPopupOpen = selectedMarkers.any(
+      (m) => m is MisafirhaneMapMarker,
+    );
     if (selectedMarkers.isNotEmpty && mounted && _mapPreviewFacility != null) {
       setState(() => _mapPreviewFacility = null);
     }
@@ -1189,7 +1127,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
   void _handleMarkerTapOnMainOverview(Marker marker) {
     if (marker is! MisafirhaneMapMarker) return;
-    final cityKey = _normalizeCityKey(marker.misafirhane.il);
+    final cityKey = _normalizeCityKey(
+      IlIlce.canonicalIl(marker.misafirhane.il) ?? marker.misafirhane.il,
+    );
     _OverviewCitySummary? summary;
     for (final item in _overviewCitySummaries(
       _cachedRotaData,
@@ -1230,16 +1170,13 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       _fitFacilitiesCamera(summary.facilities);
       await Future<void>.delayed(const Duration(milliseconds: 140));
       if (!mounted || !context.mounted) return;
-      await _openTabbedSearchResults(
-        context,
-        data,
-        summary.facilities,
-      );
+      await _openTabbedSearchResults(context, data, summary.facilities);
     });
   }
 
   void _maybeRestoreOverviewMarkers(double nextZoom) {
-    if (_mainMapFocusedCity == null || nextZoom >= _kOverviewCityZoomThreshold) {
+    if (_mainMapFocusedCity == null ||
+        nextZoom >= _kOverviewCityZoomThreshold) {
       return;
     }
     _popupController.hideAllPopups();
@@ -1261,9 +1198,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     }
     if (_mainMapFocusedCity != null && _mainMapFocusedCity!.trim().isNotEmpty) {
       final focusedKey = _normalizeCityKey(_mainMapFocusedCity!);
-      final focusedCityFacilities = _allFacilitiesForMap(_cachedRotaData)
-          .where((m) => _normalizeCityKey(m.il) == focusedKey)
-          .toList();
+      final focusedCityFacilities = _allFacilitiesForMap(
+        _cachedRotaData,
+      ).where((m) => _normalizeCityKey(m.il) == focusedKey).toList();
       if (focusedCityFacilities.any(_validFacilityCoords)) {
         _fitFacilitiesCamera(focusedCityFacilities);
         return;
@@ -1289,13 +1226,14 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       return;
     }
 
-    if (_mapPreviewFacility != null) {
+    // Liste görünümünde harita gizli: önizleme / popup adımı atlanır.
+    if (_mapPreviewFacility != null && !_searchListShowing) {
       if (_previewClosing) return;
       unawaited(_closeMapPreviewAnimated());
       return;
     }
 
-    if (_misafirhaneFacilityPopupOpen) {
+    if (_misafirhaneFacilityPopupOpen && !_searchListShowing) {
       _popupController.hideAllPopups();
       _lastExitBackAt = null;
       FocusManager.instance.primaryFocus?.unfocus();
@@ -1428,9 +1366,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       return;
     }
     _popupController.hideAllPopups();
-    if (_inlineTabbedSearchOpen) {
-      _disposeSearchSheetExtentController();
-    }
     setState(() {
       _inlineTabbedSearchOpen = false;
       _tabbedSheetRotaData = null;
@@ -1444,10 +1379,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !context.mounted) return;
       _fitFacilitiesCamera(display);
-      _openMisafirhaneSheet(
-        display,
-        liveFavoriteList: true,
-      );
+      _openMisafirhaneSheet(display, liveFavoriteList: true);
     });
     await WidgetsBinding.instance.endOfFrame;
     await Future<void>.delayed(const Duration(milliseconds: 80));
@@ -1849,7 +1781,10 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       ilceMatches = [picked];
     }
     final presetIlce = ilceMatches.length == 1
-        ? IlceSelection(il: ilceMatches.single.il, ilce: ilceMatches.single.ilce!)
+        ? IlceSelection(
+            il: ilceMatches.single.il,
+            ilce: ilceMatches.single.ilce!,
+          )
         : null;
 
     final filtered = presetIlce != null
@@ -1888,8 +1823,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
         ? null
         : MainMapSearch.findPrimaryMatchForScroll(
             query: _searchController.text,
-            displayedFacilities:
-                narrowForHighlight.isNotEmpty ? narrowForHighlight : displayList,
+            displayedFacilities: narrowForHighlight.isNotEmpty
+                ? narrowForHighlight
+                : displayList,
           );
     final wanted = forceHighlight ?? highlightMatch;
     Misafirhane? highlightTarget = wanted;
@@ -1963,23 +1899,31 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     final target = DeepLinkService.instance.pending.value;
     if (target == null) return;
     final needsData =
-        target.kind == DeepLinkKind.city || target.kind == DeepLinkKind.facility;
+        target.kind == DeepLinkKind.city ||
+        target.kind == DeepLinkKind.facility;
     final data = _cachedRotaData;
     if (needsData &&
         (data == null ||
-            (data.aramaIcinTumTesisler.isEmpty && data.misafirhaneler.isEmpty))) {
+            (data.aramaIcinTumTesisler.isEmpty &&
+                data.misafirhaneler.isEmpty))) {
       return; // Veri gelince StreamBuilder tekrar dener.
     }
     DeepLinkService.instance.take();
     _deepLinkBusy = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       unawaited(
-        _openDeepLinkTarget(target, data).whenComplete(() => _deepLinkBusy = false),
+        _openDeepLinkTarget(
+          target,
+          data,
+        ).whenComplete(() => _deepLinkBusy = false),
       );
     });
   }
 
-  Future<void> _openDeepLinkTarget(DeepLinkTarget target, RotaDataState? data) async {
+  Future<void> _openDeepLinkTarget(
+    DeepLinkTarget target,
+    RotaDataState? data,
+  ) async {
     if (!mounted || !context.mounted) return;
     Navigator.of(context).popUntil((r) => r.isFirst);
     switch (target.kind) {
@@ -2028,7 +1972,10 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
   }
 
   /// Web'deki İletişim / Konum butonunun uygulama karşılığı.
-  Future<void> _runDeepLinkAction(DeepLinkTarget target, Misafirhane? facility) async {
+  Future<void> _runDeepLinkAction(
+    DeepLinkTarget target,
+    Misafirhane? facility,
+  ) async {
     if (target.action == DeepLinkAction.call) {
       final phone = facility?.telefon.trim() ?? '';
       if (phone.isEmpty) return;
@@ -2089,7 +2036,10 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       LatLng? userForSort;
       if (granted &&
           _userLocationLatLng != null &&
-          isValidWgs84LatLng(_userLocationLatLng!.latitude, _userLocationLatLng!.longitude)) {
+          isValidWgs84LatLng(
+            _userLocationLatLng!.latitude,
+            _userLocationLatLng!.longitude,
+          )) {
         userForSort = _userLocationLatLng;
       }
       if (!mounted || !context.mounted) return;
@@ -2098,61 +2048,57 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       }
       _mapLocationState.update(_userLocationLatLng, granted);
       final sorted = sortMisafirhaneByDistance(facilities, userForSort);
-    Misafirhane? resolvedHighlight;
-    if (highlightTarget != null) {
-      for (final m in sorted) {
-        if (m.sameFavoriteIdentity(highlightTarget)) {
-          resolvedHighlight = m;
-          break;
+      Misafirhane? resolvedHighlight;
+      if (highlightTarget != null) {
+        for (final m in sorted) {
+          if (m.sameFavoriteIdentity(highlightTarget)) {
+            resolvedHighlight = m;
+            break;
+          }
         }
       }
-    }
-    final prevAttached = _attachedBottomSheet;
-    if (prevAttached != null) {
-      _attachedBottomSheet = null;
-      try {
-        prevAttached.close();
-      } catch (_) {}
-      await prevAttached.closed;
-    }
-    if (!mounted || !context.mounted) return;
-
-    if (_inlineTabbedSearchOpen) {
-      setState(() {
-        _inlineTabbedSearchOpen = false;
-        _tabbedSheetRotaData = null;
-        _tabbedSheetHighlight = null;
-      });
-      _disposeSearchSheetExtentController();
-      await Future<void>.delayed(Duration.zero);
+      final prevAttached = _attachedBottomSheet;
+      if (prevAttached != null) {
+        _attachedBottomSheet = null;
+        try {
+          prevAttached.close();
+        } catch (_) {}
+        await prevAttached.closed;
+      }
       if (!mounted || !context.mounted) return;
-    }
 
-    _allocateSearchSheetExtentController();
-    if (!mounted || !context.mounted) return;
-    ref.read(searchPanelFacilitiesSourceProvider.notifier).state =
-        List<Misafirhane>.unmodifiable(sorted);
-    setState(() {
-      readyToExit = reopenNextBackExitsSearch;
-      isSheetVisible = true;
-      _searchBackPressCount = 0;
-      _inlineTabbedSearchOpen = true;
-      _tabbedSheetRotaData = data;
-      _tabbedSheetHighlight = resolvedHighlight;
-      _tabbedSheetInitialTab = initialTabIndex;
-      _tabbedSheetGeziYemekHighlight = geziYemekHighlight;
-    });
-    _syncSearchPanelOpen(true);
-    // Arama açılınca her zaman sistem konum izin popup'ını dene (oturum reddi engellemesin).
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      unawaited(() async {
-        await SimpleLocationService.prepareForUserInitiatedPermissionDialog();
-        await _ensureLocationPermissionAndLocationForLists();
-      }());
-    });
+      if (_inlineTabbedSearchOpen) {
+        setState(() {
+          _inlineTabbedSearchOpen = false;
+          _tabbedSheetRotaData = null;
+          _tabbedSheetHighlight = null;
+        });
+        await Future<void>.delayed(Duration.zero);
+        if (!mounted || !context.mounted) return;
+      }
+
+      if (!mounted || !context.mounted) return;
+      ref.read(searchPanelFacilitiesSourceProvider.notifier).state =
+          List<Misafirhane>.unmodifiable(sorted);
+      setState(() {
+        readyToExit = reopenNextBackExitsSearch;
+        isSheetVisible = true;
+        _inlineTabbedSearchOpen = true;
+        _tabbedSheetRotaData = data;
+        _tabbedSheetHighlight = resolvedHighlight;
+        _tabbedSheetInitialTab = initialTabIndex;
+        _tabbedSheetGeziYemekHighlight = geziYemekHighlight;
+      });
+      _syncSearchPanelOpen(true);
+      // Arama açılınca her zaman sistem konum izin popup'ını dene (oturum reddi engellemesin).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        unawaited(() async {
+          await SimpleLocationService.prepareForUserInitiatedPermissionDialog();
+          await _ensureLocationPermissionAndLocationForLists();
+        }());
+      });
     } catch (e, st) {
-      _disposeSearchSheetExtentController();
       debugPrint('Arama sonuç sheet: $e\n$st');
     }
   }
@@ -2162,535 +2108,601 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
       child: Scaffold(
-      key: _scaffoldKey,
-      resizeToAvoidBottomInset: false,
-      drawer: RotalinkAppDrawer(
-        onOpenRoute: (route) => Navigator.of(context).pushNamed(route),
-        onOpenWeather: () => unawaited(showWeatherBottomSheet(context)),
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: StreamBuilder<RotaDataState>(
-              stream: _rotaStream,
-              initialData: _cachedRotaData ?? widget.repository.currentState,
-              builder: (context, snapshot) {
-                final data = snapshot.data;
-                if (data != null && data.errorMessage == null) {
-                  _cachedRotaData = data;
-                  _publishRotaDataToProvider(data);
-                  if (DeepLinkService.instance.pending.value != null) {
-                    WidgetsBinding.instance
-                        .addPostFrameCallback((_) => _onDeepLinkPending());
+        key: _scaffoldKey,
+        resizeToAvoidBottomInset: false,
+        drawer: RotalinkAppDrawer(
+          onOpenRoute: (route) => Navigator.of(context).pushNamed(route),
+          onOpenWeather: () => unawaited(showWeatherBottomSheet(context)),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: StreamBuilder<RotaDataState>(
+                stream: _rotaStream,
+                initialData: _cachedRotaData ?? widget.repository.currentState,
+                builder: (context, snapshot) {
+                  final data = snapshot.data;
+                  if (data != null && data.errorMessage == null) {
+                    _cachedRotaData = data;
+                    _publishRotaDataToProvider(data);
+                    if (DeepLinkService.instance.pending.value != null) {
+                      WidgetsBinding.instance.addPostFrameCallback(
+                        (_) => _onDeepLinkPending(),
+                      );
+                    }
                   }
-                }
-                final rotaForUi = (data != null && data.errorMessage != null)
-                    ? _cachedRotaData
-                    : (data ?? _cachedRotaData);
-                final loading = !snapshot.hasData &&
-                    snapshot.connectionState == ConnectionState.waiting;
-                final inRoute =
-                    _activeRouteStops != null && _activeRouteStops!.isNotEmpty;
-                final rawDisplay = _markersSource(data);
-                final baseDisplay = _mapFacilitiesForCurrentZoom(
-                  data,
-                  inRoute: inRoute,
-                );
-                final routeMarkers = (inRoute && rotaForUi != null)
-                    ? <Marker>[
-                        ..._markersForRoute(rotaForUi, _activeRouteStops!),
-                        ..._routeLabelMarkers,
-                      ]
-                    : const <Marker>[];
-                final showOverviewCityMarkers =
-                    !inRoute &&
-                    _isMainMapOverviewActive &&
-                    _zoom < _kOverviewCityZoomThreshold;
-                final showFacilityMarkers = !inRoute && baseDisplay.isNotEmpty;
-                /// Arama sekmeli sheet açıkken tam görünürken gizlenir; aşağı indirilince
-                /// yukarı ok FAB ile tekrar açılabilir.
-                final showExpandSearchPanelFab =
-                    _inlineTabbedSearchOpen && !isSheetVisible;
-                final searchSheetFab = _markerOverride != null &&
-                    !inRoute &&
-                    !_favoritesBrowseActive &&
-                    ((!_inlineTabbedSearchOpen && _attachedBottomSheet == null) ||
-                        showExpandSearchPanelFab);
-                final showListFab = inRoute ||
-                    _favoritesBrowseActive ||
-                    searchSheetFab;
-
-                if (loading &&
-                    _cachedRotaData == null &&
-                    rawDisplay.isEmpty &&
-                    !inRoute) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                  final rotaForUi = (data != null && data.errorMessage != null)
+                      ? _cachedRotaData
+                      : (data ?? _cachedRotaData);
+                  final loading =
+                      !snapshot.hasData &&
+                      snapshot.connectionState == ConnectionState.waiting;
+                  final inRoute =
+                      _activeRouteStops != null &&
+                      _activeRouteStops!.isNotEmpty;
+                  final rawDisplay = _markersSource(data);
+                  final baseDisplay = _mapFacilitiesForCurrentZoom(
+                    data,
+                    inRoute: inRoute,
                   );
-                }
+                  final routeMarkers = (inRoute && rotaForUi != null)
+                      ? <Marker>[
+                          ..._markersForRoute(rotaForUi, _activeRouteStops!),
+                          ..._routeLabelMarkers,
+                        ]
+                      : const <Marker>[];
+                  final showOverviewCityMarkers =
+                      !inRoute &&
+                      _isMainMapOverviewActive &&
+                      _zoom < _kOverviewCityZoomThreshold;
+                  final showFacilityMarkers =
+                      !inRoute && baseDisplay.isNotEmpty;
 
-                if (snapshot.hasError &&
-                    _cachedRotaData == null &&
-                    rawDisplay.isEmpty &&
-                    !inRoute) {
-                  return Center(child: Text('Hata: ${snapshot.error}'));
-                }
-                if (data?.errorMessage != null &&
-                    _cachedRotaData == null &&
-                    rawDisplay.isEmpty &&
-                    !inRoute) {
-                  return Center(child: Text(data!.errorMessage!));
-                }
+                  /// Arama sekmeli sheet açıkken tam görünürken gizlenir; aşağı indirilince
+                  /// yukarı ok FAB ile tekrar açılabilir.
+                  final showExpandSearchPanelFab =
+                      _inlineTabbedSearchOpen && !isSheetVisible;
+                  final searchSheetFab =
+                      _markerOverride != null &&
+                      !inRoute &&
+                      !_favoritesBrowseActive &&
+                      ((!_inlineTabbedSearchOpen &&
+                              _attachedBottomSheet == null) ||
+                          showExpandSearchPanelFab);
+                  final showListFab =
+                      inRoute || _favoritesBrowseActive || searchSheetFab;
 
-                if (snapshot.hasData &&
-                    rotaForUi != null &&
-                    !loading &&
-                    !snapshot.hasError &&
-                    data?.errorMessage == null &&
-                    !_initialTurkeyBoundsApplied) {
-                  _initialTurkeyBoundsApplied = true;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) _fitTurkeyOverviewCamera();
-                  });
-                }
+                  if (loading &&
+                      _cachedRotaData == null &&
+                      rawDisplay.isEmpty &&
+                      !inRoute) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                      ),
+                    );
+                  }
 
-                final mq = MediaQuery.paddingOf(context);
-                final toolbarBottom = mq.top + kToolbarHeight;
-                final searchChromeTop =
-                    toolbarBottom + MainMapSearchChrome.topGapBelowToolbar;
-                final searchChromeActive = ref.watch(isMapSearchChromeActiveProvider);
-                final hideMapOverlayButtons =
-                    searchChromeActive && !showExpandSearchPanelFab;
-                final onboarding = RotalinkShellScope.maybeOf(context)?.onboarding;
+                  if (snapshot.hasError &&
+                      _cachedRotaData == null &&
+                      rawDisplay.isEmpty &&
+                      !inRoute) {
+                    return Center(child: Text('Hata: ${snapshot.error}'));
+                  }
+                  if (data?.errorMessage != null &&
+                      _cachedRotaData == null &&
+                      rawDisplay.isEmpty &&
+                      !inRoute) {
+                    return Center(child: Text(data!.errorMessage!));
+                  }
 
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    RepaintBoundary(
-                      child: PopupScope(
-                        onPopupEvent: _onMisafirhanePopupEvent,
-                        child: FlutterMap(
-                          key: const ValueKey<String>('main-map'),
-                          mapController: _mapController,
-                          options: MapOptions(
-                            initialCenter: sanitizeLatLng(_center),
-                            initialZoom: clampZoom(_zoom),
-                            interactionOptions: const InteractionOptions(
-                              flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
-                            ),
-                            onPositionChanged: (pos, hasGesture) {
-                              final c = pos.center;
-                              if (isValidWgs84LatLng(c.latitude, c.longitude)) {
-                                _center = c;
-                              } else {
-                                _center = kTurkeyMapFallbackCenter;
-                              }
-                              final prevZoom = _zoom;
-                              final nextZoom = clampZoom(pos.zoom);
-                              final wasOverviewZoom =
-                                  prevZoom < _kOverviewCityZoomThreshold;
-                              final isOverviewZoom =
-                                  nextZoom < _kOverviewCityZoomThreshold;
-                              _zoom = nextZoom;
-                              if (hasGesture) {
-                                _maybeRestoreOverviewMarkers(nextZoom);
-                                if (_isMainMapOverviewActive &&
-                                    !_inlineTabbedSearchOpen &&
-                                    _attachedBottomSheet == null &&
-                                    _mainMapFocusedCity == null &&
-                                    _searchController.text.trim().isEmpty &&
-                                    _mapPreviewFacility == null &&
-                                    !_misafirhaneFacilityPopupOpen) {
-                                  _mapCameraUserAdjusted = true;
+                  if (snapshot.hasData &&
+                      rotaForUi != null &&
+                      !loading &&
+                      !snapshot.hasError &&
+                      data?.errorMessage == null &&
+                      !_initialTurkeyBoundsApplied) {
+                    _initialTurkeyBoundsApplied = true;
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) _fitTurkeyOverviewCamera();
+                    });
+                  }
+
+                  final mq = MediaQuery.paddingOf(context);
+                  final toolbarBottom = mq.top + kToolbarHeight;
+                  final searchChromeTop =
+                      toolbarBottom + MainMapSearchChrome.topGapBelowToolbar;
+                  final searchChromeActive = ref.watch(
+                    isMapSearchChromeActiveProvider,
+                  );
+                  final hideMapOverlayButtons =
+                      searchChromeActive && !showExpandSearchPanelFab;
+                  final onboarding = RotalinkShellScope.maybeOf(
+                    context,
+                  )?.onboarding;
+
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      RepaintBoundary(
+                        child: PopupScope(
+                          onPopupEvent: _onMisafirhanePopupEvent,
+                          child: FlutterMap(
+                            key: const ValueKey<String>('main-map'),
+                            mapController: _mapController,
+                            options: MapOptions(
+                              initialCenter: sanitizeLatLng(_center),
+                              initialZoom: clampZoom(_zoom),
+                              interactionOptions: const InteractionOptions(
+                                flags:
+                                    InteractiveFlag.all &
+                                    ~InteractiveFlag.rotate,
+                              ),
+                              onPositionChanged: (pos, hasGesture) {
+                                final c = pos.center;
+                                if (isValidWgs84LatLng(
+                                  c.latitude,
+                                  c.longitude,
+                                )) {
+                                  _center = c;
+                                } else {
+                                  _center = kTurkeyMapFallbackCenter;
                                 }
-                              }
-                              // Zoom eşiği geçildiğinde il/tesis marker geçişini tetikle.
-                              if (wasOverviewZoom != isOverviewZoom &&
-                                  _isMainMapOverviewActive &&
-                                  _mainMapFocusedCity == null) {
-                                setState(() {});
-                              }
-                            },
-                            onTap: (tapPosition, point) {
-                              _popupController.hideAllPopups();
-                              if (_inlineTabbedSearchOpen &&
-                                  isSheetVisible &&
-                                  (_searchSheetExtentController?.isAttached ?? false)) {
-                                unawaited(() async {
-                                  _searchResultsPanelKey.currentState
-                                      ?.closeDetailIfOpen();
-                                  await _collapseSearchResultsSheet();
-                                  if (mounted) {
-                                    setState(() {
-                                      isSheetVisible = false;
-                                      // Haritaya dokununca küçültüldü → sonraki geri sekmeyi açar
-                                      if (_searchBackPressCount < 1) {
-                                        _searchBackPressCount = 1;
-                                      }
-                                    });
+                                final prevZoom = _zoom;
+                                final nextZoom = clampZoom(pos.zoom);
+                                final wasOverviewZoom =
+                                    prevZoom < _kOverviewCityZoomThreshold;
+                                final isOverviewZoom =
+                                    nextZoom < _kOverviewCityZoomThreshold;
+                                _zoom = nextZoom;
+                                if (hasGesture) {
+                                  _maybeRestoreOverviewMarkers(nextZoom);
+                                  if (_isMainMapOverviewActive &&
+                                      !_inlineTabbedSearchOpen &&
+                                      _attachedBottomSheet == null &&
+                                      _mainMapFocusedCity == null &&
+                                      _searchController.text.trim().isEmpty &&
+                                      _mapPreviewFacility == null &&
+                                      !_misafirhaneFacilityPopupOpen) {
+                                    _mapCameraUserAdjusted = true;
                                   }
-                                }());
-                              }
-                              if (_mapPreviewFacility != null) {
-                                unawaited(_closeMapPreviewAnimated());
-                              }
-                            },
-                          ),
-                          children: [
-                            const RotalinkTileLayer(),
-                            if (_routePolylines.isNotEmpty)
-                              PolylineLayer(polylines: _routePolylines),
-                            if (inRoute && rotaForUi != null) ...[
-                              MarkerLayer(markers: routeMarkers),
-                              if (_userLocationLatLng != null &&
-                                  isValidWgs84LatLng(
-                                    _userLocationLatLng!.latitude,
-                                    _userLocationLatLng!.longitude,
-                                  ))
-                                MarkerLayer(
-                                  markers: [_userLocationMarker(_userLocationLatLng!)],
-                                ),
-                            ] else ...[
-                              MapOverviewCityMarkersLayer(
-                                visible: showOverviewCityMarkers,
-                                buildMarkers: (filter) =>
-                                    _overviewCityMarkersFor(rotaForUi, filter),
-                              ),
-                              MapFacilityPopupMarkersLayer(
-                                baseFacilities: baseDisplay,
-                                highlight: _searchSheetHighlight,
-                                visible: showFacilityMarkers,
-                                popupController: _popupController,
-                                onMarkerTap: (
-                                  popupSpec,
-                                  popupState,
-                                  popupController,
-                                ) {
-                                  if (_shouldInterceptMainMapMarkerTap) {
-                                    _handleMarkerTapOnMainOverview(popupSpec.marker);
-                                    return;
-                                  }
-
-                                  if (popupState.selectedPopupSpecs.contains(popupSpec)) {
-                                    popupController.hideAllPopups();
-                                  } else {
-                                    popupController.showPopupsOnlyForSpecs([popupSpec]);
-                                  }
-                                },
-                              ),
-                              if (_userLocationLatLng != null &&
-                                  isValidWgs84LatLng(
-                                    _userLocationLatLng!.latitude,
-                                    _userLocationLatLng!.longitude,
-                                  ))
-                                MarkerLayer(
-                                  markers: [_userLocationMarker(_userLocationLatLng!)],
-                                ),
-                              PopupLayer(
-                                popupDisplayOptions: PopupDisplayOptions(
-                                  snap: PopupSnap.markerTop,
-                                  builder: (ctx, marker) {
-                                    if (marker is MisafirhaneMapMarker) {
-                                      return MisafirhaneMarkerInfoPopup(
-                                        misafirhane: marker.misafirhane,
-                                        onInceleHaritaArama: (q) async {
-                                          final d = rotaForUi ?? _cachedRotaData;
-                                          if (d == null) {
-                                            if (context.mounted) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                    'Harita verisi henüz yüklenemedi.',
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                            return;
-                                          }
-                                          if (!mounted || !context.mounted) return;
-                                          _searchController.text = q;
-                                          await _performSearch(context, d);
-                                        },
-                                      );
-                                    }
-                                    return const SizedBox.shrink();
-                                  },
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (loading)
-                      const ColoredBox(
-                        color: Color(0x66000000),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    if (_inlineTabbedSearchOpen &&
-                        _tabbedSheetRotaData != null &&
-                        _searchSheetExtentController != null)
-                      MisafirhaneSearchResultsPanel(
-                        key: _searchResultsPanelKey,
-                        sheetExtentController: _searchSheetExtentController!,
-                        rotaData: _tabbedSheetRotaData!,
-                        mapLocationState: _mapLocationState,
-                        highlightTarget: _tabbedSheetHighlight,
-                        initialTabIndex: _tabbedSheetInitialTab,
-                        geziYemekHighlight: _tabbedSheetGeziYemekHighlight,
-                        favoritesRepo: _favoritesRepo,
-                        onFavoritesChanged: _reloadFavoritesCache,
-                        onTesisSelect: (m) async {
-                          _showMisafirhanePopupFor(m);
-                        },
-                        onRequestLocationPermission: _onSearchSheetRequestLocation,
-                        onClosePanel: _closeInlineTabbedSearchPanel,
-                        onSelectIl: _searchIlFromPanel,
-                      ),
-                    ValueListenableBuilder<int>(
-                      valueListenable: _previewPositionTick,
-                      builder: (__, a, b) {
-                        if (_mapPreviewFacility == null) return const SizedBox.shrink();
-                        return LayoutBuilder(
-                          builder: (context, constraints) {
-                          final m = _mapPreviewFacility!;
-                          const cardWMax = 200.0;
-                          // ~2 satır + padding; marker ile boşluk
-                          const estCardH = 52.0;
-                          const markerHalf = 20.0;
-                          const gapAboveMarker = 8.0;
-                          final minTopBelowSearch =
-                              toolbarBottom + MainMapSearchChrome.blockHeight + 8;
-                          final cardW = math.min(cardWMax, constraints.maxWidth - 16);
-
-                          double left;
-                          double top;
-                          if (_validFacilityCoords(m)) {
-                            final pt = _mapController.camera.latLngToScreenPoint(
-                              latLngOrFallback(m.latitude, m.longitude),
-                            );
-                            left = (pt.x - cardW / 2).clamp(8.0, constraints.maxWidth - cardW - 8);
-                            top = pt.y - markerHalf - gapAboveMarker - estCardH;
-                            top = top.clamp(
-                              minTopBelowSearch,
-                              math.max(
-                                minTopBelowSearch,
-                                constraints.maxHeight - estCardH - MediaQuery.paddingOf(context).bottom - 16,
-                              ),
-                            );
-                          } else {
-                            left = (constraints.maxWidth - cardW) / 2;
-                            top = constraints.maxHeight - estCardH - 130;
-                          }
-
-                          return Positioned(
-                            left: left,
-                            top: top,
-                            width: cardW,
-                            child: AnimatedOpacity(
-                              duration: const Duration(milliseconds: 200),
-                              curve: Curves.easeOut,
-                              opacity: _previewClosing ? 0 : 1,
-                              child: AnimatedSlide(
-                                duration: const Duration(milliseconds: 220),
-                                curve: Curves.easeOutCubic,
-                                offset: _previewClosing ? const Offset(0, 0.06) : Offset.zero,
-                                child: MapFacilityPreviewCard(
-                                  misafirhane: m,
-                                ),
-                              ),
+                                }
+                                // Zoom eşiği geçildiğinde il/tesis marker geçişini tetikle.
+                                if (wasOverviewZoom != isOverviewZoom &&
+                                    _isMainMapOverviewActive &&
+                                    _mainMapFocusedCity == null) {
+                                  setState(() {});
+                                }
+                              },
+                              onTap: (tapPosition, point) {
+                                _popupController.hideAllPopups();
+                                if (_mapPreviewFacility != null) {
+                                  unawaited(_closeMapPreviewAnimated());
+                                }
+                              },
                             ),
-                          );
-                        },
-                        );
-                      },
-                    ),
-                    Positioned(
-                      right: 16,
-                      bottom: 8,
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 280),
-                        curve: Curves.easeOutCubic,
-                        opacity: (hideMapOverlayButtons && !showExpandSearchPanelFab)
-                            ? 0
-                            : 1,
-                        child: IgnorePointer(
-                          ignoring: hideMapOverlayButtons && !showExpandSearchPanelFab,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              if (showExpandSearchPanelFab)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 10, right: 2),
-                                  child: FloatingActionButton(
-                                    heroTag: 'fab_expand_search',
-                                    backgroundColor: AppColors.primary,
-                                    elevation: 12,
-                                    onPressed: () async {
-                                      await _expandSearchResultsSheet();
-                                      if (mounted) {
-                                        setState(() {
-                                          isSheetVisible = true;
-                                          // FAB ile açıldı → sonraki geri tekrar küçültsün
-                                          _searchBackPressCount = 0;
-                                        });
+                              const RotalinkTileLayer(),
+                              if (_routePolylines.isNotEmpty)
+                                PolylineLayer(polylines: _routePolylines),
+                              if (inRoute && rotaForUi != null) ...[
+                                MarkerLayer(markers: routeMarkers),
+                                if (_userLocationLatLng != null &&
+                                    isValidWgs84LatLng(
+                                      _userLocationLatLng!.latitude,
+                                      _userLocationLatLng!.longitude,
+                                    ))
+                                  MarkerLayer(
+                                    markers: [
+                                      _userLocationMarker(_userLocationLatLng!),
+                                    ],
+                                  ),
+                              ] else ...[
+                                MapOverviewCityMarkersLayer(
+                                  visible: showOverviewCityMarkers,
+                                  buildMarkers: (filter) =>
+                                      _overviewCityMarkersFor(
+                                        rotaForUi,
+                                        filter,
+                                      ),
+                                ),
+                                MapFacilityPopupMarkersLayer(
+                                  baseFacilities: baseDisplay,
+                                  highlight: _searchSheetHighlight,
+                                  visible: showFacilityMarkers,
+                                  popupController: _popupController,
+                                  onMarkerTap:
+                                      (popupSpec, popupState, popupController) {
+                                        if (_shouldInterceptMainMapMarkerTap) {
+                                          _handleMarkerTapOnMainOverview(
+                                            popupSpec.marker,
+                                          );
+                                          return;
+                                        }
+
+                                        if (popupState.selectedPopupSpecs
+                                            .contains(popupSpec)) {
+                                          popupController.hideAllPopups();
+                                        } else {
+                                          popupController
+                                              .showPopupsOnlyForSpecs([
+                                                popupSpec,
+                                              ]);
+                                        }
+                                      },
+                                ),
+                                if (_userLocationLatLng != null &&
+                                    isValidWgs84LatLng(
+                                      _userLocationLatLng!.latitude,
+                                      _userLocationLatLng!.longitude,
+                                    ))
+                                  MarkerLayer(
+                                    markers: [
+                                      _userLocationMarker(_userLocationLatLng!),
+                                    ],
+                                  ),
+                                PopupLayer(
+                                  popupDisplayOptions: PopupDisplayOptions(
+                                    snap: PopupSnap.markerTop,
+                                    builder: (ctx, marker) {
+                                      if (marker is MisafirhaneMapMarker) {
+                                        return MisafirhaneMarkerInfoPopup(
+                                          misafirhane: marker.misafirhane,
+                                          onInceleHaritaArama: (q) async {
+                                            final d =
+                                                rotaForUi ?? _cachedRotaData;
+                                            if (d == null) {
+                                              if (context.mounted) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Harita verisi henüz yüklenemedi.',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                              return;
+                                            }
+                                            if (!mounted || !context.mounted)
+                                              return;
+                                            _searchController.text = q;
+                                            await _performSearch(context, d);
+                                          },
+                                        );
                                       }
+                                      return const SizedBox.shrink();
                                     },
-                                    tooltip: 'Sonuç listesine dön',
-                                    child: const Icon(
-                                      Icons.keyboard_arrow_up_rounded,
-                                      color: AppColors.white,
-                                    ),
                                   ),
-                                ),
-                              if (showListFab && !showExpandSearchPanelFab)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 10, right: 2),
-                                  child: FloatingActionButton(
-                                    heroTag: 'fab_list',
-                                    backgroundColor: AppColors.primary,
-                                    elevation: 12,
-                                    onPressed: () async {
-                                      final mapFacilities = ref.read(
-                                        filteredFacilitiesProvider(baseDisplay),
-                                      );
-                                      if (inRoute) {
-                                        await _openRouteSummarySheet(
-                                          context,
-                                          _activeRouteStops!,
-                                          totalDistanceM: _routeSummaryDistanceM,
-                                          totalDurationS: _routeSummaryDurationS,
-                                          navWaypoints: rotaForUi != null
-                                              ? waypointsForRouteStops(
-                                                  rotaForUi,
-                                                  _activeRouteStops!,
-                                                )
-                                              : null,
-                                        );
-                                      } else if (_favoritesBrowseActive) {
-                                        _openMisafirhaneSheet(
-                                          mapFacilities,
-                                          liveFavoriteList: true,
-                                        );
-                                      } else if (rotaForUi != null) {
-                                        await _openTabbedSearchResults(
-                                          context,
-                                          rotaForUi,
-                                          mapFacilities,
-                                          highlightTarget: _searchSheetHighlight,
-                                        );
-                                      }
-                                    },
-                                    tooltip: inRoute
-                                        ? AppStrings.routePlanSummaryTitle
-                                        : AppStrings.fabMisafirhaneList,
-                                    child: const Icon(
-                                      Icons.view_list_rounded,
-                                      color: AppColors.white,
-                                    ),
-                                  ),
-                                ),
-                              if (!showListFab &&
-                                  !_inlineTabbedSearchOpen &&
-                                  _attachedBottomSheet == null) ...[
-                                KamiMapOverlay(
-                                  repository: widget.repository,
-                                  initialData: _cachedRotaData,
-                                  userLocationHint: _userLocationLatLng,
-                                  fabAnchorKey: onboarding?.targetKey(
-                                    OnboardingTarget.kami,
-                                  ),
-                                  onRoutePlan: (outcome) async {
-                                    final data = _cachedRotaData;
-                                    if (data == null) return;
-                                    await _applyRoutePlan(
-                                      context,
-                                      data,
-                                      outcome.stops,
-                                      precomputedSegments: outcome.segments,
-                                    );
-                                  },
-                                ),
-                                const IgnorePointer(
-                                  child: SizedBox(
-                                    height: KamiMapOverlay.gapAboveEmergencyFab,
-                                  ),
-                                ),
-                                _EmergencyFab(
-                                  anchorKey: onboarding?.targetKey(
-                                    OnboardingTarget.emergency,
-                                  ),
-                                  onTap: () =>
-                                      unawaited(showEmergencyBottomSheet(context)),
                                 ),
                               ],
                             ],
                           ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      child: RotalinkAppHeader(
-                        overlayOnMap: true,
-                        onMenu: () => _scaffoldKey.currentState?.openDrawer(),
-                        onTitleTap: _goToInitialMapHome,
-                        menuAnchorKey: onboarding?.targetKey(OnboardingTarget.menu),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            KeyedSubtree(
-                              key: onboarding?.targetKey(OnboardingTarget.weather),
-                              child: MapWeatherChip(
-                                compact: true,
-                                liveGps: _userLocationLatLng,
-                                locationGranted:
-                                    _mapLocationState.locationPermissionGranted,
-                                searchedCity: _weatherSearchCity,
-                                focusedCity: _mainMapFocusedCity,
-                                mapCenter: _center,
-                                rotaData: rotaForUi,
-                              ),
+                      if (loading)
+                        const ColoredBox(
+                          color: Color(0x66000000),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                      if (_inlineTabbedSearchOpen &&
+                          _tabbedSheetRotaData != null)
+                        Positioned.fill(
+                          child: MisafirhaneSearchResultsPanel(
+                            key: _searchResultsPanelKey,
+                            listVisible: isSheetVisible,
+                            topInset:
+                                searchChromeTop +
+                                MainMapSearchChrome.blockHeight +
+                                4,
+                            onViewModeChanged: _setSearchListVisible,
+                            rotaData: _tabbedSheetRotaData!,
+                            mapLocationState: _mapLocationState,
+                            highlightTarget: _tabbedSheetHighlight,
+                            initialTabIndex: _tabbedSheetInitialTab,
+                            geziYemekHighlight: _tabbedSheetGeziYemekHighlight,
+                            favoritesRepo: _favoritesRepo,
+                            onFavoritesChanged: _reloadFavoritesCache,
+                            onTesisSelect: (m) async {
+                              _showMisafirhanePopupFor(m);
+                            },
+                            onRequestLocationPermission:
+                                _onSearchSheetRequestLocation,
+                            onClosePanel: _closeInlineTabbedSearchPanel,
+                            onSelectIl: _searchIlFromPanel,
+                          ),
+                        ),
+                      ValueListenableBuilder<int>(
+                        valueListenable: _previewPositionTick,
+                        builder: (__, a, b) {
+                          // Liste görünümünde harita gizli: önizleme durumu korunur, çizilmez.
+                          if (_mapPreviewFacility == null ||
+                              _searchListShowing) {
+                            return const SizedBox.shrink();
+                          }
+                          return LayoutBuilder(
+                            builder: (context, constraints) {
+                              final m = _mapPreviewFacility!;
+                              const cardWMax = 200.0;
+                              // ~2 satır + padding; marker ile boşluk
+                              const estCardH = 52.0;
+                              const markerHalf = 20.0;
+                              const gapAboveMarker = 8.0;
+                              final minTopBelowSearch =
+                                  toolbarBottom +
+                                  MainMapSearchChrome.blockHeight +
+                                  8 +
+                                  (_inlineTabbedSearchOpen ? 64 : 0);
+                              final cardW = math.min(
+                                cardWMax,
+                                constraints.maxWidth - 16,
+                              );
+
+                              double left;
+                              double top;
+                              if (_validFacilityCoords(m)) {
+                                final pt = _mapController.camera
+                                    .latLngToScreenPoint(
+                                      latLngOrFallback(m.latitude, m.longitude),
+                                    );
+                                left = (pt.x - cardW / 2).clamp(
+                                  8.0,
+                                  constraints.maxWidth - cardW - 8,
+                                );
+                                top =
+                                    pt.y -
+                                    markerHalf -
+                                    gapAboveMarker -
+                                    estCardH;
+                                top = top.clamp(
+                                  minTopBelowSearch,
+                                  math.max(
+                                    minTopBelowSearch,
+                                    constraints.maxHeight -
+                                        estCardH -
+                                        MediaQuery.paddingOf(context).bottom -
+                                        16,
+                                  ),
+                                );
+                              } else {
+                                left = (constraints.maxWidth - cardW) / 2;
+                                top = constraints.maxHeight - estCardH - 130;
+                              }
+
+                              return Positioned(
+                                left: left,
+                                top: top,
+                                width: cardW,
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 200),
+                                  curve: Curves.easeOut,
+                                  opacity: _previewClosing ? 0 : 1,
+                                  child: AnimatedSlide(
+                                    duration: const Duration(milliseconds: 220),
+                                    curve: Curves.easeOutCubic,
+                                    offset: _previewClosing
+                                        ? const Offset(0, 0.06)
+                                        : Offset.zero,
+                                    child: MapFacilityPreviewCard(
+                                      misafirhane: m,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                      Positioned(
+                        right: 16,
+                        bottom: 8,
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 280),
+                          curve: Curves.easeOutCubic,
+                          opacity:
+                              (hideMapOverlayButtons &&
+                                  !showExpandSearchPanelFab)
+                              ? 0
+                              : 1,
+                          child: IgnorePointer(
+                            ignoring:
+                                hideMapOverlayButtons &&
+                                !showExpandSearchPanelFab,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                if (showExpandSearchPanelFab)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 10,
+                                      right: 2,
+                                    ),
+                                    child: FloatingActionButton.extended(
+                                      heroTag: 'fab_expand_search',
+                                      backgroundColor: AppColors.primary,
+                                      elevation: 8,
+                                      onPressed: () =>
+                                          _setSearchListVisible(true),
+                                      tooltip: 'Sonuç listesine dön',
+                                      icon: const Icon(
+                                        Icons.view_list_rounded,
+                                        color: AppColors.white,
+                                      ),
+                                      label: const Text(
+                                        'Listeye dön',
+                                        style: TextStyle(
+                                          color: AppColors.white,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                if (showListFab && !showExpandSearchPanelFab)
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 10,
+                                      right: 2,
+                                    ),
+                                    child: FloatingActionButton(
+                                      heroTag: 'fab_list',
+                                      backgroundColor: AppColors.primary,
+                                      elevation: 12,
+                                      onPressed: () async {
+                                        final mapFacilities = ref.read(
+                                          filteredFacilitiesProvider(
+                                            baseDisplay,
+                                          ),
+                                        );
+                                        if (inRoute) {
+                                          await _openRouteSummarySheet(
+                                            context,
+                                            _activeRouteStops!,
+                                            totalDistanceM:
+                                                _routeSummaryDistanceM,
+                                            totalDurationS:
+                                                _routeSummaryDurationS,
+                                            navWaypoints: rotaForUi != null
+                                                ? waypointsForRouteStops(
+                                                    rotaForUi,
+                                                    _activeRouteStops!,
+                                                  )
+                                                : null,
+                                          );
+                                        } else if (_favoritesBrowseActive) {
+                                          _openMisafirhaneSheet(
+                                            mapFacilities,
+                                            liveFavoriteList: true,
+                                          );
+                                        } else if (rotaForUi != null) {
+                                          await _openTabbedSearchResults(
+                                            context,
+                                            rotaForUi,
+                                            mapFacilities,
+                                            highlightTarget:
+                                                _searchSheetHighlight,
+                                          );
+                                        }
+                                      },
+                                      tooltip: inRoute
+                                          ? AppStrings.routePlanSummaryTitle
+                                          : AppStrings.fabMisafirhaneList,
+                                      child: const Icon(
+                                        Icons.view_list_rounded,
+                                        color: AppColors.white,
+                                      ),
+                                    ),
+                                  ),
+                                if (!showListFab &&
+                                    !_inlineTabbedSearchOpen &&
+                                    _attachedBottomSheet == null) ...[
+                                  KamiMapOverlay(
+                                    repository: widget.repository,
+                                    initialData: _cachedRotaData,
+                                    userLocationHint: _userLocationLatLng,
+                                    fabAnchorKey: onboarding?.targetKey(
+                                      OnboardingTarget.kami,
+                                    ),
+                                    onRoutePlan: (outcome) async {
+                                      final data = _cachedRotaData;
+                                      if (data == null) return;
+                                      await _applyRoutePlan(
+                                        context,
+                                        data,
+                                        outcome.stops,
+                                        precomputedSegments: outcome.segments,
+                                      );
+                                    },
+                                  ),
+                                  const IgnorePointer(
+                                    child: SizedBox(
+                                      height:
+                                          KamiMapOverlay.gapAboveEmergencyFab,
+                                    ),
+                                  ),
+                                  _EmergencyFab(
+                                    anchorKey: onboarding?.targetKey(
+                                      OnboardingTarget.emergency,
+                                    ),
+                                    onTap: () => unawaited(
+                                      showEmergencyBottomSheet(context),
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
-                            const SizedBox(width: 8),
-                            const RotalinkProChip(),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                    MainMapSearchChrome(
-                      anchorKey: onboarding?.targetKey(OnboardingTarget.searchChrome),
-                      top: searchChromeTop,
-                      searchBarSession: _searchBarSession,
-                      controller: _searchController,
-                      ilOptionsSorted: _getIlOptions(rotaForUi),
-                      onSubmitted: rotaForUi != null
-                          ? () => unawaited(_performSearch(context, rotaForUi))
-                          : null,
-                      onSearchCleared: () {
-                        if (!mounted) return;
-                        FocusManager.instance.primaryFocus?.unfocus();
-                        _onMainSearchCleared();
-                        setState(() => _searchBarSession++);
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (mounted) _fitTurkeyOverviewCamera();
-                        });
-                      },
-                      focusNode: _searchBarFocusNode,
-                      onFocusChanged: _onSearchBarFocusChanged,
-                    ),
-                  ],
-                );
-              },
+                      Positioned(
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        child: RotalinkAppHeader(
+                          overlayOnMap: true,
+                          onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+                          onTitleTap: _goToInitialMapHome,
+                          menuAnchorKey: onboarding?.targetKey(
+                            OnboardingTarget.menu,
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              KeyedSubtree(
+                                key: onboarding?.targetKey(
+                                  OnboardingTarget.weather,
+                                ),
+                                child: MapWeatherChip(
+                                  compact: true,
+                                  liveGps: _userLocationLatLng,
+                                  locationGranted: _mapLocationState
+                                      .locationPermissionGranted,
+                                  searchedCity: _weatherSearchCity,
+                                  focusedCity: _mainMapFocusedCity,
+                                  mapCenter: _center,
+                                  rotaData: rotaForUi,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const RotalinkProChip(),
+                            ],
+                          ),
+                        ),
+                      ),
+                      MainMapSearchChrome(
+                        anchorKey: onboarding?.targetKey(
+                          OnboardingTarget.searchChrome,
+                        ),
+                        top: searchChromeTop,
+                        searchBarSession: _searchBarSession,
+                        controller: _searchController,
+                        ilOptionsSorted: _getIlOptions(rotaForUi),
+                        onSubmitted: rotaForUi != null
+                            ? () =>
+                                  unawaited(_performSearch(context, rotaForUi))
+                            : null,
+                        onSearchCleared: () {
+                          if (!mounted) return;
+                          FocusManager.instance.primaryFocus?.unfocus();
+                          _onMainSearchCleared();
+                          setState(() => _searchBarSession++);
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            if (mounted) _fitTurkeyOverviewCamera();
+                          });
+                        },
+                        focusNode: _searchBarFocusNode,
+                        onFocusChanged: _onSearchBarFocusChanged,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -2702,9 +2714,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     final p = phone.trim();
     if (p.isEmpty) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Telefon numarası yok')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Telefon numarası yok')));
       }
       return;
     }
@@ -2713,20 +2725,20 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Arama başlatılamadı')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Arama başlatılamadı')));
       }
     }
   }
 
   Future<void> _shareFacility(Misafirhane m) async {
-    final mapsUrl = googleMapsShareUrlForMisafirhane(m);
-    final text = '${m.isim}\n${facilityWebUrl(il: m.il, isim: m.isim)}\n'
-        'Yol tarifi: $mapsUrl\n\n'
-        'Telefon: ${m.telefon.isEmpty ? 'Yok' : m.telefon}\n\n'
-        '${StoreLinks.shareDownloadFooter()}';
-    await Share.share(text);
+    final phone = m.telefon.trim();
+    await Share.share(
+      StoreLinks.shareMessage(m.isim, [
+        if (phone.isNotEmpty) 'Telefon: $phone',
+      ]),
+    );
   }
 
   Widget _compactSheetActionColumn({
@@ -2750,7 +2762,11 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
               Text(
                 label,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 10, color: color, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  fontSize: 10,
+                  color: color,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
@@ -2772,453 +2788,432 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
     double? savedListScrollOffset;
     final ctrl = scaffoldState.showBottomSheet(
       (sheetCtx) => StatefulBuilder(
-          builder: (ctx, setModal) {
-            List<Misafirhane> rows() {
-              if (liveFavoriteList) {
-                return _resolveSavedAgainstLive(_favoritesCache, _cachedRotaData);
-              }
-              return items;
+        builder: (ctx, setModal) {
+          List<Misafirhane> rows() {
+            if (liveFavoriteList) {
+              return _resolveSavedAgainstLive(_favoritesCache, _cachedRotaData);
             }
+            return items;
+          }
 
-            Future<void> onHeartToggled(Misafirhane m) async {
-              final wasFav = _favoritesCache.any((f) => f.sameFavoriteIdentity(m));
-              await _favoritesRepo.toggle(m);
-              await _reloadFavoritesCache();
+          Future<void> onHeartToggled(Misafirhane m) async {
+            final wasFav = _favoritesCache.any(
+              (f) => f.sameFavoriteIdentity(m),
+            );
+            await _favoritesRepo.toggle(m);
+            await _reloadFavoritesCache();
+            if (!mounted) return;
+            if (liveFavoriteList && _favoritesCache.isEmpty) {
+              Navigator.pop(sheetCtx);
+              setState(() => _favoritesBrowseActive = false);
+              return;
+            }
+            if (sheetCtx.mounted) {
+              ScaffoldMessenger.of(sheetCtx).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    wasFav ? 'Favorilerden çıkarıldı' : 'Favorilere eklendi',
+                  ),
+                  duration: const Duration(seconds: 1),
+                ),
+              );
+            }
+            setModal(() {});
+            if (liveFavoriteList) {
+              _fitFacilitiesCamera(rows());
+            }
+          }
+
+          Future<void> requestLocationFromCompactSheet() async {
+            await _ensureLocationPermissionAndLocationForLists(
+              fromDistanceChip: true,
+            );
+            if (!mounted || !await SimpleLocationService.isLocationGranted())
+              return;
+            if (!sheetCtx.mounted) return;
+            Navigator.pop(sheetCtx);
+            if (!mounted) return;
+            WidgetsBinding.instance.addPostFrameCallback((_) {
               if (!mounted) return;
-              if (liveFavoriteList && _favoritesCache.isEmpty) {
-                Navigator.pop(sheetCtx);
-                setState(() => _favoritesBrowseActive = false);
-                return;
+              _openMisafirhaneSheet(items, liveFavoriteList: liveFavoriteList);
+            });
+          }
+
+          final list = rows();
+          final detail = detailFacility;
+          final sheetH = detail != null
+              ? misafirhaneCompactDetailSheetHeight(ctx)
+              : misafirhaneCompactSheetHeight(ctx);
+
+          void restoreCompactListScroll(Misafirhane? returnTo) {
+            WidgetsBinding.instance.addPostFrameCallback((_) async {
+              if (!listScrollController.hasClients) {
+                await Future<void>.delayed(const Duration(milliseconds: 48));
               }
-              if (sheetCtx.mounted) {
-                ScaffoldMessenger.of(sheetCtx).showSnackBar(
-                  SnackBar(
-                    content: Text(wasFav ? 'Favorilerden çıkarıldı' : 'Favorilere eklendi'),
-                    duration: const Duration(seconds: 1),
+              if (!listScrollController.hasClients) return;
+              final saved = savedListScrollOffset;
+              if (saved != null) {
+                listScrollController.jumpTo(
+                  saved.clamp(
+                    0.0,
+                    listScrollController.position.maxScrollExtent,
                   ),
                 );
+                return;
               }
-              setModal(() {});
-              if (liveFavoriteList) {
-                _fitFacilitiesCamera(rows());
-              }
-            }
-
-            Future<void> requestLocationFromCompactSheet() async {
-              await _ensureLocationPermissionAndLocationForLists(
-                fromDistanceChip: true,
+              if (returnTo == null) return;
+              final idx = list.indexWhere(
+                (f) => f.sameFavoriteIdentity(returnTo),
               );
-              if (!mounted || !await SimpleLocationService.isLocationGranted()) return;
-              if (!sheetCtx.mounted) return;
-              Navigator.pop(sheetCtx);
-              if (!mounted) return;
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (!mounted) return;
-                _openMisafirhaneSheet(
-                  items,
-                  liveFavoriteList: liveFavoriteList,
-                );
-              });
+              if (idx < 0) return;
+              const kApproxItemH = 96.0;
+              final target = (idx * kApproxItemH).clamp(
+                0.0,
+                listScrollController.position.maxScrollExtent,
+              );
+              await listScrollController.animateTo(
+                target,
+                duration: const Duration(milliseconds: 280),
+                curve: Curves.easeOutCubic,
+              );
+            });
+          }
+
+          void setCompactDetail(Misafirhane? m) {
+            final previous = detailFacility;
+            if (m != null && listScrollController.hasClients) {
+              savedListScrollOffset = listScrollController.offset;
             }
+            setModal(() {
+              detailFacility = m;
+              _compactFacilityDetailOpen = m != null;
+              if (m == null) {
+                _closeCompactFacilityDetail = null;
+              } else {
+                _closeCompactFacilityDetail = () => setCompactDetail(null);
+              }
+            });
+            if (m == null && previous != null) {
+              restoreCompactListScroll(previous);
+            }
+          }
 
-            final list = rows();
-            final detail = detailFacility;
-            final sheetH = detail != null
-                ? misafirhaneCompactDetailSheetHeight(ctx)
-                : misafirhaneCompactSheetHeight(ctx);
-
-            void restoreCompactListScroll(Misafirhane? returnTo) {
-              WidgetsBinding.instance.addPostFrameCallback((_) async {
-                if (!listScrollController.hasClients) {
-                  await Future<void>.delayed(const Duration(milliseconds: 48));
-                }
-                if (!listScrollController.hasClients) return;
-                final saved = savedListScrollOffset;
-                if (saved != null) {
-                  listScrollController.jumpTo(
-                    saved.clamp(
-                      0.0,
-                      listScrollController.position.maxScrollExtent,
-                    ),
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOutCubic,
+            height: sheetH,
+            child: Material(
+              color: AppColors.surfaceOf(context),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                transitionBuilder: (child, animation) {
+                  final offset = Tween<Offset>(
+                    begin: const Offset(0.08, 0),
+                    end: Offset.zero,
+                  ).animate(animation);
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(position: offset, child: child),
                   );
-                  return;
-                }
-                if (returnTo == null) return;
-                final idx = list.indexWhere(
-                  (f) => f.sameFavoriteIdentity(returnTo),
-                );
-                if (idx < 0) return;
-                const kApproxItemH = 96.0;
-                final target = (idx * kApproxItemH).clamp(
-                  0.0,
-                  listScrollController.position.maxScrollExtent,
-                );
-                await listScrollController.animateTo(
-                  target,
-                  duration: const Duration(milliseconds: 280),
-                  curve: Curves.easeOutCubic,
-                );
-              });
-            }
-
-            void setCompactDetail(Misafirhane? m) {
-              final previous = detailFacility;
-              if (m != null && listScrollController.hasClients) {
-                savedListScrollOffset = listScrollController.offset;
-              }
-              setModal(() {
-                detailFacility = m;
-                _compactFacilityDetailOpen = m != null;
-                if (m == null) {
-                  _closeCompactFacilityDetail = null;
-                } else {
-                  _closeCompactFacilityDetail = () => setCompactDetail(null);
-                }
-              });
-              if (m == null && previous != null) {
-                restoreCompactListScroll(previous);
-              }
-            }
-
-            return AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOutCubic,
-              height: sheetH,
-              child: Material(
-                color: AppColors.white,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 280),
-                    switchInCurve: Curves.easeOutCubic,
-                    switchOutCurve: Curves.easeInCubic,
-                    transitionBuilder: (child, animation) {
-                      final offset = Tween<Offset>(
-                        begin: const Offset(0.08, 0),
-                        end: Offset.zero,
-                      ).animate(animation);
-                      return FadeTransition(
-                        opacity: animation,
-                        child: SlideTransition(
-                          position: offset,
-                          child: child,
+                },
+                child: detail != null
+                    ? KeyedSubtree(
+                        key: ValueKey<String>(
+                          'compact-detail-${detail.stableFacilityId}',
                         ),
-                      );
-                    },
-                    child: detail != null
-                        ? KeyedSubtree(
-                            key: ValueKey<String>(
-                              'compact-detail-${detail.stableFacilityId}',
-                            ),
-                            child: ListenableBuilder(
-                              listenable: _mapLocationState,
-                              builder: (context, _) {
-                                return FacilityDetailCard(
-                                  misafirhane: detail,
-                                  mapLocationState: _mapLocationState,
-                                  isFavorite: _favoritesCache.any(
-                                    (f) => f.sameFavoriteIdentity(detail),
-                                  ),
-                                  onBack: () => setCompactDetail(null),
-                                  onCall: () => unawaited(
-                                    _dialFacilityPhone(context, detail.telefon),
-                                  ),
-                                  onShare: () =>
-                                      unawaited(_shareFacility(detail)),
-                                  onFavorite: () =>
-                                      unawaited(onHeartToggled(detail)),
-                                  onInspect: () => unawaited(
-                                    openMapSearch(
-                                      context,
-                                      detail.il,
-                                      detail.isim,
-                                    ),
-                                  ),
-                                  onReview: () => unawaited(
-                                    pushOnShellNavigator<void>(
-                                      MaterialPageRoute<void>(
-                                        builder: (_) => YorumScreen(
-                                          facilityId: ReviewRepository
-                                              .sanitizeFacilityId(
+                        child: ListenableBuilder(
+                          listenable: _mapLocationState,
+                          builder: (context, _) {
+                            return FacilityDetailCard(
+                              misafirhane: detail,
+                              mapLocationState: _mapLocationState,
+                              isFavorite: _favoritesCache.any(
+                                (f) => f.sameFavoriteIdentity(detail),
+                              ),
+                              onBack: () => setCompactDetail(null),
+                              onCall: () => unawaited(
+                                _dialFacilityPhone(context, detail.telefon),
+                              ),
+                              onShare: () => unawaited(_shareFacility(detail)),
+                              onFavorite: () =>
+                                  unawaited(onHeartToggled(detail)),
+                              onInspect: () => unawaited(
+                                openMapSearch(context, detail.il, detail.isim),
+                              ),
+                              onReview: () => unawaited(
+                                pushOnShellNavigator<void>(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => YorumScreen(
+                                      facilityId:
+                                          ReviewRepository.sanitizeFacilityId(
                                             detail.stableFacilityId,
                                           ),
-                                          facilityName: detail.isim,
-                                        ),
-                                      ),
+                                      facilityName: detail.isim,
                                     ),
                                   ),
-                                  onShowOnMap: () {
-                                    unawaited(
-                                      openMapSearch(
-                                        context,
-                                        detail.il,
-                                        detail.isim,
-                                      ),
-                                    );
-                                  },
-                                  onRequestLocation:
-                                      requestLocationFromCompactSheet,
+                                ),
+                              ),
+                              onShowOnMap: () {
+                                unawaited(
+                                  openMapSearch(
+                                    context,
+                                    detail.il,
+                                    detail.isim,
+                                  ),
                                 );
                               },
-                            ),
-                          )
-                        : KeyedSubtree(
-                            key: const ValueKey<String>('compact-list'),
-                            child: ListView.separated(
-                              controller: listScrollController,
-                              physics: const ClampingScrollPhysics(),
-                              padding: EdgeInsets.only(
-                                bottom: MediaQuery.paddingOf(ctx).bottom,
-                              ),
-                              itemCount: list.length,
-                              separatorBuilder: (_, _) =>
-                                  const Divider(height: 1),
-                              itemBuilder: (_, i) {
-                                final m = list[i];
-                                final isFav = _favoritesCache.any(
-                                  (f) => f.sameFavoriteIdentity(m),
-                                );
-                                return ListenableBuilder(
-                                  listenable: _mapLocationState,
-                                  builder: (context, _) {
-                                    return Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                      onTap: () => setCompactDetail(m),
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                          10,
-                                          10,
-                                          4,
-                                          10,
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.stretch,
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        m.isim,
-                                                        style: const TextStyle(
-                                                          color: AppColors
-                                                              .textPrimary,
-                                                          fontSize: 14.5,
-                                                          height: 1.2,
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                        maxLines: 3,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
+                              onRequestLocation:
+                                  requestLocationFromCompactSheet,
+                            );
+                          },
+                        ),
+                      )
+                    : KeyedSubtree(
+                        key: const ValueKey<String>('compact-list'),
+                        child: ListView.separated(
+                          controller: listScrollController,
+                          physics: const ClampingScrollPhysics(),
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.paddingOf(ctx).bottom,
+                          ),
+                          itemCount: list.length,
+                          separatorBuilder: (_, _) => const Divider(height: 1),
+                          itemBuilder: (_, i) {
+                            final m = list[i];
+                            final isFav = _favoritesCache.any(
+                              (f) => f.sameFavoriteIdentity(m),
+                            );
+                            return ListenableBuilder(
+                              listenable: _mapLocationState,
+                              builder: (context, _) {
+                                return Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: () => setCompactDetail(m),
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                        10,
+                                        10,
+                                        4,
+                                        10,
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.stretch,
+                                        children: [
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      m.isim,
+                                                      style: const TextStyle(
+                                                        color: AppColors
+                                                            .textPrimary,
+                                                        fontSize: 14.5,
+                                                        height: 1.2,
+                                                        fontWeight:
+                                                            FontWeight.w600,
                                                       ),
-                                                      const SizedBox(height: 5),
-                                                      Row(
-                                                        children: [
-                                                          if (m.tip
-                                                              .trim()
-                                                              .isNotEmpty) ...[
-                                                            Flexible(
-                                                              child: Text(
-                                                                m.tip.trim(),
-                                                                maxLines: 1,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                style: TextStyle(
-                                                                  color: AppColors
-                                                                      .textPrimary
-                                                                      .withValues(
-                                                                    alpha: 0.52,
-                                                                  ),
-                                                                  fontSize: 12,
-                                                                  height: 1.2,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w500,
-                                                                ),
+                                                      maxLines: 3,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                    const SizedBox(height: 5),
+                                                    Row(
+                                                      children: [
+                                                        if (m.tip
+                                                            .trim()
+                                                            .isNotEmpty) ...[
+                                                          Flexible(
+                                                            child: Text(
+                                                              m.tip.trim(),
+                                                              maxLines: 1,
+                                                              overflow:
+                                                                  TextOverflow
+                                                                      .ellipsis,
+                                                              style: TextStyle(
+                                                                color: AppColors
+                                                                    .textPrimary
+                                                                    .withValues(
+                                                                      alpha:
+                                                                          0.52,
+                                                                    ),
+                                                                fontSize: 12,
+                                                                height: 1.2,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w500,
                                                               ),
                                                             ),
-                                                            const SizedBox(
-                                                              width: 8,
-                                                            ),
-                                                          ],
-                                                          Container(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .fromLTRB(
-                                                              10,
-                                                              6,
-                                                              8,
-                                                              6,
-                                                            ),
-                                                            decoration:
-                                                                BoxDecoration(
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 8,
+                                                          ),
+                                                        ],
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets.fromLTRB(
+                                                                10,
+                                                                6,
+                                                                8,
+                                                                6,
+                                                              ),
+                                                          decoration: BoxDecoration(
+                                                            color: AppColors
+                                                                .primary
+                                                                .withValues(
+                                                                  alpha: 0.09,
+                                                                ),
+                                                            borderRadius:
+                                                                BorderRadius.circular(
+                                                                  999,
+                                                                ),
+                                                            border: Border.all(
                                                               color: AppColors
                                                                   .primary
                                                                   .withValues(
-                                                                alpha: 0.09,
-                                                              ),
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                999,
-                                                              ),
-                                                              border:
-                                                                  Border.all(
-                                                                color: AppColors
-                                                                    .primary
-                                                                    .withValues(
-                                                                  alpha: 0.14,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                            child: const Row(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .min,
-                                                              children: [
-                                                                Text(
-                                                                  'Detay',
-                                                                  style:
-                                                                      TextStyle(
-                                                                    color:
-                                                                        AppColors
-                                                                            .primary,
-                                                                    fontSize:
-                                                                        12,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w700,
-                                                                    height: 1,
+                                                                    alpha: 0.14,
                                                                   ),
-                                                                ),
-                                                                SizedBox(
-                                                                  width: 2,
-                                                                ),
-                                                                Icon(
-                                                                  Icons
-                                                                      .arrow_forward_rounded,
-                                                                  size: 14,
+                                                            ),
+                                                          ),
+                                                          child: const Row(
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              Text(
+                                                                'Detay',
+                                                                style: TextStyle(
                                                                   color: AppColors
                                                                       .primary,
+                                                                  fontSize: 12,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w700,
+                                                                  height: 1,
                                                                 ),
-                                                              ],
-                                                            ),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 2,
+                                                              ),
+                                                              Icon(
+                                                                Icons
+                                                                    .arrow_forward_rounded,
+                                                                size: 14,
+                                                                color: AppColors
+                                                                    .primary,
+                                                              ),
+                                                            ],
                                                           ),
-                                                        ],
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                                _compactSheetActionColumn(
-                                                  icon: Icons.call,
-                                                  color:
-                                                      const Color(0xFF2E7D32),
-                                                  label: 'Ara',
-                                                  onTap: () => unawaited(
-                                                    _dialFacilityPhone(
-                                                      context,
-                                                      m.telefon,
-                                                    ),
-                                                  ),
-                                                ),
-                                                _compactSheetActionColumn(
-                                                  icon: Icons.share,
-                                                  color:
-                                                      const Color(0xFF039BE5),
-                                                  label: 'Paylaş',
-                                                  onTap: () => unawaited(
-                                                    _shareFacility(m),
-                                                  ),
-                                                ),
-                                                _compactSheetActionColumn(
-                                                  icon: isFav
-                                                      ? Icons.favorite
-                                                      : Icons.favorite_border,
-                                                  color:
-                                                      const Color(0xFFC2185B),
-                                                  label: 'Favori',
-                                                  onTap: () => unawaited(
-                                                    onHeartToggled(m),
-                                                  ),
-                                                ),
-                                                _compactSheetActionColumn(
-                                                  icon: Icons.map_outlined,
-                                                  color: AppColors.primary,
-                                                  label: 'İncele',
-                                                  onTap: () => unawaited(
-                                                    openMapSearch(
-                                                      context,
-                                                      m.il,
-                                                      m.isim,
-                                                    ),
-                                                  ),
-                                                ),
-                                                _compactSheetActionColumn(
-                                                  icon: Icons
-                                                      .chat_bubble_outline,
-                                                  color:
-                                                      const Color(0xFFE65100),
-                                                  label: 'Yorum',
-                                                  onTap: () => unawaited(
-                                                    pushOnShellNavigator<void>(
-                                                      MaterialPageRoute<void>(
-                                                        builder: (_) =>
-                                                            YorumScreen(
-                                                          facilityId:
-                                                              ReviewRepository
-                                                                  .sanitizeFacilityId(
-                                                            m.stableFacilityId,
-                                                          ),
-                                                          facilityName: m.isim,
                                                         ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              _compactSheetActionColumn(
+                                                icon: Icons.call,
+                                                color: const Color(0xFF2E7D32),
+                                                label: 'Ara',
+                                                onTap: () => unawaited(
+                                                  _dialFacilityPhone(
+                                                    context,
+                                                    m.telefon,
+                                                  ),
+                                                ),
+                                              ),
+                                              _compactSheetActionColumn(
+                                                icon: Icons.share,
+                                                color: const Color(0xFF039BE5),
+                                                label: 'Paylaş',
+                                                onTap: () => unawaited(
+                                                  _shareFacility(m),
+                                                ),
+                                              ),
+                                              _compactSheetActionColumn(
+                                                icon: isFav
+                                                    ? Icons.favorite
+                                                    : Icons.favorite_border,
+                                                color: const Color(0xFFC2185B),
+                                                label: 'Favori',
+                                                onTap: () => unawaited(
+                                                  onHeartToggled(m),
+                                                ),
+                                              ),
+                                              _compactSheetActionColumn(
+                                                icon: Icons.map_outlined,
+                                                color: AppColors.primary,
+                                                label: 'Harita',
+                                                onTap: () => unawaited(
+                                                  openMapSearch(
+                                                    context,
+                                                    m.il,
+                                                    m.isim,
+                                                  ),
+                                                ),
+                                              ),
+                                              _compactSheetActionColumn(
+                                                icon: Icons.chat_bubble_outline,
+                                                color: const Color(0xFFE65100),
+                                                label: 'Yorum',
+                                                onTap: () => unawaited(
+                                                  pushOnShellNavigator<void>(
+                                                    MaterialPageRoute<void>(
+                                                      builder: (_) => YorumScreen(
+                                                        facilityId:
+                                                            ReviewRepository.sanitizeFacilityId(
+                                                              m.stableFacilityId,
+                                                            ),
+                                                        facilityName: m.isim,
                                                       ),
                                                     ),
                                                   ),
                                                 ),
-                                              ],
-                                            ),
-                                            DistancePermissionChip(
-                                              userLocation:
-                                                  _mapLocationState.userLocation,
-                                              locationPermissionGranted:
-                                                  _mapLocationState
-                                                      .locationPermissionGranted,
-                                              facilityPoint: LatLng(
-                                                m.latitude,
-                                                m.longitude,
                                               ),
-                                              onRequestLocation:
-                                                  requestLocationFromCompactSheet,
-                                              spacingAbove: 4,
-                                              fullWidthSingleLine: true,
+                                            ],
+                                          ),
+                                          DistancePermissionChip(
+                                            userLocation:
+                                                _mapLocationState.userLocation,
+                                            locationPermissionGranted:
+                                                _mapLocationState
+                                                    .locationPermissionGranted,
+                                            facilityPoint: LatLng(
+                                              m.latitude,
+                                              m.longitude,
                                             ),
-                                          ],
-                                        ),
+                                            onRequestLocation:
+                                                requestLocationFromCompactSheet,
+                                            spacingAbove: 4,
+                                            fullWidthSingleLine: true,
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    );
-                                  },
+                                  ),
                                 );
                               },
-                            ),
-                          ),
-                  ),
+                            );
+                          },
+                        ),
+                      ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
+      ),
       backgroundColor: Colors.transparent,
       elevation: 0,
       enableDrag: true,
@@ -3245,7 +3240,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       final dur = formatRouteDurationSeconds(seg.durationS);
       out.add(
         Marker(
-          key: ValueKey<String>('route-lbl-$i-${mid.latitude}-${mid.longitude}'),
+          key: ValueKey<String>(
+            'route-lbl-$i-${mid.latitude}-${mid.longitude}',
+          ),
           point: mid,
           width: 104,
           height: 42,
@@ -3306,13 +3303,11 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
                 s.city,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                  shadows: [
-                    Shadow(color: Colors.white, blurRadius: 4),
-                  ],
+                  color: AppColors.textStrongOf(context),
+                  shadows: [Shadow(color: Colors.white, blurRadius: 4)],
                 ),
               ),
               const Icon(Icons.place, color: Color(0xFFE65100), size: 34),
@@ -3382,7 +3377,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       return;
     }
 
-    final segments = precomputedSegments != null && precomputedSegments.isNotEmpty
+    final segments =
+        precomputedSegments != null && precomputedSegments.isNotEmpty
         ? precomputedSegments
         : await OsrmRouteService.fetchSegments(waypoints);
     if (!mounted || token != _routeLoadGen) return;
@@ -3407,23 +3403,28 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       );
     }
 
-    final straight = onlyValidLatLngs(OsrmRouteService.straightFallback(waypoints));
+    final straight = onlyValidLatLngs(
+      OsrmRouteService.straightFallback(waypoints),
+    );
     final effectivePolylines = polylines.isNotEmpty
         ? polylines
         : (straight.length >= 2
-            ? [
-                Polyline<Object>(
-                  points: straight,
-                  color: const Color(0xFFD32F2F),
-                  strokeWidth: 5,
-                ),
-              ]
-            : const <Polyline<Object>>[]);
+              ? [
+                  Polyline<Object>(
+                    points: straight,
+                    color: const Color(0xFFD32F2F),
+                    strokeWidth: 5,
+                  ),
+                ]
+              : const <Polyline<Object>>[]);
 
     final flat = effectivePolylines.expand((p) => p.points).toList();
-    final labels = segments.isNotEmpty ? _routeSegmentLabelMarkers(segments) : const <Marker>[];
+    final labels = segments.isNotEmpty
+        ? _routeSegmentLabelMarkers(segments)
+        : const <Marker>[];
 
-    final hasOsrmTotals = segments.isNotEmpty && totalDistanceM > 0 && totalDurationS > 0;
+    final hasOsrmTotals =
+        segments.isNotEmpty && totalDistanceM > 0 && totalDurationS > 0;
     setState(() {
       _routePolylines = effectivePolylines;
       _routeLabelMarkers = labels;
@@ -3434,17 +3435,22 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      unawaited(_openRouteSummarySheet(
-        context,
-        stops,
-        totalDistanceM: hasOsrmTotals ? totalDistanceM : null,
-        totalDurationS: hasOsrmTotals ? totalDurationS : null,
-        navWaypoints: waypointsForRouteStops(data, stops),
-      ));
+      unawaited(
+        _openRouteSummarySheet(
+          context,
+          stops,
+          totalDistanceM: hasOsrmTotals ? totalDistanceM : null,
+          totalDurationS: hasOsrmTotals ? totalDurationS : null,
+          navWaypoints: waypointsForRouteStops(data, stops),
+        ),
+      );
     });
   }
 
-  Future<void> _promptSaveRouteFromMap(BuildContext context, List<RouteStop> stops) async {
+  Future<void> _promptSaveRouteFromMap(
+    BuildContext context,
+    List<RouteStop> stops,
+  ) async {
     final nameCtrl = TextEditingController();
     try {
       final ok = await showDialog<bool>(
@@ -3453,12 +3459,20 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
           title: const Text(AppStrings.routePlanSaveTitle),
           content: TextField(
             controller: nameCtrl,
-            decoration: const InputDecoration(hintText: AppStrings.routePlanSaveNameHint),
+            decoration: const InputDecoration(
+              hintText: AppStrings.routePlanSaveNameHint,
+            ),
             textCapitalization: TextCapitalization.sentences,
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('İptal')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Kaydet')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('İptal'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Kaydet'),
+            ),
           ],
         ),
       );
@@ -3516,267 +3530,325 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
             minChildSize: 0.28,
             maxChildSize: 0.92,
             builder: (_, scroll) {
-            final routeDm = totalDistanceM ?? 0;
-            final routeDs = totalDurationS ?? 0;
-            final showTotals = routeDm > 0 && routeDs > 0;
-            return Material(
-              color: AppColors.white,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              clipBehavior: Clip.antiAlias,
-              child: ListView(
-              controller: scroll,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-              children: [
-                ListTile(
-                  title: Text(
-                    AppStrings.routePlanSummaryTitle,
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary),
-                  ),
+              final routeDm = totalDistanceM ?? 0;
+              final routeDs = totalDurationS ?? 0;
+              final showTotals = routeDm > 0 && routeDs > 0;
+              return Material(
+                color: AppColors.surfaceOf(context),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
                 ),
-                if (showTotals) ...[
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF007B8F), Color(0xFF005F6B)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                clipBehavior: Clip.antiAlias,
+                child: ListView(
+                  controller: scroll,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 12,
+                  ),
+                  children: [
+                    ListTile(
+                      title: Text(
+                        AppStrings.routePlanSummaryTitle,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.35),
-                            blurRadius: 16,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
-                                    borderRadius: BorderRadius.circular(14),
-                                  ),
-                                  child: const Icon(Icons.route_rounded, color: AppColors.white, size: 26),
+                    ),
+                    if (showTotals) ...[
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFF007B8F), Color(0xFF005F6B)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withValues(
+                                  alpha: 0.35,
                                 ),
-                                const SizedBox(width: 14),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        AppStrings.routePlanTotalDistance,
-                                        style: TextStyle(
-                                          color: AppColors.white.withValues(alpha: 0.85),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
+                                blurRadius: 16,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.2,
                                         ),
+                                        borderRadius: BorderRadius.circular(14),
                                       ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        formatRouteDistanceMeters(routeDm),
-                                        style: const TextStyle(
-                                          color: AppColors.white,
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.w800,
-                                        ),
+                                      child: const Icon(
+                                        Icons.route_rounded,
+                                        color: AppColors.white,
+                                        size: 26,
                                       ),
-                                    ],
+                                    ),
+                                    const SizedBox(width: 14),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            AppStrings.routePlanTotalDistance,
+                                            style: TextStyle(
+                                              color: AppColors.white.withValues(
+                                                alpha: 0.85,
+                                              ),
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            formatRouteDistanceMeters(routeDm),
+                                            style: const TextStyle(
+                                              color: AppColors.white,
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 14),
+                                Text(
+                                  AppStrings.routePlanTotalDuration,
+                                  style: TextStyle(
+                                    color: AppColors.white.withValues(
+                                      alpha: 0.85,
+                                    ),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  formatRouteDurationSeconds(routeDs),
+                                  style: const TextStyle(
+                                    color: AppColors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  AppStrings.routePlanOsrmNote,
+                                  style: TextStyle(
+                                    color: AppColors.white.withValues(
+                                      alpha: 0.75,
+                                    ),
+                                    fontSize: 11,
+                                    height: 1.25,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 14),
-                            Text(
-                              AppStrings.routePlanTotalDuration,
-                              style: TextStyle(
-                                color: AppColors.white.withValues(alpha: 0.85),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              formatRouteDurationSeconds(routeDs),
-                              style: const TextStyle(
-                                color: AppColors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              AppStrings.routePlanOsrmNote,
-                              style: TextStyle(
-                                color: AppColors.white.withValues(alpha: 0.75),
-                                fontSize: 11,
-                                height: 1.25,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-                ...stops.asMap().entries.map((e) {
-                  final i = e.key;
-                  final s = e.value;
-                  final title = s.days == 0
-                      ? '${i + 1}. ${s.city} · ${AppStrings.routePlanStartNoOvernight}'
-                      : '${i + 1}. ${s.city} — ${s.days} ${AppStrings.routePlanDaysLabel}';
-                  final children = <Widget>[];
-                  if (s.items.isEmpty) {
-                    children.add(
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF5F9FA),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            AppStrings.routePlanNoSuggestions,
-                            style: TextStyle(fontSize: 13, color: AppColors.campaignSummaryMuted),
                           ),
                         ),
                       ),
-                    );
-                  } else {
-                    for (final it in s.items) {
-                      if (it is Misafirhane) {
+                    ],
+                    ...stops.asMap().entries.map((e) {
+                      final i = e.key;
+                      final s = e.value;
+                      final title = s.days == 0
+                          ? '${i + 1}. ${s.city} · ${AppStrings.routePlanStartNoOvernight}'
+                          : '${i + 1}. ${s.city} — ${s.days} ${AppStrings.routePlanDaysLabel}';
+                      final children = <Widget>[];
+                      if (s.items.isEmpty) {
                         children.add(
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
-                            child: Material(
-                              color: Colors.white,
-                              elevation: 0,
-                              borderRadius: BorderRadius.circular(14),
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: const Color(0xFF1565C0).withValues(alpha: 0.2)),
-                                ),
-                                child: ListTile(
-                                  dense: true,
-                                  leading: const CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor: Color(0xFFE3F2FD),
-                                    child: Icon(Icons.hotel_rounded, color: Color(0xFF1565C0), size: 20),
-                                  ),
-                                  title: Text(
-                                    it.isim,
-                                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                                  ),
-                                  subtitle: Text(
-                                    AppStrings.routePlanKonak,
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.primary.withValues(alpha: 0.8),
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
+                            padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F9FA),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                AppStrings.routePlanNoSuggestions,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.textMutedOf(context),
                                 ),
                               ),
                             ),
                           ),
                         );
-                      } else if (it is GeziYemekItem) {
-                        final yemek = it.tur == 'Yemek';
-                        final label = yemek ? AppStrings.routePlanYemek : AppStrings.routePlanGezi;
-                        final accent = yemek ? const Color(0xFFE65100) : const Color(0xFF2E7D32);
-                        final dayLabel = it.day != null && s.days > 0
-                            ? ' · ${AppStrings.routePlanDayShort} ${it.day}'
-                            : '';
-                        children.add(
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
-                            child: Material(
-                              color: Colors.white,
-                              elevation: 0,
-                              borderRadius: BorderRadius.circular(14),
-                              child: Container(
-                                decoration: BoxDecoration(
+                      } else {
+                        for (final it in s.items) {
+                          if (it is Misafirhane) {
+                            children.add(
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
+                                child: Material(
+                                  color: Colors.white,
+                                  elevation: 0,
                                   borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(color: accent.withValues(alpha: 0.22)),
-                                ),
-                                child: ListTile(
-                                  dense: true,
-                                  leading: CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor: accent.withValues(alpha: 0.12),
-                                    child: Icon(
-                                      yemek ? Icons.restaurant_rounded : Icons.park_rounded,
-                                      color: accent,
-                                      size: 20,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                        color: const Color(
+                                          0xFF1565C0,
+                                        ).withValues(alpha: 0.2),
+                                      ),
                                     ),
-                                  ),
-                                  title: Text(
-                                    it.isim,
-                                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                                  ),
-                                  subtitle: Text(
-                                    '$label$dayLabel',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: accent.withValues(alpha: 0.9),
-                                      fontWeight: FontWeight.w600,
+                                    child: ListTile(
+                                      dense: true,
+                                      leading: const CircleAvatar(
+                                        radius: 18,
+                                        backgroundColor: Color(0xFFE3F2FD),
+                                        child: Icon(
+                                          Icons.hotel_rounded,
+                                          color: Color(0xFF1565C0),
+                                          size: 20,
+                                        ),
+                                      ),
+                                      title: Text(
+                                        it.isim,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        AppStrings.routePlanKonak,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.primary.withValues(
+                                            alpha: 0.8,
+                                          ),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ),
-                        );
+                            );
+                          } else if (it is GeziYemekItem) {
+                            final yemek = it.tur == 'Yemek';
+                            final label = yemek
+                                ? AppStrings.routePlanYemek
+                                : AppStrings.routePlanGezi;
+                            final accent = yemek
+                                ? const Color(0xFFE65100)
+                                : const Color(0xFF2E7D32);
+                            final dayLabel = it.day != null && s.days > 0
+                                ? ' · ${AppStrings.routePlanDayShort} ${it.day}'
+                                : '';
+                            children.add(
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8, 0, 8, 6),
+                                child: Material(
+                                  color: Colors.white,
+                                  elevation: 0,
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                        color: accent.withValues(alpha: 0.22),
+                                      ),
+                                    ),
+                                    child: ListTile(
+                                      dense: true,
+                                      leading: CircleAvatar(
+                                        radius: 18,
+                                        backgroundColor: accent.withValues(
+                                          alpha: 0.12,
+                                        ),
+                                        child: Icon(
+                                          yemek
+                                              ? Icons.restaurant_rounded
+                                              : Icons.park_rounded,
+                                          color: accent,
+                                          size: 20,
+                                        ),
+                                      ),
+                                      title: Text(
+                                        it.isim,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      subtitle: Text(
+                                        '$label$dayLabel',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: accent.withValues(alpha: 0.9),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                        }
                       }
-                    }
-                  }
-                  return ExpansionTile(
-                    title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-                    children: children,
-                  );
-                }),
-                if (navWaypoints != null && navWaypoints.length >= 2) ...[
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.navigation_rounded, color: AppColors.primary),
-                    title: const Text(AppStrings.routePlanStartNavigation),
-                    onTap: () {
-                      openGoogleDirectionsWaypoints(sheetCtx, navWaypoints);
-                    },
-                  ),
-                ],
-                const Divider(),
-                ListTile(
-                  leading: const Icon(Icons.delete_outline),
-                  title: const Text(AppStrings.routePlanClearRoute),
-                  onTap: () {
-                    Navigator.pop(sheetCtx);
-                    setState(_clearRouteOnly);
-                  },
+                      return ExpansionTile(
+                        title: Text(
+                          title,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        children: children,
+                      );
+                    }),
+                    if (navWaypoints != null && navWaypoints.length >= 2) ...[
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(
+                          Icons.navigation_rounded,
+                          color: AppColors.primary,
+                        ),
+                        title: const Text(AppStrings.routePlanStartNavigation),
+                        onTap: () {
+                          openGoogleDirectionsWaypoints(sheetCtx, navWaypoints);
+                        },
+                      ),
+                    ],
+                    const Divider(),
+                    ListTile(
+                      leading: const Icon(Icons.delete_outline),
+                      title: const Text(AppStrings.routePlanClearRoute),
+                      onTap: () {
+                        Navigator.pop(sheetCtx);
+                        setState(_clearRouteOnly);
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.bookmark_add_outlined),
+                      title: const Text(AppStrings.routePlanSaveTitle),
+                      onTap: () async {
+                        Navigator.pop(sheetCtx);
+                        await _promptSaveRouteFromMap(context, stops);
+                      },
+                    ),
+                  ],
                 ),
-                ListTile(
-                  leading: const Icon(Icons.bookmark_add_outlined),
-                  title: const Text(AppStrings.routePlanSaveTitle),
-                  onTap: () async {
-                    Navigator.pop(sheetCtx);
-                    await _promptSaveRouteFromMap(context, stops);
-                  },
-                ),
-              ],
-            ),
-            );
-          },
-        ),
+              );
+            },
+          ),
         ),
       ),
       backgroundColor: Colors.transparent,
@@ -3791,14 +3863,10 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen> with WidgetsBindi
       }
     });
   }
-
 }
 
 class _EmergencyFab extends StatelessWidget {
-  const _EmergencyFab({
-    required this.onTap,
-    this.anchorKey,
-  });
+  const _EmergencyFab({required this.onTap, this.anchorKey});
 
   final VoidCallback onTap;
   final Key? anchorKey;
@@ -3808,39 +3876,47 @@ class _EmergencyFab extends StatelessWidget {
     return KeyedSubtree(
       key: anchorKey,
       child: Tooltip(
-      message: AppStrings.fabEmergency,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Material(
-            elevation: 12,
-            shape: const CircleBorder(),
-            color: const Color(0xFFD32F2F),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: onTap,
-              child: SizedBox(
-                width: 56,
-                height: 56,
-                child: const Icon(Icons.priority_high, color: AppColors.white, size: 28),
+        message: AppStrings.fabEmergency,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Material(
+              elevation: 12,
+              shape: const CircleBorder(),
+              color: const Color(0xFFD32F2F),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: onTap,
+                child: SizedBox(
+                  width: 56,
+                  height: 56,
+                  child: const Icon(
+                    Icons.priority_high,
+                    color: AppColors.white,
+                    size: 28,
+                  ),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            AppStrings.emergencyLabel,
-            style: TextStyle(
-              color: AppColors.emergencyLabel,
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 1.4,
-              shadows: const [
-                Shadow(color: Color(0x40000000), offset: Offset(0, 1), blurRadius: 1),
-              ],
+            const SizedBox(height: 2),
+            Text(
+              AppStrings.emergencyLabel,
+              style: TextStyle(
+                color: AppColors.emergencyLabel,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.4,
+                shadows: const [
+                  Shadow(
+                    color: Color(0x40000000),
+                    offset: Offset(0, 1),
+                    blurRadius: 1,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
@@ -3861,4 +3937,3 @@ class _OverviewCitySummary {
 
   double get markerSize => facilityCount >= 100 ? 30 : 26;
 }
-

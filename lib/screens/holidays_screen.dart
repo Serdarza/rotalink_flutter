@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import '../constants/public_holidays_2026.dart';
 import '../l10n/app_strings.dart';
 import '../navigation/rotalink_shell_scope.dart';
-import '../services/announcement_notification_scheduler.dart';
-import '../services/campaign_push_service.dart';
 import '../theme/app_colors.dart';
 
 /// 2026–2027 resmi tatiller ve idari izinler — liste, kart ve geri sayım.
@@ -62,8 +60,6 @@ class _HolidayCardStyle {
 
 class _HolidaysScreenState extends State<HolidaysScreen> {
   late final Timer _tick;
-  bool? _announcementsEnabled;
-  bool? _campaignPushEnabled;
 
   @override
   void initState() {
@@ -71,38 +67,6 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     _tick = Timer.periodic(const Duration(minutes: 1), (_) {
       if (mounted) setState(() {});
     });
-    unawaited(_loadAnnouncementsEnabled());
-    unawaited(_loadCampaignPushEnabled());
-  }
-
-  Future<void> _loadAnnouncementsEnabled() async {
-    final enabled = await AnnouncementNotificationScheduler.isEnabled();
-    if (mounted) setState(() => _announcementsEnabled = enabled);
-  }
-
-  Future<void> _loadCampaignPushEnabled() async {
-    final enabled = await CampaignPushService.isEnabled();
-    if (mounted) setState(() => _campaignPushEnabled = enabled);
-  }
-
-  Future<void> _toggleCampaignPush(bool value) async {
-    setState(() => _campaignPushEnabled = value);
-    final permitted = await CampaignPushService.setEnabled(value);
-    if (value && !permitted && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Bildirim izni kapalı. Bildirim almak için telefon ayarlarından '
-            'Rotalink bildirimlerine izin verin.',
-          ),
-        ),
-      );
-    }
-  }
-
-  Future<void> _toggleAnnouncements(bool value) async {
-    setState(() => _announcementsEnabled = value);
-    await AnnouncementNotificationScheduler.setEnabled(value);
   }
 
   @override
@@ -243,9 +207,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
     final firstPastIndex = upcoming.length;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(AppStrings.drawerHolidays),
-      ),
+      appBar: AppBar(title: Text(AppStrings.drawerHolidays)),
       body: ListView.builder(
         padding: EdgeInsets.fromLTRB(
           16,
@@ -253,7 +215,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
           16,
           12 + RotalinkShellScope.scrollBottomPadding(context),
         ),
-        itemCount: holidays.length + 2,
+        itemCount: holidays.length + 1,
         itemBuilder: (context, index) {
           if (index == 0) {
             return Padding(
@@ -262,93 +224,27 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppColors.primarySoft,
+                  color: AppColors.primarySoftOf(context),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(color: AppColors.borderOf(context)),
                 ),
                 child: Text(
                   '2026–2027 milli ve dini tatiller ile açıklanan kamu idari izinleri. '
                   'İdari izin yalnızca kamu personelini kapsar; özel sektörü bağlamaz. '
                   'Dini bayram tarihlerinde Diyanet takvimi esas alınır.',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.campaignSummaryMuted,
+                    color: AppColors.textMutedOf(context),
                     height: 1.4,
                   ),
                 ),
               ),
             );
           }
-          if (index == 1) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFBBDEFB)),
-                ),
-                child: Column(
-                  children: [
-                    SwitchListTile.adaptive(
-                      value: _announcementsEnabled ?? true,
-                      onChanged: _announcementsEnabled == null
-                          ? null
-                          : _toggleAnnouncements,
-                      secondary: const Icon(
-                        Icons.notifications_active_outlined,
-                        color: Color(0xFF1565C0),
-                      ),
-                      title: Text(
-                        'Duyuru bildirimleri',
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      subtitle: Text(
-                        'Haftada en fazla bir kez, Perşembe 21:00 civarı tatil, '
-                        'tesis ve kampanya önerileri.',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.campaignSummaryMuted,
-                          height: 1.3,
-                        ),
-                      ),
-                    ),
-                    const Divider(height: 1, indent: 16, endIndent: 16),
-                    SwitchListTile.adaptive(
-                      value: _campaignPushEnabled ?? true,
-                      onChanged: _campaignPushEnabled == null
-                          ? null
-                          : _toggleCampaignPush,
-                      secondary: const Icon(
-                        Icons.campaign_outlined,
-                        color: Color(0xFF1565C0),
-                      ),
-                      title: Text(
-                        CampaignPushService.settingTitle,
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      subtitle: Text(
-                        CampaignPushService.settingDescription,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.campaignSummaryMuted,
-                          height: 1.3,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          final i = index - 2;
+          final i = index - 1;
           final h = holidays[i];
           final showPastHeader = past.isNotEmpty && i == firstPastIndex;
-          final showYearHeader = i == 0 ||
-              showPastHeader ||
-              holidays[i - 1].year != h.year;
+          final showYearHeader =
+              i == 0 || showPastHeader || holidays[i - 1].year != h.year;
           final countdown = _countdownText(h, now);
           final timing = _holidayTiming(h, now);
           final style = _cardStyle(timing);
@@ -361,17 +257,17 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                   padding: EdgeInsets.only(top: i > 0 ? 12 : 0, bottom: 6),
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.history_rounded,
                         size: 20,
-                        color: AppColors.campaignSummaryMuted,
+                        color: AppColors.textMutedOf(context),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         'Geçmiş tatiller',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: AppColors.campaignSummaryMuted,
+                          color: AppColors.textMutedOf(context),
                         ),
                       ),
                     ],
@@ -387,7 +283,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                     '${h.year} yılı',
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: AppColors.textStrongOf(context),
                     ),
                   ),
                 ),
@@ -447,13 +343,15 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                                             h.name,
                                             style: theme.textTheme.titleMedium
                                                 ?.copyWith(
-                                              fontWeight: FontWeight.w700,
-                                              color: style.titleMuted
-                                                  ? AppColors
-                                                      .campaignSummaryMuted
-                                                  : AppColors.textPrimary,
-                                              height: 1.25,
-                                            ),
+                                                  fontWeight: FontWeight.w700,
+                                                  color: style.titleMuted
+                                                      ? AppColors
+                                                            .campaignSummaryMuted
+                                                      : AppColors.textStrongOf(
+                                                          context,
+                                                        ),
+                                                  height: 1.25,
+                                                ),
                                           ),
                                           const SizedBox(height: 8),
                                           Container(
@@ -474,10 +372,10 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                                               h.dateLine,
                                               style: theme.textTheme.bodyMedium
                                                   ?.copyWith(
-                                                color: style.dateFg,
-                                                fontWeight: FontWeight.w600,
-                                                letterSpacing: 0.1,
-                                              ),
+                                                    color: style.dateFg,
+                                                    fontWeight: FontWeight.w600,
+                                                    letterSpacing: 0.1,
+                                                  ),
                                             ),
                                           ),
                                         ],
@@ -504,8 +402,9 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                                       ),
                                       backgroundColor: _kindChipBg(h.kind),
                                       side: BorderSide(
-                                        color: _kindChipFg(h.kind)
-                                            .withValues(alpha: 0.25),
+                                        color: _kindChipFg(
+                                          h.kind,
+                                        ).withValues(alpha: 0.25),
                                       ),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 4,
@@ -525,8 +424,9 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                                       ),
                                       backgroundColor: style.durationChipBg,
                                       side: BorderSide(
-                                        color: style.dateChipBorder
-                                            .withValues(alpha: 0.45),
+                                        color: style.dateChipBorder.withValues(
+                                          alpha: 0.45,
+                                        ),
                                       ),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 4,
@@ -551,8 +451,9 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
                                       ),
                                       backgroundColor: style.countdownBg,
                                       side: BorderSide(
-                                        color: style.dateChipBorder
-                                            .withValues(alpha: 0.55),
+                                        color: style.dateChipBorder.withValues(
+                                          alpha: 0.55,
+                                        ),
                                       ),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 4,

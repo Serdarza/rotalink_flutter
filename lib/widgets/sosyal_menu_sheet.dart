@@ -42,7 +42,7 @@ Future<void> showSosyalMenuSheet(BuildContext context, SosyalMenu menu) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: Colors.white,
+    backgroundColor: AppColors.surfaceOf(context),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
@@ -106,8 +106,8 @@ class _SosyalMenuBody extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           menu.isim,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
+          style: TextStyle(
+            color: AppColors.textStrongOf(context),
             fontSize: 17,
             fontWeight: FontWeight.w700,
             letterSpacing: -0.2,
@@ -166,8 +166,8 @@ class _SosyalMenuBody extends StatelessWidget {
           const SizedBox(height: 18),
           Text(
             k.ad,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: AppColors.textStrongOf(context),
               fontSize: 14.5,
               fontWeight: FontWeight.w700,
             ),
@@ -204,8 +204,8 @@ class _SosyalMenuBody extends StatelessWidget {
                     children: [
                       Text(
                         formatTl(u.fiyat),
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                        style: TextStyle(
+                          color: AppColors.textStrongOf(context),
                           fontSize: 13.5,
                           fontWeight: FontWeight.w600,
                         ),

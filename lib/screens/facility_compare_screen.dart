@@ -36,7 +36,7 @@ class FacilityCompareScreen extends StatelessWidget {
                 child: Text(
                   FacilityPricing.compareNeedTwo,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColors.textPrimary.withValues(alpha: 0.7), fontSize: 15),
+                  style: TextStyle(color: AppColors.textStrongOf(context).withValues(alpha: 0.7), fontSize: 15),
                 ),
               ),
             );
@@ -79,7 +79,7 @@ class FacilityCompareScreen extends StatelessWidget {
               const SizedBox(height: 14),
               Text(
                 FacilityPricing.note,
-                style: TextStyle(color: AppColors.textPrimary.withValues(alpha: 0.55), fontSize: 12),
+                style: TextStyle(color: AppColors.textStrongOf(context).withValues(alpha: 0.55), fontSize: 12),
               ),
             ],
           );
@@ -107,7 +107,7 @@ class _Section extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.primary.withValues(alpha: 0.08)),
       ),
@@ -117,7 +117,7 @@ class _Section extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: AppColors.textPrimary.withValues(alpha: 0.6),
+              color: AppColors.textStrongOf(context).withValues(alpha: 0.6),
               fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
@@ -158,8 +158,8 @@ class _HeaderRow extends StatelessWidget {
             children: [
               Text(
                 m.isim.trim(),
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: AppColors.textStrongOf(context),
                   fontSize: 13.5,
                   fontWeight: FontWeight.w800,
                   height: 1.25,
@@ -267,8 +267,8 @@ class _TextRow extends StatelessWidget {
         for (final c in cells)
           Text(
             c,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: AppColors.textStrongOf(context),
               fontSize: 13,
               fontWeight: FontWeight.w600,
               height: 1.3,

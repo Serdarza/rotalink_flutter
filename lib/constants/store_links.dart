@@ -27,15 +27,29 @@ abstract final class StoreLinks {
 
   static String get currentStoreName => _isApple ? 'App Store' : 'Play Store';
 
+  /// Uygulama yokken paylaşım linkinin açtığı adres.
+  static const home = 'https://rotalink.tr/';
+
   /// Çekmece menüsü — Uygulamayı Paylaş.
   static String drawerShareMessage() =>
-      'Rotalink uygulamasını bu linklerden indirebilirsiniz:\n\n'
-      'Play Store:\n$playStore\n\n'
-      'App Store:\n$appStore';
+      'Rotalink — kamu seyahat rehberi\n$home';
 
-  /// Paylaşım metinlerinin altına eklenen indirme satırı (her iki mağaza).
-  static String shareDownloadFooter() =>
-      'Rotalink uygulamasını bu linklerden indirebilirsiniz:\n'
-      'Play Store: $playStore\n'
-      'App Store: $appStore';
+  /// Paylaşım metinlerinin altındaki tek bağlantı.
+  static String shareDownloadFooter() => 'Rotalink\n$home';
+
+  /// Başlık, isteğe bağlı satırlar ve alttaki site bağlantısı.
+  static String shareMessage(String title, [List<String> lines = const []]) {
+    final body = StringBuffer(title.trim());
+    for (final line in lines) {
+      final text = line.trim();
+      if (text.isEmpty) continue;
+      body
+        ..write('\n')
+        ..write(text);
+    }
+    body
+      ..write('\n\n')
+      ..write(shareDownloadFooter());
+    return body.toString();
+  }
 }

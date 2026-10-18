@@ -27,9 +27,9 @@ class RotalinkAppDrawer extends StatelessWidget {
     final uri = Uri.parse('https://rotalink.tr/?web=1');
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
         context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Web sitesi açılamadı.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Web sitesi açılamadı.')));
     }
   }
 
@@ -129,6 +129,11 @@ class RotalinkAppDrawer extends StatelessWidget {
                     },
                   ),
                   const DrawerSocialSection(),
+                  RotalinkDrawerTile(
+                    icon: Icons.settings_outlined,
+                    title: AppStrings.drawerSettings,
+                    onTap: () => openRoute(RotalinkShellRoutes.settings),
+                  ),
                   RotalinkDrawerTile(
                     icon: Icons.info_outline_rounded,
                     title: AppStrings.drawerAbout,

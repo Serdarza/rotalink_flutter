@@ -3,13 +3,15 @@ abstract final class AppStrings {
   static const String appName = 'Rotalink';
   static const String defaultNotificationChannelId = 'rotalink_notifications';
   static const String discoverLoadingTitle = 'Kampanyalar yükleniyor';
-  static const String discoverLoadingSubtitle = 'Birkaç saniye içinde hazır olacak';
+  static const String discoverLoadingSubtitle =
+      'Birkaç saniye içinde hazır olacak';
   static const String campaignDetailCta = 'Detayları Gör';
   static const String share = 'Paylaş';
   static const String discoverSearchHint = 'İl, kurum veya kampanya ara';
   static const String campaignOpenLink = 'Bağlantıyı aç';
   static const String campaignGoToDetails = 'Kampanya Detaylarına Git';
-  static const String campaignGoToDetailsSub = 'Tam içerik harici bağlantıda açılır';
+  static const String campaignGoToDetailsSub =
+      'Tam içerik harici bağlantıda açılır';
 
   static const String searchCityHint = 'Şehir veya misafirhane arayın';
   static const String searchNoResults = 'Sonuç bulunamadı.';
@@ -58,9 +60,12 @@ abstract final class AppStrings {
   static const String routePlanDayShort = 'Gün';
   static const String routePlanAddStop = 'Durak ekle';
   static const String routePlanCalculate = 'Rotayı hesapla ve önerileri göster';
-  static const String routePlanInvalidStart = 'Lütfen geçerli bir başlangıç şehri giriniz.';
-  static const String routePlanInvalidStop = 'Geçersiz durak şehri; listeden seçin.';
-  static const String routePlanNeedTarget = 'Lütfen en az bir hedef şehir giriniz.';
+  static const String routePlanInvalidStart =
+      'Lütfen geçerli bir başlangıç şehri giriniz.';
+  static const String routePlanInvalidStop =
+      'Geçersiz durak şehri; listeden seçin.';
+  static const String routePlanNeedTarget =
+      'Lütfen en az bir hedef şehir giriniz.';
   static const String routePlanSavedTitle = 'Kaydedilmiş rotalar';
   static const String routePlanNew = 'Yeni rota';
   static const String routePlanDelete = 'Sil';
@@ -77,7 +82,8 @@ abstract final class AppStrings {
   static const String routePlanTimelineWaypoint = 'Ara durak';
   static const String routePlanTotalDistance = 'Toplam mesafe';
   static const String routePlanTotalDuration = 'Tahmini sürüş süresi';
-  static const String routePlanOsrmNote = 'Araç rotası (OSRM) — trafik dahil değildir.';
+  static const String routePlanOsrmNote =
+      'Araç rotası (OSRM) — trafik dahil değildir.';
   static const String routePlanDaysLabel = 'gün';
   static const String routePlanKonak = 'Konaklama';
   static const String routePlanGezi = 'Gezi';
@@ -93,7 +99,8 @@ abstract final class AppStrings {
   static const String routePlanSearchIlLabel = 'İl ara';
   static const String routePlanPreviewNoMetrics =
       'Canlı mesafe hesabına ulaşılamadı; haritada rota yine de çizilecek.';
-  static const String routePlanInsufficientLocations = 'Rota için yeterli konum bulunamadı.';
+  static const String routePlanInsufficientLocations =
+      'Rota için yeterli konum bulunamadı.';
   static const String bottomDiscover = 'Kampanya';
   static const String drawerSubtitle = 'Akıllı Seyahat Rehberiniz';
   static const String drawerVersionPrefix = 'Sürüm: ';
@@ -104,11 +111,17 @@ abstract final class AppStrings {
   static const String drawerWebsite = 'Web Sitemize Git';
   static const String drawerShareApp = 'Uygulamayı Paylaş';
   static const String drawerAbout = 'Hakkımızda';
+  static const String drawerSettings = 'Ayarlar';
+  static const String drawerAppearance = 'Görünüm';
+  static const String drawerDarkModeTitle = 'Karanlık mod açılsın mı?';
+  static const String drawerDarkModeSubtitle =
+      'Açıkken karanlık görünüm kullanılır. Kapalıyken normal görünüm çalışır.';
   static const String drawerSocialMedia = 'Sosyal Medya Hesaplarımız';
   static const String drawerSocialInstagram = 'Instagram';
   static const String drawerSocialInstagramHandle = '@rotalink_tr';
   static const String drawerSocialFacebook = 'Facebook';
-  static const String drawerSocialFacebookHandle = 'Rotalink Kamu Seyahat Rehberi';
+  static const String drawerSocialFacebookHandle =
+      'Rotalink Kamu Seyahat Rehberi';
   static const String drawerSocialOpenFailed = 'Bağlantı açılamadı.';
 
   static const String myLocationTooltip = 'Konumum';
@@ -146,5 +159,4 @@ abstract final class AppStrings {
   static const String onboardingNext = 'İleri';
   static const String onboardingSkip = 'Atla';
   static const String onboardingFinish = 'Başla';
-
 }

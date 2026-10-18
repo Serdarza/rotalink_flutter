@@ -338,7 +338,7 @@ Future<double?> showBudgetPicker(
   return showModalBottomSheet<double>(
     context: context,
     showDragHandle: true,
-    backgroundColor: Colors.white,
+    backgroundColor: AppColors.surfaceOf(context),
     builder: (sheetContext) => StatefulBuilder(
       builder: (ctx, setSheetState) => SafeArea(
         child: Padding(
@@ -347,10 +347,10 @@ Future<double?> showBudgetPicker(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 FacilityPricing.budgetSheetTitle,
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: AppColors.textStrongOf(context),
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
                 ),
@@ -462,7 +462,7 @@ Future<void> showProFeatureTeaser(
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
-    backgroundColor: Colors.white,
+    backgroundColor: AppColors.surfaceOf(context),
     builder: (sheetContext) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
@@ -486,8 +486,8 @@ Future<void> showProFeatureTeaser(
                 Expanded(
                   child: Text(
                     title,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: AppColors.textStrongOf(context),
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
                     ),

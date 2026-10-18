@@ -38,9 +38,9 @@ class FacilityLocationFilterBar extends ConsumerWidget {
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE8EEF0))),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceOf(context),
+        border: Border(bottom: BorderSide(color: AppColors.borderOf(context))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -58,8 +58,8 @@ class FacilityLocationFilterBar extends ConsumerWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: AppColors.textStrongOf(context),
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -189,12 +189,12 @@ class _FilterPill extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = onTap != null;
     final fg = !enabled
-        ? const Color(0xFF9AABB0)
-        : (active ? AppColors.primary : AppColors.textPrimary);
+        ? AppColors.textMutedOf(context)
+        : (active ? AppColors.primary : AppColors.textStrongOf(context));
     return Material(
       color: active
           ? AppColors.primary.withValues(alpha: 0.08)
-          : const Color(0xFFF4F7F8),
+          : AppColors.fieldFillOf(context),
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
@@ -219,8 +219,8 @@ class _FilterPill extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: const TextStyle(
-                        color: AppColors.campaignSummaryMuted,
+                      style: TextStyle(
+                        color: AppColors.textMutedOf(context),
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
                       ),
@@ -303,9 +303,9 @@ class ListLocationFilterBar extends StatelessWidget {
         : IlIlce.label(il, ilce ?? '');
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE8EEF0))),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceOf(context),
+        border: Border(bottom: BorderSide(color: AppColors.borderOf(context))),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -323,8 +323,8 @@ class ListLocationFilterBar extends StatelessWidget {
                   title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: AppColors.textStrongOf(context),
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
                   ),
@@ -482,8 +482,8 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
             child: Text(
               widget.title,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: AppColors.textStrongOf(context),
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
               ),
@@ -495,12 +495,14 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
               controller: _query,
               onChanged: (_) => setState(() {}),
               textInputAction: TextInputAction.search,
+              cursorColor: AppColors.primary,
+              style: TextStyle(color: AppColors.searchTextOf(context)),
               decoration: InputDecoration(
                 hintText: widget.searchHint,
                 prefixIcon: const Icon(Icons.search_rounded),
                 isDense: true,
                 filled: true,
-                fillColor: const Color(0xFFF4F7F8),
+                fillColor: AppColors.fieldFillOf(context),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
@@ -510,10 +512,10 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
           ),
           Expanded(
             child: names.isEmpty && !showAll
-                ? const Center(
+                ? Center(
                     child: Text(
                       'Eşleşen sonuç yok',
-                      style: TextStyle(color: AppColors.campaignSummaryMuted),
+                      style: TextStyle(color: AppColors.textMutedOf(context)),
                     ),
                   )
                 : ListView.builder(
@@ -583,7 +585,7 @@ class _LocationPickerSheetState extends State<_LocationPickerSheet> {
               fontWeight: FontWeight.w600,
               color: empty
                   ? const Color(0xFFA5B3B7)
-                  : AppColors.campaignSummaryMuted,
+                  : AppColors.textMutedOf(context),
             ),
           ),
           if (selected) ...[

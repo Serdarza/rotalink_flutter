@@ -9,6 +9,7 @@ import '../l10n/app_strings.dart';
 import '../models/campaign.dart';
 import '../models/campaign_insights.dart';
 import '../theme/app_colors.dart';
+import '../theme/ara_ui.dart';
 import '../theme/system_ui.dart';
 import '../widgets/campaign_smart_icon.dart';
 import 'campaign_detail_screen.dart';
@@ -58,9 +59,7 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   @override
   void initState() {
     super.initState();
-    unawaited(
-      RotalinkSystemUi.applyEdgeToEdge(),
-    );
+    unawaited(RotalinkSystemUi.applyEdgeToEdge());
     unawaited(
       CampaignFilterPrefs.getAudience().then((a) {
         if (mounted && a != null) _audience.value = a;
@@ -203,69 +202,69 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
       child: Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: AppColors.canvasOf(context),
-      // Üst şerit status bar’a taşsın; alt gest / üç tuş hep üstte kalsın (viewPadding klavyede de doğru).
-      body: SafeArea(
-        top: false,
-        bottom: !widget.embeddedInShell,
-        child: Padding(
-          padding: widget.embeddedInShell
-              ? EdgeInsets.zero
-              : EdgeInsets.only(
-                  bottom: MediaQuery.viewPaddingOf(context).bottom,
+        resizeToAvoidBottomInset: false,
+        backgroundColor: AraUi.pageOf(context),
+        // Üst şerit status bar’a taşsın; alt gest / üç tuş hep üstte kalsın (viewPadding klavyede de doğru).
+        body: SafeArea(
+          top: false,
+          bottom: !widget.embeddedInShell,
+          child: Padding(
+            padding: widget.embeddedInShell
+                ? EdgeInsets.zero
+                : EdgeInsets.only(
+                    bottom: MediaQuery.viewPaddingOf(context).bottom,
+                  ),
+            child: Column(
+              children: [
+                _DiscoverHeader(
+                  searchController: _search,
+                  showBackButton: widget.showBackButton,
+                  onBack: () => Navigator.of(context).pop(),
                 ),
-          child: Column(
-            children: [
-              _DiscoverHeader(
-                searchController: _search,
-                showBackButton: widget.showBackButton,
-                onBack: () => Navigator.of(context).pop(),
-              ),
-              AnimatedBuilder(
-                animation: Listenable.merge([_audience, _discoverBodyTick]),
-                builder: (context, _) => _AudienceFilterBar(
-                  campaigns: _loadError != null ? const [] : _allCampaigns,
-                  selected: _audience.value,
-                  onSelected: _selectAudience,
+                AnimatedBuilder(
+                  animation: Listenable.merge([_audience, _discoverBodyTick]),
+                  builder: (context, _) => _AudienceFilterBar(
+                    campaigns: _loadError != null ? const [] : _allCampaigns,
+                    selected: _audience.value,
+                    onSelected: _selectAudience,
+                  ),
                 ),
-              ),
-              _DisclaimerBanner(),
-              Expanded(
-                child: AnimatedBuilder(
-                  animation: Listenable.merge([
-                    _debouncedFilter,
-                    _discoverBodyTick,
-                    _audience,
-                  ]),
-                  builder: (context, _) {
-                    final filterQuery = _debouncedFilter.value;
-                    final audience = _audience.value;
-                    final filtered = _loadError != null
-                        ? const <Campaign>[]
-                        : _filtered(_allCampaigns, filterQuery, audience);
-                    final overlay = _overlayLoading();
-                    final emptyMsg = _emptyMessage(
-                      overlayLoading: overlay,
-                      all: _allCampaigns,
-                      filtered: filtered,
-                      audience: audience,
-                      query: filterQuery,
-                    );
-                    return _buildBody(
-                      context: context,
-                      overlay: overlay,
-                      campaigns: filtered,
-                      emptyMsg: emptyMsg,
-                      audience: audience,
-                    );
-                  },
+                _DisclaimerBanner(),
+                Expanded(
+                  child: AnimatedBuilder(
+                    animation: Listenable.merge([
+                      _debouncedFilter,
+                      _discoverBodyTick,
+                      _audience,
+                    ]),
+                    builder: (context, _) {
+                      final filterQuery = _debouncedFilter.value;
+                      final audience = _audience.value;
+                      final filtered = _loadError != null
+                          ? const <Campaign>[]
+                          : _filtered(_allCampaigns, filterQuery, audience);
+                      final overlay = _overlayLoading();
+                      final emptyMsg = _emptyMessage(
+                        overlayLoading: overlay,
+                        all: _allCampaigns,
+                        filtered: filtered,
+                        audience: audience,
+                        query: filterQuery,
+                      );
+                      return _buildBody(
+                        context: context,
+                        overlay: overlay,
+                        campaigns: filtered,
+                        emptyMsg: emptyMsg,
+                        audience: audience,
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }
@@ -470,7 +469,9 @@ class _DiscoverHeader extends StatelessWidget {
         width: double.infinity,
         decoration: BoxDecoration(
           color: AppColors.surfaceOf(context),
-          border: Border(bottom: BorderSide(color: AppColors.borderOf(context))),
+          border: Border(
+            bottom: BorderSide(color: AppColors.borderOf(context)),
+          ),
         ),
         padding: EdgeInsets.fromLTRB(4, top + 4, 4, 16),
         child: Column(
@@ -506,7 +507,8 @@ class _DiscoverHeader extends StatelessWidget {
   }
 }
 
-/// Keşfet arama satırı — klavye inset’i yalnızca bu şeride uygulanır ([resizeToAvoidBottomInset] kapalıyken).
+/// Keşfet arama satırı. Ekranın en üstünde durur; klavye payı eklenmez
+/// (eklenirse üst şerit uzar ve kampanya listesi aşağı kayar).
 class _DiscoverSearchField extends StatelessWidget {
   const _DiscoverSearchField({required this.controller});
 
@@ -514,9 +516,8 @@ class _DiscoverSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ime = MediaQuery.viewInsetsOf(context).bottom;
     return Padding(
-      padding: EdgeInsets.only(bottom: ime),
+      padding: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: TextField(
@@ -524,7 +525,10 @@ class _DiscoverSearchField extends StatelessWidget {
           style: TextStyle(color: AppColors.textStrongOf(context)),
           cursorColor: AppColors.primary,
           decoration: InputDecoration(
-            prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary),
+            prefixIcon: const Icon(
+              Icons.search_rounded,
+              color: AppColors.primary,
+            ),
             hintText: AppStrings.discoverSearchHint,
             hintStyle: TextStyle(color: AppColors.textMutedOf(context)),
             filled: true,
@@ -541,7 +545,10 @@ class _DiscoverSearchField extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(14)),
               borderSide: BorderSide(color: AppColors.primary, width: 1.5),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
           ),
         ),
       ),
@@ -568,7 +575,7 @@ class _DiscoverLoadingBody extends StatelessWidget {
           Text(
             AppStrings.discoverLoadingSubtitle,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.campaignSummaryMuted,
+              color: AppColors.textMutedOf(context),
             ),
           ),
         ],
@@ -771,8 +778,9 @@ class _CampaignDiscoverCard extends StatelessWidget {
                                     vertical: 3,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.surfaceOf(context)
-                                        .withValues(alpha: 0.7),
+                                    color: AppColors.surfaceOf(
+                                      context,
+                                    ).withValues(alpha: 0.7),
                                     borderRadius: BorderRadius.circular(8),
                                     border: Border.all(
                                       color: AppColors.borderOf(context),

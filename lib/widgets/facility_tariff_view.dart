@@ -33,12 +33,12 @@ class _TariffPalette {
   final bool masked;
 
   Color get title =>
-      isDark ? Colors.white.withValues(alpha: 0.92) : AppColors.textPrimary;
+      isDark ? Colors.white.withValues(alpha: 0.92) : AppColors.textStrong;
   Color get label => isDark
       ? Colors.white.withValues(alpha: 0.62)
-      : AppColors.textPrimary.withValues(alpha: 0.58);
+      : AppColors.textStrong.withValues(alpha: 0.58);
   Color get value =>
-      isDark ? Colors.white.withValues(alpha: 0.95) : AppColors.textPrimary;
+      isDark ? Colors.white.withValues(alpha: 0.95) : AppColors.textStrong;
   Color get cardBg =>
       isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white;
   Color get hairline => isDark
@@ -430,7 +430,7 @@ class MaskedPrice extends StatelessWidget {
         style: TextStyle(
           color: isDark
               ? Colors.white.withValues(alpha: 0.85)
-              : AppColors.textPrimary,
+              : AppColors.textStrongOf(context),
           fontSize: 13,
           fontWeight: FontWeight.w800,
         ),

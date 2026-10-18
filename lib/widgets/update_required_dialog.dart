@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../theme/app_colors.dart';
+
 /// Zorunlu güncelleme uyarısı dialog'u
 class UpdateRequiredDialog extends StatelessWidget {
   const UpdateRequiredDialog({
@@ -44,7 +46,7 @@ class UpdateRequiredDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.surfaceOf(context),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../data/favorites_repository.dart';
 import '../models/misafirhane.dart';
 import '../theme/app_colors.dart';
+import '../theme/ara_ui.dart';
 import '../theme/system_ui.dart';
 
 /// Kaydedilen tesisler için görselsiz, metin ve ikon odaklı giriş ekranı.
@@ -46,7 +47,7 @@ class _FavoritesHubScreenState extends State<FavoritesHubScreen> {
     return AnnotatedRegion(
       value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
       child: Material(
-        color: AppColors.canvasOf(context),
+        color: AraUi.pageOf(context),
         child: SafeArea(
           bottom: false,
           child: Column(
@@ -177,7 +178,9 @@ class _FavoriteCard extends StatelessWidget {
       facility.ilce.trim(),
       facility.il.trim(),
     ].where((part) => part.isNotEmpty).join(' · ');
-    final type = facility.tip.trim().isEmpty ? 'Konaklama' : facility.tip.trim();
+    final type = facility.tip.trim().isEmpty
+        ? 'Konaklama'
+        : facility.tip.trim();
 
     return Material(
       color: AppColors.surfaceOf(context),
@@ -299,9 +302,9 @@ class _EmptyState extends StatelessWidget {
               'Beğendiğiniz tesisleri kaydedin; daha sonra burada ve haritada '
               'kolayca bulun.',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textMuted,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textMutedOf(context)),
             ),
             const SizedBox(height: 22),
             FilledButton.icon(

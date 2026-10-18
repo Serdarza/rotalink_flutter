@@ -457,7 +457,7 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: AppColors.white,
+                  color: AppColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -480,7 +480,7 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
                           border: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          hintStyle: TextStyle(color: Colors.grey.shade500),
+                          hintStyle: TextStyle(color: AppColors.textMutedOf(context)),
                         ),
                       ),
                     ),
@@ -678,10 +678,10 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                  color: AppColors.textStrongOf(context),
                 ),
               ),
             ],
@@ -694,7 +694,7 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
           return Padding(
             padding: const EdgeInsets.only(bottom: 10),
             child: Material(
-              color: AppColors.white,
+              color: AppColors.surfaceOf(context),
               elevation: isFirst ? 4 : 2,
               shadowColor: AppColors.primary.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
@@ -715,10 +715,10 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
                           children: [
                             Text(
                               d.dayName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 16,
-                                color: AppColors.textPrimary,
+                                color: AppColors.textStrongOf(context),
                               ),
                             ),
                             const SizedBox(height: 2),
@@ -726,7 +726,7 @@ class _WeatherSheetBodyState extends State<_WeatherSheetBody> {
                               'Min ${d.minTemp}° · Max ${d.maxTemp}°',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Colors.grey.shade600,
+                                color: AppColors.textMutedOf(context),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -781,7 +781,7 @@ class _PremiumTabBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -844,7 +844,7 @@ class _SegButton extends StatelessWidget {
               child: Text(
                 label,
                 style: TextStyle(
-                  color: selected ? Colors.white : AppColors.campaignSummaryMuted,
+                  color: selected ? Colors.white : AppColors.textMutedOf(context),
                   fontWeight: FontWeight.w700,
                   fontSize: 14,
                 ),
@@ -873,7 +873,7 @@ class _MetricTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 14, 10, 14),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFE0ECEF)),
         boxShadow: [
@@ -893,17 +893,17 @@ class _MetricTile extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 11,
-              color: Colors.grey.shade600,
+              color: AppColors.textMutedOf(context),
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+              color: AppColors.textStrongOf(context),
             ),
           ),
         ],
@@ -922,7 +922,7 @@ class _PremiumErrorCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.surfaceOf(context),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: const Color(0xFFFFE0B2)),
       ),
@@ -933,7 +933,7 @@ class _PremiumErrorCard extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(color: Colors.grey.shade800, height: 1.35),
+              style: TextStyle(color: AppColors.textStrongOf(context), height: 1.35),
             ),
           ),
         ],

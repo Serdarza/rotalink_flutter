@@ -23,7 +23,6 @@ import '../services/simple_location_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/best_value_facility.dart';
 import '../utils/il_ilce.dart';
-import '../utils/maps_launch.dart';
 import '../utils/search_normalize.dart';
 import 'facility_detail_card.dart';
 import 'facility_sort_bar.dart';
@@ -183,11 +182,11 @@ class _NationwidePriceSheetState extends State<_NationwidePriceSheet> {
   }
 
   Future<void> _share(Misafirhane m) async {
-    final mapsUrl = googleMapsShareUrlForMisafirhane(m);
+    final phone = m.telefon.trim();
     await Share.share(
-      '${m.isim}\n$mapsUrl\n\n'
-      'Telefon: ${m.telefon.isEmpty ? 'Yok' : m.telefon}\n\n'
-      '${StoreLinks.shareDownloadFooter()}',
+      StoreLinks.shareMessage(m.isim, [
+        if (phone.isNotEmpty) 'Telefon: $phone',
+      ]),
     );
   }
 

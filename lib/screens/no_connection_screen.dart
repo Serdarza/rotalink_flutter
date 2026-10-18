@@ -35,9 +35,10 @@ class _NoConnectionScreenState extends State<NoConnectionScreen>
       duration: const Duration(milliseconds: 1600),
     )..repeat(reverse: true);
 
-    _scale = Tween<double>(begin: 0.92, end: 1.0).animate(
-      CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
-    );
+    _scale = Tween<double>(
+      begin: 0.92,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _pulse, curve: Curves.easeInOut));
 
     // Bağlantı otomatik gelirse sayfayı kapat.
     _sub = NetworkService.instance.onConnectivityChanged.listen((connected) {
@@ -72,7 +73,7 @@ class _NoConnectionScreenState extends State<NoConnectionScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.canvas,
+      backgroundColor: AppColors.canvasOf(context),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -88,7 +89,7 @@ class _NoConnectionScreenState extends State<NoConnectionScreen>
                   height: 100,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.primary.withValues(alpha: 0.08),
+                    color: AppColors.primarySoftOf(context),
                   ),
                   child: const Icon(
                     Icons.wifi_off_rounded,
@@ -101,13 +102,13 @@ class _NoConnectionScreenState extends State<NoConnectionScreen>
               const SizedBox(height: 32),
 
               // ─── Başlık ────────────────────────────────────────────────────
-              const Text(
+              Text(
                 'Bağlantı Yok',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1A2E),
+                  color: AppColors.textStrongOf(context),
                   letterSpacing: 0.2,
                 ),
               ),
@@ -121,7 +122,7 @@ class _NoConnectionScreenState extends State<NoConnectionScreen>
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w400,
-                  color: Colors.grey.shade600,
+                  color: AppColors.textMutedOf(context),
                   height: 1.55,
                 ),
               ),
@@ -137,7 +138,9 @@ class _NoConnectionScreenState extends State<NoConnectionScreen>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.55),
+                    disabledBackgroundColor: AppColors.primary.withValues(
+                      alpha: 0.55,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

@@ -68,7 +68,7 @@ Future<bool?> showRoutePlanPreviewSheet({
                         AppStrings.routePlanPreviewTitle,
                         style: Theme.of(ctx).textTheme.titleLarge?.copyWith(
                               fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimary,
+                              color: AppColors.textStrongOf(context),
                             ),
                       ),
                       const SizedBox(height: 8),
@@ -77,7 +77,7 @@ Future<bool?> showRoutePlanPreviewSheet({
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: AppColors.campaignSummaryMuted,
+                          color: AppColors.textMutedOf(context),
                           fontSize: 14,
                           height: 1.35,
                         ),
@@ -193,7 +193,7 @@ Future<bool?> showRoutePlanPreviewSheet({
                                 child: Text(
                                   AppStrings.routePlanPreviewNoMetrics,
                                   style: TextStyle(
-                                    color: AppColors.textPrimary.withValues(alpha: 0.85),
+                                    color: AppColors.textStrongOf(context).withValues(alpha: 0.85),
                                     fontSize: 13,
                                     height: 1.3,
                                   ),
@@ -284,7 +284,7 @@ Future<bool?> showRoutePlanPreviewSheet({
                         child: Text(
                           AppStrings.routePlanPreviewEdit,
                           style: TextStyle(
-                            color: AppColors.campaignSummaryMuted,
+                            color: AppColors.textMutedOf(context),
                             fontWeight: FontWeight.w600,
                           ),
                         ),

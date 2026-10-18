@@ -81,4 +81,21 @@ abstract final class AppColors {
 
   static Color primarySoftOf(BuildContext context) =>
       isDark(context) ? darkPrimarySoft : primarySoft;
+
+  /// Arama kutusu: koyu temada açık metin, koyu zemin.
+  static Color searchBgOf(BuildContext context) =>
+      isDark(context) ? darkSurface : searchBarBg;
+
+  static Color searchTextOf(BuildContext context) =>
+      isDark(context) ? darkTextStrong : searchBarText;
+
+  static Color searchHintOf(BuildContext context) =>
+      isDark(context) ? darkTextMuted : const Color(0xFF8A9A9E);
+
+  /// Form alanlarının dolgu rengi.
+  static Color fieldFillOf(BuildContext context) =>
+      isDark(context) ? const Color(0xFF243033) : const Color(0xFFF3F7F8);
+
+  static Color iconOf(BuildContext context) =>
+      isDark(context) ? darkTextMuted : textMuted;
 }

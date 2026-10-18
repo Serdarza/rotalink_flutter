@@ -100,20 +100,23 @@ class _KamiInspectButton extends StatelessWidget {
   final KamiResultCardTap tapAction;
   final VoidCallback onTap;
 
-  static (IconData icon, Color color) _style(KamiResultCardTap action) {
+  static (IconData icon, Color color) _style(
+    BuildContext context,
+    KamiResultCardTap action,
+  ) {
     switch (action) {
       case KamiResultCardTap.maps:
         return (Icons.explore_rounded, AppColors.primary);
       case KamiResultCardTap.images:
         return (Icons.image_search_rounded, const Color(0xFF00796B));
       case KamiResultCardTap.none:
-        return (Icons.open_in_new_rounded, AppColors.textPrimary);
+        return (Icons.open_in_new_rounded, AppColors.textMutedOf(context));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final (icon, color) = _style(tapAction);
+    final (icon, color) = _style(context, tapAction);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -491,7 +494,7 @@ class _WelcomePanel extends StatelessWidget {
               fontSize: 15,
               fontWeight: FontWeight.w500,
               letterSpacing: 0.2,
-              color: AppColors.textPrimary.withValues(alpha: 0.55),
+              color: AppColors.textStrongOf(context).withValues(alpha: 0.55),
             ),
           ),
           const SizedBox(height: 6),
@@ -513,7 +516,7 @@ class _WelcomePanel extends StatelessWidget {
               fontSize: 15,
               height: 1.55,
               fontWeight: FontWeight.w400,
-              color: AppColors.textPrimary.withValues(alpha: 0.78),
+              color: AppColors.textStrongOf(context).withValues(alpha: 0.78),
             ),
           ),
           const SizedBox(height: 28),
@@ -566,10 +569,10 @@ class _CapabilityGrid extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   item.$2,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14.5,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textStrongOf(context),
                   ),
                 ),
               ],
@@ -699,8 +702,8 @@ class _UserBubble extends StatelessWidget {
       isUser: true,
       child: Text(
         text,
-        style: const TextStyle(
-          color: AppColors.textPrimary,
+        style: TextStyle(
+          color: AppColors.textStrongOf(context),
           fontSize: 14.5,
           height: 1.45,
           fontWeight: FontWeight.w600,
@@ -736,8 +739,8 @@ class _AssistantTextResult extends StatelessWidget {
           if (title.isNotEmpty)
             Text(
               title,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: AppColors.textStrongOf(context),
                 fontSize: 17,
                 fontWeight: FontWeight.w800,
                 height: 1.3,
@@ -748,7 +751,7 @@ class _AssistantTextResult extends StatelessWidget {
             Text(
               body,
               style: TextStyle(
-                color: AppColors.textPrimary.withValues(alpha: 0.84),
+                color: AppColors.textStrongOf(context).withValues(alpha: 0.84),
                 fontSize: 14.5,
                 height: 1.55,
                 fontWeight: FontWeight.w400,
@@ -914,7 +917,7 @@ class _WeekendRecsResultState extends State<_WeekendRecsResult> {
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.surfaceOf(context),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
@@ -945,8 +948,8 @@ class _WeekendRecsResultState extends State<_WeekendRecsResult> {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: AppColors.textStrongOf(context),
               fontSize: 20,
               fontWeight: FontWeight.w800,
               height: 1.25,
@@ -957,7 +960,7 @@ class _WeekendRecsResultState extends State<_WeekendRecsResult> {
             Text(
               subtitle,
               style: TextStyle(
-                color: AppColors.textPrimary.withValues(alpha: 0.58),
+                color: AppColors.textStrongOf(context).withValues(alpha: 0.58),
                 fontSize: 13.5,
                 fontWeight: FontWeight.w500,
               ),
@@ -1003,7 +1006,7 @@ class _WeekendRecsResultState extends State<_WeekendRecsResult> {
               child: Text(
                 'Bu filtrelere uyan destinasyon yok. Filtreleri gevşetin.',
                 style: TextStyle(
-                  color: AppColors.textPrimary.withValues(alpha: 0.65),
+                  color: AppColors.textStrongOf(context).withValues(alpha: 0.65),
                 ),
               ),
             )
@@ -1068,10 +1071,10 @@ class _WeekendCityContentSheet extends StatelessWidget {
                 const SizedBox(height: 14),
                 Text(
                   detail.city,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textStrongOf(context),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -1080,7 +1083,7 @@ class _WeekendCityContentSheet extends StatelessWidget {
                   '${KamiDistanceService.formatKm(detail.distanceKm)} · '
                   '${detail.driveLabel}',
                   style: TextStyle(
-                    color: AppColors.textPrimary.withValues(alpha: 0.58),
+                    color: AppColors.textStrongOf(context).withValues(alpha: 0.58),
                     fontWeight: FontWeight.w600,
                     fontSize: 13.5,
                   ),
@@ -1109,7 +1112,7 @@ class _WeekendCityContentSheet extends StatelessWidget {
                     isScrollable: true,
                     labelColor: AppColors.primary,
                     unselectedLabelColor:
-                        AppColors.textPrimary.withValues(alpha: 0.45),
+                        AppColors.textStrongOf(context).withValues(alpha: 0.45),
                     indicatorColor: AppColors.primary,
                     labelStyle: const TextStyle(
                       fontWeight: FontWeight.w800,
@@ -1239,7 +1242,7 @@ class _CityPlaceList extends StatelessWidget {
             emptyLabel,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: AppColors.textPrimary.withValues(alpha: 0.55),
+              color: AppColors.textStrongOf(context).withValues(alpha: 0.55),
               fontSize: 14.5,
             ),
           ),
@@ -1305,10 +1308,10 @@ class _CityPlaceTile extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                    color: AppColors.textStrongOf(context),
                     height: 1.3,
                   ),
                 ),
@@ -1352,7 +1355,7 @@ class _CityPlaceTile extends StatelessWidget {
               Text(
                 city.trim(),
                 style: TextStyle(
-                  color: AppColors.textPrimary.withValues(alpha: 0.55),
+                  color: AppColors.textStrongOf(context).withValues(alpha: 0.55),
                   fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1369,7 +1372,7 @@ class _CityPlaceTile extends StatelessWidget {
             Text(
               desc,
               style: TextStyle(
-                color: AppColors.textPrimary.withValues(alpha: 0.78),
+                color: AppColors.textStrongOf(context).withValues(alpha: 0.78),
                 fontSize: 13.5,
                 height: 1.45,
               ),
@@ -1390,7 +1393,7 @@ class _CityPlaceTile extends StatelessWidget {
                   child: Text(
                     addr,
                     style: TextStyle(
-                      color: AppColors.textPrimary.withValues(alpha: 0.62),
+                      color: AppColors.textStrongOf(context).withValues(alpha: 0.62),
                       fontSize: 12.5,
                       height: 1.35,
                     ),
@@ -1419,7 +1422,7 @@ class _CityPlaceTile extends StatelessWidget {
                     style: TextStyle(
                       color: dialPhoneOnTap
                           ? AppColors.primary
-                          : AppColors.textPrimary,
+                          : AppColors.textStrongOf(context),
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                       decoration: dialPhoneOnTap
@@ -1523,8 +1526,8 @@ class _WeekendCityCard extends StatelessWidget {
                         children: [
                           Text(
                             score.city,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
+                            style: TextStyle(
+                              color: AppColors.textStrongOf(context),
                               fontSize: 16.5,
                               fontWeight: FontWeight.w800,
                             ),
@@ -1556,7 +1559,7 @@ class _WeekendCityCard extends StatelessWidget {
                   '${KamiDistanceService.formatKm(score.distanceKm)} · '
                   'Yaklaşık ${score.driveLabel}',
                   style: TextStyle(
-                    color: AppColors.textPrimary.withValues(alpha: 0.7),
+                    color: AppColors.textStrongOf(context).withValues(alpha: 0.7),
                     fontWeight: FontWeight.w600,
                     fontSize: 13.5,
                   ),
@@ -1566,7 +1569,7 @@ class _WeekendCityCard extends StatelessWidget {
                   'Gezi ${score.geziCount} · Yemek ${score.yemekCount} · '
                   'Sosyal ${score.sosyalCount} · Tesis ${score.facilityCount}',
                   style: TextStyle(
-                    color: AppColors.textPrimary.withValues(alpha: 0.55),
+                    color: AppColors.textStrongOf(context).withValues(alpha: 0.55),
                     fontSize: 12.5,
                   ),
                 ),
@@ -1577,7 +1580,7 @@ class _WeekendCityCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: AppColors.textPrimary.withValues(alpha: 0.72),
+                      color: AppColors.textStrongOf(context).withValues(alpha: 0.72),
                       fontSize: 12.5,
                       height: 1.35,
                     ),
@@ -1638,8 +1641,8 @@ class _FacilityCardsResult extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
+                style: TextStyle(
+                  color: AppColors.textStrongOf(context),
                   fontSize: 20,
                   fontWeight: FontWeight.w800,
                   height: 1.25,
@@ -1650,7 +1653,7 @@ class _FacilityCardsResult extends StatelessWidget {
                 Text(
                   subtitle,
                   style: TextStyle(
-                    color: AppColors.textPrimary.withValues(alpha: 0.58),
+                    color: AppColors.textStrongOf(context).withValues(alpha: 0.58),
                     fontSize: 13.5,
                     fontWeight: FontWeight.w500,
                     height: 1.35,
@@ -1741,8 +1744,8 @@ class _FacilityInfoCard extends StatelessWidget {
                 children: [
                   Text(
                     card.title,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: AppColors.textStrongOf(context),
                       fontSize: 16,
                       fontWeight: FontWeight.w800,
                       height: 1.35,
@@ -1753,7 +1756,7 @@ class _FacilityInfoCard extends StatelessWidget {
                     Text(
                       city,
                       style: TextStyle(
-                        color: AppColors.textPrimary.withValues(alpha: 0.55),
+                        color: AppColors.textStrongOf(context).withValues(alpha: 0.55),
                         fontSize: 12.5,
                         fontWeight: FontWeight.w600,
                       ),
@@ -1785,7 +1788,7 @@ class _FacilityInfoCard extends StatelessWidget {
           Text(
             description,
             style: TextStyle(
-              color: AppColors.textPrimary.withValues(alpha: 0.82),
+              color: AppColors.textStrongOf(context).withValues(alpha: 0.82),
               fontSize: 13.5,
               height: 1.5,
               fontWeight: FontWeight.w400,
@@ -1878,7 +1881,7 @@ class _InfoRow extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              color: AppColors.textPrimary.withValues(alpha: 0.55),
+              color: AppColors.textStrongOf(context).withValues(alpha: 0.55),
               fontSize: 12.5,
               fontWeight: FontWeight.w600,
             ),
@@ -1889,10 +1892,10 @@ class _InfoRow extends StatelessWidget {
             value,
             style: TextStyle(
               color: muted
-                  ? AppColors.textPrimary.withValues(alpha: 0.45)
+                  ? AppColors.textStrongOf(context).withValues(alpha: 0.45)
                   : linkStyle
                       ? AppColors.primary
-                      : AppColors.textPrimary,
+                      : AppColors.textStrongOf(context),
               fontSize: emphasize ? 14.5 : 14,
               fontWeight: emphasize || linkStyle
                   ? FontWeight.w700
@@ -1937,7 +1940,7 @@ class _KamiComposer extends StatelessWidget {
     return Material(
       elevation: 8,
       shadowColor: Colors.black.withValues(alpha: 0.08),
-      color: AppColors.white,
+      color: AppColors.surfaceOf(context),
       child: Padding(
         padding: EdgeInsets.fromLTRB(12, 10, 12, bottomPad),
         child: Row(
@@ -1946,7 +1949,7 @@ class _KamiComposer extends StatelessWidget {
             Expanded(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F7F8),
+                  color: AppColors.fieldFillOf(context),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(
                     color: AppColors.primary.withValues(alpha: 0.12),
@@ -1959,12 +1962,14 @@ class _KamiComposer extends StatelessWidget {
                   maxLines: 4,
                   textInputAction: TextInputAction.send,
                   onSubmitted: (_) => onSend(),
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  cursorColor: AppColors.primary,
+                  style: TextStyle(
+                    color: AppColors.searchTextOf(context),
                     fontSize: 15,
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: KamiMessages.inputHint,
+                    hintStyle: TextStyle(color: AppColors.searchHintOf(context)),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
                     focusedBorder: InputBorder.none,

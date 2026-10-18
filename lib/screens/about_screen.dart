@@ -205,7 +205,7 @@ class AboutScreen extends StatelessWidget {
 
                       fontWeight: FontWeight.bold,
 
-                      color: AppColors.textPrimary,
+                      color: AppColors.textStrongOf(context),
 
                     ),
 
@@ -241,7 +241,7 @@ class AboutScreen extends StatelessWidget {
 
                         fontWeight: FontWeight.w600,
 
-                        color: AppColors.textPrimary,
+                        color: AppColors.textStrongOf(context),
 
                       ),
 
@@ -549,7 +549,7 @@ class _SectionCard extends StatelessWidget {
 
                 style: theme.textTheme.bodyLarge?.copyWith(
 
-                  color: AppColors.textPrimary,
+                  color: AppColors.textStrongOf(context),
 
                   height: 1.45,
 
