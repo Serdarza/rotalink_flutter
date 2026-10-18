@@ -36,6 +36,7 @@ import 'kamp_rotalari_view.dart';
 import '../utils/geo_helpers.dart';
 import '../utils/il_ilce.dart';
 import '../utils/main_map_search.dart';
+import '../utils/maps_launch.dart';
 import '../utils/safe_map_coordinates.dart';
 import '../utils/best_value_facility.dart';
 import '../utils/search_normalize.dart';
