@@ -27338,8 +27338,8 @@
       "isim": "Ayvalık Polisevi",
       "tip": "Polisevi",
       "il": "Balıkesir",
-      "adres": "Ayvalık Polis Moral Eğitim Merkezi Müdürlüğü. Ayvalık – BALIKESİR",
-      "telefon": "05053181040",
+      "adres": "Küçükköy Mah. Sarımsaklı Bulvarı 4. Sk. No:4, Ayvalık/Balıkesir (Ayvalık Polis Moral Eğitim Merkezi)",
+      "telefon": "(0266) 324 60 09 / 0505 318 10 40",
       "latitude": 39.26825189522491,
       "longitude": 26.6748965383062
     },
@@ -42151,6 +42151,24 @@
       "telefon": "(0272) 251 52 62 / 0505 318 03 53",
       "latitude": 38.8386094,
       "longitude": 30.4323735
+    },
+    {
+      "isim": "Ankara Hacı Bayram Veli Üniversitesi AOÇ Konukevi",
+      "tip": "Üniversite Konukevi",
+      "il": "Ankara",
+      "adres": "Atatürk Orman Çiftliği, Yenimahalle/Ankara",
+      "telefon": "",
+      "latitude": 39.9366502,
+      "longitude": 32.8051499
+    },
+    {
+      "isim": "Trakya Üniversitesi Balkan Konukevi",
+      "tip": "Üniversite Konukevi",
+      "il": "Edirne",
+      "adres": "Trakya Üniversitesi Balkan Yerleşkesi, Merkez/Edirne",
+      "telefon": "",
+      "latitude": 41.6422021,
+      "longitude": 26.6159419
     }
   ],
   "sosyal": [
