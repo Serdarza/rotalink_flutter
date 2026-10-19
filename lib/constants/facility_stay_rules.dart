@@ -95,6 +95,10 @@ abstract final class FacilityStayRules {
         normalizeForSearch(m.isim).contains('gapuluslararasi')) {
       return _gapUtaem;
     }
+    if (normalizeForSearch(m.il) == 'istanbul' &&
+        normalizeForSearch(m.isim).contains('vakifbankkavacik')) {
+      return _vakifbankKavacik;
+    }
     return _kurumMisafirhanesi(_institutionName(m.tip));
   }
 
@@ -142,6 +146,32 @@ abstract final class FacilityStayRules {
     howTo: [
       'Tesisi arayıp kamu personeli olduğunuzu belirtin.',
       'Girişte kurum kimliği gösterin.',
+    ],
+  );
+
+  static const _vakifbankKavacik = FacilityStayRule(
+    authority: 'Vakıfbank',
+    civilAccess: StayAccess.notAllowed,
+    groups: [
+      StayGroup(
+        'Vakıfbank personeli',
+        'Yalnızca banka personeli konaklayabilir.',
+        StayAccess.allowed,
+      ),
+      StayGroup(
+        'Diğer kamu personeli',
+        'Banka personeli harici misafir kabul edilmiyor.',
+        StayAccess.notAllowed,
+      ),
+      StayGroup(
+        'Sivil vatandaşlar',
+        'Banka personeli harici misafir kabul edilmiyor.',
+        StayAccess.notAllowed,
+      ),
+    ],
+    howTo: [
+      'Konaklama yalnızca Vakıfbank personeline açıktır.',
+      'Rezervasyon için tesisi arayıp banka personeli olduğunuzu belirtin.',
     ],
   );
 
