@@ -42142,6 +42142,15 @@
       "telefon": "",
       "latitude": 38.395,
       "longitude": 27.18
+    },
+    {
+      "isim": "Afyonkarahisar Polis Moral Eğitim Merkezi",
+      "tip": "Polisevi",
+      "il": "Afyonkarahisar",
+      "adres": "Dörtyol Mah. Kütahya Yolu Bulvarı No:12, Merkez/Afyonkarahisar",
+      "telefon": "(0272) 251 52 62 / 0505 318 03 53",
+      "latitude": 38.8386094,
+      "longitude": 30.4323735
     }
   ],
   "sosyal": [
