@@ -23,6 +23,10 @@ val hasFullSigningConfig: Boolean =
     keystoreProperties.getProperty("storeFile") != null &&
     keystoreProperties.getProperty("storePassword") != null
 
+// Personal release APK updates the installed test app without erasing its data.
+// Normal store builds retain their existing production signing/configuration.
+val personalApk = providers.environmentVariable("ROTALINK_PERSONAL_APK").orNull == "true"
+
 android {
     // Play Store / mevcut Kotlin uygulaması ile aynı paket — değiştirmeyin.
     namespace = "com.serdarza.rotalink"
@@ -77,7 +81,9 @@ android {
         }
         release {
             signingConfig =
-                if (hasFullSigningConfig) {
+                if (personalApk) {
+                    signingConfigs.getByName("debug")
+                } else if (hasFullSigningConfig) {
                     signingConfigs.getByName("release")
                 } else {
                     println(
@@ -88,8 +94,8 @@ android {
                 }
             // R8 kod küçültme + kaynak temizleme → APK boyutu ve tersine mühendislik koruması.
             // flutter build apk --obfuscate --split-debug-info=build/debug-info ile tam obfuscation.
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = !personalApk
+            isShrinkResources = !personalApk
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -103,6 +109,10 @@ flutter {
 }
 
 dependencies {
+    // Expose the already-used FlutterFire Messaging SDK to the debug-only renderer.
+    // Use firebase_core's BoM version; do not introduce a different native SDK.
+    implementation(platform("com.google.firebase:firebase-bom:${rootProject.project(":firebase_core").property("FirebaseSDKVersion")}"))
+    implementation("com.google.firebase:firebase-messaging")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("androidx.activity:activity-ktx:1.9.3")
 }
@@ -111,4 +121,8 @@ dependencies {
 // desugaring bayrağını değerlendirme sonunda tekrar işaretle (checkDebugAarMetadata geçsin).
 afterEvaluate {
     android.compileOptions.isCoreLibraryDesugaringEnabled = true
+    if (personalApk) {
+        val firebaseTask = tasks.getByName("processReleaseGoogleServices") as com.google.gms.googleservices.GoogleServicesTask
+        firebaseTask.googleServicesJsonFiles.set(listOf(file("src/debug/google-services.json")))
+    }
 }

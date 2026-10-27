@@ -80,7 +80,9 @@ class _SearchHubScreenState extends State<SearchHubScreen> {
                   decoration: BoxDecoration(
                     color: AraUi.chromeFillOf(context),
                     border: Border(
-                      bottom: BorderSide(color: AraUi.secondaryActionBorderOf(context)),
+                      bottom: BorderSide(
+                        color: AraUi.secondaryActionBorderOf(context),
+                      ),
                     ),
                   ),
                   child: SafeArea(
@@ -123,6 +125,7 @@ class _SearchHubScreenState extends State<SearchHubScreen> {
                               controller: _controller,
                               ilOptionsSorted: iller,
                               onSubmitted: _submit,
+                              onClearPressed: widget.onBack,
                               ignoreKeyboardInset: true,
                               restrained: true,
                             ),
@@ -272,7 +275,9 @@ class _HubCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: color == null ? AraUi.cardBorderOf(context) : AraUi.primaryActionBorder,
+          color: color == null
+              ? AraUi.cardBorderOf(context)
+              : AraUi.primaryActionBorder,
         ),
       ),
       child: InkWell(
@@ -398,7 +403,10 @@ class _CityCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right_rounded, color: AraUi.subtleTextOf(context)),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: AraUi.subtleTextOf(context),
+            ),
           ],
         ),
       ),
@@ -448,7 +456,10 @@ class _NearbyCard extends StatelessWidget {
                   SizedBox(height: 2),
                   Text(
                     'Konumunuza göre sonuçları görün',
-                    style: TextStyle(color: AraUi.mutedTextOf(context), fontSize: 12.5),
+                    style: TextStyle(
+                      color: AraUi.mutedTextOf(context),
+                      fontSize: 12.5,
+                    ),
                   ),
                 ],
               ),

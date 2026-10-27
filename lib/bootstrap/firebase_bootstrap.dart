@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -13,17 +12,10 @@ import '../services/map_tile_cache_service.dart';
 /// **Not:** iOS derlemesi için `ios/Runner/GoogleService-Info.plist` gerekir (Kotlin
 /// projesinde yok; Firebase Console → iOS uygulaması → plist indirip Xcode’a ekleyin).
 
-@pragma('vm:entry-point')
-Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-}
-
 /// Kritik yol: yalnızca [Firebase.initializeApp].
-/// Messaging / Analytics / Remote Config arka planda ısınır — açılışı bloklamaz.
+/// Analytics / Remote Config arka planda ısınır — açılışı bloklamaz.
 Future<FirebaseApp> initializeFirebase() async {
   final app = await Firebase.initializeApp();
-
-  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
   unawaited(MapTileCacheService.instance.ensureInitialized());
   unawaited(_warmFirebaseServices());
@@ -31,10 +23,6 @@ Future<FirebaseApp> initializeFirebase() async {
 }
 
 Future<void> _warmFirebaseServices() async {
-  try {
-    await FirebaseMessaging.instance.setAutoInitEnabled(true);
-  } catch (_) {}
-
   try {
     await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
   } catch (_) {}

@@ -17,281 +17,195 @@ const _tealDark = Color(0xFF00566B);
 /// Arama sonuçlarının en üstünde: fiyatı doğrulanmış en uygun konaklama.
 /// Pro değilse tesis adı ve tutar bulanık; dokununca Pro ekranı açılır.
 /// Pro ise gerçek tesis ve tutar görünür; dokununca [onOpenFacility].
-class BestValueProCard extends StatefulWidget {
+class BestValueProCard extends StatelessWidget {
   const BestValueProCard({
     super.key,
     required this.pick,
     required this.onOpenFacility,
   });
-
   final BestValuePick pick;
   final VoidCallback onOpenFacility;
 
   @override
-  State<BestValueProCard> createState() => _BestValueProCardState();
-}
-
-class _BestValueProCardState extends State<BestValueProCard>
-    with SingleTickerProviderStateMixin {
-  static const _sweeps = 3;
-
-  late final AnimationController _shine = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1500),
-  );
-  int _sweepsDone = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    ProService.instance.isPro.addListener(_onProChanged);
-    _shine.addStatusListener((s) {
-      if (s != AnimationStatus.completed || !mounted) return;
-      _sweepsDone++;
-      if (_sweepsDone < _sweeps) {
-        Future<void>.delayed(const Duration(milliseconds: 450), () {
-          if (mounted) _shine.forward(from: 0);
-        });
+  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
+    valueListenable: ProService.instance.isPro,
+    builder: (context, _, _) {
+      final unlocked = PriceAccess.unlocked;
+      final title = pick.isComparison
+          ? (pick.il != null
+                ? FacilityPricing.bestValueTitleIl(pick.il!)
+                : FacilityPricing.bestValueTitle)
+          : FacilityPricing.bestValueSingleTitle;
+      final basis = pick.basis == BestValueBasis.sivil
+          ? FacilityPricing.sivilLabel
+          : FacilityPricing.kamuLabel;
+      void open() {
+        if (unlocked) {
+          onOpenFacility();
+        } else {
+          Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
+        }
       }
-    });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      if (MediaQuery.of(context).disableAnimations) return;
-      Future<void>.delayed(const Duration(milliseconds: 350), () {
-        if (mounted) _shine.forward(from: 0);
-      });
-    });
-  }
 
-  @override
-  void dispose() {
-    ProService.instance.isPro.removeListener(_onProChanged);
-    _shine.dispose();
-    super.dispose();
-  }
-
-  void _onProChanged() {
-    if (mounted) setState(() {});
-  }
-
-  void _onTap() {
-    if (PriceAccess.unlocked) {
-      widget.onOpenFacility();
-    } else {
-      Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final pick = widget.pick;
-    final unlocked = PriceAccess.unlocked;
-    final title = pick.isComparison
-        ? (pick.il != null
-            ? FacilityPricing.bestValueTitleIl(pick.il!)
-            : FacilityPricing.bestValueTitle)
-        : FacilityPricing.bestValueSingleTitle;
-    final basisLabel = pick.basis == BestValueBasis.sivil
-        ? FacilityPricing.sivilLabel
-        : FacilityPricing.kamuLabel;
-    final tip = pick.facility.tip.trim();
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
-      child: Semantics(
-        button: true,
-        label: unlocked
-            ? '$title: ${pick.facility.isim}, ${formatTl(pick.price)}'
-            : '$title. ${FacilityPricing.bestValueCta}',
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: _onTap,
-            borderRadius: BorderRadius.circular(16),
+      final details = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (unlocked)
+            Text(
+              [
+                pick.facility.il,
+                pick.facility.ilce,
+              ].where((s) => s.trim().isNotEmpty).join(' / '),
+              style: const TextStyle(color: Colors.white, fontSize: 13),
+            ),
+          Text(
+            [
+              if (unlocked && pick.facility.tip.trim().isNotEmpty)
+                pick.facility.tip,
+              basis,
+            ].join(' · '),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 12,
+            ),
+          ),
+        ],
+      );
+      final amount = Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          unlocked
+              ? FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    formatTl(pick.price),
+                    style: const TextStyle(
+                      color: _gold,
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                )
+              : const _Blurred(text: '0.000 TL', fontSize: 22, color: _gold),
+          const Text(
+            FacilityPricing.bestValueUnit,
+            style: TextStyle(color: Colors.white, fontSize: 11),
+          ),
+        ],
+      );
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+        child: Semantics(
+          button: true,
+          label: unlocked
+              ? '${pick.facility.isim}, ${formatTl(pick.price)}'
+              : '$title. ${FacilityPricing.bestValueCta}',
+          child: Material(
+            clipBehavior: Clip.antiAlias,
+            color: _tealDark,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+              side: const BorderSide(color: _gold, width: 1.4),
+            ),
             child: Ink(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [AppColors.primary, _tealDark],
                 ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _gold.withValues(alpha: 0.85), width: 1.4),
-                boxShadow: [
-                  BoxShadow(
-                    color: _gold.withValues(alpha: 0.28),
-                    blurRadius: 14,
-                    spreadRadius: 0.5,
-                  ),
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.18),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Stack(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-                      child: Column(
+              child: InkWell(
+                onTap: open,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              const _ProBadge(),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  title,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 13.5,
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 0.1,
-                                  ),
-                                ),
-                              ),
-                            ],
+                          const Padding(
+                            padding: EdgeInsets.only(top: 2),
+                            child: _ProBadge(),
                           ),
-                          const SizedBox(height: 12),
-                          Row(
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: unlocked
+                                ? Text(
+                                    pick.facility.isim,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 16,
+                                    ),
+                                  )
+                                : Text(
+                                    title,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      LayoutBuilder(
+                        builder: (context, box) {
+                          final stacked =
+                              box.maxWidth < 310 ||
+                              MediaQuery.textScalerOf(context).scale(14) > 20;
+                          return Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
                                 width: 40,
-                                height: 40,
-                                alignment: Alignment.center,
+                                height: 44,
                                 decoration: BoxDecoration(
                                   color: Colors.white.withValues(alpha: 0.14),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: const Icon(Icons.hotel_rounded, color: _gold, size: 22),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    unlocked
-                                        ? Text(
-                                            pick.facility.isim,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.w800,
-                                              height: 1.2,
-                                            ),
-                                          )
-                                        : const _Blurred(
-                                            text: 'Gizli tesis adı',
-                                            fontSize: 15,
-                                          ),
-                                    const SizedBox(height: 3),
-                                    Text(
-                                      [if (unlocked && tip.isNotEmpty) tip, basisLabel].join(' · '),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.78),
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
+                                child: const Icon(
+                                  Icons.hotel_rounded,
+                                  color: _gold,
                                 ),
                               ),
                               const SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  unlocked
-                                      ? Text(
-                                          formatTl(pick.price),
-                                          style: const TextStyle(
-                                            color: _gold,
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.w900,
-                                          ),
-                                        )
-                                      : const _Blurred(text: '0.000 TL', fontSize: 17, color: _gold),
-                                  Text(
-                                    FacilityPricing.bestValueUnit,
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(alpha: 0.75),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          if (pick.isComparison) ...[
-                            const SizedBox(height: 10),
-                            Row(
-                              children: [
-                                Icon(Icons.verified_outlined,
-                                    size: 14, color: Colors.white.withValues(alpha: 0.8)),
-                                const SizedBox(width: 5),
+                              if (stacked)
                                 Expanded(
-                                  child: Text(
-                                    FacilityPricing.bestValueCompared(pick.comparedCount),
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(alpha: 0.85),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      details,
+                                      const SizedBox(height: 6),
+                                      amount,
+                                    ],
                                   ),
-                                ),
+                                )
+                              else ...[
+                                Expanded(child: details),
+                                const SizedBox(width: 8),
+                                SizedBox(width: 115, child: amount),
                               ],
-                            ),
-                          ],
-                          const SizedBox(height: 12),
-                          _CtaButton(unlocked: unlocked, onTap: _onTap),
-                        ],
+                            ],
+                          );
+                        },
                       ),
-                    ),
-                    Positioned.fill(
-                      child: IgnorePointer(
-                        child: AnimatedBuilder(
-                          animation: _shine,
-                          builder: (context, _) {
-                            if (!_shine.isAnimating) return const SizedBox.shrink();
-                            final t = Curves.easeInOutCubic.transform(_shine.value);
-                            return DecoratedBox(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment(-3 + 5 * t, -1),
-                                  end: Alignment(-1 + 5 * t, 1),
-                                  colors: [
-                                    Colors.white.withValues(alpha: 0),
-                                    Colors.white.withValues(alpha: 0.28),
-                                    Colors.white.withValues(alpha: 0),
-                                  ],
-                                  stops: const [0.35, 0.5, 0.65],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+                      const SizedBox(height: 10),
+                      _CtaButton(unlocked: unlocked, onTap: open),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
 }
 
 class _ProBadge extends StatelessWidget {
@@ -327,7 +241,11 @@ class _ProBadge extends StatelessWidget {
 
 /// Gerçek veriyi değil sabit yer tutucu metni bulanıklaştırır (ekran görüntüsünden okunamaz).
 class _Blurred extends StatelessWidget {
-  const _Blurred({required this.text, required this.fontSize, this.color = Colors.white});
+  const _Blurred({
+    required this.text,
+    required this.fontSize,
+    this.color = Colors.white,
+  });
 
   final String text;
   final double fontSize;
@@ -340,7 +258,11 @@ class _Blurred extends StatelessWidget {
       child: Text(
         text,
         maxLines: 1,
-        style: TextStyle(color: color, fontSize: fontSize, fontWeight: FontWeight.w800),
+        style: TextStyle(
+          color: color,
+          fontSize: fontSize,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
@@ -358,14 +280,21 @@ class _CtaButton extends StatelessWidget {
       width: double.infinity,
       child: FilledButton.icon(
         onPressed: onTap,
-        icon: Icon(unlocked ? Icons.arrow_forward_rounded : Icons.lock_open_rounded, size: 18),
-        label: Text(unlocked ? FacilityPricing.bestValueOpen : FacilityPricing.bestValueCta),
+        icon: Icon(
+          unlocked ? Icons.arrow_forward_rounded : Icons.lock_open_rounded,
+          size: 18,
+        ),
+        label: Text(unlocked ? 'Tesisi İncele' : FacilityPricing.bestValueCta),
         style: FilledButton.styleFrom(
           backgroundColor: unlocked ? Colors.white : _gold,
-          foregroundColor: unlocked ? AppColors.primary : const Color(0xFF3D2A00),
+          foregroundColor: unlocked
+              ? AppColors.primary
+              : const Color(0xFF3D2A00),
           padding: const EdgeInsets.symmetric(vertical: 11),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
       ),
     );

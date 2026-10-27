@@ -63,44 +63,125 @@ void main() {
     expect(i.daysLeft(DateTime(2026, 1, 1)), isNull);
   });
 
-  test('union offers are hidden from groups that cannot join unions', () {
-    final kamuSen = CampaignInsights.of(_c({
-      'kurum': 'Türkiye Kamu-Sen',
-      'baslik': 'Digiturk: Kurumsal İndirim – Türkiye Kamu-Sen Üyelerine Özel',
-      'etiketler': ['Kamu Personeli'],
-    }));
+  test('general union offers do not override an explicit audience', () {
+    final kamuSen = CampaignInsights.of(
+      _c({
+        'kurum': 'Türkiye Kamu-Sen',
+        'baslik':
+            'Digiturk: Kurumsal İndirim – Türkiye Kamu-Sen Üyelerine Özel',
+        'etiketler': ['Kamu Personeli'],
+      }),
+    );
     expect(kamuSen.isUnionOffer, isTrue);
     expect(kamuSen.matches(CampaignAudience.teacher), isTrue);
     expect(kamuSen.matches(CampaignAudience.police), isFalse);
     expect(kamuSen.matches(CampaignAudience.military), isFalse);
     expect(kamuSen.matches(CampaignAudience.gendarmerie), isFalse);
 
-    final ets = CampaignInsights.of(_c({
-      'kurum': 'Emniyet Teşkilatı Sendikası',
-      'baslik': 'Anaokulu İndirim Anlaşması',
-      'etiketler': ['Emniyet'],
-    }));
-    expect(ets.matches(CampaignAudience.police), isFalse);
+    final ets = CampaignInsights.of(
+      _c({
+        'kurum': 'Emniyet Teşkilatı Sendikası',
+        'baslik': 'Anaokulu İndirim Anlaşması',
+        'etiketler': ['Emniyet'],
+      }),
+    );
+    expect(ets.matches(CampaignAudience.police), isTrue);
+    expect(ets.matches(CampaignAudience.military), isFalse);
+    expect(ets.matches(CampaignAudience.gendarmerie), isFalse);
 
-    final egitimGucu = CampaignInsights.of(_c({
-      'kurum': 'Eğitim Gücü Sen',
-      'baslik': 'Sara Dil Kursu ile Üyelerimize Özel İndirim',
-      'etiketler': ['Öğretmen'],
-    }));
+    final egitimGucu = CampaignInsights.of(
+      _c({
+        'kurum': 'Eğitim Gücü Sen',
+        'baslik': 'Sara Dil Kursu ile Üyelerimize Özel İndirim',
+        'etiketler': ['Öğretmen'],
+      }),
+    );
     expect(egitimGucu.isUnionOffer, isTrue);
     expect(egitimGucu.matches(CampaignAudience.teacher), isTrue);
 
-    final ptt = CampaignInsights.of(_c({
-      'baslik': 'TSK, Jandarma ve Emniyet Mensuplarına PTT Kargo indirimi!',
-      'aciklama': '',
-    }));
+    final ptt = CampaignInsights.of(
+      _c({
+        'baslik': 'TSK, Jandarma ve Emniyet Mensuplarına PTT Kargo indirimi!',
+        'aciklama': '',
+      }),
+    );
     expect(ptt.isUnionOffer, isFalse);
     expect(ptt.matches(CampaignAudience.police), isTrue);
     expect(ptt.matches(CampaignAudience.military), isTrue);
   });
 
+  test('every collector audience tag appears in its own tab', () {
+    const tags = {
+      'Öğretmen': CampaignAudience.teacher,
+      'Sağlık Çalışanı': CampaignAudience.health,
+      'Hekim': CampaignAudience.health,
+      'Hemşire': CampaignAudience.health,
+      'Emniyet': CampaignAudience.police,
+      'TSK': CampaignAudience.military,
+      'Jandarma': CampaignAudience.gendarmerie,
+      'Sahil Güvenlik': CampaignAudience.gendarmerie,
+      'Akademisyen': CampaignAudience.academic,
+      'Belediye Personeli': CampaignAudience.municipal,
+      'Kamu Personeli': CampaignAudience.publicGeneral,
+      'Memur': CampaignAudience.publicGeneral,
+      'Kamu İşçisi': CampaignAudience.publicGeneral,
+    };
+    for (final entry in tags.entries) {
+      final insights = CampaignInsights.of(
+        _c({
+          'kurum': 'Örnek Sendika',
+          'baslik': 'Üyelerimize özel indirim anlaşması',
+          'etiketler': [entry.key],
+        }),
+      );
+      expect(insights.audiences, {entry.value}, reason: entry.key);
+      expect(insights.matches(entry.value), isTrue, reason: entry.key);
+    }
+  });
+
+  test('legacy bare Emniyet and EGM titles match the police tab', () {
+    for (final title in [
+      "TSK, Emniyet ve Jandarma'ya Sarsılmaz Kampanyaları!",
+      'EGM Personeline Özel İndirim',
+      'Emniyet Genel Müdürlüğüne Özel Kampanya',
+    ]) {
+      final insights = CampaignInsights.of(_c({'baslik': title}));
+      expect(insights.matches(CampaignAudience.police), isTrue, reason: title);
+    }
+    final shared = CampaignInsights.of(
+      _c({'baslik': "TSK, Emniyet ve Jandarma'ya Sarsılmaz Kampanyaları!"}),
+    );
+    expect(shared.audiences, {
+      CampaignAudience.police,
+      CampaignAudience.military,
+      CampaignAudience.gendarmerie,
+    });
+  });
+
   test('foldTr', () {
     expect(foldTr('ÖĞRETMENLERE  Özel'), 'ogretmenlere ozel');
     expect(foldTr('İBB Çalışanları'), 'ibb calisanlari');
+  });
+
+  test('Rotalink katılım duyurusu kurum kampanyası sayılmaz', () {
+    final promotion = _c({
+      'baslik': 'Tesisiniz veya kampanyanız Rotalink’te yer alsın',
+      'aciklama': 'Kamu personeli ve TSK mensuplarına ulaşın.',
+      'link': 'mailto:rotalinkinfo@gmail.com?subject=Rotalink',
+      'etiketler': ['TSK', 'Kamu Personeli'],
+    });
+    expect(promotion.isRotalinkPromotion, isTrue);
+    final insights = CampaignInsights.of(promotion);
+    expect(insights.audiences, isEmpty);
+    for (final audience in CampaignAudience.values) {
+      expect(insights.matches(audience), isFalse, reason: audience.label);
+    }
+    expect(
+      _c({
+        'baslik': 'Tesisiniz veya kampanyanız Rotalink’te yer alsın',
+        'link': 'https://example.com/kampanya',
+      }).isRotalinkPromotion,
+      isFalse,
+    );
   });
 }

@@ -9,17 +9,16 @@ class RotalinkShellScope extends InheritedWidget {
     super.key,
     required this.goHome,
     required this.selectTab,
-    required this.onboarding,
+    this.onboarding,
     required super.child,
   });
 
   final VoidCallback goHome;
   final void Function(RotalinkBottomNavItem tab) selectTab;
-  final AppOnboardingController onboarding;
+  final AppOnboardingController? onboarding;
 
   static RotalinkShellScope? maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<RotalinkShellScope>();
+    return context.dependOnInheritedWidgetOfExactType<RotalinkShellScope>();
   }
 
   /// Geri tuşu gibi build dışı çağrılar için — [maybeOf] bağımlılık kaydeder.

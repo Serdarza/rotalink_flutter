@@ -9,14 +9,18 @@ import '../models/misafirhane.dart';
 import '../services/calendar_event_service.dart';
 import '../services/view_counter_service.dart';
 import '../theme/app_colors.dart';
-import '../theme/ara_ui.dart';
 import '../utils/il_ilce.dart';
-import 'distance_permission_chip.dart';
+import '../data/facility_compare_selection.dart';
+import '../billing/price_access.dart';
+import '../utils/geo_helpers.dart';
+import '../utils/safe_map_coordinates.dart';
+import 'facility_detail_action.dart';
+import 'facility_weather_badge.dart';
+import 'view_count_label.dart';
 import 'facility_compare_widgets.dart';
 import 'facility_info_error_report.dart';
 import 'facility_overnight_price_box.dart';
 import 'facility_stay_eligibility_card.dart';
-import 'view_count_label.dart';
 
 /// Tesis listesinden açılan profesyonel detay kartı (Geri ile listeye dönüş).
 class FacilityDetailCard extends StatelessWidget {
@@ -33,6 +37,7 @@ class FacilityDetailCard extends StatelessWidget {
     required this.onReview,
     required this.onShowOnMap,
     required this.onRequestLocation,
+    this.fromMap = false,
   });
 
   final Misafirhane misafirhane;
@@ -46,29 +51,24 @@ class FacilityDetailCard extends StatelessWidget {
   final VoidCallback onReview;
   final VoidCallback onShowOnMap;
   final Future<void> Function() onRequestLocation;
+  final bool fromMap;
 
   @override
   Widget build(BuildContext context) {
     final m = FacilityAddressRepository.instance.resolveFacility(misafirhane);
-    final tip = m.tip.trim();
-    final il = m.il.trim();
-    final ilce = m.ilce.trim();
-    final adres = m.adres.trim();
-    final brightness = Theme.of(context).brightness;
-    final isDark = brightness == Brightness.dark;
-
-    final bg = isDark ? const Color(0xFF151A1C) : AppColors.canvas;
-    final cardBg = isDark ? const Color(0xFF1E2528) : Colors.white;
-    final muted = isDark
-        ? Colors.white.withValues(alpha: 0.55)
-        : AppColors.textStrongOf(context).withValues(alpha: 0.55);
-    final titleColor = isDark
-        ? Colors.white.withValues(alpha: 0.96)
-        : AppColors.textStrongOf(context);
-    final hairline = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : AppColors.primary.withValues(alpha: 0.08);
-
+    final validPoint =
+        m.latitude != 0 &&
+        m.longitude != 0 &&
+        isValidWgs84LatLng(m.latitude, m.longitude);
+    final distance = mapLocationState.locationPermissionGranted && validPoint
+        ? distanceMetersBetween(
+            mapLocationState.userLocation,
+            LatLng(m.latitude, m.longitude),
+          )
+        : null;
+    final distanceLabel = distance == null
+        ? null
+        : 'Size uzaklık: ${distance >= 1000 ? '${(distance / 1000).toStringAsFixed(1).replaceAll('.', ',')} km' : '${distance.round()} m'} (Kuş Uçuşu)';
     return ViewRecorder(
       viewId: ViewCounterService.keyFor(
         ViewCategory.konaklama,
@@ -76,158 +76,104 @@ class FacilityDetailCard extends StatelessWidget {
         misafirhane.isim,
       ),
       child: Material(
-        color: bg,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Material(
-              color: cardBg,
-              elevation: 0,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 8, 14, 10),
+        color: AppColors.canvasOf(context),
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(6, 0, 16, 0),
                 child: Row(
                   children: [
-                    Material(
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : AppColors.primary.withValues(alpha: 0.08),
-                      shape: const CircleBorder(),
-                      clipBehavior: Clip.antiAlias,
-                      child: InkWell(
-                        onTap: onBack,
-                        customBorder: const CircleBorder(),
-                        child: SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: Icon(
-                            Icons.arrow_back_rounded,
-                            size: 22,
-                            color: isDark ? Colors.white : AppColors.primary,
-                          ),
-                        ),
+                    IconButton(
+                      tooltip: 'Geri',
+                      onPressed: onBack,
+                      icon: const Icon(
+                        Icons.arrow_back_rounded,
+                        color: AppColors.primary,
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(9),
+                      child: Image.asset(
+                        'assets/images/app_logo.png',
+                        width: 30,
+                        height: 30,
+                      ),
+                    ),
+                    const SizedBox(width: 9),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Listeye dön',
-                            style: TextStyle(
-                              color: titleColor,
-                              fontSize: 15.5,
+                      child: Text(
+                        'Rotalink',
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              fontSize: 23,
                               fontWeight: FontWeight.w800,
-                              letterSpacing: -0.2,
-                              height: 1.15,
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Konaklama detayı',
-                            style: TextStyle(
-                              color: muted,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w500,
-                              height: 1.15,
-                            ),
-                          ),
-                        ],
                       ),
-                    ),
-                    const Icon(
-                      Icons.bed_outlined,
-                      color: AppColors.primary,
-                      size: 22,
                     ),
                   ],
                 ),
               ),
-            ),
-            Container(height: 1, color: hairline),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                physics: const ClampingScrollPhysics(),
-                children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: hairline),
-                      boxShadow: isDark
-                          ? null
-                          : [
-                              BoxShadow(
-                                color: AppColors.primary.withValues(
-                                  alpha: 0.06,
-                                ),
-                                blurRadius: 18,
-                                offset: const Offset(0, 6),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(12, 5, 12, 12),
+                  children: [
+                    _FacilityHero(facility: m),
+                    const SizedBox(height: 10),
+                    _Surface(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            if (m.adres.trim().isNotEmpty)
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Icon(
+                                    Icons.location_on_rounded,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 7),
+                                  Expanded(
+                                    child: Text(
+                                      m.adres.trim(),
+                                      style: const TextStyle(
+                                        fontSize: 12.5,
+                                        height: 1.35,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            m.isim.trim().isEmpty ? 'Tesis' : m.isim.trim(),
-                            style: TextStyle(
-                              color: titleColor,
-                              fontSize: 21,
-                              fontWeight: FontWeight.w800,
-                              height: 1.25,
-                              letterSpacing: -0.2,
-                            ),
-                          ),
-                          if (il.isNotEmpty ||
-                              tip.isNotEmpty ||
-                              ilce.isNotEmpty) ...[
-                            const SizedBox(height: 10),
+                            if (m.adres.trim().isNotEmpty &&
+                                distanceLabel != null)
+                              const SizedBox(height: 6),
                             Wrap(
                               spacing: 8,
-                              runSpacing: 8,
+                              runSpacing: 6,
                               crossAxisAlignment: WrapCrossAlignment.center,
                               children: [
-                                if (il.isNotEmpty)
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.location_city_outlined,
-                                        size: 15,
-                                        color: muted,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        IlIlce.label(il, ilce),
-                                        style: TextStyle(
-                                          color: muted,
-                                          fontSize: 13.5,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                if (tip.isNotEmpty)
+                                if (distanceLabel != null)
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
+                                      horizontal: 9,
+                                      vertical: 5,
                                     ),
                                     decoration: BoxDecoration(
                                       color: AppColors.primary.withValues(
-                                        alpha: 0.10,
+                                        alpha: 0.09,
                                       ),
-                                      borderRadius: BorderRadius.circular(999),
+                                      borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
-                                      tip,
+                                      distanceLabel,
                                       style: const TextStyle(
+                                        fontSize: 11,
                                         color: AppColors.primary,
-                                        fontSize: 12,
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
@@ -235,153 +181,327 @@ class FacilityDetailCard extends StatelessWidget {
                               ],
                             ),
                           ],
-                          if (adres.isNotEmpty) ...[
-                            const SizedBox(height: 10),
-                            Row(
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _Surface(
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 2,
+                            ),
+                            child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Icon(
-                                  Icons.place_outlined,
-                                  size: 16,
-                                  color: muted,
-                                ),
-                                const SizedBox(width: 6),
                                 Expanded(
-                                  child: Text(
-                                    adres,
-                                    style: TextStyle(
-                                      color: muted,
-                                      fontSize: 13,
-                                      height: 1.35,
-                                      fontWeight: FontWeight.w500,
+                                  child: FacilityDetailAction(
+                                    icon: isFavorite
+                                        ? Icons.favorite_rounded
+                                        : Icons.favorite_border_rounded,
+                                    label: 'Favori',
+                                    color: isFavorite
+                                        ? const Color(0xFFE53935)
+                                        : AppColors.primary,
+                                    selected: isFavorite,
+                                    onTap: onFavorite,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: FacilityDetailAction(
+                                    icon: Icons.event_available_outlined,
+                                    label: 'Takvim',
+                                    onTap: () => unawaited(
+                                      _addToCalendar(
+                                        context,
+                                        m.isim.trim().isEmpty
+                                            ? 'Tesis'
+                                            : m.isim.trim(),
+                                      ),
                                     ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: FacilityDetailAction(
+                                    icon: Icons.chat_bubble_outline_rounded,
+                                    label: 'Yorum',
+                                    onTap: onReview,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: FacilityCompareButton(
+                                    facility: misafirhane,
+                                    userLocation: mapLocationState.userLocation,
+                                    compactAction: true,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: FacilityDetailAction(
+                                    icon: Icons.ios_share_rounded,
+                                    label: 'Paylaş',
+                                    onTap: onShare,
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                          const SizedBox(height: 14),
-                          DistancePermissionChip(
-                            userLocation: mapLocationState.userLocation,
-                            locationPermissionGranted:
-                                mapLocationState.locationPermissionGranted,
-                            facilityPoint: LatLng(m.latitude, m.longitude),
-                            onRequestLocation: onRequestLocation,
-                            spacingAbove: 0,
-                            fullWidthSingleLine: true,
+                          ),
+                          ValueListenableBuilder<List<Misafirhane>>(
+                            valueListenable: FacilityCompareSelection.instance,
+                            builder: (context, selected, _) =>
+                                PriceAccess.unlocked && selected.length >= 2
+                                ? TextButton.icon(
+                                    onPressed: () => openFacilityCompare(
+                                      context,
+                                      userLocation:
+                                          mapLocationState.userLocation,
+                                    ),
+                                    icon: const Icon(
+                                      Icons.compare_arrows_rounded,
+                                      size: 18,
+                                    ),
+                                    label: Text(
+                                      'Seçilenleri karşılaştır (${selected.length})',
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: cardBg,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: hairline),
+                    const SizedBox(height: 10),
+                    FacilityOvernightPriceBox(
+                      facility: m,
+                      detailPresentation: true,
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 10,
-                      ),
-                      child: Row(
-                        children: [
-                          _DetailAction(
-                            icon: Icons.ios_share_rounded,
-                            color: AppColors.primary,
-                            label: 'Paylaş',
-                            onTap: onShare,
-                          ),
-                          _DetailAction(
-                            icon: isFavorite
-                                ? Icons.favorite_rounded
-                                : Icons.favorite_border_rounded,
-                            color: isFavorite
-                                ? AraUi.favorite
-                                : AppColors.primary,
-                            label: 'Favori',
-                            onTap: onFavorite,
-                          ),
-                          _DetailAction(
-                            icon: Icons.chat_bubble_outline_rounded,
-                            color: AppColors.primary,
-                            label: 'Yorum',
-                            onTap: onReview,
-                          ),
-                          _DetailAction(
-                            icon: Icons.event_available_outlined,
-                            color: AppColors.primary,
-                            label: 'Takvim',
-                            onTap: () => unawaited(
-                              _addToCalendar(
-                                context,
-                                m.isim.trim().isEmpty ? 'Tesis' : m.isim.trim(),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  FacilityCompareButton(
-                    facility: misafirhane,
-                    userLocation: mapLocationState.userLocation,
-                  ),
-                  const SizedBox(height: 12),
-                  FacilityOvernightPriceBox(facility: m),
-                  const SizedBox(height: 12),
-                  FacilityStayEligibilityCard(facility: m),
-                  const SizedBox(height: 12),
-                  FacilityInfoErrorReportCard(facility: m),
-                ],
+                    const SizedBox(height: 10),
+                    FacilityStayEligibilityCard(facility: m, compact: true),
+                    const SizedBox(height: 10),
+                    FacilityInfoErrorReportCard(facility: m),
+                    const SizedBox(height: 6),
+                  ],
+                ),
               ),
-            ),
-            Material(
-              color: cardBg,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
-                child: SizedBox(
-                  height: 50,
+              Material(
+                color: AppColors.surfaceOf(context),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
                   child: Row(
                     children: [
                       Expanded(
-                        child: _BottomButton(
-                          icon: Icons.my_location_outlined,
+                        child: _PrimaryAction(
+                          icon: Icons.my_location_rounded,
                           label: 'Haritada göster',
                           color: AppColors.primary,
-                          filled: false,
-                          onPressed: onShowOnMap,
+                          onTap: onShowOnMap,
                         ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: _BottomButton(
+                        child: _PrimaryAction(
                           icon: Icons.call_rounded,
                           label: 'Ara',
-                          color: AppColors.primary,
-                          onPressed: onCall,
+                          color: const Color(0xFF32A818),
+                          onTap: onCall,
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Konaklama detayı: telefonun takvimine etkinlik ekleme ekranını açar.
+class _Surface extends StatelessWidget {
+  const _Surface({required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: AppColors.surfaceOf(context),
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: AppColors.borderOf(context)),
+      boxShadow: AppColors.isDark(context)
+          ? null
+          : [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.045),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+    ),
+    child: child,
+  );
+}
+
+class _FacilityHero extends StatelessWidget {
+  const _FacilityHero({required this.facility});
+  final Misafirhane facility;
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.bottomLeft,
+        end: Alignment.topRight,
+        colors: [Color(0xFF005965), Color(0xFF007F8F), Color(0xFF22AEB4)],
+      ),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(14),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final narrow =
+              constraints.maxWidth < 310 ||
+              MediaQuery.textScalerOf(context).scale(14) > 18;
+          final title = Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                facility.isim.trim().isEmpty ? 'Tesis' : facility.isim.trim(),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 19,
+                  fontWeight: FontWeight.w800,
+                  height: 1.12,
+                ),
+              ),
+              if (facility.tip.trim().isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 7),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Text(
+                      facility.tip,
+                      style: const TextStyle(
+                        color: Color(0xFF007F8F),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ),
+              if (facility.il.trim().isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    IlIlce.label(facility.il, facility.ilce),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+            ],
+          );
+          final weather = ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: narrow ? double.infinity : 91,
+            ),
+            child: FacilityWeatherBadge(
+              key: ValueKey(facility.stableFacilityId),
+              facility: facility,
+            ),
+          );
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 46,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.8),
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Icon(
+                      Icons.bed_rounded,
+                      size: 30,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 11),
+                  Expanded(child: title),
+                  if (!narrow) ...[const SizedBox(width: 10), weather],
+                ],
+              ),
+              if (narrow)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: weather,
+                ),
+            ],
+          );
+        },
+      ),
+    ),
+  );
+}
+
+class _PrimaryAction extends StatelessWidget {
+  const _PrimaryAction({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => FilledButton(
+    onPressed: onTap,
+    style: FilledButton.styleFrom(
+      backgroundColor: color,
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 12),
+      minimumSize: const Size(0, 48),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 20),
+        const SizedBox(width: 7),
+        Flexible(
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 Future<void> _addToCalendar(BuildContext context, String title) async {
   final now = DateTime.now();
+  const tr = Locale('tr', 'TR');
   final date = await showDatePicker(
     context: context,
+    locale: tr,
     initialDate: DateUtils.dateOnly(now).add(const Duration(days: 1)),
     firstDate: DateUtils.dateOnly(now),
     lastDate: now.add(const Duration(days: 730)),
@@ -396,6 +516,9 @@ Future<void> _addToCalendar(BuildContext context, String title) async {
     helpText: 'Saat seçin',
     cancelText: 'Vazgeç',
     confirmText: 'Tamam',
+    builder: (context, child) {
+      return Localizations.override(context: context, locale: tr, child: child);
+    },
   );
   if (time == null || !context.mounted) return;
   final begin = DateTime(
@@ -409,131 +532,6 @@ Future<void> _addToCalendar(BuildContext context, String title) async {
   if (!ok && context.mounted) {
     ScaffoldMessenger.maybeOf(context)?.showSnackBar(
       const SnackBar(content: Text('Takvim uygulaması açılamadı.')),
-    );
-  }
-}
-
-class _BottomButton extends StatelessWidget {
-  const _BottomButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onPressed,
-    this.filled = true,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onPressed;
-
-  /// true: dolu ana eylem. false: açık turkuaz yüzey + ince çerçeve (ikincil).
-  final bool filled;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!filled) {
-      return FilledButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 20),
-        label: Text(
-          label,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 15,
-            letterSpacing: 0.1,
-          ),
-        ),
-        style: FilledButton.styleFrom(
-          backgroundColor: AraUi.primaryActionFill,
-          foregroundColor: color,
-          elevation: 0,
-          minimumSize: const Size.fromHeight(50),
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
-            side: BorderSide(color: AraUi.primaryActionBorder),
-          ),
-        ),
-      );
-    }
-    return FilledButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 20),
-      label: Text(
-        label,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontWeight: FontWeight.w800,
-          fontSize: 15,
-          letterSpacing: 0.1,
-        ),
-      ),
-      style: FilledButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        minimumSize: const Size.fromHeight(50),
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      ),
-    );
-  }
-}
-
-class _DetailAction extends StatelessWidget {
-  const _DetailAction({
-    required this.icon,
-    required this.color,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.10),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 22),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  // Etiket nötr koyu; renk yalnız ikonda (Booking / Airbnb düzeni).
-                  color: AppColors.isDark(context)
-                      ? Colors.white.withValues(alpha: 0.85)
-                      : AraUi.inactiveForegroundOf(context),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

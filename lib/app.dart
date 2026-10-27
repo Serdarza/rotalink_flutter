@@ -1,7 +1,10 @@
+import 'widgets/admin_popup_host.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 import 'main.dart';
@@ -27,6 +30,13 @@ class RotalinkApp extends StatelessWidget {
           navigatorKey: rotalinkNavigatorKey,
           title: AppStrings.appName,
           debugShowCheckedModeBanner: false,
+          locale: const Locale('tr', 'TR'),
+          supportedLocales: const [Locale('tr', 'TR')],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           theme: buildRotalinkTheme(),
           darkTheme: buildRotalinkDarkTheme(),
           themeMode: themeMode,
@@ -35,7 +45,7 @@ class RotalinkApp extends StatelessWidget {
               value: RotalinkSystemUi.forBrightness(
                 Theme.of(context).brightness,
               ),
-              child: child ?? const SizedBox.shrink(),
+              child: AdminPopupHost(child: child ?? const SizedBox.shrink()),
             );
           },
           home: const _ConnectivityGate(),
@@ -64,8 +74,12 @@ class _ConnectivityGateState extends State<_ConnectivityGate> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       logStartup('ilk kare');
-      FlutterNativeSplash.remove();
-      _startBackgroundAfterShell();
+      if (!kIsWeb) FlutterNativeSplash.remove();
+      unawaited(
+        WidgetsBinding.instance.waitUntilFirstFrameRasterized.then((_) {
+          if (mounted) _startBackgroundAfterShell();
+        }),
+      );
     });
   }
 

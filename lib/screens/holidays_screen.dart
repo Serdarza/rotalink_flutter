@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../constants/public_holidays_2026.dart';
+import '../services/public_holiday_repository.dart';
 import '../l10n/app_strings.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
@@ -60,10 +61,17 @@ class _HolidayCardStyle {
 
 class _HolidaysScreenState extends State<HolidaysScreen> {
   late final Timer _tick;
+  final _repository = PublicHolidayRepository.instance;
+
+  void _onHolidaysChanged() {
+    if (mounted) setState(() {});
+  }
 
   @override
   void initState() {
     super.initState();
+    _repository.addListener(_onHolidaysChanged);
+    unawaited(_repository.refresh());
     _tick = Timer.periodic(const Duration(minutes: 1), (_) {
       if (mounted) setState(() {});
     });
@@ -71,6 +79,7 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
 
   @override
   void dispose() {
+    _repository.removeListener(_onHolidaysChanged);
     _tick.cancel();
     super.dispose();
   }
@@ -196,283 +205,273 @@ class _HolidaysScreenState extends State<HolidaysScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final now = DateTime.now();
-    final upcoming = <PublicHoliday>[];
-    final past = <PublicHoliday>[];
-    for (final h in kPublicHolidays) {
-      (_holidayTiming(h, now) == _HolidayTiming.past ? past : upcoming).add(h);
-    }
-    upcoming.sort((a, b) => a.start.compareTo(b.start));
-    past.sort((a, b) => b.start.compareTo(a.start));
-    final holidays = [...upcoming, ...past];
-    final firstPastIndex = upcoming.length;
+    final years = _repository.items.map((h) => h.year).toSet().toList()..sort();
+    final yearsLabel = years.isEmpty
+        ? ''
+        : '${years.first}${years.length > 1 ? "–${years.last}" : ""} ';
+    final holidays =
+        _repository.items
+            .where((h) => _holidayTiming(h, now) != _HolidayTiming.past)
+            .toList()
+          ..sort((a, b) => a.start.compareTo(b.start));
 
     return Scaffold(
       appBar: AppBar(title: Text(AppStrings.drawerHolidays)),
-      body: ListView.builder(
-        padding: EdgeInsets.fromLTRB(
-          16,
-          12,
-          16,
-          12 + RotalinkShellScope.scrollBottomPadding(context),
-        ),
-        itemCount: holidays.length + 1,
-        itemBuilder: (context, index) {
-          if (index == 0) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.primarySoftOf(context),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.borderOf(context)),
-                ),
-                child: Text(
-                  '2026–2027 milli ve dini tatiller ile açıklanan kamu idari izinleri. '
-                  'İdari izin yalnızca kamu personelini kapsar; özel sektörü bağlamaz. '
-                  'Dini bayram tarihlerinde Diyanet takvimi esas alınır.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.textMutedOf(context),
-                    height: 1.4,
-                  ),
-                ),
-              ),
-            );
-          }
-          final i = index - 1;
-          final h = holidays[i];
-          final showPastHeader = past.isNotEmpty && i == firstPastIndex;
-          final showYearHeader =
-              i == 0 || showPastHeader || holidays[i - 1].year != h.year;
-          final countdown = _countdownText(h, now);
-          final timing = _holidayTiming(h, now);
-          final style = _cardStyle(timing);
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (showPastHeader)
-                Padding(
-                  padding: EdgeInsets.only(top: i > 0 ? 12 : 0, bottom: 6),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.history_rounded,
-                        size: 20,
-                        color: AppColors.textMutedOf(context),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'Geçmiş tatiller',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textMutedOf(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              if (showYearHeader)
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: i > 0 && !showPastHeader ? 8 : 0,
-                    bottom: 10,
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await _repository.refresh(force: true);
+        },
+        child: ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.fromLTRB(
+            16,
+            12,
+            16,
+            12 + RotalinkShellScope.scrollBottomPadding(context),
+          ),
+          itemCount: holidays.length + 1,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 14),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.primarySoftOf(context),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.borderOf(context)),
                   ),
                   child: Text(
-                    '${h.year} yılı',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textStrongOf(context),
+                    '${yearsLabel}milli ve dini tatiller ile açıklanan kamu idari izinleri. İdari izin yalnızca kamu personelini kapsar; özel sektörü bağlamaz. Dini bayram tarihlerinde Diyanet takvimi esas alınır.${holidays.isEmpty
+                            ? '\n\nGösterilecek yaklaşan tatil bulunmuyor.'
+                            : ''}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textMutedOf(context),
+                      height: 1.4,
                     ),
                   ),
                 ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Card(
-                  elevation: 0,
-                  shadowColor: Colors.black26,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: BorderSide(
-                      color: style.cardBorder.withValues(alpha: 0.85),
+              );
+            }
+            final i = index - 1;
+            final h = holidays[i];
+            final showYearHeader = i == 0 || holidays[i - 1].year != h.year;
+            final countdown = _countdownText(h, now);
+            final timing = _holidayTiming(h, now);
+            final style = _cardStyle(timing);
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (showYearHeader)
+                  Padding(
+                    padding: EdgeInsets.only(top: i > 0 ? 8 : 0, bottom: 10),
+                    child: Text(
+                      '${h.year} yılı',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textStrongOf(context),
+                      ),
                     ),
                   ),
-                  clipBehavior: Clip.antiAlias,
-                  child: IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Container(width: 5, color: style.strip),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(14, 14, 16, 14),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                      width: 46,
-                                      height: 46,
-                                      decoration: BoxDecoration(
-                                        color: style.iconBg,
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: style.dateChipBorder
-                                              .withValues(alpha: 0.65),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Card(
+                    elevation: 0,
+                    shadowColor: Colors.black26,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      side: BorderSide(
+                        color: style.cardBorder.withValues(alpha: 0.85),
+                      ),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Container(width: 5, color: style.strip),
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(
+                                14,
+                                14,
+                                16,
+                                14,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 46,
+                                        height: 46,
+                                        decoration: BoxDecoration(
+                                          color: style.iconBg,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: style.dateChipBorder
+                                                .withValues(alpha: 0.65),
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          h.kind == HolidayKind.idari
+                                              ? Icons.work_off_outlined
+                                              : Icons.event_outlined,
+                                          color: style.iconFg,
+                                          size: 24,
                                         ),
                                       ),
-                                      child: Icon(
-                                        h.kind == HolidayKind.idari
-                                            ? Icons.work_off_outlined
-                                            : Icons.event_outlined,
-                                        color: style.iconFg,
-                                        size: 24,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            h.name,
-                                            style: theme.textTheme.titleMedium
-                                                ?.copyWith(
-                                                  fontWeight: FontWeight.w700,
-                                                  color: style.titleMuted
-                                                      ? AppColors
-                                                            .campaignSummaryMuted
-                                                      : AppColors.textStrongOf(
-                                                          context,
-                                                        ),
-                                                  height: 1.25,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 6,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: style.dateChipBg,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              border: Border.all(
-                                                color: style.dateChipBorder
-                                                    .withValues(alpha: 0.9),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              h.dateLine,
-                                              style: theme.textTheme.bodyMedium
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              h.name,
+                                              style: theme.textTheme.titleMedium
                                                   ?.copyWith(
-                                                    color: style.dateFg,
-                                                    fontWeight: FontWeight.w600,
-                                                    letterSpacing: 0.1,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: style.titleMuted
+                                                        ? AppColors
+                                                              .campaignSummaryMuted
+                                                        : AppColors.textStrongOf(
+                                                            context,
+                                                          ),
+                                                    height: 1.25,
                                                   ),
                                             ),
+                                            const SizedBox(height: 8),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                    vertical: 6,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: style.dateChipBg,
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                border: Border.all(
+                                                  color: style.dateChipBorder
+                                                      .withValues(alpha: 0.9),
+                                                ),
+                                              ),
+                                              child: Text(
+                                                h.dateLine,
+                                                style: theme
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.copyWith(
+                                                      color: style.dateFg,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      letterSpacing: 0.1,
+                                                    ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      Chip(
+                                        visualDensity: VisualDensity.compact,
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        label: Text(
+                                          h.kindLabel,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                            color: _kindChipFg(h.kind),
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: [
-                                    Chip(
-                                      visualDensity: VisualDensity.compact,
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      label: Text(
-                                        h.kindLabel,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          color: _kindChipFg(h.kind),
+                                        ),
+                                        backgroundColor: _kindChipBg(h.kind),
+                                        side: BorderSide(
+                                          color: _kindChipFg(
+                                            h.kind,
+                                          ).withValues(alpha: 0.25),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
                                         ),
                                       ),
-                                      backgroundColor: _kindChipBg(h.kind),
-                                      side: BorderSide(
-                                        color: _kindChipFg(
-                                          h.kind,
-                                        ).withValues(alpha: 0.25),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 4,
-                                      ),
-                                    ),
-                                    Chip(
-                                      visualDensity: VisualDensity.compact,
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      label: Text(
-                                        'Süre: ${h.durationLabel}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: style.durationChipFg,
+                                      Chip(
+                                        visualDensity: VisualDensity.compact,
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        label: Text(
+                                          'Süre: ${h.durationLabel}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: style.durationChipFg,
+                                          ),
+                                        ),
+                                        backgroundColor: style.durationChipBg,
+                                        side: BorderSide(
+                                          color: style.dateChipBorder
+                                              .withValues(alpha: 0.45),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
                                         ),
                                       ),
-                                      backgroundColor: style.durationChipBg,
-                                      side: BorderSide(
-                                        color: style.dateChipBorder.withValues(
-                                          alpha: 0.45,
+                                      Chip(
+                                        visualDensity: VisualDensity.compact,
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
+                                        avatar: Icon(
+                                          _countdownIcon(timing),
+                                          size: 16,
+                                          color: style.countdownIcon,
+                                        ),
+                                        label: Text(
+                                          countdown,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w700,
+                                            color: style.countdownFg,
+                                          ),
+                                        ),
+                                        backgroundColor: style.countdownBg,
+                                        side: BorderSide(
+                                          color: style.dateChipBorder
+                                              .withValues(alpha: 0.55),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
                                         ),
                                       ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 4,
-                                      ),
-                                    ),
-                                    Chip(
-                                      visualDensity: VisualDensity.compact,
-                                      materialTapTargetSize:
-                                          MaterialTapTargetSize.shrinkWrap,
-                                      avatar: Icon(
-                                        _countdownIcon(timing),
-                                        size: 16,
-                                        color: style.countdownIcon,
-                                      ),
-                                      label: Text(
-                                        countdown,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w700,
-                                          color: style.countdownFg,
-                                        ),
-                                      ),
-                                      backgroundColor: style.countdownBg,
-                                      side: BorderSide(
-                                        color: style.dateChipBorder.withValues(
-                                          alpha: 0.55,
-                                        ),
-                                      ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 4,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          );
-        },
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'device_test_screen.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import '../l10n/app_strings.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../services/announcement_notification_scheduler.dart';
 import '../services/campaign_push_service.dart';
+import '../services/app_notifications_service.dart';
 import '../services/holiday_notification_scheduler.dart';
 import '../theme/app_colors.dart';
 import '../theme/theme_mode_prefs.dart';
@@ -22,6 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool? _announcementsEnabled;
   bool? _campaignPushEnabled;
   bool? _holidayRemindersEnabled;
+  bool? _adminNotificationsEnabled;
 
   @override
   void initState() {
@@ -33,11 +37,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final announcements = await AnnouncementNotificationScheduler.isEnabled();
     final campaigns = await CampaignPushService.isEnabled();
     final holidays = await HolidayNotificationScheduler.isEnabled();
+    final admin = await AppNotificationsService.isEnabled();
     if (!mounted) return;
     setState(() {
       _announcementsEnabled = announcements;
       _campaignPushEnabled = campaigns;
       _holidayRemindersEnabled = holidays;
+      _adminNotificationsEnabled = admin;
     });
   }
 
@@ -59,6 +65,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _toggleAnnouncements(bool value) async {
     setState(() => _announcementsEnabled = value);
     await AnnouncementNotificationScheduler.setEnabled(value);
+  }
+
+  Future<void> _toggleAdminNotifications(bool value) async {
+    setState(() => _adminNotificationsEnabled = value);
+    final permitted = await AppNotificationsService.setEnabled(value);
+    if (value && !permitted && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Bildirim almak için telefon ayarlarından Rotalink bildirimlerine izin verin.',
+          ),
+        ),
+      );
+    }
   }
 
   Future<void> _toggleCampaignPush(bool value) async {
@@ -84,6 +104,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottom),
         children: [
+          if (kDebugMode &&
+              !kIsWeb &&
+              (defaultTargetPlatform == TargetPlatform.android ||
+                  defaultTargetPlatform == TargetPlatform.iOS)) ...[
+            _card(
+              context,
+              padding: EdgeInsets.zero,
+              child: ListTile(
+                leading: const Icon(
+                  Icons.phonelink_setup,
+                  color: AppColors.primary,
+                ),
+                title: const Text('Yönetici testi'),
+                subtitle: const Text(
+                  'Pop-up ve bildirimleri yalnızca bu telefonda deneyin.',
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const DeviceTestScreen(),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 22),
+          ],
           _sectionTitle(context, AppStrings.drawerAppearance),
           const SizedBox(height: 8),
           _card(
@@ -119,6 +165,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
+                SwitchListTile.adaptive(
+                  value: _adminNotificationsEnabled ?? true,
+                  onChanged: _adminNotificationsEnabled == null
+                      ? null
+                      : _toggleAdminNotifications,
+                  secondary: const Icon(
+                    Icons.notifications_outlined,
+                    color: AppColors.primary,
+                  ),
+                  title: const Text('Rotalink bildirimleri'),
+                  subtitle: const Text(
+                    'Rotalink’ten gelen anlık duyuru ve bilgilendirmeler.',
+                  ),
+                ),
+                Divider(height: 1, color: AppColors.borderOf(context)),
                 SwitchListTile.adaptive(
                   value: _announcementsEnabled ?? true,
                   onChanged: _announcementsEnabled == null

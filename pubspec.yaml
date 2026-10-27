@@ -10,11 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   firebase_core: ^3.8.1
   cloud_firestore: ^5.6.0
   firebase_analytics: ^11.4.0
   firebase_remote_config: ^5.3.0
-  firebase_messaging: ^15.1.0
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
   geolocator: ^13.0.2
@@ -43,6 +44,7 @@ dependencies:
   crypto: ^3.0.7
   app_links: ^7.0.0
   play_install_referrer: ^0.5.0
+  firebase_messaging: 15.2.10
 
 dev_dependencies:
   flutter_test:
@@ -59,9 +61,13 @@ flutter:
     - assets/images/kami_logo.png
     - assets/images/social_instagram.png
     - assets/images/social_facebook.png
+    - assets/images/home_categories/
+    - assets/images/home_discover/
     # Gömülü yedek veritabanı: ilk açılışta uzak (GitHub) veri bozuk/erişilemezse
     # arama boş kalmasın diye uygulamayla birlikte gelir.
     - assets/data/master_database_updated.json
+    - assets/data/kis_kesfet.json
+    - assets/data/kis_kesfet_osm_pistes.json
 
 # dart run flutter_launcher_icons
 # Kare logo (app_logo.png); adaptive arka plan PNG köşe rengine yakın — maskede renk farkı görünmez.

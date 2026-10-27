@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
+import 'package:flutter/foundation.dart' show compute, debugPrint, kDebugMode;
 
 import '../models/gezi_yemek_item.dart';
 import '../models/misafirhane.dart';
@@ -43,12 +43,13 @@ class FirebaseRotaRepository {
   RotaDataState? _memoryState;
   Stream<RotaDataState>? _watchRootStream;
   Future<void>? _readyInFlight;
+  final _stateUpdates = StreamController<RotaDataState>.broadcast();
 
   /// Splash sonrası bellekte hazır veri (StreamBuilder [initialData] için).
   RotaDataState? get currentState => _memoryState;
 
-  /// İlk kurulumda GitHub'dan indirir; sonraki açılışlarda yerel önbellek +
-  /// en fazla günde bir sürüm kontrolü (değiştiyse yeniden indirir).
+  /// Önce yerel önbellek veya uygulamayla gelen veri; GitHub arka planda yenilenir.
+  /// En fazla günde bir sürüm kontrolü yapılır (değiştiyse yeniden indirilir).
   /// Aynı anda birden fazla çağrı tek yüklemeyi paylaşır (açılış hızı).
   Future<void> ensureLocalDataReady() async {
     if (_memoryState != null && _memoryState!.initialLoadCompleted) {
@@ -79,40 +80,43 @@ class FirebaseRotaRepository {
       } else {
         unawaited(_maybeSyncIfRemoteVersionChanged());
       }
-      _watchRootStream = null;
       return;
     }
-    // İlk kurulum: önce uzak; başarısızsa gömülü yedeğe düş (arama boş kalmasın).
-    final ok = await _downloadAndPersistRoot();
-    if (!ok) {
-      await _loadFromBundled();
-      // Ağ geldiğinde bir sonraki sürüm kontrolü uzak veriyi tekrar dener.
-      await RotaSyncPrefs.clearVersion();
+    // İlk kurulumda da hazır içerik göster; yavaş/yanıtsız ağ açılışı bekletmesin.
+    await _loadFromBundled();
+    if (_memoryState?.aramaIcinTumTesisler.isNotEmpty ?? false) {
+      unawaited(_downloadAndPersistRoot());
+    } else {
+      // Gömülü veri de kullanılamıyorsa mevcut uzak veri kurtarma yolunu koru.
+      await _downloadAndPersistRoot();
     }
-    _watchRootStream = null;
   }
 
   Future<void> primeRootSnapshot() => ensureLocalDataReady();
 
-  /// Paylaşılan broadcast akış — harita, KAMİ ve rota planı aynı anda dinleyebilir.
+  /// Paylaşılan broadcast akış — harita, Rota ve rota planı aynı anda dinleyebilir.
   Stream<RotaDataState> watchRoot() {
-    return _watchRootStream ??=
-        Stream.fromFuture(_resolveState()).asBroadcastStream();
+    return _watchRootStream ??= Stream<RotaDataState>.multi((controller) {
+      RotaDataState? lastState;
+      void publish(RotaDataState state) {
+        if (identical(lastState, state)) return;
+        lastState = state;
+        controller.add(state);
+      }
+
+      final subscription = _stateUpdates.stream.listen(publish);
+      controller.onCancel = subscription.cancel;
+      unawaited(
+        _resolveState().then(
+          (state) => publish(_memoryState ?? state),
+          onError: controller.addError,
+        ),
+      );
+    }, isBroadcast: true);
   }
 
   Future<RotaDataState> _resolveState() async {
-    // Ana ekran açılışta yüklemeyi beklemeden dinler; aynı veriyi iki kez
-    // okuyup indirmemek için süren yüklemeyi paylaş.
-    final inFlight = _readyInFlight;
-    if (inFlight != null) await inFlight;
-    if (_memoryState != null) return _memoryState!;
-    if (await RotaLocalCache.hasCache()) {
-      return _loadFromLocalCache();
-    }
-    final ok = await _downloadAndPersistRoot();
-    if (!ok) {
-      return _loadFromBundled();
-    }
+    await ensureLocalDataReady();
     return _memoryState ?? const RotaDataState(initialLoadCompleted: true);
   }
 
@@ -127,15 +131,13 @@ class FirebaseRotaRepository {
       }
       // Tek parse; bozuk/eksik önbellekte (ör. geçmişte inen hatalı JSON)
       // istisna → gömülü yedeğe düş, arama boş kalmasın.
-      final decoded = jsonDecode(raw);
-      if (!_hasUsableTesis(decoded)) {
+      final parsed = await compute(_parseRootState, raw);
+      if (parsed == null) {
         _log('Yerel önbellek geçersiz/boş; gömülü yedeğe düşülüyor.');
         return _loadFromBundled();
       }
       _loadedFromBundled = false;
-      final state = _mapSnapshotToState(decoded).copyWith(
-        loadedFromLocalCache: true,
-      );
+      final state = parsed.copyWith(loadedFromLocalCache: true);
       return _memoryState = state;
     } catch (err, st) {
       _log('Yerel önbellek okunamadı: $err', st);
@@ -149,7 +151,14 @@ class FirebaseRotaRepository {
     return tesis is List && tesis.isNotEmpty;
   }
 
-  /// Uygulamayla gelen gömülü yedek veritabanını yükler (son çare).
+  /// Büyük JSON çözümleme ve model dönüşümü mobilde arayüzü durdurmasın.
+  static RotaDataState? _parseRootState(String raw) {
+    final decoded = jsonDecode(raw);
+    if (!_hasUsableTesis(decoded)) return null;
+    return _mapSnapshotToState(decoded);
+  }
+
+  /// Önbellek yoksa uygulamayla gelen hazır veritabanını yükler.
   Future<RotaDataState> _loadFromBundled() async {
     try {
       final raw = await RotaBundledData.load();
@@ -157,16 +166,14 @@ class FirebaseRotaRepository {
         _log('Gömülü yedek veritabanı yok.');
         return _memoryState = const RotaDataState(initialLoadCompleted: true);
       }
-      final decoded = jsonDecode(raw);
-      if (!_hasUsableTesis(decoded)) {
+      final parsed = await compute(_parseRootState, raw);
+      if (parsed == null) {
         _log('Gömülü yedek geçersiz.');
         return _memoryState = const RotaDataState(initialLoadCompleted: true);
       }
       _loadedFromBundled = true;
       _log('Gömülü yedek veritabanı yüklendi.');
-      final state = _mapSnapshotToState(decoded).copyWith(
-        loadedFromLocalCache: true,
-      );
+      final state = parsed.copyWith(loadedFromLocalCache: true);
       return _memoryState = state;
     } catch (err, st) {
       _log('Gömülü yedek okunamadı: $err', st);
@@ -210,11 +217,12 @@ class FirebaseRotaRepository {
         return false;
       }
 
-      final decoded = jsonDecode(json);
+      final state = await compute(_parseRootState, json);
+      if (state == null) return false;
       await RotaLocalCache.writeJson(json);
       _loadedFromBundled = false;
-      _memoryState = _mapSnapshotToState(decoded);
-      _watchRootStream = null;
+      _memoryState = state;
+      _stateUpdates.add(state);
 
       final version =
           expectedVersion ?? await GithubRotaDataSource.fetchRemoteVersion();
@@ -241,7 +249,7 @@ class FirebaseRotaRepository {
   static const String pathYemekler = 'yemekler';
   static const String pathSosyal = 'sosyal';
 
-  RotaDataState _mapSnapshotToState(dynamic root) {
+  static RotaDataState _mapSnapshotToState(dynamic root) {
     if (root is! Map) {
       return const RotaDataState(initialLoadCompleted: true);
     }
@@ -261,7 +269,7 @@ class FirebaseRotaRepository {
     );
   }
 
-  List<SosyalItem> _parseSosyalList(dynamic v) {
+  static List<SosyalItem> _parseSosyalList(dynamic v) {
     if (v == null) return [];
     if (v is List) {
       return v.map(SosyalItem.tryParse).whereType<SosyalItem>().toList();
@@ -281,7 +289,7 @@ class FirebaseRotaRepository {
     return [];
   }
 
-  List<GeziYemekItem> _parseGeziYemekList(dynamic v) {
+  static List<GeziYemekItem> _parseGeziYemekList(dynamic v) {
     if (v == null) return [];
     if (v is List) {
       return v.map(GeziYemekItem.tryParse).whereType<GeziYemekItem>().toList();
@@ -301,7 +309,9 @@ class FirebaseRotaRepository {
     return [];
   }
 
-  List<Misafirhane> _distinctByStableFacilityIdPreferCoords(List<Misafirhane> full) {
+  static List<Misafirhane> _distinctByStableFacilityIdPreferCoords(
+    List<Misafirhane> full,
+  ) {
     final seen = <String, Misafirhane>{};
     for (final t in full) {
       final k = t.stableFacilityId;
@@ -317,7 +327,7 @@ class FirebaseRotaRepository {
     return seen.values.toList();
   }
 
-  List<Misafirhane> _distinctByIlPreferCoords(List<Misafirhane> full) {
+  static List<Misafirhane> _distinctByIlPreferCoords(List<Misafirhane> full) {
     final byIl = <String, Misafirhane>{};
     for (final t in full) {
       final k = t.il.trim();
@@ -336,13 +346,13 @@ class FirebaseRotaRepository {
     return byIl.values.toList();
   }
 
-  List<Misafirhane> _loadTesisFull(Map<String, dynamic> m) {
+  static List<Misafirhane> _loadTesisFull(Map<String, dynamic> m) {
     final primary = _parseMisafirhaneList(m[pathTesisler]);
     if (primary.isNotEmpty) return primary;
     return _parseMisafirhaneList(m[pathTesislerLegacy]);
   }
 
-  List<Misafirhane> _parseMisafirhaneList(dynamic v) {
+  static List<Misafirhane> _parseMisafirhaneList(dynamic v) {
     if (v == null) return [];
     if (v is List) {
       return v.map(Misafirhane.tryParse).whereType<Misafirhane>().toList();

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-import '../constants/store_links.dart';
+import '../services/feedback_service.dart';
+import '../widgets/feedback_report_button.dart';
 import '../l10n/app_strings.dart';
 import '../theme/app_colors.dart';
 
@@ -15,86 +14,54 @@ class SuggestionScreen extends StatefulWidget {
   State<SuggestionScreen> createState() => _SuggestionScreenState();
 }
 
-class _SuggestionScreenState extends State<SuggestionScreen>
-    with WidgetsBindingObserver {
+class _SuggestionScreenState extends State<SuggestionScreen> {
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _suggestion = TextEditingController();
 
-  bool _mailLaunched = false;
-
-  static const _to = StoreLinks.supportEmail;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
+  bool _sending = false;
+  bool _consent = false;
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _name.dispose();
     _email.dispose();
     _suggestion.dispose();
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed && _mailLaunched && mounted) {
-      setState(() => _mailLaunched = false);
-      _showThankYouDialog();
-    }
-  }
-
   Future<void> _send() async {
+    if (_sending) return;
     final email = _email.text.trim();
     final suggestion = _suggestion.text.trim();
-    if (email.isEmpty || suggestion.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.suggestionValidationToast)),
-      );
+    if (suggestion.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Lütfen önerinizi yazın.')));
       return;
     }
 
     final name = _name.text.trim();
-    final body =
-        '''
-Ad Soyad: $name
-Kullanıcı E-posta: $email
-
-Öneri:
-$suggestion'''
-            .trim();
-
-    final uri = Uri(
-      scheme: 'mailto',
-      path: _to,
-      query: _encodeQueryParameters(<String, String>{
-        'subject': 'Kullanıcı Önerisi',
-        'body': body,
-      }),
-    );
-
-    final ok = await launchUrl(uri);
-    if (!mounted) return;
-    if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(AppStrings.suggestionMailFailed)),
+    setState(() => _sending = true);
+    try {
+      await FeedbackService.instance.submit(
+        kind: FeedbackKind.suggestion,
+        description: name.isEmpty
+            ? suggestion
+            : 'Ad Soyad: $name\n\n$suggestion',
+        sourcePage: 'Menü / Öneri',
+        email: email,
+        contactConsent: _consent,
       );
-      return;
+      if (mounted) _showThankYouDialog();
+    } on FeedbackException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    } finally {
+      if (mounted) setState(() => _sending = false);
     }
-    setState(() => _mailLaunched = true);
-  }
-
-  String _encodeQueryParameters(Map<String, String> params) {
-    return params.entries
-        .map(
-          (e) =>
-              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
-        )
-        .join('&');
   }
 
   void _showThankYouDialog() {
@@ -179,7 +146,9 @@ $suggestion'''
                 16,
                 16,
                 16,
-                16 + MediaQuery.viewInsetsOf(context).bottom + MediaQuery.viewPaddingOf(context).bottom,
+                16 +
+                    MediaQuery.viewInsetsOf(context).bottom +
+                    MediaQuery.viewPaddingOf(context).bottom,
               ),
               child: Card(
                 color: AppColors.surfaceOf(context),
@@ -201,22 +170,32 @@ $suggestion'''
                           fillColor: AppColors.fieldFillOf(context),
                           contentPadding: EdgeInsets.all(12),
                         ),
-                        style: TextStyle(color: AppColors.searchTextOf(context)),
+                        style: TextStyle(
+                          color: AppColors.searchTextOf(context),
+                        ),
                         textInputAction: TextInputAction.next,
                       ),
                       const SizedBox(height: 10),
                       TextField(
                         controller: _email,
                         decoration: InputDecoration(
-                          hintText: AppStrings.suggestionEmailHint,
+                          hintText: 'E-posta adresiniz (isteğe bağlı)',
                           border: InputBorder.none,
                           filled: true,
                           fillColor: AppColors.fieldFillOf(context),
                           contentPadding: EdgeInsets.all(12),
                         ),
-                        style: TextStyle(color: AppColors.searchTextOf(context)),
+                        style: TextStyle(
+                          color: AppColors.searchTextOf(context),
+                        ),
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
+                      ),
+                      FeedbackContactFields(
+                        controller: _email,
+                        consent: _consent,
+                        showEmail: false,
+                        onConsentChanged: (v) => setState(() => _consent = v),
                       ),
                       const SizedBox(height: 10),
                       TextField(
@@ -229,7 +208,9 @@ $suggestion'''
                           contentPadding: EdgeInsets.all(16),
                           alignLabelWithHint: true,
                         ),
-                        style: TextStyle(color: AppColors.searchTextOf(context)),
+                        style: TextStyle(
+                          color: AppColors.searchTextOf(context),
+                        ),
                         minLines: 6,
                         maxLines: 12,
                         keyboardType: TextInputType.multiline,
@@ -239,7 +220,7 @@ $suggestion'''
                       SizedBox(
                         height: 52,
                         child: FilledButton(
-                          onPressed: _send,
+                          onPressed: _sending ? null : _send,
                           style: FilledButton.styleFrom(
                             backgroundColor: _sendBg,
                             foregroundColor: AppColors.white,

@@ -35,18 +35,24 @@
         android:extractNativeLibs="false"
         android:resizeableActivity="true"
         android:usesCleartextTraffic="false">
+        <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="false" />
+        <service android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingService"
+            tools:node="remove" />
+        <service android:name=".RotalinkMessagingService" android:exported="false">
+            <intent-filter><action android:name="com.google.firebase.MESSAGING_EVENT" /></intent-filter>
+        </service>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_rotalink" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/primary" />
         <meta-data
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
         <meta-data
             android:name="google_analytics_default_allow_ad_personalization_signals"
             android:value="false" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_launcher" />
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/primary" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -134,6 +140,10 @@
         </intent>
         <intent>
             <action android:name="android.intent.action.DIAL" />
+            <data android:scheme="tel" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
             <data android:scheme="tel" />
         </intent>
         <intent>

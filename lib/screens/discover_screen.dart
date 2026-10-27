@@ -12,6 +12,7 @@ import '../theme/app_colors.dart';
 import '../theme/ara_ui.dart';
 import '../theme/system_ui.dart';
 import '../widgets/campaign_smart_icon.dart';
+import '../widgets/campaign_promotion_card.dart';
 import 'campaign_detail_screen.dart';
 
 /// Kotlin [DiscoverActivity] + [DiscoverComposeScreen].
@@ -110,8 +111,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     CampaignAudience? audience,
   ) {
     final q = foldTr(query);
-    if (q.isEmpty && audience == null) return all;
-    return all.where((c) {
+    final filtered = all.where((c) {
+      if (c.isRotalinkPromotion) return audience == null;
       if (audience != null && !CampaignInsights.of(c).matches(audience)) {
         return false;
       }
@@ -121,6 +122,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
           foldTr(c.summary).contains(q) ||
           c.tags.any((t) => foldTr(t).contains(q));
     }).toList();
+    return [
+      ...filtered.where((c) => c.isRotalinkPromotion),
+      ...filtered.where((c) => !c.isRotalinkPromotion),
+    ];
   }
 
   void _selectAudience(CampaignAudience? a) {
@@ -181,6 +186,18 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         itemCount: campaigns.length,
         itemBuilder: (context, index) {
           final c = campaigns[index];
+          if (c.isRotalinkPromotion) {
+            return CampaignPromotionCard(
+              campaign: c,
+              onTap: () {
+                Navigator.of(context, rootNavigator: false).push<void>(
+                  MaterialPageRoute<void>(
+                    builder: (_) => CampaignDetailScreen(campaign: c),
+                  ),
+                );
+              },
+            );
+          }
           return _CampaignDiscoverCard(
             campaign: c,
             audience: audience ?? CampaignInsights.of(c).primaryAudience,

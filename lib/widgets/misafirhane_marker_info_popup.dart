@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../models/misafirhane.dart';
+import '../utils/facility_phone_dialer.dart';
 import '../theme/app_colors.dart';
 import '../utils/maps_launch.dart';
 
@@ -65,23 +65,7 @@ class MisafirhaneMarkerInfoPopup extends StatelessWidget {
   }
 
   Future<void> _onAra(BuildContext context) async {
-    final raw = misafirhane.telefon.trim();
-    if (raw.isEmpty) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Telefon numarası mevcut değil.')),
-        );
-      }
-      return;
-    }
-    final uri = Uri(scheme: 'tel', path: raw.replaceAll(RegExp(r'\s'), ''));
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Arama başlatılamadı')),
-      );
-    }
+    await FacilityPhoneDialer.open(context, misafirhane);
   }
 
   @override

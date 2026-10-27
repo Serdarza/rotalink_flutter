@@ -14,19 +14,19 @@ import '../navigation/main_map_nav_bridge.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../navigator_keys.dart';
-import '../onboarding/app_onboarding_controller.dart';
-import '../onboarding/app_onboarding_overlay.dart';
-import '../onboarding/onboarding_prefs.dart';
 import '../services/campaign_push_service.dart';
 import '../theme/system_ui.dart';
 import '../widgets/pro_support_banner.dart';
 import '../widgets/rotalink_glass_bottom_nav.dart';
+import '../widgets/feedback_report_button.dart';
+import 'nearby_guesthouses_screen.dart';
 import 'about_screen.dart';
 import 'discover_screen.dart';
 import 'favorites_hub_screen.dart';
 import 'deferred_main_map.dart';
 import 'home_dashboard_screen.dart';
 import 'holidays_screen.dart';
+import 'kis_kesfet_screen.dart';
 import 'pro_screen.dart';
 import 'search_hub_screen.dart';
 import 'settings_screen.dart';
@@ -44,7 +44,8 @@ class RotalinkMainShell extends StatefulWidget {
 
 class _RotalinkMainShellState extends State<RotalinkMainShell> {
   final MainMapNavBridge _navBridge = MainMapNavBridge();
-  late final AppOnboardingController _onboarding;
+  final _feedbackPage = ValueNotifier<String>('/');
+  late final _feedbackObserver = _FeedbackPageObserver(_feedbackPage);
   RotalinkBottomNavItem _selected = RotalinkBottomNavItem.home;
   bool _showDashboard = true;
   bool _showSearchHub = false;
@@ -58,21 +59,21 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   @override
   void initState() {
     super.initState();
-    _onboarding = AppOnboardingController(onEnsureHome: _goHome);
+    _navBridge.onDetailVisibilityChanged = () {
+      if (mounted) setState(() {});
+    };
     _navBridge.onExternalSurfaceChanged = (visible) {
       if (!mounted || _selected != RotalinkBottomNavItem.home) return;
       setState(() {
-        _showDashboard = !visible && !_onboarding.active;
+        _showDashboard = !visible;
         _showSearchHub = false;
         _showFavoritesHub = false;
       });
     };
-    _onboarding.addListener(_onOnboardingChanged);
     ProService.instance.isPro.addListener(_onProChanged);
     DeepLinkService.instance.pending.addListener(_onDeepLink);
     CampaignPushService.openRequests.addListener(_onCampaignNotificationOpen);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_maybeStartOnboarding());
       _scheduleProSupportBanner();
       // Uygulama kapalıyken kampanya bildirimine dokunulduysa istek zaten bekliyordur.
       _onCampaignNotificationOpen();
@@ -115,18 +116,6 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     }
   }
 
-  void _onOnboardingChanged() {
-    if (mounted) {
-      setState(() {
-        if (!_onboarding.active && _selected == RotalinkBottomNavItem.home) {
-          _showDashboard = true;
-          _showSearchHub = false;
-          _showFavoritesHub = false;
-        }
-      });
-    }
-  }
-
   void _onProChanged() {
     if (!mounted) return;
     if (ProService.instance.hasProAccess && _showProSupportBanner) {
@@ -148,7 +137,6 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     if (!mounted || _showProSupportBanner) return;
     if (!_proSupportDelayElapsed) return;
     if (ProService.instance.hasProAccess) return;
-    if (_onboarding.active) return;
     if (await ProSupportBannerPrefs.wasShownToday()) return;
     if (!mounted) return;
 
@@ -167,22 +155,15 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     unawaited(_openDashboardRoute(RotalinkShellRoutes.pro));
   }
 
-  Future<void> _maybeStartOnboarding() async {
-    if (await OnboardingPrefs.shouldShow()) {
-      await OnboardingPrefs.markCompleted();
-    }
-  }
-
   @override
   void dispose() {
     _proSupportTimer?.cancel();
     ProService.instance.isPro.removeListener(_onProChanged);
-    _onboarding.removeListener(_onOnboardingChanged);
-    _onboarding.dispose();
     DeepLinkService.instance.pending.removeListener(_onDeepLink);
     CampaignPushService.openRequests.removeListener(
       _onCampaignNotificationOpen,
     );
+    _feedbackPage.dispose();
     _navBridge.dispose();
     super.dispose();
   }
@@ -263,9 +244,11 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   void _openRoutePlan() {
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() => _selected = RotalinkBottomNavItem.route);
-    _bodyNav?.popUntil((route) => route.isFirst);
+    // Kampanya açıkken popUntil anasayfayı bir kare gösterir; rota sayfası
+    // üst sayfanın yerine konur ([pushOrReplaceOnShellNavigator]).
     unawaited(() async {
       await _ensureMapReady();
+      if (!mounted) return;
       await _revealAfterRoutePush(_navBridge.openRoutePlan?.call());
     }());
   }
@@ -450,6 +433,23 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
           settings: settings,
           builder: (_) => const HolidaysScreen(),
         );
+      case RotalinkShellRoutes.nearby:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => NearbyGuesthousesScreen(
+            repository: widget.repository,
+            onOpenFacility: (facility) => unawaited(
+              _openMapSurface(() async {
+                await _navBridge.openFacility?.call(context, facility);
+              }, selected: RotalinkBottomNavItem.search),
+            ),
+          ),
+        );
+      case RotalinkShellRoutes.winterDiscover:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) => const KisKesfetScreen(),
+        );
       case RotalinkShellRoutes.suggestion:
         return MaterialPageRoute<void>(
           settings: settings,
@@ -495,7 +495,6 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
       },
       child: RotalinkShellScope(
         goHome: _goHome,
-        onboarding: _onboarding,
         selectTab: (tab) {
           switch (tab) {
             case RotalinkBottomNavItem.home:
@@ -514,12 +513,44 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
           children: [
             Scaffold(
               resizeToAvoidBottomInset: false,
+              floatingActionButtonLocation:
+                  FloatingActionButtonLocation.endFloat,
+              floatingActionButton:
+                  MediaQuery.viewInsetsOf(context).bottom > 0 ||
+                      (_feedbackPage.value == RotalinkShellRoutes.home &&
+                          !_showDashboard &&
+                          !_showSearchHub &&
+                          !_showFavoritesHub &&
+                          (_navBridge.isFacilityDetailOpen?.call() ?? false))
+                  ? null
+                  : ValueListenableBuilder<String>(
+                      valueListenable: _feedbackPage,
+                      builder: (context, page, _) => FeedbackReportButton(
+                        sourcePage: _showDashboard
+                            ? 'Ana Sayfa'
+                            : _showSearchHub
+                            ? 'Ara'
+                            : _showFavoritesHub
+                            ? 'Favorilerim'
+                            : page == '/'
+                            ? _selected.name
+                            : page,
+                        facility:
+                            !_showDashboard &&
+                                !_showSearchHub &&
+                                !_showFavoritesHub &&
+                                page == '/'
+                            ? () => _navBridge.feedbackFacility?.call()
+                            : null,
+                      ),
+                    ),
               body: Stack(
                 children: [
                   Navigator(
                     key: rotalinkShellBodyNavigatorKey,
                     initialRoute: RotalinkShellRoutes.home,
                     onGenerateRoute: _onGenerateRoute,
+                    observers: [_feedbackObserver],
                   ),
                   if (_showDashboard)
                     Positioned.fill(
@@ -563,27 +594,9 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
                 onSearch: _openSearch,
                 onRoutePlan: _openRoutePlan,
                 onDiscover: _openDiscoverTab,
-                navTargetKeys: {
-                  OnboardingTarget.navSearch: _onboarding.targetKey(
-                    OnboardingTarget.navSearch,
-                  ),
-                  OnboardingTarget.navDiscover: _onboarding.targetKey(
-                    OnboardingTarget.navDiscover,
-                  ),
-                  OnboardingTarget.navRoute: _onboarding.targetKey(
-                    OnboardingTarget.navRoute,
-                  ),
-                  OnboardingTarget.navFavorites: _onboarding.targetKey(
-                    OnboardingTarget.navFavorites,
-                  ),
-                },
               ),
             ),
-            if (_onboarding.active)
-              Positioned.fill(
-                child: AppOnboardingOverlay(controller: _onboarding),
-              ),
-            if (_showProSupportBanner && !_onboarding.active)
+            if (_showProSupportBanner)
               Positioned.fill(
                 child: ProSupportBanner(
                   onOpenPro: _openProFromSupportBanner,
@@ -595,4 +608,30 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
       ),
     );
   }
+}
+
+class _FeedbackPageObserver extends NavigatorObserver {
+  _FeedbackPageObserver(this.page);
+  final ValueNotifier<String> page;
+  bool _scheduled = false;
+  String _latest = '/';
+  void _update(Route<dynamic>? route) {
+    _latest = route == null ? '/' : route.settings.name ?? '/sayfa';
+    if (_scheduled) return;
+    _scheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduled = false;
+      if (navigator?.mounted ?? false) page.value = _latest;
+    });
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _update(route);
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) =>
+      _update(previousRoute);
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) =>
+      _update(newRoute);
 }

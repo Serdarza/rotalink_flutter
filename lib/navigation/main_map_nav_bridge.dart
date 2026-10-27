@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/firebase_rota_repository.dart';
 import '../models/route_plan_outcome.dart';
+import '../models/misafirhane.dart';
 
 /// [MainMapScreen] ↔ [RotalinkMainShell] köprüsü (alt menü eylemleri).
 class MainMapNavBridge {
@@ -10,6 +11,11 @@ class MainMapNavBridge {
   Future<void> Function(BuildContext context, RotaDataState? data)? openSearch;
   Future<void> Function(BuildContext context, String query)? openSearchQuery;
   Future<void> Function(BuildContext context, int tabIndex)? openCategory;
+  Future<void> Function(BuildContext context, Misafirhane facility)?
+  openFacility;
+  Misafirhane? Function()? feedbackFacility;
+  bool Function()? isFacilityDetailOpen;
+  VoidCallback? onDetailVisibilityChanged;
   Future<void> Function()? openRoutePlan;
   Future<void> Function(RoutePlanOutcome outcome)? applyRoutePlan;
   VoidCallback? openMenu;
@@ -26,6 +32,10 @@ class MainMapNavBridge {
     openSearch = null;
     openSearchQuery = null;
     openCategory = null;
+    openFacility = null;
+    feedbackFacility = null;
+    isFacilityDetailOpen = null;
+    onDetailVisibilityChanged = null;
     openRoutePlan = null;
     applyRoutePlan = null;
     openMenu = null;

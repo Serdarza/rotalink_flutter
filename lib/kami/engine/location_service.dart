@@ -5,7 +5,7 @@ import '../../data/user_location_cache.dart';
 import '../../services/simple_location_service.dart';
 import '../../utils/safe_map_coordinates.dart';
 
-/// KAMİ konum okuma — mevcut izin akışını bozmaz; yalnızca okur / cache kullanır.
+/// Rota konum okuma — mevcut izin akışını bozmaz; yalnızca okur / cache kullanır.
 class KamiLocationService {
   const KamiLocationService();
 

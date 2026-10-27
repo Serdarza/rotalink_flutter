@@ -62,19 +62,20 @@ class CampaignInsights {
   static CampaignInsights of(Campaign c) =>
       _cache[c] ??= CampaignInsights._fromCampaign(c);
 
-  /// Emniyet, TSK ve Jandarma mensupları sendikaya üye olamaz.
-  static const Set<CampaignAudience> _noUnionMembership = {
+  /// Genel bir sendika etiketinden bu gruplara otomatik kapsam genişletilmez.
+  static const Set<CampaignAudience> _unionNeedsExplicitAudience = {
     CampaignAudience.police,
     CampaignAudience.military,
     CampaignAudience.gendarmerie,
   };
 
-  /// Bu gruba seçilen kullanıcı kampanyayı görmeli mi? Genel kamu kampanyaları her grupta
-  /// görünür; sendika kampanyaları sendikaya üye olamayan gruplarda gösterilmez.
+  /// Kaynakta açıkça belirtilen kitle her zaman ilgili sekmede görünür.
+  /// Genel kamu kampanyaları diğer gruplara da yayılır; genel sendika
+  /// kampanyaları için bazı gruplarda açık kitle eşleşmesi gerekir.
   bool matches(CampaignAudience a) {
-    if (isUnionOffer && _noUnionMembership.contains(a)) return false;
-    return audiences.contains(a) ||
-        audiences.contains(CampaignAudience.publicGeneral);
+    if (audiences.contains(a)) return true;
+    if (isUnionOffer && _unionNeedsExplicitAudience.contains(a)) return false;
+    return audiences.contains(CampaignAudience.publicGeneral);
   }
 
   bool isNew(DateTime now) {
@@ -96,7 +97,9 @@ class CampaignInsights {
     final text = '${c.title}\n${c.summary}';
     return CampaignInsights._(
       audiences: _audiences(c),
-      isUnionOffer: _unionPattern.hasMatch(foldTr('${c.organization}\n${c.title}')),
+      isUnionOffer: _unionPattern.hasMatch(
+        foldTr('${c.organization}\n${c.title}'),
+      ),
       maxDiscountPercent: _maxDiscount(text),
       endDate: _endDate(text),
       createdAt: c.createdAt,
@@ -133,9 +136,7 @@ class CampaignInsights {
     CampaignAudience.health: RegExp(
       r'saglik (calisan|personel|mensup)|saglik bakanligi(nin)? (personel|calisan)|hekimlere|doktorlara|hemsire|tabip odasi',
     ),
-    CampaignAudience.police: RegExp(
-      r'\bpolis|emniyet (mensup|personel|teskilat|calisan)',
-    ),
+    CampaignAudience.police: RegExp(r'\bpolis|\bemniyet\b|\begm\b'),
     CampaignAudience.military: RegExp(
       r'\btsk\b|silahli kuvvet|\basker|\bsubay|astsubay|msb (personel|calisan)|milli savunma bakanligi|\boyak\b',
     ),
@@ -152,6 +153,7 @@ class CampaignInsights {
   };
 
   static Set<CampaignAudience> _audiences(Campaign c) {
+    if (c.isRotalinkPromotion) return const {};
     final fromTags = <CampaignAudience>{};
     for (final t in c.tags) {
       final a = _tagMap[foldTr(t)];

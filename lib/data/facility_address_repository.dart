@@ -40,8 +40,12 @@ class FacilityAddressRepository {
   Map<String, FacilityAddressEntry> _byKey = const {};
 
   int get count => _byKey.length;
+  Future<void>? _readyInFlight;
 
-  Future<void> ensureLocalDataReady() async {
+  Future<void> ensureLocalDataReady() => _readyInFlight ??=
+      _ensureLocalDataReady().whenComplete(() => _readyInFlight = null);
+
+  Future<void> _ensureLocalDataReady() async {
     if (await TesisAdresLocalCache.hasCache()) {
       await _loadFromLocalCache();
       unawaited(_maybeSyncIfRemoteVersionChanged());
@@ -110,7 +114,8 @@ class FacilityAddressRepository {
       if (json == null) return;
       await TesisAdresLocalCache.writeJson(json);
       _applyDecoded(jsonDecode(json));
-      final version = expectedVersion ??
+      final version =
+          expectedVersion ??
           await GithubTesisAdresDataSource.fetchRemoteVersion();
       if (version != null) {
         await TesisAdresSyncPrefs.setLocalVersion(version);

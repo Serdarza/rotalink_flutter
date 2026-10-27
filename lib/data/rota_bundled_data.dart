@@ -3,7 +3,7 @@ import 'package:flutter/services.dart' show rootBundle;
 
 /// Uygulamayla birlikte gelen gömülü yedek veritabanı.
 ///
-/// İlk kurulumda uzak (GitHub) master JSON bozuk veya erişilemez olduğunda
+/// İlk kurulumda indirmeyi beklemeden içerik göstermek ve bozuk önbellekte
 /// arama ekranının boş kalmaması için kullanılır. Sürüm yükseltmelerinde
 /// `assets/data/master_database_updated.json` güncel tutulmalıdır.
 abstract final class RotaBundledData {

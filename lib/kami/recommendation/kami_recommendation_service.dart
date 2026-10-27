@@ -7,7 +7,7 @@ import 'route_optimizer.dart';
 import 'trip_score_service.dart';
 import 'weekend_recommender.dart';
 
-/// KAMİ öneri API'si — puanlama + hafta sonu + rota detayı.
+/// Rota öneri API'si — puanlama + hafta sonu + rota detayı.
 class KamiRecommendationService {
   const KamiRecommendationService();
 

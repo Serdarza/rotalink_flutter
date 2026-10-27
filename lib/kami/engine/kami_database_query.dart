@@ -12,7 +12,7 @@ import 'kami_models.dart';
 import 'municipal_service.dart';
 import 'tourism_service.dart';
 
-/// Tek kaynak: tüm KAMİ cevapları yalnızca RTDB kayıtlarından üretilir.
+/// Tek kaynak: tüm Rota cevapları yalnızca RTDB kayıtlarından üretilir.
 abstract final class KamiDatabaseQuery {
   static const _accommodation = KamiAccommodationService();
   static const _food = KamiFoodService();

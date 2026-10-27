@@ -1,3 +1,5 @@
+import 'device_test_service.dart';
+import 'app_notifications_service.dart';
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -8,6 +10,7 @@ import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import '../constants/public_holidays_2026.dart';
+import 'public_holiday_repository.dart';
 import '../navigator_keys.dart';
 import '../screens/holidays_screen.dart';
 import '../navigation/rotalink_shell_routes.dart';
@@ -55,8 +58,30 @@ class HolidayNotificationScheduler {
       FlutterLocalNotificationsPlugin();
 
   static bool _initialized = false;
+  static Future<void>? _scheduleFlight;
+  static bool _rescheduleRequested = false;
+
+  static void _onHolidayListChanged() {
+    unawaited(
+      scheduleUpcomingHolidayReminders().catchError((Object e) {
+        debugPrint('Tatil hatırlatmaları yenilenemedi: $e');
+      }),
+    );
+  }
 
   static Future<void> handleBackgroundTap(NotificationResponse details) async {
+    if (details.payload?.startsWith(AppNotificationsService.payloadPrefix) ??
+        false) {
+      await AppNotificationsService.handleTap(details.payload!);
+      return;
+    }
+    if (kDebugMode &&
+        (details.payload?.startsWith(adminTestPayloadPrefix) ?? false)) {
+      await DeviceTestService().localTap(
+        details.payload!.substring(adminTestPayloadPrefix.length),
+      );
+      return;
+    }
     if (details.payload == CampaignPushService.localPayload) {
       await CampaignPushService.markPendingOpenInPrefs();
       return;
@@ -90,7 +115,7 @@ class HolidayNotificationScheduler {
     tzdata.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Europe/Istanbul'));
 
-    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidInit = AndroidInitializationSettings('ic_stat_rotalink');
     const iosInit = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
@@ -118,6 +143,13 @@ class HolidayNotificationScheduler {
     );
     await android?.createNotificationChannel(
       const AndroidNotificationChannel(
+        'rotalink_admin_test',
+        'Yönetici telefon testleri',
+        importance: Importance.high,
+      ),
+    );
+    await android?.createNotificationChannel(
+      const AndroidNotificationChannel(
         CampaignPushService.channelId,
         CampaignPushService.channelName,
         description: CampaignPushService.channelDescription,
@@ -128,6 +160,15 @@ class HolidayNotificationScheduler {
     final launch = await _plugin.getNotificationAppLaunchDetails();
     if (launch?.didNotificationLaunchApp == true) {
       final payload = launch?.notificationResponse?.payload;
+      if (payload?.startsWith(AppNotificationsService.payloadPrefix) ?? false) {
+        await AppNotificationsService.handleTap(payload!);
+      }
+      if (kDebugMode &&
+          (payload?.startsWith(adminTestPayloadPrefix) ?? false)) {
+        await DeviceTestService.instance.localTap(
+          payload!.substring(adminTestPayloadPrefix.length),
+        );
+      }
       final route = _announcementRoute(payload);
       if (payload == CampaignPushService.localPayload) {
         CampaignPushService.requestOpen();
@@ -139,7 +180,8 @@ class HolidayNotificationScheduler {
     }
 
     _initialized = true;
-
+    PublicHolidayRepository.instance.addListener(_onHolidayListChanged);
+    await PublicHolidayRepository.instance.loadCache();
     await scheduleUpcomingHolidayReminders();
   }
 
@@ -155,7 +197,7 @@ class HolidayNotificationScheduler {
       channelDescription: CampaignPushService.channelDescription,
       importance: Importance.high,
       priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
+      icon: 'ic_stat_rotalink',
     );
     const ios = DarwinNotificationDetails(
       presentAlert: true,
@@ -171,9 +213,63 @@ class HolidayNotificationScheduler {
     );
   }
 
+  static const adminTestPayloadPrefix = 'admin_test:';
+  static Future<void> showAdminTestNotification({
+    required String title,
+    required String body,
+    required String deliveryId,
+    Uint8List? picture,
+  }) async {
+    if (!kDebugMode) return;
+    if (!_initialized) await initialize();
+    final android = AndroidNotificationDetails(
+      'rotalink_admin_test',
+      'Yönetici telefon testleri',
+      channelDescription:
+          'Yalnızca eşleştirilmiş test telefonuna gönderilen bildirimler',
+      importance: Importance.high,
+      priority: Priority.high,
+      icon: 'ic_stat_rotalink',
+      styleInformation: picture == null
+          ? BigTextStyleInformation(body)
+          : BigPictureStyleInformation(
+              ByteArrayAndroidBitmap(picture),
+              contentTitle: title,
+              summaryText: body,
+            ),
+    );
+    await _plugin.show(
+      950000 + (deliveryId.hashCode & 1023),
+      title,
+      body,
+      NotificationDetails(
+        android: android,
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      payload: adminTestPayloadPrefix + deliveryId,
+    );
+  }
+
   static const int _campaignNotificationId = 940_000;
 
   static void _onForegroundNotificationResponse(NotificationResponse r) {
+    if (r.payload?.startsWith(AppNotificationsService.payloadPrefix) ?? false) {
+      unawaited(AppNotificationsService.handleTap(r.payload!));
+      return;
+    }
+    if (kDebugMode &&
+        (r.payload?.startsWith(adminTestPayloadPrefix) ?? false)) {
+      unawaited(
+        DeviceTestService.instance.localTap(
+          r.payload!.substring(adminTestPayloadPrefix.length),
+        ),
+      );
+      return;
+    }
     if (r.payload == CampaignPushService.localPayload) {
       CampaignPushService.requestOpen();
       return;
@@ -269,7 +365,7 @@ class HolidayNotificationScheduler {
     final p = await SharedPreferences.getInstance();
     await p.setBool(prefKey, enabled);
     if (!enabled) {
-      await _cancelHolidayReminders();
+      await scheduleUpcomingHolidayReminders();
       return true;
     }
     if (!_initialized) await initialize();
@@ -280,18 +376,36 @@ class HolidayNotificationScheduler {
 
   static Future<void> _cancelHolidayReminders() async {
     if (!_initialized) return;
-    final holidays = kPublicHolidays;
-    for (var i = 0; i < holidays.length; i++) {
-      await _plugin.cancel(_idBase + i);
+    final pending = await _plugin.pendingNotificationRequests();
+    for (final notification in pending) {
+      if (notification.id >= _idBase && notification.id < _idBase + 1000) {
+        await _plugin.cancel(notification.id);
+      }
     }
   }
 
-  static Future<void> scheduleUpcomingHolidayReminders() async {
-    if (!_initialized) return;
+  static Future<void> scheduleUpcomingHolidayReminders() {
+    if (!_initialized) return Future.value();
+    // Ana ekranın mevcut resume çağrısı da tatil verisini arka planda yeniler.
+    unawaited(PublicHolidayRepository.instance.refresh());
+    _rescheduleRequested = true;
+    return _scheduleFlight ??= _drainHolidaySchedules().whenComplete(
+      () => _scheduleFlight = null,
+    );
+  }
+
+  static Future<void> _drainHolidaySchedules() async {
+    while (_rescheduleRequested) {
+      _rescheduleRequested = false;
+      await _scheduleCurrentHolidayList();
+    }
+  }
+
+  static Future<void> _scheduleCurrentHolidayList() async {
     await _cancelHolidayReminders();
     if (!await isEnabled()) return;
-
-    final holidays = kPublicHolidays;
+    final holidays = PublicHolidayRepository.instance.items;
+    var scheduledCount = 0;
     final now = DateTime.now();
     for (var i = 0; i < holidays.length; i++) {
       final h = holidays[i];
@@ -305,6 +419,7 @@ class HolidayNotificationScheduler {
         0,
       );
       if (!atNine.isAfter(now)) continue;
+      if (scheduledCount >= 48) break; // Diğer bildirimlere de yer bırakır.
 
       final when = tz.TZDateTime.from(atNine, tz.local);
 
@@ -329,7 +444,7 @@ class HolidayNotificationScheduler {
           body,
           summaryText: 'Rotalink',
         ),
-        icon: '@mipmap/ic_launcher',
+        icon: 'ic_stat_rotalink',
       );
 
       const iosDetails = DarwinNotificationDetails(
@@ -351,6 +466,7 @@ class HolidayNotificationScheduler {
               UILocalNotificationDateInterpretation.absoluteTime,
           payload: payloadOpenHolidays,
         );
+        scheduledCount++;
       } catch (e, st) {
         debugPrint('Tatil bildirimi planlanamadı (${h.name}): $e\n$st');
       }

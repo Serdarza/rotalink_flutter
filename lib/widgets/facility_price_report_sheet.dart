@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../services/feedback_service.dart';
+import 'feedback_report_button.dart';
 
 import '../constants/facility_pricing.dart';
-import '../constants/store_links.dart';
 import '../models/misafirhane.dart';
 import '../theme/app_colors.dart';
 
-/// Fiyat bildir / yanlış bildir — mailto şablonlu alt sayfa.
+/// Fiyat bildir / yanlış bildir — doğrudan gönderim alt sayfası.
 Future<void> showFacilityPriceReportSheet(
   BuildContext context, {
   required Misafirhane facility,
@@ -59,6 +59,8 @@ class _FacilityPriceReportSheetState extends State<_FacilityPriceReportSheet> {
   late final TextEditingController _kurum;
   late final TextEditingController _note;
   bool _sending = false;
+  final _email = TextEditingController();
+  bool _consent = false;
 
   @override
   void initState() {
@@ -75,6 +77,7 @@ class _FacilityPriceReportSheetState extends State<_FacilityPriceReportSheet> {
     _kamu.dispose();
     _kurum.dispose();
     _note.dispose();
+    _email.dispose();
     super.dispose();
   }
 
@@ -126,39 +129,30 @@ class _FacilityPriceReportSheetState extends State<_FacilityPriceReportSheet> {
           ..writeln(note);
       }
 
-      final uri = Uri(
-        scheme: 'mailto',
-        path: StoreLinks.supportEmail,
-        query: _encodeQueryParameters({
-          'subject': 'Fiyat bildirimi — ${f.il} / ${f.isim}',
-          'body': buffer.toString().trim(),
-        }),
+      await FeedbackService.instance.submit(
+        kind: FeedbackKind.incorrectInfo,
+        description: buffer.toString().trim(),
+        sourcePage: 'Konaklama / Fiyat bildirimi',
+        facilityId: f.stableFacilityId,
+        facilityName: f.isim,
+        email: _email.text,
+        contactConsent: _consent,
       );
-
-      final ok = await launchUrl(uri);
       if (!mounted) return;
-      if (!ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(FacilityPricing.reportMailFailed),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return;
-      }
+      final messenger = ScaffoldMessenger.of(context);
       Navigator.of(context).pop();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Teşekkürler, bildiriminiz alındı.')),
+      );
+    } on FeedbackException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
     } finally {
       if (mounted) setState(() => _sending = false);
     }
-  }
-
-  String _encodeQueryParameters(Map<String, String> params) {
-    return params.entries
-        .map(
-          (e) =>
-              '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
-        )
-        .join('&');
   }
 
   @override
@@ -192,10 +186,7 @@ class _FacilityPriceReportSheetState extends State<_FacilityPriceReportSheet> {
             const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 6),
             Text(
@@ -267,6 +258,12 @@ class _FacilityPriceReportSheetState extends State<_FacilityPriceReportSheet> {
               style: TextStyle(fontSize: 11.5, height: 1.35, color: muted),
             ),
             const SizedBox(height: 16),
+            FeedbackContactFields(
+              controller: _email,
+              consent: _consent,
+              onConsentChanged: (v) => setState(() => _consent = v),
+            ),
+            const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: _sending ? null : _submit,
               icon: _sending
@@ -312,17 +309,15 @@ class _FacilityPriceReportSheetState extends State<_FacilityPriceReportSheet> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w700,
-          ),
+          style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
         ),
         const SizedBox(height: 6),
         TextField(
           controller: controller,
           maxLines: maxLines,
-          textInputAction:
-              maxLines == 1 ? TextInputAction.next : TextInputAction.done,
+          textInputAction: maxLines == 1
+              ? TextInputAction.next
+              : TextInputAction.done,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: TextStyle(
@@ -351,7 +346,10 @@ class _FacilityPriceReportSheetState extends State<_FacilityPriceReportSheet> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppColors.primary, width: 1.4),
+              borderSide: const BorderSide(
+                color: AppColors.primary,
+                width: 1.4,
+              ),
             ),
           ),
         ),

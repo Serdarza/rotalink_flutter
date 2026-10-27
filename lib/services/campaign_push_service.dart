@@ -1,87 +1,47 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'holiday_notification_scheduler.dart';
 
-/// FCM işlemlerini soyutlar; testlerde sahte uygulama verilir.
-abstract class CampaignMessagingClient {
-  Future<bool> requestPermission();
-  Future<void> subscribe(String topic);
-  Future<void> unsubscribe(String topic);
-
-  /// iOS'ta konu aboneliği için APNs token'ı hazır olmalıdır (diğer platformlarda true).
-  Future<bool> isReadyToSubscribe();
-}
-
-class _FirebaseMessagingClient implements CampaignMessagingClient {
-  FirebaseMessaging get _fm => FirebaseMessaging.instance;
-
-  @override
-  Future<bool> requestPermission() async {
-    final s = await _fm.requestPermission();
-    return s.authorizationStatus == AuthorizationStatus.authorized ||
-        s.authorizationStatus == AuthorizationStatus.provisional;
-  }
-
-  @override
-  Future<void> subscribe(String topic) => _fm.subscribeToTopic(topic);
-
-  @override
-  Future<void> unsubscribe(String topic) => _fm.unsubscribeFromTopic(topic);
-
-  @override
-  Future<bool> isReadyToSubscribe() async {
-    if (kIsWeb || !Platform.isIOS) return true;
-    for (var i = 0; i < 6; i++) {
-      if (await _fm.getAPNSToken() != null) return true;
-      await Future<void>.delayed(const Duration(seconds: 1));
-    }
-    return false;
-  }
-}
-
-/// "Yeni Kampanya Bildirimleri" — sunucudan (GitHub Actions → FCM HTTP v1) gelen
-/// günlük 10:00 bildirimi.
+/// "Yeni Kampanya Bildirimleri" — GitHub `kampanya.json` indirdiğinde yerel bildirim.
 ///
-/// * Bildirim `kampanya_yeni` FCM konusuna gider; kullanıcı kapatınca konudan çıkarılır,
-///   böylece hiçbir kampanya bildirimi almaz. Cihaz tokenları sunucuda tutulmaz;
-///   token yenileme ve geçersiz token temizliği FCM tarafından yönetilir.
-/// * Tercih, duyuru ve tatil bildirimi tercihlerinden ayrı saklanır.
-/// * Bildirime dokunmak (uygulama kapalı / arka planda / açık) Kampanya sekmesini açar.
+/// Firebase / FCM kullanılmaz. Uygulama yeni kayıtları çekince, daha önce
+/// görülmemiş kimlikler için tek bildirim gösterilir. İlk indirmede mevcut
+/// liste taban alınır, toplu bildirim gitmez. Tercih kapalıysa gösterilmez.
+/// Bildirime dokunmak Kampanya sekmesini açar.
 abstract final class CampaignPushService {
-  static const topic = 'kampanya_yeni';
   static const prefKey = 'rotalink_campaign_push_enabled';
   static const _prefPendingOpen = 'rotalink_pending_open_campaigns';
+  static const _prefKnownIds = 'rotalink_campaign_known_ids';
+  static const _maxKnownIds = 3000;
 
   static const channelId = 'rotalink_campaigns';
   static const channelName = 'Yeni kampanyalar';
-  static const channelDescription = 'Rotalink\'e yeni kampanyalar eklendiğinde bildirim';
+  static const channelDescription =
+      'Rotalink\'e yeni kampanyalar eklendiğinde bildirim';
 
-  /// Sunucu `data.type` değeri ve yerel (ön plan) bildirim yükü.
-  static const messageType = 'new_campaigns';
   static const localPayload = 'campaign:new';
 
-  /// Ayarlar kartındaki başlık ve açıklama.
   static const settingTitle = 'Yeni Kampanya Bildirimleri';
   static const settingDescription =
-      'Rotalink\'e yeni kampanyalar eklendiğinde bildirim al.';
+      'Uygulama yeni kampanyaları indirdiğinde bildirim al.';
 
   /// Kullanıcı bildirime dokundukça artar; ana iskelet dinler.
   static final ValueNotifier<int> openRequests = ValueNotifier<int>(0);
   static bool _pendingOpen = false;
 
-  static CampaignMessagingClient _client = _FirebaseMessagingClient();
+  static Future<bool> Function() _requestPermission =
+      HolidayNotificationScheduler.requestPermissions;
   static Future<void> Function({required String title, required String body})
       _showLocal = HolidayNotificationScheduler.showCampaignNotification;
   static bool _initialized = false;
-  static final List<StreamSubscription<Object?>> _subs = [];
 
   @visibleForTesting
-  static void debugSetClient(CampaignMessagingClient client) => _client = client;
+  static void debugSetPermission(Future<bool> Function() fn) =>
+      _requestPermission = fn;
 
   @visibleForTesting
   static void debugSetLocalNotifier(
@@ -93,13 +53,22 @@ abstract final class CampaignPushService {
   static void debugReset() {
     _pendingOpen = false;
     openRequests.value = 0;
-    _client = _FirebaseMessagingClient();
+    _requestPermission = HolidayNotificationScheduler.requestPermissions;
     _showLocal = HolidayNotificationScheduler.showCampaignNotification;
     _initialized = false;
-    for (final s in _subs) {
-      unawaited(s.cancel());
+  }
+
+  static (String title, String body) buildText(int count) {
+    if (count > 0) {
+      return (
+        'Rotalink – $count Yeni Kampanya Eklendi! 🎉',
+        'Yeni fırsatları keşfetmek için hemen Rotalink\'i aç!',
+      );
     }
-    _subs.clear();
+    return (
+      'Rotalink – Yeni Kampanyalar Eklendi! 🎉',
+      'Rotalink\'e yeni kampanyalar eklendi. Fırsatları kaçırmamak için hemen keşfet!',
+    );
   }
 
   // ------------------------------------------------------------------ tercih
@@ -109,43 +78,23 @@ abstract final class CampaignPushService {
     return p.getBool(prefKey) ?? true;
   }
 
-  /// Tercihi kaydeder ve FCM konu aboneliğini eşitler. Açarken bildirim izni istenir;
-  /// izin verilmemişse `false` döner (tercih yine kaydedilir).
+  /// Tercihi kaydeder. Açarken yerel bildirim izni istenir; izin yoksa `false`
+  /// döner (tercih yine kaydedilir).
   static Future<bool> setEnabled(bool enabled) async {
     final p = await SharedPreferences.getInstance();
     await p.setBool(prefKey, enabled);
     var permitted = true;
     if (enabled) {
       try {
-        permitted = await _client.requestPermission();
-        await HolidayNotificationScheduler.requestPermissions();
+        permitted = await _requestPermission();
       } catch (e) {
         debugPrint('Kampanya bildirimi izni alınamadı: $e');
       }
     }
-    await syncSubscription();
     return permitted;
   }
 
-  /// Tercihe göre konuya abone ol / aboneliği kaldır. Hata olursa uygulamayı bozmaz.
-  static Future<void> syncSubscription() async {
-    try {
-      final enabled = await isEnabled();
-      if (!await _client.isReadyToSubscribe()) return; // token yenilenince tekrar denenir
-      if (enabled) {
-        await _client.subscribe(topic);
-      } else {
-        await _client.unsubscribe(topic);
-      }
-    } catch (e) {
-      debugPrint('Kampanya bildirimi aboneliği eşitlenemedi: $e');
-    }
-  }
-
   // ------------------------------------------------------------------ mesajlar
-
-  static bool isCampaignMessage(Map<String, dynamic> data) =>
-      data['type'] == messageType || data['route'] == 'kampanyalar';
 
   /// Kampanya sekmesinin açılmasını ister (uygulama henüz hazır değilse bekletilir).
   static void requestOpen() {
@@ -177,58 +126,63 @@ abstract final class CampaignPushService {
     }
   }
 
-  @visibleForTesting
-  static void handleOpenedMessage(Map<String, dynamic> data) {
-    if (isCampaignMessage(data)) requestOpen();
+  /// GitHub listesindeki kimlikleri işler: ilk seferde taban kaydı, sonra yalnızca
+  /// yeni kimlikler için bir yerel bildirim.
+  static Future<void> notifyNewCampaigns(Iterable<String> currentIds) async {
+    final fresh = await claimNewIds(currentIds);
+    if (fresh.isEmpty) return;
+    if (!await isEnabled()) return;
+    final text = buildText(fresh.length);
+    await _showLocal(title: text.$1, body: text.$2);
   }
 
-  /// Ön planda gelen kampanya mesajı: sistem bildirimi göstermez, bu yüzden yerel
-  /// bildirim üretilir (tıklanınca aynı yönlendirme çalışır).
+  /// Daha önce görülmemiş kimlikleri döndürür. İlk çağrıda tümünü taban alır,
+  /// bildirim üretmez (`[]`).
   @visibleForTesting
-  static Future<void> handleForegroundMessage(
-    Map<String, dynamic> data,
-    String? title,
-    String? body,
-  ) async {
-    if (!isCampaignMessage(data)) return;
-    if (!await isEnabled()) return;
-    await _showLocal(
-      title: title ?? 'Rotalink – Yeni Kampanyalar Eklendi! 🎉',
-      body: body ??
-          'Rotalink\'e yeni kampanyalar eklendi. Fırsatları kaçırmamak için hemen keşfet!',
-    );
+  static Future<List<String>> claimNewIds(Iterable<String> currentIds) async {
+    final ids = <String>[];
+    final seen = <String>{};
+    for (final raw in currentIds) {
+      final id = raw.trim();
+      if (id.isEmpty || !seen.add(id)) continue;
+      ids.add(id);
+    }
+    if (ids.isEmpty) return const [];
+
+    final p = await SharedPreferences.getInstance();
+    final stored = p.getStringList(_prefKnownIds);
+    if (stored == null) {
+      await p.setStringList(_prefKnownIds, _capped(ids));
+      return const [];
+    }
+
+    final known = stored.toSet();
+    final fresh = [for (final id in ids) if (!known.contains(id)) id];
+    if (fresh.isEmpty) return const [];
+
+    await p.setStringList(_prefKnownIds, _capped([...stored, ...fresh]));
+    return fresh;
+  }
+
+  static List<String> _capped(List<String> ids) {
+    if (ids.length <= _maxKnownIds) return ids;
+    return ids.sublist(ids.length - _maxKnownIds);
   }
 
   // ------------------------------------------------------------------ başlatma
 
-  /// Firebase hazır olduktan sonra bir kez çağrılır.
   static Future<void> initialize() async {
     if (_initialized) return;
     _initialized = true;
     if (kIsWeb || !(Platform.isAndroid || Platform.isIOS)) return;
 
-    final fm = FirebaseMessaging.instance;
-
-    _subs.add(FirebaseMessaging.onMessage.listen((m) {
-      unawaited(handleForegroundMessage(
-        m.data,
-        m.notification?.title,
-        m.notification?.body,
-      ));
-    }));
-    _subs.add(FirebaseMessaging.onMessageOpenedApp.listen(
-      (m) => handleOpenedMessage(m.data),
-    ));
-    // Token yenilenince / APNs token'ı gelince abonelik yeniden eşitlenir.
-    _subs.add(fm.onTokenRefresh.listen((_) => unawaited(syncSubscription())));
-
-    try {
-      final initial = await fm.getInitialMessage();
-      if (initial != null) handleOpenedMessage(initial.data);
-    } catch (e) {
-      debugPrint('İlk bildirim okunamadı: $e');
-    }
     await _consumePendingFromPrefs();
-    unawaited(syncSubscription());
+    if (await isEnabled()) {
+      try {
+        await _requestPermission();
+      } catch (e) {
+        debugPrint('Kampanya bildirimi izni alınamadı: $e');
+      }
+    }
   }
 }

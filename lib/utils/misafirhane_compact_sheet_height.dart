@@ -10,6 +10,6 @@ double misafirhaneCompactSheetHeight(BuildContext context) {
 double misafirhaneCompactDetailSheetHeight(BuildContext context) {
   final h = MediaQuery.sizeOf(context).height;
   final bottomNav = 64.0 + MediaQuery.paddingOf(context).bottom;
-  // Tam ekranın %68'i, alt menü yüksekliği düşülmüş alanın içinde kalsın.
-  return (h * 0.68).clamp(360.0, h - bottomNav - 8);
+  // Detay tüm kullanılabilir gövdeyi kullanır; alt navigasyon korunur.
+  return (h - bottomNav).clamp(0.0, h);
 }

@@ -9,10 +9,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../billing/price_access.dart';
 import '../billing/pro_service.dart';
-import '../constants/facility_pricing.dart';
 import '../constants/store_links.dart';
 import '../data/facility_compare_selection.dart';
-import '../data/facility_sort_prefs.dart';
 import '../providers/facility_filter_provider.dart';
 import '../navigator_keys.dart';
 import '../screens/yorum_screen.dart';
@@ -34,6 +32,7 @@ import '../services/nominatim_geocode_cache.dart';
 import '../theme/app_colors.dart';
 import 'kamp_rotalari_view.dart';
 import '../utils/geo_helpers.dart';
+import '../utils/facility_phone_dialer.dart';
 import '../utils/il_ilce.dart';
 import '../utils/main_map_search.dart';
 import '../utils/maps_launch.dart';
@@ -44,12 +43,11 @@ import '../theme/ara_ui.dart';
 import 'ara_action_button.dart';
 import 'view_count_label.dart';
 import 'best_value_pro_card.dart';
-import 'distance_permission_chip.dart';
 import 'facility_compare_widgets.dart';
 import 'facility_detail_card.dart';
 import 'facility_location_filter_bar.dart';
-import 'facility_sort_bar.dart';
 import 'sosyal_menu_sheet.dart';
+import 'search_results_ui.dart';
 
 /// Kotlin [MisafirhaneBottomSheet] (arama modu): Tesis / Gezi / Yemek / Sosyal sekmeleri.
 /// Ana harita gövdesindeki [Stack] içine yerleştirilir; üstteki toolbar ve arama çubuğu sheet’ten sonra
@@ -71,6 +69,7 @@ class MisafirhaneSearchResultsPanel extends ConsumerStatefulWidget {
     this.onRequestLocationPermission,
     required this.onClosePanel,
     this.onSelectIl,
+    this.onDetailChanged,
   });
 
   /// `true`: liste görünümü (harita gizli); `false`: harita görünümü.
@@ -98,6 +97,7 @@ class MisafirhaneSearchResultsPanel extends ConsumerStatefulWidget {
 
   /// Filtre çubuğundan il seçilince o il için arama yapılır.
   final ValueChanged<String>? onSelectIl;
+  final ValueChanged<bool>? onDetailChanged;
 
   @override
   MisafirhaneSearchResultsPanelState createState() =>
@@ -125,6 +125,7 @@ class MisafirhaneSearchResultsPanelState
   }
 
   bool get isDetailOpen => _detailFacility != null;
+  Misafirhane? get visibleFacility => _detailFacility;
 
   /// Dışarıdan (ör. rotalink.tr tesis linki) tesis detayını açar.
   void openFacilityDetail(Misafirhane m) {
@@ -142,6 +143,7 @@ class MisafirhaneSearchResultsPanelState
   Future<void> _openFacilityDetail(Misafirhane m) async {
     _rememberListScroll();
     setState(() => _detailFacility = m);
+    widget.onDetailChanged?.call(true);
     // Haritadan (marker / önizleme) açıldıysa detay liste yüzeyinde gösterilir.
     if (!widget.listVisible) widget.onViewModeChanged(true);
   }
@@ -150,6 +152,7 @@ class MisafirhaneSearchResultsPanelState
     if (_detailFacility == null) return;
     final returnTo = _detailFacility!;
     if (mounted) setState(() => _detailFacility = null);
+    widget.onDetailChanged?.call(false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       unawaited(_restoreListScrollAfterDetail(returnTo));
@@ -238,13 +241,6 @@ class MisafirhaneSearchResultsPanelState
   int _geocodeErrorRetries = 0;
   int _geocodeMissRetries = 0;
 
-  /// Pro: konaklama listesi fiyata göre (ucuzdan pahalıya) sıralı mı.
-  bool _sortByPrice = false;
-  BestValueBasis _priceBasis = BestValueBasis.sivil;
-
-  /// Pro: tek kişi / gece fiyatı için üst limit (TL); null ise bütçe filtresi kapalı.
-  double? _budgetMax;
-
   /// Sosyal satırında ilçe satırı (açıklama ayrı gösterilir).
   static String _sosyalIlceLine(SosyalItem s) {
     final ilce = s.ilce.trim();
@@ -271,7 +267,6 @@ class MisafirhaneSearchResultsPanelState
     KampRepository.instance.items.addListener(_onKampChanged);
     unawaited(KampRepository.instance.ensureLoaded());
     unawaited(_loadFavorites());
-    unawaited(_loadSortPrefs());
     // initState içinde setState çağırmaktan kaçın: sekme doğrudan set et.
     _tabIndex = widget.initialTabIndex;
     if (widget.highlightTarget != null && widget.initialTabIndex == 0) {
@@ -294,83 +289,6 @@ class MisafirhaneSearchResultsPanelState
     });
   }
 
-  Future<void> _loadSortPrefs() async {
-    final prefs = await FacilitySortPrefs.load();
-    if (!mounted) return;
-    setState(() {
-      _priceBasis = prefs.basis;
-      _sortByPrice = prefs.byPrice && PriceAccess.unlocked;
-    });
-  }
-
-  void _selectDistanceSort() {
-    if (!_sortByPrice) return;
-    setState(() => _sortByPrice = false);
-    unawaited(FacilitySortPrefs.save(byPrice: false, basis: _priceBasis));
-  }
-
-  void _selectPriceSort(List<Misafirhane> facilities) {
-    if (!PriceAccess.unlocked) {
-      unawaited(
-        showPriceSortProTeaser(
-          context,
-          countFacilitiesWithNightPrice(facilities),
-        ),
-      );
-      return;
-    }
-    if (_sortByPrice) return;
-    setState(() => _sortByPrice = true);
-    final scroll = _listScroll;
-    if (scroll != null && scroll.hasClients) scroll.jumpTo(0);
-    unawaited(FacilitySortPrefs.save(byPrice: true, basis: _priceBasis));
-  }
-
-  void _selectPriceBasis(BestValueBasis basis) {
-    if (basis == _priceBasis) return;
-    setState(() => _priceBasis = basis);
-    unawaited(FacilitySortPrefs.save(byPrice: _sortByPrice, basis: basis));
-  }
-
-  Future<void> _openBudgetPicker(List<Misafirhane> facilities) async {
-    if (!PriceAccess.unlocked) {
-      unawaited(
-        showProFeatureTeaser(
-          context,
-          icon: Icons.account_balance_wallet_outlined,
-          title: FacilityPricing.budgetTeaserTitle,
-          headline: FacilityPricing.budgetTeaserCount(
-            countFacilitiesWithNightPrice(facilities),
-          ),
-          perks: FacilityPricing.budgetTeaserPerks,
-        ),
-      );
-      return;
-    }
-    var basis = _priceBasis;
-    var range = nightPriceRange(facilities, basis);
-    if (range == null) {
-      basis = basis == BestValueBasis.sivil
-          ? BestValueBasis.kamu
-          : BestValueBasis.sivil;
-      range = nightPriceRange(facilities, basis);
-    }
-    if (range == null) return;
-    final picked = await showBudgetPicker(
-      context,
-      range: range,
-      current: _budgetMax,
-    );
-    if (!mounted || picked == null) return;
-    setState(() {
-      _budgetMax = picked.isNaN ? null : picked;
-      _priceBasis = basis;
-    });
-    unawaited(FacilitySortPrefs.save(byPrice: _sortByPrice, basis: basis));
-    final scroll = _listScroll;
-    if (scroll != null && scroll.hasClients) scroll.jumpTo(0);
-  }
-
   void _onCompareChanged() {
     if (mounted) setState(() {});
   }
@@ -386,20 +304,8 @@ class MisafirhaneSearchResultsPanelState
     );
   }
 
-  void _clearBudget() {
-    if (_budgetMax == null) return;
-    setState(() => _budgetMax = null);
-  }
-
   void _onProChanged() {
-    if (!mounted) return;
-    if (!PriceAccess.unlocked) _budgetMax = null;
-    if (_sortByPrice && !PriceAccess.unlocked) {
-      setState(() => _sortByPrice = false);
-    } else if (!_sortByPrice && PriceAccess.unlocked) {
-      unawaited(_loadSortPrefs());
-    }
-    setState(() {});
+    if (mounted) setState(() {});
   }
 
   @override
@@ -702,6 +608,7 @@ class MisafirhaneSearchResultsPanelState
       if (c != null) ilCounts[c] = (ilCounts[c] ?? 0) + 1;
     }
     return ListLocationFilterBar(
+      compact: true,
       il: il,
       ilce: _listIlceFor(tab),
       count: shown,
@@ -844,7 +751,7 @@ class MisafirhaneSearchResultsPanelState
         await step();
       }
     } finally {
-      if (gen == _geocodeGen) {
+      if (mounted && gen == _geocodeGen) {
         _prefetchRunning = false;
         // Ağ hatası veya henüz çözülemeyen satırlar: arka planda tekrar dene.
         final unresolvedGezi = _geziFiltered.any((g) {
@@ -1047,28 +954,12 @@ class MisafirhaneSearchResultsPanelState
     );
   }
 
-  Future<void> _dialPhone(BuildContext ctx, String phone) async {
-    final p = phone.trim();
-    if (p.isEmpty) {
-      ScaffoldMessenger.of(
-        ctx,
-      ).showSnackBar(const SnackBar(content: Text('Telefon numarası yok')));
-      return;
-    }
-    final uri = Uri(scheme: 'tel', path: p.replaceAll(RegExp(r'\s'), ''));
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (ctx.mounted) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('Arama başlatılamadı')));
-      }
-    }
+  Future<void> _dialPhone(BuildContext ctx, Misafirhane facility) async {
+    await FacilityPhoneDialer.open(ctx, facility);
   }
 
   Future<void> _shareMisafirhane(Misafirhane m) async {
-    final phone = m.telefon.trim();
+    final phone = m.telefonNumaralari.join(' / ');
     await Share.share(
       StoreLinks.shareMessage(m.isim, [
         if (phone.isNotEmpty) 'Telefon: $phone',
@@ -1138,12 +1029,14 @@ class MisafirhaneSearchResultsPanelState
                 _hediyelikFiltered.length,
                 _kampFiltered.length,
               ];
+              final listVisible = widget.listVisible || _tabIndex != 0;
               final showViewBar =
                   detail == null && _tabIndex != _TabBarHeaderDelegate.kampTab;
               final viewBar = _ViewModeBar(
-                showList: widget.listVisible,
+                showList: listVisible,
                 tabIndex: _tabIndex,
                 counts: counts,
+                il: ref.watch(searchPanelLocationSummaryProvider).il,
                 onViewModeChanged: widget.onViewModeChanged,
                 onTabChanged: _onTabChanged,
               );
@@ -1153,9 +1046,9 @@ class MisafirhaneSearchResultsPanelState
                   // Liste görünümü: harita gizli, tam yükseklik. Harita görünümünde
                   // Offstage ile durum (sekme, kaydırma, filtre) korunur.
                   Offstage(
-                    offstage: !widget.listVisible,
+                    offstage: !listVisible,
                     child: TickerMode(
-                      enabled: widget.listVisible,
+                      enabled: listVisible,
                       child: SizedBox.expand(
                         child: ColoredBox(
                           // Üst alan (arama + filtre + başlık + sekmeler) hafif turkuaz
@@ -1164,8 +1057,9 @@ class MisafirhaneSearchResultsPanelState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              SizedBox(height: widget.topInset),
-                              if (showViewBar) viewBar,
+                              SizedBox(
+                                height: detail == null ? widget.topInset : 0,
+                              ),
                               Expanded(
                                 child: Material(
                                   color: detail != null
@@ -1208,7 +1102,7 @@ class MisafirhaneSearchResultsPanelState
                                               ),
                                               onCall: () => _dialPhone(
                                                 context,
-                                                detail.telefon,
+                                                detail,
                                               ),
                                               onShare: () => unawaited(
                                                 _shareMisafirhane(detail),
@@ -1267,6 +1161,10 @@ class MisafirhaneSearchResultsPanelState
                                                         counts: counts,
                                                       ),
                                                 ),
+                                                if (showViewBar)
+                                                  SliverToBoxAdapter(
+                                                    child: viewBar,
+                                                  ),
                                                 ..._tabSlivers(context),
                                               ],
                                             ),
@@ -1281,7 +1179,7 @@ class MisafirhaneSearchResultsPanelState
                     ),
                   ),
                   // Harita görünümü: başlık/arama altında kompakt Liste/Harita çubuğu.
-                  if (!widget.listVisible && showViewBar)
+                  if (!listVisible && showViewBar)
                     Positioned(
                       top: widget.topInset + 6,
                       left: 10,
@@ -1327,18 +1225,150 @@ class MisafirhaneSearchResultsPanelState
     }
   }
 
+  List<Misafirhane> get _allSearchFacilities => MainMapSearch.tesisKaynagiArama(
+    aramaIcinTumTesisler: widget.rotaData.aramaIcinTumTesisler,
+    misafirhaneler: widget.rotaData.misafirhaneler,
+  );
+
+  Widget _compactFacilityFilters(List<Misafirhane> facilities) {
+    final active =
+        ref.watch(facilityTypeFilterProvider) != kFacilityFilterAll ||
+        ref.watch(facilityIlceFilterProvider) != null;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+      child: Row(
+        children: [
+          SearchFilterButton(
+            label: 'Filtrele',
+            icon: Icons.tune_rounded,
+            active: active,
+            onTap: () => _openFacilityFilters(facilities),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: FacilityLocationFilterBar(
+              allFacilities: _allSearchFacilities,
+              districtOnly: true,
+              onSelectIl: widget.onSelectIl,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openFacilityFilters(List<Misafirhane> facilities) async {
+    final container = ProviderScope.containerOf(context);
+    await showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => UncontrolledProviderScope(
+        container: container,
+        child: StatefulBuilder(
+          builder: (ctx, updateSheet) => Consumer(
+            builder: (ctx, sheetRef, _) {
+              final type = sheetRef.watch(facilityTypeFilterProvider);
+              const types = [
+                (kFacilityFilterAll, 'Tümü'),
+                ('Orduevi', 'Orduevi'),
+                ('Öğretmenevi', 'Öğretmenevi'),
+                ('Polisevi', 'Polisevi'),
+              ];
+              return ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.sizeOf(ctx).height * 0.82,
+                ),
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Konaklama filtreleri',
+                        style: Theme.of(ctx).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 6,
+                        children: [
+                          for (final option in types)
+                            FilterChip(
+                              label: Text(option.$2),
+                              selected: type == option.$1,
+                              onSelected: (_) =>
+                                  sheetRef
+                                      .read(facilityTypeFilterProvider.notifier)
+                                      .state = option
+                                      .$1,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      FacilityLocationFilterBar(
+                        allFacilities: _allSearchFacilities,
+                        onSelectIl: widget.onSelectIl,
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton(
+                        onPressed: () {
+                          sheetRef
+                                  .read(facilityTypeFilterProvider.notifier)
+                                  .state =
+                              kFacilityFilterAll;
+                          sheetRef
+                                  .read(facilityIlceFilterProvider.notifier)
+                                  .state =
+                              null;
+                          updateSheet(() {});
+                        },
+                        child: const Text('Filtreleri Temizle'),
+                      ),
+                      const SizedBox(height: 8),
+                      FilledButton(
+                        onPressed: () => Navigator.of(sheetContext).pop(),
+                        child: const Text('Sonuçları Göster'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   List<Widget> _tesisTabSlivers(
     BuildContext context,
     List<Misafirhane> facilities,
   ) {
+    if (widget.mapLocationState.locationPermissionGranted &&
+        widget.mapLocationState.userLocation != null) {
+      final indexed = facilities.indexed.toList();
+      indexed.sort((a, b) {
+        final c =
+            _distanceMetersToUser(
+              a.$2.latitude == 0 && a.$2.longitude == 0
+                  ? null
+                  : LatLng(a.$2.latitude, a.$2.longitude),
+            ).compareTo(
+              _distanceMetersToUser(
+                b.$2.latitude == 0 && b.$2.longitude == 0
+                    ? null
+                    : LatLng(b.$2.latitude, b.$2.longitude),
+              ),
+            );
+        return c != 0 ? c : a.$1.compareTo(b.$1);
+      });
+      facilities = indexed.map((e) => e.$2).toList();
+    }
     final locationBar = SliverToBoxAdapter(
-      child: FacilityLocationFilterBar(
-        allFacilities: MainMapSearch.tesisKaynagiArama(
-          aramaIcinTumTesisler: widget.rotaData.aramaIcinTumTesisler,
-          misafirhaneler: widget.rotaData.misafirhaneler,
-        ),
-        onSelectIl: widget.onSelectIl,
-      ),
+      child: _compactFacilityFilters(facilities),
     );
     if (facilities.isEmpty) {
       final ilceActive = ref.watch(facilityIlceFilterProvider) != null;
@@ -1380,69 +1410,7 @@ class MisafirhaneSearchResultsPanelState
       ];
     }
 
-    final hasAnyPrice = countFacilitiesWithNightPrice(facilities) > 0;
-    final unlocked = PriceAccess.unlocked;
-    final byPrice = _sortByPrice && unlocked && hasAnyPrice;
-    final budget = unlocked && hasAnyPrice ? _budgetMax : null;
-    final sortBar = hasAnyPrice
-        ? SliverToBoxAdapter(
-            child: FacilitySortBar(
-              byPrice: byPrice,
-              basis: _priceBasis,
-              unlocked: unlocked,
-              onSelectDistance: _selectDistanceSort,
-              onSelectPrice: () => _selectPriceSort(facilities),
-              onBasisChanged: _selectPriceBasis,
-              budgetMax: budget,
-              onBudgetTap: () => unawaited(_openBudgetPicker(facilities)),
-              onBudgetClear: _clearBudget,
-            ),
-          )
-        : null;
     final compareBar = _compareBarSliver();
-
-    if (byPrice || budget != null) {
-      final split = splitFacilitiesByPrice(
-        facilities,
-        _priceBasis,
-        sortByPrice: byPrice,
-        maxAmount: budget,
-      );
-      final priced = split.priced;
-      final unpriced = split.unpriced;
-      return [
-        locationBar,
-        _kListGap,
-        ?sortBar,
-        ?compareBar,
-        if (budget != null && (split.overBudget > 0 || priced.isEmpty))
-          SliverToBoxAdapter(
-            child: FacilityBudgetInfo(
-              hidden: split.overBudget,
-              noneFits: priced.isEmpty,
-            ),
-          ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate((ctx, index) {
-            if (index.isOdd) return _kListDivider;
-            final e = priced[index ~/ 2];
-            return _tesisFacilityRow(context, e.$1, price: e.$2);
-          }, childCount: priced.isEmpty ? 0 : priced.length * 2 - 1),
-        ),
-        if (unpriced.isNotEmpty) ...[
-          SliverToBoxAdapter(
-            child: FacilityUnpricedHeader(count: unpriced.length),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate((ctx, index) {
-              if (index.isOdd) return _kListDivider;
-              return _tesisFacilityRow(context, unpriced[index ~/ 2]);
-            }, childCount: unpriced.length * 2 - 1),
-          ),
-        ],
-        _listBottomInset(context),
-      ];
-    }
 
     final n = facilities.length;
     final childCount = n * 2 - 1;
@@ -1450,7 +1418,6 @@ class MisafirhaneSearchResultsPanelState
     return [
       locationBar,
       _kListGap,
-      ?sortBar,
       ?compareBar,
       if (bestValue != null)
         SliverToBoxAdapter(
@@ -1474,36 +1441,29 @@ class MisafirhaneSearchResultsPanelState
     ];
   }
 
-  Widget _tesisFacilityRow(
-    BuildContext context,
-    Misafirhane m, {
-    FacilityNightPrice? price,
-  }) {
+  Widget _tesisFacilityRow(BuildContext context, Misafirhane m) {
     final resolved = FacilityAddressRepository.instance.resolveFacility(m);
     final flash =
         _flashFacility != null && m.sameFavoriteIdentity(_flashFacility!);
     final konum = IlIlce.label(resolved.il, resolved.ilce);
-    final row = _searchListTile(
-      icon: Icons.hotel_rounded,
-      title: resolved.isim,
-      showFiyatBilgisi:
-          FacilityPriceRepository.instance.lookup(m.il, m.isim)?.hasFiyatBilgisi ==
-              true,
-      subtitle: konum.isEmpty ? null : konum,
-      distance: DistancePermissionChip(
-        userLocation: widget.mapLocationState.userLocation,
-        locationPermissionGranted:
-            widget.mapLocationState.locationPermissionGranted,
-        facilityPoint: LatLng(m.latitude, m.longitude),
-        onRequestLocation: widget.onRequestLocationPermission ?? () async {},
-        spacingAbove: 8,
-        fullWidthSingleLine: true,
-      ),
+    final row = SearchFacilityResultCard(
+      name: resolved.isim,
+      location: konum,
+      hasPrice:
+          FacilityPriceRepository.instance
+              .lookup(m.il, m.isim)
+              ?.hasFiyatBilgisi ==
+          true,
+      userLocation: widget.mapLocationState.userLocation,
+      locationPermissionGranted:
+          widget.mapLocationState.locationPermissionGranted,
+      facilityPoint: m.latitude == 0 && m.longitude == 0
+          ? null
+          : LatLng(m.latitude, m.longitude),
       footer: ViewCountLabel(
         viewId: ViewCounterService.keyFor(ViewCategory.konaklama, m.il, m.isim),
       ),
       onTap: () => unawaited(_openFacilityDetail(m)),
-      trailingCue: price != null ? FacilityNightPriceTag(price: price) : null,
     );
     final wrapped = flash
         ? _SearchHighlightFlash(
@@ -1589,15 +1549,12 @@ class MisafirhaneSearchResultsPanelState
               ),
             ],
             if (isGezi)
-              DistancePermissionChip(
+              SearchResultDistanceLine(
                 userLocation: widget.mapLocationState.userLocation,
                 locationPermissionGranted:
                     widget.mapLocationState.locationPermissionGranted,
                 facilityPoint: ll,
-                onRequestLocation:
-                    widget.onRequestLocationPermission ?? () async {},
                 spacingAbove: 10,
-                fullWidthSingleLine: true,
               ),
             const SizedBox(height: 12),
             AraActionRow(
@@ -1647,92 +1604,6 @@ class MisafirhaneSearchResultsPanelState
     );
     final wrapped = isHl ? _SearchHighlightFlash(child: row) : row;
     return KeyedSubtree(key: _keyForGeziYemek(g), child: wrapped);
-  }
-
-  /// Ortak arama listesi satırı — ikon + başlık + alt metin + mesafe.
-  Widget _searchListTile({
-    required IconData icon,
-    required String title,
-    bool showFiyatBilgisi = false,
-    String? subtitle,
-    Widget? distance,
-    Widget? footer,
-    required VoidCallback onTap,
-    List<Widget> trailingActions = const [],
-    Widget? trailingCue,
-  }) {
-    return _rowCard(
-      child: InkWell(
-        onTap: onTap,
-        splashColor: AppColors.primary.withValues(alpha: 0.06),
-        highlightColor: AppColors.primary.withValues(alpha: 0.03),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 13, 10, 13),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _categoryIcon(icon, AraUi.stay),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: AppColors.textStrongOf(context),
-                              fontSize: 16,
-                              height: 1.25,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        if (showFiyatBilgisi) ...[
-                          const SizedBox(width: 8),
-                          const _UcretBilgisiLabel(),
-                        ],
-                      ],
-                    ),
-                    if (subtitle != null && subtitle.isNotEmpty) ...[
-                      const SizedBox(height: 3),
-                      Text(
-                        subtitle,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: AppColors.textMutedOf(context),
-                          fontSize: 12,
-                          height: 1.35,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                    if (distance != null) distance,
-                    ?footer,
-                  ],
-                ),
-              ),
-              ...trailingActions,
-              trailingCue ??
-                  Padding(
-                    padding: EdgeInsets.only(left: 2),
-                    child: Icon(
-                      Icons.chevron_right_rounded,
-                      size: 22,
-                      color: AppColors.textMutedOf(context),
-                    ),
-                  ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   /// Kartlar arası boşluk (zemin [AraUi.pageOf(context)] görünür).
@@ -1877,8 +1748,9 @@ class MisafirhaneSearchResultsPanelState
     final k = kategori.toLowerCase();
     if (k.contains('el sanat')) return Icons.palette_outlined;
     if (k.contains('tatlı')) return Icons.cake_outlined;
-    if (k.contains('bal') || k.contains('peynir'))
+    if (k.contains('bal') || k.contains('peynir')) {
       return Icons.egg_alt_outlined;
+    }
     if (k.contains('meyve')) return Icons.eco_outlined;
     if (k.contains('yağ') || k.contains('baharat')) return Icons.spa_outlined;
     if (k.contains('içecek')) return Icons.local_cafe_outlined;
@@ -1887,10 +1759,7 @@ class MisafirhaneSearchResultsPanelState
 
   Future<void> _shareHediyelik(HediyelikItem h) async {
     await Share.share(
-      StoreLinks.shareMessage(h.ad, [
-        h.il.trim(),
-        h.aciklama.trim(),
-      ]),
+      StoreLinks.shareMessage(h.ad, [h.il.trim(), h.aciklama.trim()]),
     );
   }
 
@@ -2152,15 +2021,12 @@ class MisafirhaneSearchResultsPanelState
                   ),
                 ),
               ],
-              DistancePermissionChip(
+              SearchResultDistanceLine(
                 userLocation: widget.mapLocationState.userLocation,
                 locationPermissionGranted:
                     widget.mapLocationState.locationPermissionGranted,
                 facilityPoint: ll,
-                onRequestLocation:
-                    widget.onRequestLocationPermission ?? () async {},
                 spacingAbove: 10,
-                fullWidthSingleLine: true,
               ),
               if (menu != null) ...[
                 const SizedBox(height: 10),
@@ -2377,6 +2243,7 @@ Widget _categoryIcon(IconData icon, AraTone tone) {
 class _ViewModeBar extends StatelessWidget {
   const _ViewModeBar({
     required this.showList,
+    this.il,
     required this.tabIndex,
     required this.counts,
     required this.onViewModeChanged,
@@ -2384,12 +2251,12 @@ class _ViewModeBar extends StatelessWidget {
   });
 
   final bool showList;
+  final String? il;
   final int tabIndex;
   final List<int> counts;
   final ValueChanged<bool> onViewModeChanged;
   final ValueChanged<int> onTabChanged;
 
-  static const double height = 46;
   static const _labels = [
     'Konaklama',
     'Gezi',
@@ -2403,31 +2270,34 @@ class _ViewModeBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final i = tabIndex.clamp(0, _labels.length - 1);
     final count = i < counts.length ? counts[i] : 0;
-    // Bilgi başlığı: buton değil; kategori koyu, sonuç sayısı daha hafif.
-    final title = Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: _labels[i],
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: AraUi.inactiveForegroundOf(context),
-            ),
+    final title = Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          il == null
+              ? _labels[i]
+              : '${searchProvinceLocative(il!)} ${_labels[i]}',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+            color: AppColors.textStrongOf(context),
           ),
-          TextSpan(
-            text: '  $count sonuç',
-            style: TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w500,
-              color: AraUi.mutedTextOf(context),
-            ),
-          ),
-        ],
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
+        ),
+        Text(
+          '$count ${i == 0 || i == 3 ? 'tesis' : 'sonuç'} bulundu',
+          style: TextStyle(fontSize: 12, color: AppColors.textMutedOf(context)),
+        ),
+      ],
     );
+    if (tabIndex != 0) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: title,
+      );
+    }
     final Widget left = showList
         ? title
         : PopupMenuButton<int>(
@@ -2464,17 +2334,26 @@ class _ViewModeBar extends StatelessWidget {
               ],
             ),
           );
-    return SizedBox(
-      height: height,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 66),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          children: [
-            Expanded(child: left),
-            const SizedBox(width: 8),
-            _ViewToggle(showList: showList, onChanged: onViewModeChanged),
-          ],
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: MediaQuery.textScalerOf(context).scale(14) > 20
+            ? Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  left,
+                  const SizedBox(height: 6),
+                  _ViewToggle(showList: showList, onChanged: onViewModeChanged),
+                ],
+              )
+            : Row(
+                children: [
+                  Expanded(child: left),
+                  const SizedBox(width: 8),
+                  _ViewToggle(showList: showList, onChanged: onViewModeChanged),
+                ],
+              ),
       ),
     );
   }
@@ -2526,7 +2405,9 @@ class _ViewToggle extends StatelessWidget {
     required bool selected,
     required VoidCallback onTap,
   }) {
-    final fg = selected ? AraUi.activeForeground : AraUi.inactiveForegroundOf(context);
+    final fg = selected
+        ? AraUi.activeForeground
+        : AraUi.inactiveForegroundOf(context);
     return Semantics(
       button: true,
       selected: selected,
@@ -2622,7 +2503,9 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
                 decoration: BoxDecoration(
                   color: AppColors.surfaceOf(context),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AraUi.secondaryActionBorderOf(context)),
+                  border: Border.all(
+                    color: AraUi.secondaryActionBorderOf(context),
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(3),
@@ -2654,7 +2537,9 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
         ? counts[hediyelikTab]
         : 0;
     final kampSayisi = kampTab < counts.length ? counts[kampTab] : 0;
-    final fg = sel ? AraUi.activeForeground : AraUi.inactiveForegroundOf(context);
+    final fg = sel
+        ? AraUi.activeForeground
+        : AraUi.inactiveForegroundOf(context);
     return PopupMenuButton<int>(
       tooltip: 'Diğer sekmeler',
       position: PopupMenuPosition.under,
@@ -2879,33 +2764,3 @@ class _TabBarHeaderDelegate extends SliverPersistentHeaderDelegate {
 
 /// Fiyat kaydı olan tesis kartında, ad satırının sağındaki salt okunur etiket.
 /// Kartın kendisi tıklanır; bu etiket ayrı bir düğme değildir.
-class _UcretBilgisiLabel extends StatelessWidget {
-  const _UcretBilgisiLabel();
-
-  @override
-  Widget build(BuildContext context) {
-    final dark = AppColors.isDark(context);
-    return IgnorePointer(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: dark ? const Color(0xFF1B4D34) : const Color(0xFFE5F6EA),
-          borderRadius: BorderRadius.circular(999),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          child: Text(
-            'Fiyat Bilgisi',
-            maxLines: 1,
-            softWrap: false,
-            style: TextStyle(
-              color: dark ? const Color(0xFFB7E7C6) : const Color(0xFF146C39),
-              fontSize: 11,
-              height: 1.1,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}

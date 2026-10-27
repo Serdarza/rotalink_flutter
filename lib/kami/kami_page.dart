@@ -22,7 +22,7 @@ import 'recommendation/kami_recommendation_service.dart';
 import 'recommendation/route_optimizer.dart';
 import 'recommendation/trip_score_service.dart';
 
-/// KAMİ sohbet — kullanıcı / asistan için iki yumuşak yüzey rengi.
+/// Rota sohbet — kullanıcı / asistan için iki yumuşak yüzey rengi.
 abstract final class _KamiChatPalette {
   static const userSurface = Color(0xFFD9EDF2);
   static const assistantSurface = Color(0xFFF0F4F6);
@@ -211,7 +211,7 @@ Future<void> _kamiDialPhone(BuildContext context, String raw) async {
   }
 }
 
-/// KAMİ asistan sayfası — Intent/Rule Engine sonucu gösterir (LLM yok).
+/// Rota asistan sayfası — Intent/Rule Engine sonucu gösterir (LLM yok).
 class KamiPage extends StatefulWidget {
   const KamiPage({
     super.key,
@@ -480,7 +480,7 @@ class _WelcomePanel extends StatelessWidget {
         children: [
           ClipOval(
             child: Image.asset(
-              'assets/images/kami_logo.png',
+              KamiMessages.logoAsset,
               width: 88,
               height: 88,
               fit: BoxFit.cover,

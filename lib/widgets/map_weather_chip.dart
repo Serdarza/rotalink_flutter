@@ -8,6 +8,7 @@ import '../data/firebase_rota_repository.dart' show RotaDataState;
 import '../services/weather_location_resolver.dart';
 import '../services/weather_service.dart';
 import '../theme/app_colors.dart';
+import '../theme/weather_badge_palette.dart';
 import 'weather_bottom_sheet.dart';
 
 /// Ana harita üst çubuk / sağ üst — sıcaklık + hava durumu emojisi; dokununca detay sheet.
@@ -54,7 +55,8 @@ class _MapWeatherChipState extends State<MapWeatherChip> {
   @override
   void didUpdateWidget(MapWeatherChip oldWidget) {
     super.didUpdateWidget(oldWidget);
-    final depsChanged = oldWidget.liveGps?.latitude != widget.liveGps?.latitude ||
+    final depsChanged =
+        oldWidget.liveGps?.latitude != widget.liveGps?.latitude ||
         oldWidget.liveGps?.longitude != widget.liveGps?.longitude ||
         oldWidget.locationGranted != widget.locationGranted ||
         oldWidget.searchedCity != widget.searchedCity ||
@@ -120,31 +122,7 @@ class _MapWeatherChipState extends State<MapWeatherChip> {
     return target.source.label;
   }
 
-  List<Color> _gradientForIcon(String icon) {
-    if (icon.startsWith('01')) {
-      return const [Color(0xFFFFB347), Color(0xFFFF8C42), Color(0xFFE85D04)];
-    }
-    if (icon.startsWith('02') || icon.startsWith('03') || icon.startsWith('04')) {
-      return const [Color(0xFF90A4AE), Color(0xFF607D8B), Color(0xFF455A64)];
-    }
-    if (icon.startsWith('09') || icon.startsWith('10')) {
-      return const [Color(0xFF4FC3F7), Color(0xFF0288D1), Color(0xFF01579B)];
-    }
-    if (icon.startsWith('11')) {
-      return const [Color(0xFF5C6BC0), Color(0xFF3949AB), Color(0xFF283593)];
-    }
-    if (icon.startsWith('13')) {
-      return const [Color(0xFFB3E5FC), Color(0xFF81D4FA), Color(0xFF4FC3F7)];
-    }
-    if (icon.startsWith('50')) {
-      return const [Color(0xFFB0BEC5), Color(0xFF78909C), Color(0xFF546E7A)];
-    }
-    return [
-      AppColors.drawerHeaderGradientStart,
-      AppColors.drawerHeaderGradientEnd,
-      AppColors.purple500.withValues(alpha: 0.9),
-    ];
-  }
+  List<Color> _gradientForIcon(String icon) => weatherBadgeGradient(icon);
 
   @override
   Widget build(BuildContext context) {

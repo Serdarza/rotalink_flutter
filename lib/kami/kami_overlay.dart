@@ -16,7 +16,7 @@ abstract final class KamiSessionState {
   static bool bubbleConsumed = false;
 }
 
-/// Harita üzerindeki KAMİ FAB + konuşma balonu.
+/// Harita üzerindeki Rota FAB + konuşma balonu.
 class KamiMapOverlay extends StatefulWidget {
   const KamiMapOverlay({
     super.key,
@@ -31,7 +31,7 @@ class KamiMapOverlay extends StatefulWidget {
   final RotaDataState? initialData;
   final LatLng? userLocationHint;
 
-  /// KAMİ'den haritaya rota aktarımı.
+  /// Rota'dan haritaya rota aktarımı.
   final Future<void> Function(RoutePlanOutcome outcome)? onRoutePlan;
 
   /// İlk açılış turu spotlight hedefi.

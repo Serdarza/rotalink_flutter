@@ -32,34 +32,32 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
     final url = campaign.linkUrl?.trim();
     if (url == null || url.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bağlantı yok.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Bağlantı yok.')));
       }
       return;
     }
     final uri = Uri.tryParse(url);
     if (uri == null) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bağlantı açılamadı.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Bağlantı açılamadı.')));
       }
       return;
     }
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Bağlantı açılamadı.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Bağlantı açılamadı.')));
     }
   }
 
   Future<void> _share() async {
     await Share.share(
-      StoreLinks.shareMessage(campaign.title.trim(), [
-        campaign.summary.trim(),
-      ]),
+      StoreLinks.shareMessage(campaign.title.trim(), [campaign.summary.trim()]),
       subject: campaign.title.trim(),
     );
   }
@@ -67,13 +65,13 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final bottomPad =
-        20 + MediaQuery.viewPaddingOf(context).bottom + MediaQuery.viewInsetsOf(context).bottom;
+        20 +
+        MediaQuery.viewPaddingOf(context).bottom +
+        MediaQuery.viewInsetsOf(context).bottom;
 
     return Scaffold(
       backgroundColor: AppColors.backgroundMain,
-      appBar: AppBar(
-        title: const Text('Kampanya'),
-      ),
+      appBar: AppBar(title: const Text('Kampanya')),
       body: SafeArea(
         top: false,
         bottom: false,
@@ -128,22 +126,32 @@ class _CampaignDetailScreenState extends State<CampaignDetailScreen> {
               ),
             ],
             const SizedBox(height: 28),
-            if (campaign.linkUrl != null && campaign.linkUrl!.trim().isNotEmpty) ...[
+            if (campaign.linkUrl != null &&
+                campaign.linkUrl!.trim().isNotEmpty) ...[
               FilledButton.icon(
                 onPressed: _openLink,
                 icon: const Icon(Icons.open_in_new),
-                label: const Text(AppStrings.campaignOpenLink),
+                label: Text(
+                  campaign.isRotalinkPromotion
+                      ? 'E-posta ile iletişime geç'
+                      : AppStrings.campaignOpenLink,
+                ),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: AppColors.white,
                 ),
               ),
               const SizedBox(height: 6),
-              const Text(
-                'Bu bağlantı üçüncü taraf bir kaynağa aittir. '
-                'Rotalink bu kurumla bağlantılı değildir.',
-                style: TextStyle(fontSize: 11, color: Color(0xFF9E9E9E), height: 1.4),
-              ),
+              if (!campaign.isRotalinkPromotion)
+                const Text(
+                  'Bu bağlantı üçüncü taraf bir kaynağa aittir. '
+                  'Rotalink bu kurumla bağlantılı değildir.',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF9E9E9E),
+                    height: 1.4,
+                  ),
+                ),
             ],
             const SizedBox(height: 12),
             OutlinedButton.icon(

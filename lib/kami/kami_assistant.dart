@@ -23,7 +23,7 @@ class KamiChatMessage {
   final Map<String, Object?>? metadata;
 }
 
-/// KAMİ yetenek alanları — AI entegrasyonunda tool/intent eşlemesi için.
+/// Rota yetenek alanları — AI entegrasyonunda tool/intent eşlemesi için.
 enum KamiCapability {
   chat,
   routePlanning,

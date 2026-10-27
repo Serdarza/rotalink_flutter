@@ -14,13 +14,13 @@ import '../theme/ara_ui.dart';
 import '../theme/system_ui.dart';
 import '../utils/main_map_search.dart';
 import '../widgets/custom_search_bar.dart';
-import '../widgets/emergency_bottom_sheet.dart';
 import '../widgets/rotalink_app_drawer.dart';
 import '../widgets/rotalink_app_header.dart';
 import '../widgets/map_weather_chip.dart';
 import '../widgets/nationwide_price_sheet.dart';
-import '../widgets/rotalink_pro_chip.dart';
 import '../widgets/weather_bottom_sheet.dart';
+import '../widgets/home_photo_discover_card.dart';
+import '../widgets/winter_discover_home_card.dart';
 
 /// Haritayı özellik olarak koruyan, uygulamanın yeni ana giriş ekranı.
 ///
@@ -90,8 +90,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
 
   Future<void> _openWeather() => showWeatherBottomSheet(context);
 
-  Future<void> _openEmergency() => showEmergencyBottomSheet(context);
-
   Future<void> _openPriceBrowse(RotaDataState? data) {
     final facilities = data == null
         ? const <Misafirhane>[]
@@ -135,7 +133,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                 slivers: [
                   SliverToBoxAdapter(child: _buildHeader(context, data)),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+                    padding: const EdgeInsets.fromLTRB(16, 2, 16, 28),
                     sliver: SliverList.list(
                       children: [
                         _WelcomeHeader(
@@ -143,7 +141,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                           ilOptionsSorted: iller,
                           onSubmitted: _submitSearch,
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 16),
                         const _SectionTitle(title: 'Ne arıyorsunuz?'),
                         const SizedBox(height: 12),
                         _CategoryGrid(
@@ -152,15 +150,19 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         ),
                         const SizedBox(height: 16),
                         _MapDiscoverCard(onTap: widget.onOpenMap),
-                        const SizedBox(height: 24),
-                        _SectionTitle(
-                          title: 'Hızlı işlemler',
-                          actionLabel: 'Kampanyalar',
-                          onAction: widget.onOpenDiscover,
+                        const SizedBox(height: 12),
+                        WinterDiscoverHomeCard(
+                          onTap: () => widget.onOpenNamedRoute(
+                            RotalinkShellRoutes.winterDiscover,
+                          ),
                         ),
+                        const SizedBox(height: 24),
+                        const _SectionTitle(title: 'Hızlı işlemler'),
                         const SizedBox(height: 12),
                         _QuickActions(
-                          onRoute: widget.onOpenRoutePlan,
+                          onRoute: () => widget.onOpenNamedRoute(
+                            RotalinkShellRoutes.nearby,
+                          ),
                           onPrice: () => unawaited(_openPriceBrowse(data)),
                           onWeather: () => unawaited(_openWeather()),
                           onHolidays: () => widget.onOpenNamedRoute(
@@ -169,12 +171,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         ),
                         const SizedBox(height: 24),
                         _RecentSearches(onSelect: widget.onSubmitQuery),
-                        const SizedBox(height: 18),
-                        _AssistantCard(onTap: widget.onOpenKami),
-                        const SizedBox(height: 12),
-                        _EmergencyCard(
-                          onTap: () => unawaited(_openEmergency()),
-                        ),
                       ],
                     ),
                   ),
@@ -190,16 +186,7 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
   Widget _buildHeader(BuildContext context, RotaDataState? data) {
     return RotalinkAppHeader(
       onMenu: () => _scaffoldKey.currentState?.openDrawer(),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          MapWeatherChip(compact: true, rotaData: data),
-          const SizedBox(width: 8),
-          RotalinkProChip(
-            onTap: () => widget.onOpenNamedRoute(RotalinkShellRoutes.pro),
-          ),
-        ],
-      ),
+      trailing: MapWeatherChip(compact: true, rotaData: data),
     );
   }
 }
@@ -259,16 +246,19 @@ class _WelcomeHeader extends StatelessWidget {
         ),
         const SizedBox(height: 2),
         Text(
-          'Bugün nereye gidiyoruz?',
-          style: Theme.of(context).textTheme.displaySmall,
+          'Türkiye’yi Birlikte Keşfedelim!',
+          style: Theme.of(
+            context,
+          ).textTheme.displaySmall?.copyWith(fontSize: 27, height: 1.15),
         ),
-        const SizedBox(height: 18),
+        const SizedBox(height: 12),
         CustomSearchBar(
           controller: controller,
           ilOptionsSorted: ilOptionsSorted,
           onSubmitted: onSubmitted,
           ignoreKeyboardInset: true,
           emphasized: true,
+          compactHome: true,
         ),
       ],
     );
@@ -276,11 +266,9 @@ class _WelcomeHeader extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title, this.actionLabel, this.onAction});
+  const _SectionTitle({required this.title});
 
   final String title;
-  final String? actionLabel;
-  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -289,8 +277,6 @@ class _SectionTitle extends StatelessWidget {
         Expanded(
           child: Text(title, style: Theme.of(context).textTheme.headlineSmall),
         ),
-        if (actionLabel != null)
-          TextButton(onPressed: onAction, child: Text(actionLabel!)),
       ],
     );
   }
@@ -350,11 +336,11 @@ class _CategoryGridBody extends StatelessWidget {
     final items = [
       (
         'Konaklama',
-        'Misafirhane ve orduevi',
+        'Kamu Misafirhaneleri',
         Icons.bed_rounded,
         konaklamaCount,
         const Color(0xFF007B8F),
-        const Color(0xFFD4F3F6),
+        'assets/images/home_categories/konaklama.webp',
       ),
       (
         'Gezi',
@@ -362,7 +348,7 @@ class _CategoryGridBody extends StatelessWidget {
         Icons.landscape_rounded,
         data?.gezi.length,
         const Color(0xFF2E7D32),
-        const Color(0xFFDFF3E3),
+        'assets/images/home_categories/gezi.webp',
       ),
       (
         'Yemek',
@@ -370,7 +356,7 @@ class _CategoryGridBody extends StatelessWidget {
         Icons.restaurant_rounded,
         data?.yemek.length,
         const Color(0xFFE65100),
-        const Color(0xFFFFE8D6),
+        'assets/images/home_categories/yemek.webp',
       ),
       (
         'Sosyal tesisler',
@@ -378,7 +364,7 @@ class _CategoryGridBody extends StatelessWidget {
         Icons.apartment_rounded,
         data?.sosyal.length,
         const Color(0xFF5E35B1),
-        const Color(0xFFEEE6FA),
+        'assets/images/home_categories/sosyal.webp',
       ),
       (
         'Hediyelik',
@@ -386,7 +372,7 @@ class _CategoryGridBody extends StatelessWidget {
         Icons.card_giftcard_rounded,
         hediyelikCount == 0 ? null : hediyelikCount,
         const Color(0xFFAD1457),
-        const Color(0xFFFCE4EC),
+        'assets/images/home_categories/hediyelik.webp',
       ),
       (
         'Kamp yerleri',
@@ -394,7 +380,7 @@ class _CategoryGridBody extends StatelessWidget {
         Icons.park_rounded,
         kampCount == 0 ? null : kampCount,
         const Color(0xFF558B2F),
-        const Color(0xFFF1F8E9),
+        'assets/images/home_categories/kamp.webp',
       ),
     ];
 
@@ -402,77 +388,147 @@ class _CategoryGridBody extends StatelessWidget {
       itemCount: items.length,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisExtent: 112,
+        mainAxisExtent:
+            128 +
+            (MediaQuery.textScalerOf(context).scale(14) - 14).clamp(0, 28) * 3,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
       ),
       itemBuilder: (context, index) {
         final item = items[index];
-        final cardBg = AppColors.isDark(context)
-            ? Color.alphaBlend(
-                item.$5.withValues(alpha: 0.22),
-                AppColors.darkSurface,
-              )
-            : item.$6;
-        return Material(
-          color: cardBg,
-          borderRadius: BorderRadius.circular(16),
-          elevation: 0,
-          child: InkWell(
-            onTap: () => onSelected(index),
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                border: Border.all(color: item.$5.withValues(alpha: 0.22)),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        final categoryIcon = Container(
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            color: item.$5,
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white, width: 1.5),
+          ),
+          child: Icon(item.$3, color: Colors.white, size: 18),
+        );
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final stackedIcon =
+                constraints.maxWidth < 155 ||
+                MediaQuery.textScalerOf(context).scale(14) > 17.5;
+            return Material(
+              color: item.$5,
+              borderRadius: BorderRadius.circular(18),
+              clipBehavior: Clip.antiAlias,
+              elevation: 0,
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 38,
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: item.$5,
-                          borderRadius: BorderRadius.circular(11),
-                        ),
-                        child: Icon(item.$3, color: Colors.white, size: 22),
+                  Image.asset(
+                    item.$6,
+                    fit: BoxFit.cover,
+                    cacheWidth: 640,
+                    excludeFromSemantics: true,
+                  ),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        stops: [0, 0.32, 0.66, 1],
+                        colors: [
+                          Color(0x08000000),
+                          Color(0x18000000),
+                          Color(0x85000000),
+                          Color(0xE6000000),
+                        ],
                       ),
-                      const Spacer(),
-                      if (item.$4 != null)
-                        Text(
-                          '${item.$4}',
-                          style: TextStyle(
-                            color: AppColors.textMutedOf(context),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Material(
+                    type: MaterialType.transparency,
+                    child: InkWell(
+                      onTap: () => onSelected(index),
+                      borderRadius: BorderRadius.circular(18),
+                      child: Stack(
+                        children: [
+                          if (stackedIcon)
+                            Positioned(top: 10, left: 10, child: categoryIcon),
+                          if (item.$4 != null)
+                            Positioned(
+                              top: 9,
+                              right: 9,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  '${item.$4}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF142832),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          Positioned(
+                            left: 10,
+                            right: 10,
+                            bottom: 10,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                if (!stackedIcon) ...[
+                                  categoryIcon,
+                                  const SizedBox(width: 7),
+                                ],
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.$1,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: stackedIcon ? 12 : 14,
+                                          fontWeight: FontWeight.w800,
+                                          height: 1.1,
+                                          letterSpacing: -0.25,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        item.$2,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Color(0xFFF5F7F8),
+                                          fontSize: 10.5,
+                                          fontWeight: FontWeight.w500,
+                                          height: 1.2,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                    ],
-                  ),
-                  const Spacer(),
-                  Text(
-                    item.$1,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.$2,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.bodySmall,
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ),
+            );
+          },
         );
       },
     );
@@ -486,91 +542,14 @@ class _MapDiscoverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
-        child: Ink(
-          height: 142,
-          padding: const EdgeInsets.fromLTRB(18, 16, 12, 16),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Color(0xFF007B8F), Color(0xFF00A3B8)],
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Haritada keşfet',
-                      style: Theme.of(
-                        context,
-                      ).textTheme.headlineSmall?.copyWith(color: Colors.white),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'Yakınındaki yerleri ve tesisleri haritada görün.',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.88),
-                      ),
-                    ),
-                    const Spacer(),
-                    const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Haritayı aç',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        SizedBox(width: 4),
-                        Icon(
-                          Icons.arrow_forward_rounded,
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 14),
-              Container(
-                width: 112,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.16),
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: const Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Icon(Icons.map_rounded, color: Colors.white, size: 60),
-                    Positioned(
-                      top: 28,
-                      right: 27,
-                      child: Icon(
-                        Icons.location_on_rounded,
-                        color: Color(0xFFFFD54F),
-                        size: 27,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return HomePhotoDiscoverCard(
+      title: 'Haritada keşfet',
+      subtitle: 'Yakınındaki yerleri ve tesisleri haritada görün.',
+      actionLabel: 'Haritayı aç',
+      imageAsset: 'assets/images/home_discover/map.webp',
+      icon: Icons.map_rounded,
+      accent: const Color(0xFF007B8F),
+      onTap: onTap,
     );
   }
 }
@@ -591,57 +570,65 @@ class _QuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dark = AppColors.isDark(context);
-    return Row(
-      children: [
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.alt_route_rounded,
-            label: 'Rota',
-            color: const Color(0xFF1565C0),
-            background: const Color(0xFFE3F0FF),
-            onTap: onRoute,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: ValueListenableBuilder<bool>(
-            valueListenable: ProService.instance.isPro,
-            builder: (_, _, _) {
-              final pro = ProService.instance.hasProAccess;
-              return _QuickAction(
-                icon: Icons.payments_rounded,
-                label: 'Fiyat',
-                color: dark ? const Color(0xFFF2C14E) : const Color(0xFFB8860B),
-                background: dark
-                    ? const Color(0xFF3A2E14)
-                    : const Color(0xFFFFF3D0),
-                badge: pro ? null : 'Pro',
-                onTap: onPrice,
-              );
-            },
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.cloud_rounded,
-            label: 'Hava',
-            color: const Color(0xFF00838F),
-            background: const Color(0xFFD7F4F7),
-            onTap: onWeather,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.calendar_month_rounded,
-            label: 'Tatiller',
-            color: const Color(0xFFEF6C00),
-            background: const Color(0xFFFFE8CC),
-            onTap: onHolidays,
-          ),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final fontExtra = MediaQuery.textScalerOf(context).scale(12) - 12;
+        final columns = constraints.maxWidth < 320 || fontExtra > 3 ? 2 : 4;
+        return GridView.count(
+          crossAxisCount: columns,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+          mainAxisExtent: 112 + fontExtra.clamp(0, 30) * 2,
+          shrinkWrap: true,
+          padding: EdgeInsets.zero,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            _QuickAction(
+              icon: Icons.location_on_rounded,
+              label: 'Yakınımdaki\nMisafirhaneler',
+              color: const Color(0xFF1565C0),
+              background: const Color(0xFFE3F0FF),
+              imageAsset: 'assets/images/home_categories/konaklama.webp',
+              onTap: onRoute,
+            ),
+            ValueListenableBuilder<bool>(
+              valueListenable: ProService.instance.isPro,
+              builder: (_, _, _) {
+                final pro = ProService.instance.hasProAccess;
+                return _QuickAction(
+                  icon: Icons.payments_rounded,
+                  label: 'Fiyat',
+                  color: dark
+                      ? const Color(0xFFF2C14E)
+                      : const Color(0xFFB8860B),
+                  background: dark
+                      ? const Color(0xFF3A2E14)
+                      : const Color(0xFFFFF3D0),
+                  imageAsset: 'assets/images/home_discover/prices.webp',
+                  badge: pro ? null : 'Pro',
+                  onTap: onPrice,
+                );
+              },
+            ),
+            _QuickAction(
+              icon: Icons.cloud_rounded,
+              label: 'Meteoroloji',
+              color: const Color(0xFF00838F),
+              background: const Color(0xFFD7F4F7),
+              imageAsset: 'assets/images/home_discover/weather.webp',
+              onTap: onWeather,
+            ),
+            _QuickAction(
+              icon: Icons.calendar_month_rounded,
+              label: 'Tatiller',
+              color: const Color(0xFFEF6C00),
+              background: const Color(0xFFFFE8CC),
+              imageAsset: 'assets/images/home_discover/holidays.webp',
+              onTap: onHolidays,
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -652,6 +639,7 @@ class _QuickAction extends StatelessWidget {
     required this.label,
     required this.color,
     required this.background,
+    required this.imageAsset,
     required this.onTap,
     this.badge,
   });
@@ -660,76 +648,108 @@ class _QuickAction extends StatelessWidget {
   final String label;
   final Color color;
   final Color background;
+  final String imageAsset;
   final VoidCallback onTap;
   final String? badge;
 
   @override
   Widget build(BuildContext context) {
-    final bg = AppColors.isDark(context)
-        ? Color.alphaBlend(color.withValues(alpha: 0.28), AppColors.darkSurface)
-        : background;
+    final shade = Color.lerp(color, const Color(0xFF0B1823), 0.7)!;
     return Material(
-      color: bg,
-      borderRadius: BorderRadius.circular(14),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Container(
-          height: 76,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: color.withValues(alpha: 0.18)),
+      color: AppColors.isDark(context) ? shade : background,
+      borderRadius: BorderRadius.circular(16),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            imageAsset,
+            fit: BoxFit.cover,
+            cacheWidth: 360,
+            excludeFromSemantics: true,
           ),
-          child: Stack(
-            children: [
-              Center(
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                stops: const [0, 0.4, 1],
+                colors: [
+                  const Color(0x22000000),
+                  shade.withValues(alpha: 0.1),
+                  shade,
+                ],
+              ),
+            ),
+          ),
+          Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: onTap,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(icon, color: color, size: 23),
-                    const SizedBox(height: 7),
-                    Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
+                    Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.88),
+                        borderRadius: BorderRadius.circular(9),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.4),
+                        ),
+                      ),
+                      child: Icon(icon, color: Colors.white, size: 18),
+                    ),
+                    const Spacer(),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        label,
+                        maxLines: label.contains('\n') ? 2 : 1,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          height: 1.15,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              if (badge != null)
-                Positioned(
-                  top: 6,
-                  right: 6,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFFF2C14E), Color(0xFFB8860B)],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      badge!,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 8.5,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.3,
-                      ),
+            ),
+          ),
+          if (badge != null)
+            Positioned(
+              top: 6,
+              right: 6,
+              child: IgnorePointer(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFDC83),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    badge!,
+                    style: const TextStyle(
+                      color: Color(0xFF503608),
+                      fontSize: 8,
+                      fontWeight: FontWeight.w900,
+                      height: 1,
                     ),
                   ),
                 ),
-            ],
-          ),
-        ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -873,133 +893,6 @@ class _RecentSearchRow extends StatelessWidget {
                 Icons.north_east_rounded,
                 color: AppColors.textMutedOf(context),
                 size: 16,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _AssistantCard extends StatelessWidget {
-  const _AssistantCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return _InfoActionCard(
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(13),
-        child: Image.asset(
-          'assets/images/kami_logo.png',
-          width: 46,
-          height: 46,
-          fit: BoxFit.cover,
-        ),
-      ),
-      title: 'KAMİ’ye sor',
-      subtitle: 'Gezi, yemek ve rota önerilerini keşfet.',
-      actionLabel: 'Asistanı aç',
-      background: AppColors.isDark(context)
-          ? AppColors.darkPrimarySoft
-          : const Color(0xFFDFF4F6),
-      borderColor: const Color(0xFF007B8F).withValues(alpha: 0.22),
-      onTap: onTap,
-    );
-  }
-}
-
-class _EmergencyCard extends StatelessWidget {
-  const _EmergencyCard({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return _InfoActionCard(
-      leading: Container(
-        width: 46,
-        height: 46,
-        decoration: BoxDecoration(
-          color: AppColors.danger,
-          borderRadius: BorderRadius.circular(13),
-        ),
-        child: const EmergencyHilalIcon(color: Colors.white, size: 26),
-      ),
-      title: 'Acil durumda hızlı erişim',
-      subtitle: 'Yardım numaraları ve önemli bilgilere ulaşın.',
-      actionLabel: 'Acil yardım',
-      actionColor: AppColors.danger,
-      background: AppColors.isDark(context)
-          ? const Color(0xFF3A2224)
-          : const Color(0xFFFFE8E9),
-      borderColor: AppColors.danger.withValues(alpha: 0.22),
-      onTap: onTap,
-    );
-  }
-}
-
-class _InfoActionCard extends StatelessWidget {
-  const _InfoActionCard({
-    required this.leading,
-    required this.title,
-    required this.subtitle,
-    required this.actionLabel,
-    required this.onTap,
-    this.actionColor = AppColors.primary,
-    this.background = AppColors.surface,
-    this.borderColor = AppColors.border,
-  });
-
-  final Widget leading;
-  final String title;
-  final String subtitle;
-  final String actionLabel;
-  final Color actionColor;
-  final Color background;
-  final Color borderColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: background,
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: borderColor),
-          ),
-          child: Row(
-            children: [
-              leading,
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                actionLabel,
-                style: TextStyle(
-                  color: actionColor,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
-                ),
               ),
             ],
           ),

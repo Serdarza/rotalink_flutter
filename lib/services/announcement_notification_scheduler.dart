@@ -173,7 +173,7 @@ abstract final class AnnouncementNotificationScheduler {
     tz.setLocalLocation(tz.getLocation('Europe/Istanbul'));
     await plugin.initialize(
       const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        android: AndroidInitializationSettings('ic_stat_rotalink'),
         iOS: DarwinInitializationSettings(
           requestAlertPermission: false,
           requestBadgePermission: false,
@@ -231,7 +231,7 @@ abstract final class AnnouncementNotificationScheduler {
             _channelName,
             channelDescription: _channelDescription,
             styleInformation: BigTextStyleInformation(a.body, summaryText: 'Rotalink'),
-            icon: '@mipmap/ic_launcher',
+            icon: 'ic_stat_rotalink',
           ),
           iOS: const DarwinNotificationDetails(
             presentAlert: true,

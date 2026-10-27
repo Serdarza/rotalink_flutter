@@ -20,6 +20,7 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        AdminTestNotificationSession.register(applicationContext, flutterEngine.dartExecutor.binaryMessenger)
         // Ücretsiz Pro hakkı için: uygulama silinip yüklenince değişmez.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "rotalink/device")
             .setMethodCallHandler { call, result ->

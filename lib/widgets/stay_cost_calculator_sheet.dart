@@ -16,6 +16,7 @@ Future<void> showStayCostCalculator(BuildContext context, Misafirhane priced) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
+    useRootNavigator: true,
     useSafeArea: true,
     showDragHandle: true,
     backgroundColor: AppColors.surfaceOf(context),
@@ -45,7 +46,8 @@ class _StayCostCalculatorBody extends StatefulWidget {
   final ScrollController controller;
 
   @override
-  State<_StayCostCalculatorBody> createState() => _StayCostCalculatorBodyState();
+  State<_StayCostCalculatorBody> createState() =>
+      _StayCostCalculatorBodyState();
 }
 
 class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
@@ -95,7 +97,9 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
   void _loadOptions() {
     final prevRow = _options.isEmpty ? null : _options[_optionIndex].row;
     _options = StayCostCalculator.roomOptions(_t, _catId);
-    final keep = prevRow == null ? -1 : _options.indexWhere((o) => o.row == prevRow);
+    final keep = prevRow == null
+        ? -1
+        : _options.indexWhere((o) => o.row == prevRow);
     _optionIndex = keep >= 0 ? keep : 0;
     _applyOption();
   }
@@ -125,7 +129,9 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
     if (!_breakfastOn || _breakfastIncluded == true) return null;
     final fromRow = _breakfastRowAmount;
     if (fromRow != null) return fromRow;
-    return double.tryParse(_breakfastCtrl.text.replaceAll('.', '').replaceAll(',', '.'));
+    return double.tryParse(
+      _breakfastCtrl.text.replaceAll('.', '').replaceAll(',', '.'),
+    );
   }
 
   StayCostBreakdown? get _result {
@@ -148,15 +154,17 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
     );
   }
 
-  String get _catName =>
-      _categories.firstWhere((c) => c.id == _catId).ad;
+  String get _catName => _categories.firstWhere((c) => c.id == _catId).ad;
 
   void _setPeople({int? adults, int? children}) {
     setState(() {
       _adults = adults ?? _adults;
       _children = children ?? _children;
       if (!_roomsTouched && _option != null) {
-        _rooms = StayCostCalculator.suggestedRooms(_option!, _adults + _children);
+        _rooms = StayCostCalculator.suggestedRooms(
+          _option!,
+          _adults + _children,
+        );
       }
     });
   }
@@ -184,9 +192,14 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
     final breakfastNotes = StayCostCalculator.breakfastNotes(_t);
     final unconfirmed = _t.dogrulama == TariffVerification.teyitGerekli;
 
-    return ListView(
+    final fields = ListView(
       controller: widget.controller,
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        16 + MediaQuery.viewInsetsOf(context).bottom,
+      ),
       children: [
         Row(
           children: [
@@ -197,7 +210,10 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
                 color: AppColors.primary.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(Icons.calculate_outlined, color: AppColors.primary),
+              child: const Icon(
+                Icons.calculate_outlined,
+                color: AppColors.primary,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -212,7 +228,10 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
                     widget.facility.isim,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 12.5, color: Color(0xFF6B7C82)),
+                    style: const TextStyle(
+                      fontSize: 12.5,
+                      color: Color(0xFF6B7C82),
+                    ),
                   ),
                 ],
               ),
@@ -346,7 +365,10 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
           if (childNotes.isNotEmpty)
             _NotesBox(title: 'Tesisin çocuk kuralı', notes: childNotes)
           else
-            const _Hint('Tarifede çocuk indirimi belirtilmemiş; tesise sorun.', warn: true),
+            const _Hint(
+              'Tarifede çocuk indirimi belirtilmemiş; tesise sorun.',
+              warn: true,
+            ),
         ],
         const _SectionTitle('Kahvaltı'),
         if (_breakfastIncluded == true)
@@ -368,7 +390,9 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
               cursorColor: AppColors.primary,
               style: TextStyle(color: AppColors.searchTextOf(context)),
               controller: _breakfastCtrl,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: _fieldDecoration(
                 context,
                 hint: 'Kişi başı günlük kahvaltı ücreti (TL)',
@@ -404,20 +428,53 @@ class _StayCostCalculatorBodyState extends State<_StayCostCalculatorBody> {
           ),
       ],
     );
+    return Column(
+      children: [
+        if (r != null)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            color: AppColors.primary.withValues(alpha: 0.08),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Tahmini toplam',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    formatTl(r.total),
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      fontSize: 19,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        Expanded(child: fields),
+      ],
+    );
   }
 
-  static InputDecoration _fieldDecoration(BuildContext context, {String? hint}) =>
-      InputDecoration(
-        hintText: hint,
-        isDense: true,
-        filled: true,
-        fillColor: AppColors.fieldFillOf(context),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      );
+  static InputDecoration _fieldDecoration(
+    BuildContext context, {
+    String? hint,
+  }) => InputDecoration(
+    hintText: hint,
+    isDense: true,
+    filled: true,
+    fillColor: AppColors.fieldFillOf(context),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide.none,
+    ),
+  );
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -427,16 +484,16 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 18, bottom: 8),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-            color: AppColors.textStrongOf(context),
-          ),
-        ),
-      );
+    padding: const EdgeInsets.only(top: 12, bottom: 6),
+    child: Text(
+      text,
+      style: TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w800,
+        color: AppColors.textStrongOf(context),
+      ),
+    ),
+  );
 }
 
 class _Hint extends StatelessWidget {
@@ -447,25 +504,31 @@ class _Hint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: 6),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              warn ? Icons.info_outline_rounded : Icons.check_circle_outline_rounded,
-              size: 15,
-              color: warn ? const Color(0xFFE08600) : const Color(0xFF2E7D32),
-            ),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                text,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF5A6B70), height: 1.35),
-              ),
-            ),
-          ],
+    padding: const EdgeInsets.only(top: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          warn
+              ? Icons.info_outline_rounded
+              : Icons.check_circle_outline_rounded,
+          size: 15,
+          color: warn ? const Color(0xFFE08600) : const Color(0xFF2E7D32),
         ),
-      );
+        const SizedBox(width: 6),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF5A6B70),
+              height: 1.35,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class _NotesBox extends StatelessWidget {
@@ -476,30 +539,34 @@ class _NotesBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(top: 8),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: const Color(0xFFFFF8E1),
-          borderRadius: BorderRadius.circular(10),
+    margin: const EdgeInsets.only(top: 8),
+    padding: const EdgeInsets.all(10),
+    decoration: BoxDecoration(
+      color: const Color(0xFFFFF8E1),
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
-            ),
-            for (final n in notes)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  '• $n',
-                  style: const TextStyle(fontSize: 12, height: 1.35, color: Color(0xFF5A4A00)),
-                ),
+        for (final n in notes)
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              '• $n',
+              style: const TextStyle(
+                fontSize: 12,
+                height: 1.35,
+                color: Color(0xFF5A4A00),
               ),
-          ],
-        ),
-      );
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 class _StepperRow extends StatelessWidget {
@@ -521,38 +588,38 @@ class _StepperRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: Row(
-          children: [
-            Icon(icon, size: 20, color: AppColors.primary),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-              ),
-            ),
-            IconButton.filledTonal(
-              visualDensity: VisualDensity.compact,
-              onPressed: value > min ? () => onChanged(value - 1) : null,
-              icon: const Icon(Icons.remove_rounded, size: 18),
-            ),
-            SizedBox(
-              width: 36,
-              child: Text(
-                '$value',
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-              ),
-            ),
-            IconButton.filledTonal(
-              visualDensity: VisualDensity.compact,
-              onPressed: value < max ? () => onChanged(value + 1) : null,
-              icon: const Icon(Icons.add_rounded, size: 18),
-            ),
-          ],
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      children: [
+        Icon(icon, size: 20, color: AppColors.primary),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
         ),
-      );
+        IconButton.filledTonal(
+          visualDensity: VisualDensity.compact,
+          onPressed: value > min ? () => onChanged(value - 1) : null,
+          icon: const Icon(Icons.remove_rounded, size: 18),
+        ),
+        SizedBox(
+          width: 36,
+          child: Text(
+            '$value',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          ),
+        ),
+        IconButton.filledTonal(
+          visualDensity: VisualDensity.compact,
+          onPressed: value < max ? () => onChanged(value + 1) : null,
+          icon: const Icon(Icons.add_rounded, size: 18),
+        ),
+      ],
+    ),
+  );
 }
 
 class _ResultCard extends StatelessWidget {
@@ -572,32 +639,38 @@ class _ResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final r = result;
     Widget line(String label, double v) => Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 13),
-                ),
+      padding: const EdgeInsets.only(top: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.85),
+                fontSize: 13,
               ),
-              Text(
-                formatTl(v),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w700,
-                  fontFeatures: [FontFeature.tabularFigures()],
-                ),
-              ),
-            ],
+            ),
           ),
-        );
+          Text(
+            formatTl(v),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 13.5,
+              fontWeight: FontWeight.w700,
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
+      ),
+    );
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.82)],
+          colors: [
+            AppColors.primary,
+            AppColors.primary.withValues(alpha: 0.82),
+          ],
         ),
         borderRadius: BorderRadius.circular(16),
       ),
@@ -606,7 +679,10 @@ class _ResultCard extends StatelessWidget {
         children: [
           Text(
             'Tahmini toplam',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 13),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 13,
+            ),
           ),
           Text(
             formatTl(r.total),
@@ -620,7 +696,10 @@ class _ResultCard extends StatelessWidget {
           if (nights > 1)
             Text(
               'Gecelik ortalama ${formatTl(r.total / nights)}',
-              style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 12),
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.85),
+                fontSize: 12,
+              ),
             ),
           const SizedBox(height: 6),
           line('Konaklama', r.lodging),
@@ -632,7 +711,11 @@ class _ResultCard extends StatelessWidget {
             unconfirmed
                 ? 'Bu tesisin fiyatı teyit gerektiriyor. Hesap tarifeye göredir; kesin tutar için tesisle görüşün.'
                 : 'Hesap tarifeye göredir; dönem, kampanya ve tesis kuralları tutarı değiştirebilir.',
-            style: TextStyle(color: Colors.white.withValues(alpha: 0.85), fontSize: 11.5, height: 1.35),
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.85),
+              fontSize: 11.5,
+              height: 1.35,
+            ),
           ),
           const SizedBox(height: 10),
           OutlinedButton.icon(
@@ -642,7 +725,9 @@ class _ResultCard extends StatelessWidget {
             style: OutlinedButton.styleFrom(
               foregroundColor: Colors.white,
               side: BorderSide(color: Colors.white.withValues(alpha: 0.6)),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
         ],

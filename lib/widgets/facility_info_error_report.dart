@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../services/feedback_service.dart';
+import 'feedback_report_button.dart';
 
-import '../constants/store_links.dart';
 import '../models/misafirhane.dart';
 
 const _kRed = Color(0xFFD32F2F);
@@ -96,7 +96,7 @@ class FacilityInfoErrorReportCard extends StatelessWidget {
                   horizontal: 14,
                   vertical: 10,
                 ),
-                minimumSize: Size.zero,
+                minimumSize: const Size(64, 44),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -115,7 +115,7 @@ class FacilityInfoErrorReportCard extends StatelessWidget {
   }
 }
 
-/// Hata türü seçimi + açıklama; e-posta uygulaması şablonla açılır.
+/// Hata türü seçimi + açıklama; ortak geri bildirim servisine gönderilir.
 Future<void> showFacilityInfoErrorReportSheet(
   BuildContext context, {
   required Misafirhane facility,
@@ -146,10 +146,13 @@ class _InfoErrorReportSheetState extends State<_InfoErrorReportSheet> {
   final _selected = <_InfoErrorKind>{};
   final _note = TextEditingController();
   bool _sending = false;
+  final _email = TextEditingController();
+  bool _consent = false;
 
   @override
   void dispose() {
     _note.dispose();
+    _email.dispose();
     super.dispose();
   }
 
@@ -194,30 +197,27 @@ class _InfoErrorReportSheetState extends State<_InfoErrorReportSheet> {
           ..writeln(note);
       }
 
-      final uri = Uri(
-        scheme: 'mailto',
-        path: StoreLinks.supportEmail,
-        query:
-            {
-                  'subject': 'Bilgi hatası — ${f.il} / ${f.isim}',
-                  'body': buffer.toString().trim(),
-                }.entries
-                .map(
-                  (e) =>
-                      '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}',
-                )
-                .join('&'),
+      await FeedbackService.instance.submit(
+        kind: FeedbackKind.incorrectInfo,
+        description: buffer.toString().trim(),
+        sourcePage: 'Konaklama / Bilgi hatası',
+        facilityId: f.stableFacilityId,
+        facilityName: f.isim,
+        email: _email.text,
+        contactConsent: _consent,
       );
-
-      final ok = await launchUrl(uri);
       if (!mounted) return;
-      if (!ok) {
-        _snack(
-          'E-posta uygulaması açılamadı. ${StoreLinks.supportEmail} adresine yazabilirsiniz.',
-        );
-        return;
-      }
+      final messenger = ScaffoldMessenger.of(context);
       Navigator.of(context).pop();
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Teşekkürler, bildiriminiz alındı.')),
+      );
+    } on FeedbackException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.message)));
+      }
     } finally {
       if (mounted) setState(() => _sending = false);
     }
@@ -364,6 +364,12 @@ class _InfoErrorReportSheetState extends State<_InfoErrorReportSheet> {
               ),
             ),
             const SizedBox(height: 16),
+            FeedbackContactFields(
+              controller: _email,
+              consent: _consent,
+              onConsentChanged: (v) => setState(() => _consent = v),
+            ),
+            const SizedBox(height: 12),
             FilledButton.icon(
               onPressed: _sending ? null : _submit,
               icon: _sending
@@ -376,7 +382,7 @@ class _InfoErrorReportSheetState extends State<_InfoErrorReportSheet> {
                       ),
                     )
                   : const Icon(Icons.mail_outline_rounded, size: 20),
-              label: Text(_sending ? 'Hazırlanıyor…' : 'E-posta ile bildir'),
+              label: Text(_sending ? 'Hazırlanıyor…' : 'Bildir'),
               style: FilledButton.styleFrom(
                 backgroundColor: _kRed,
                 foregroundColor: Colors.white,
@@ -392,7 +398,7 @@ class _InfoErrorReportSheetState extends State<_InfoErrorReportSheet> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Gönder tuşuna bastığınızda e-posta uygulamanız hazır metinle açılır.',
+              'Bildiriminiz inceleme için doğrudan Rotalink’e iletilir.',
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 11.5, color: muted),
             ),

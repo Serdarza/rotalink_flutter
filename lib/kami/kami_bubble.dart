@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 
-/// KAMİ konuşma balonu — kompakt, sade, FAB'a bağlı.
+/// Rota konuşma balonu — kompakt, sade, FAB'a bağlı.
 class KamiBubble extends StatelessWidget {
   const KamiBubble({
     super.key,

@@ -1,7 +1,9 @@
+import 'services/device_test_messaging.dart';
+import 'services/app_notifications_service.dart';
 import 'dart:async';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,12 +44,21 @@ Future<void> main() async {
   unawaited(RotalinkSystemUi.applyEdgeToEdge());
 
   analyticsObserver = AnalyticsObserver(FirebaseAnalyticsService.instance);
-  await ThemeModePrefs.load();
+  unawaited(
+    ThemeModePrefs.load().catchError(
+      (Object e) => debugPrint('Görünüm tercihi okunamadı: $e'),
+    ),
+  );
   runApp(const ProviderScope(child: RotalinkApp()));
-  FlutterNativeSplash.remove();
+  if (!kIsWeb) FlutterNativeSplash.remove();
   logStartup('runApp');
 
-  unawaited(_startBackgroundServices());
+  unawaited(
+    WidgetsBinding.instance.waitUntilFirstFrameRasterized.then((_) {
+      logStartup('ilk kare ekranda');
+      return _startBackgroundServices();
+    }),
+  );
 }
 
 /// Firebase ve diğer servisler ilk kareden sonra ısınır; açılışı bekletmez.
@@ -55,6 +66,12 @@ Future<void> _startBackgroundServices() async {
   try {
     await initializeFirebase();
     logStartup('firebase');
+    unawaited(AppNotificationsService.initialize());
+    unawaited(
+      DeviceTestMessaging.initialize(
+        HolidayNotificationScheduler.showAdminTestNotification,
+      ).catchError((Object _) {}),
+    );
   } catch (e) {
     debugPrint('Firebase başlatılamadı: $e');
   }
@@ -71,10 +88,8 @@ Future<void> _startBackgroundServices() async {
 Future<void> _requestRuntimePermissions() async {
   await Future<void>.delayed(const Duration(seconds: 8));
   try {
-    await FirebaseMessaging.instance.requestPermission();
-  } catch (_) {}
-  try {
     await HolidayNotificationScheduler.requestPermissions();
+    await AppNotificationsService.syncSubscription();
   } catch (_) {}
 }
 

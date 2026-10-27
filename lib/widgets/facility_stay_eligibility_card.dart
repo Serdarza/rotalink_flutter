@@ -25,9 +25,14 @@ String stayCivilBadge(StayAccess a) => switch (a) {
 /// Tesis detayında "Kimler konaklayabilir?" — tesis tipine göre gruplar
 /// ve açılır "Nasıl kalınır?" adımları.
 class FacilityStayEligibilityCard extends StatefulWidget {
-  const FacilityStayEligibilityCard({super.key, required this.facility});
+  const FacilityStayEligibilityCard({
+    super.key,
+    required this.facility,
+    this.compact = false,
+  });
 
   final Misafirhane facility;
+  final bool compact;
 
   @override
   State<FacilityStayEligibilityCard> createState() =>
@@ -57,6 +62,7 @@ class _FacilityStayEligibilityCardState
         ? Colors.white.withValues(alpha: 0.60)
         : AppColors.textStrongOf(context).withValues(alpha: 0.60);
     final badgeColor = _accessColor(rule.civilAccess);
+    if (widget.compact) return _compactCard(context, rule, badgeColor);
 
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -303,4 +309,161 @@ class _FacilityStayEligibilityCardState
       ),
     );
   }
+
+  Widget _compactCard(
+    BuildContext context,
+    FacilityStayRule rule,
+    Color badgeColor,
+  ) => Material(
+    color: AppColors.surfaceOf(context),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(18),
+      side: BorderSide(color: AppColors.borderOf(context)),
+    ),
+    clipBehavior: Clip.antiAlias,
+    child: Theme(
+      data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+      child: Column(
+        children: [
+          ExpansionTile(
+            tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+            childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            leading: const Icon(
+              Icons.groups_2_outlined,
+              color: AppColors.primary,
+            ),
+            title: Wrap(
+              spacing: 8,
+              runSpacing: 5,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                const Text(
+                  'Kimler konaklayabilir?',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: badgeColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Text(
+                    _civilBadge(rule.civilAccess),
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      color: badgeColor,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  rule.authority,
+                  style: TextStyle(
+                    color: AppColors.textMutedOf(context),
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+              for (final group in rule.groups)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        _accessIcon(group.access),
+                        size: 19,
+                        color: _accessColor(group.access),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              group.title,
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              group.detail,
+                              style: TextStyle(
+                                color: AppColors.textMutedOf(context),
+                                fontSize: 12,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          Divider(
+            height: 1,
+            indent: 12,
+            endIndent: 12,
+            color: AppColors.borderOf(context),
+          ),
+          ExpansionTile(
+            tilePadding: const EdgeInsets.symmetric(horizontal: 12),
+            childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
+            leading: const Icon(
+              Icons.checklist_rounded,
+              color: AppColors.primary,
+            ),
+            title: const Text(
+              'Nasıl kalınır?',
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+            ),
+            children: [
+              for (final (index, step) in rule.howTo.indexed)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${index + 1}.',
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          step,
+                          style: const TextStyle(fontSize: 12.5, height: 1.4),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(12, 0, 12, 10),
+            child: Text(
+              FacilityStayRules.disclaimer,
+              style: TextStyle(fontSize: 10.5, height: 1.35),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

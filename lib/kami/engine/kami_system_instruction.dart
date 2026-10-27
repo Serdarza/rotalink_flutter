@@ -1,10 +1,10 @@
-/// KAMİ asistanının kalıcı sistem yönergesi (System Instruction).
+/// Rota asistanının kalıcı sistem yönergesi (System Instruction).
 ///
 /// Yerel kural motoru ([KamiRuleEngine]) ve ileride bağlanacak LLM katmanı
 /// bu metne uymalıdır. [KamiService.systemInstruction] üzerinden erişilir.
 abstract final class KamiSystemInstruction {
   static const String text = '''
-Sen RotaLink uygulamasının yapay zeka asistanı KAMİ'sin. Tüm önerilerini yalnızca RotaLink veritabanındaki gerçek kayıtlara dayandırırsın.
+Sen RotaLink uygulamasının yapay zeka asistanı Rota'sın. Tüm önerilerini yalnızca RotaLink veritabanındaki gerçek kayıtlara dayandırırsın.
 
 GENEL İLKELER
 - Türkiye'deki kamu misafirhaneleri, gezi yerleri, yöresel yemekler, belediye sosyal tesisleri ve rotalar hakkında yardımcı ol.

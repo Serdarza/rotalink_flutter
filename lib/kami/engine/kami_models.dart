@@ -7,7 +7,7 @@ import '../../models/sosyal_item.dart';
 import '../recommendation/trip_score_service.dart';
 import 'kami_entities.dart';
 
-/// KAMİ niyet türleri — yerel motor + ileride Gemini mapping için ortak.
+/// Rota niyet türleri — yerel motor + ileride Gemini mapping için ortak.
 enum KamiIntentType {
   weekendTrip,
   food,

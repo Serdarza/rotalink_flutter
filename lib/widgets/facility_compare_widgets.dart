@@ -9,6 +9,7 @@ import '../navigator_keys.dart';
 import '../screens/facility_compare_screen.dart';
 import '../theme/app_colors.dart';
 import 'facility_sort_bar.dart' show showProFeatureTeaser;
+import 'facility_detail_action.dart';
 
 const _gold = Color(0xFFF2C14E);
 const _goldDeep = Color(0xFFB8860B);
@@ -24,19 +25,25 @@ Future<void> openFacilityCompare(BuildContext context, {LatLng? userLocation}) {
 }
 
 Future<void> showCompareProTeaser(BuildContext context) => showProFeatureTeaser(
-      context,
-      icon: Icons.compare_arrows_rounded,
-      title: FacilityPricing.compareTeaserTitle,
-      headline: FacilityPricing.compareTeaserHeadline,
-      perks: FacilityPricing.compareTeaserPerks,
-    );
+  context,
+  icon: Icons.compare_arrows_rounded,
+  title: FacilityPricing.compareTeaserTitle,
+  headline: FacilityPricing.compareTeaserHeadline,
+  perks: FacilityPricing.compareTeaserPerks,
+);
 
 /// Tesis detayında "Karşılaştırmaya ekle" satırı; seçim 2+ olunca "Karşılaştır (n)".
 class FacilityCompareButton extends StatelessWidget {
-  const FacilityCompareButton({super.key, required this.facility, this.userLocation});
+  const FacilityCompareButton({
+    super.key,
+    required this.facility,
+    this.userLocation,
+    this.compactAction = false,
+  });
 
   final Misafirhane facility;
   final LatLng? userLocation;
+  final bool compactAction;
 
   void _onToggle(BuildContext context) {
     if (!PriceAccess.unlocked) {
@@ -62,8 +69,19 @@ class FacilityCompareButton extends StatelessWidget {
       valueListenable: FacilityCompareSelection.instance,
       builder: (context, selected, _) {
         final unlocked = PriceAccess.unlocked;
-        final inList = unlocked && selected.any((x) => x.sameFavoriteIdentity(facility));
+        final inList =
+            unlocked && selected.any((x) => x.sameFavoriteIdentity(facility));
         final canOpen = unlocked && selected.length >= 2;
+        if (compactAction) {
+          return FacilityDetailAction(
+            icon: inList
+                ? Icons.check_circle_outline_rounded
+                : Icons.compare_arrows_rounded,
+            label: 'Karşılaştır',
+            selected: inList,
+            onTap: () => _onToggle(context),
+          );
+        }
         return DecoratedBox(
           decoration: BoxDecoration(
             color: cardBg,
@@ -80,11 +98,18 @@ class FacilityCompareButton extends StatelessWidget {
                     style: TextButton.styleFrom(
                       alignment: Alignment.centerLeft,
                       // Yazı nötr koyu; renk yalnız ikonda.
-                      foregroundColor: isDark ? Colors.white : const Color(0xFF2B3A40),
-                      textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                      foregroundColor: isDark
+                          ? Colors.white
+                          : const Color(0xFF2B3A40),
+                      textStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     icon: Icon(
-                      inList ? Icons.check_circle_rounded : Icons.compare_arrows_rounded,
+                      inList
+                          ? Icons.check_circle_rounded
+                          : Icons.compare_arrows_rounded,
                       size: 20,
                       color: AppColors.primary,
                     ),
@@ -93,22 +118,36 @@ class FacilityCompareButton extends StatelessWidget {
                       children: [
                         Flexible(
                           child: Text(
-                            inList ? FacilityPricing.compareAdded : FacilityPricing.compareAdd,
+                            inList
+                                ? FacilityPricing.compareAdded
+                                : FacilityPricing.compareAdd,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        if (!unlocked) ...[const SizedBox(width: 6), const CompareProBadge()],
+                        if (!unlocked) ...[
+                          const SizedBox(width: 6),
+                          const CompareProBadge(),
+                        ],
                       ],
                     ),
                   ),
                 ),
                 if (canOpen)
                   FilledButton(
-                    onPressed: () => openFacilityCompare(context, userLocation: userLocation),
+                    onPressed: () => openFacilityCompare(
+                      context,
+                      userLocation: userLocation,
+                    ),
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      textStyle: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 10,
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                     child: Text(FacilityPricing.compareOpen(selected.length)),
                   ),
@@ -123,7 +162,11 @@ class FacilityCompareButton extends StatelessWidget {
 
 /// Arama listesinin üstünde, karşılaştırmaya tesis eklenmişken görünen çubuk.
 class FacilityCompareBar extends StatelessWidget {
-  const FacilityCompareBar({super.key, required this.selected, this.userLocation});
+  const FacilityCompareBar({
+    super.key,
+    required this.selected,
+    this.userLocation,
+  });
 
   final List<Misafirhane> selected;
   final LatLng? userLocation;
@@ -140,7 +183,11 @@ class FacilityCompareBar extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
           child: Row(
             children: [
-              const Icon(Icons.compare_arrows_rounded, size: 18, color: AppColors.primary),
+              const Icon(
+                Icons.compare_arrows_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -168,13 +215,20 @@ class FacilityCompareBar extends StatelessWidget {
               ),
               if (canOpen)
                 FilledButton(
-                  onPressed: () => openFacilityCompare(context, userLocation: userLocation),
+                  onPressed: () =>
+                      openFacilityCompare(context, userLocation: userLocation),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
+                    textStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   child: Text(FacilityPricing.compareOpen(selected.length)),
                 ),

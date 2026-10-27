@@ -34,11 +34,13 @@ class CustomSearchBar extends StatefulWidget {
     this.ilOptionsSorted,
     this.onSubmitted,
     this.onSearchCleared,
+    this.onClearPressed,
     this.onFilterPressed,
     this.onFocusChanged,
     this.ignoreKeyboardInset = false,
     this.emphasized = false,
     this.restrained = false,
+    this.compactHome = false,
   });
 
   final TextEditingController controller;
@@ -54,6 +56,9 @@ class CustomSearchBar extends StatefulWidget {
   /// Metin tamamen boşaldığında harita durumunu sıfırlamak için.
   final VoidCallback? onSearchCleared;
 
+  /// Explicit X tap only; deleting text or a programmatic clear keeps its behavior.
+  final VoidCallback? onClearPressed;
+
   /// Filtre ikonu tıklandığında (geçilmezse ikon soluk gösterilir).
   final VoidCallback? onFilterPressed;
 
@@ -68,6 +73,7 @@ class CustomSearchBar extends StatefulWidget {
 
   /// Ara ekranı: sade beyaz yüzey, ince gri çerçeve, odakta turkuaz çerçeve.
   final bool restrained;
+  final bool compactHome;
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -186,17 +192,37 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
             FocusManager.instance.primaryFocus?.unfocus();
             SchedulerBinding.instance.addPostFrameCallback((_) => onSubmit());
           },
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             isDense: true,
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 14),
+            enabledBorder: (widget.compactHome || widget.restrained)
+                ? InputBorder.none
+                : null,
+            focusedBorder: (widget.compactHome || widget.restrained)
+                ? InputBorder.none
+                : null,
+            filled: (widget.compactHome || widget.restrained) ? false : null,
+            hintText: (widget.compactHome || widget.restrained)
+                ? 'İl veya misafirhane ara...'
+                : null,
+            hintStyle: TextStyle(
+              fontSize: 14,
+              color: AppColors.textMutedOf(context),
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 4,
+              vertical: widget.compactHome ? 10 : 14,
+            ),
           ),
         ),
         // ── Daktilo hint overlay ────────────────────────────────────────────
         ListenableBuilder(
           listenable: Listenable.merge([controller, focusNode]),
           builder: (_, _) {
-            if (controller.text.isNotEmpty || focusNode.hasFocus) {
+            if (widget.compactHome ||
+                widget.restrained ||
+                controller.text.isNotEmpty ||
+                focusNode.hasFocus) {
               return const SizedBox.shrink();
             }
             return const IgnorePointer(
@@ -329,7 +355,7 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
           );
 
     // ── Gölge: dingin vs. odaklı ─────────────────────────────────────────
-    final radius = widget.restrained ? 16.0 : _kRadius;
+    final radius = widget.restrained ? 28.0 : _kRadius;
     final List<BoxShadow> shadow = widget.restrained
         ? [
             BoxShadow(
@@ -384,25 +410,34 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: _kMaxWidth),
           child: AnimatedScale(
-            scale: focused && !widget.restrained ? 1.015 : 1.0,
+            scale: focused && !widget.restrained && !widget.compactHome
+                ? 1.015
+                : 1.0,
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOutCubic,
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeOutCubic,
-              height: _kHeight,
+              height: widget.compactHome
+                  ? (MediaQuery.textScalerOf(context).scale(15.5) + 20).clamp(
+                      49.0,
+                      100.0,
+                    )
+                  : _kHeight,
               decoration: BoxDecoration(
                 color: AppColors.isDark(context)
                     ? AppColors.darkSurface
+                    : widget.compactHome
+                    ? Colors.white
                     : widget.emphasized
                     ? const Color(0xFFF3FBFC)
                     : _kBg,
                 borderRadius: BorderRadius.circular(radius),
-                border: widget.restrained
+                border: widget.compactHome
+                    ? Border.all(color: AppColors.primary, width: 1)
+                    : widget.restrained
                     ? Border.all(
-                        color: focused
-                            ? AppColors.primary
-                            : AppColors.borderOf(context),
+                        color: AppColors.primary,
                         width: focused ? 1.6 : 1,
                       )
                     : widget.emphasized
@@ -438,16 +473,23 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                       // ── Temizle ───────────────────────────────────────
                       if (showClear)
                         _BarBtn(
+                          touchSize: (widget.compactHome || widget.restrained)
+                              ? 44
+                              : 36,
                           icon: Icons.close,
                           tooltip: AppStrings.clearSearch,
                           onPressed: () {
                             FocusManager.instance.primaryFocus?.unfocus();
                             widget.controller.clear();
+                            widget.onClearPressed?.call();
                           },
                         ),
 
                       // ── Mikrofon ──────────────────────────────────────
                       _BarBtn(
+                        touchSize: (widget.compactHome || widget.restrained)
+                            ? 44
+                            : 36,
                         icon: _listening ? Icons.mic : Icons.mic_none,
                         color: _listening
                             ? Colors.redAccent
@@ -475,12 +517,14 @@ class _BarBtn extends StatelessWidget {
     required this.tooltip,
     required this.onPressed,
     this.color = AppColors.primary,
+    this.touchSize = 36,
   });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback? onPressed;
   final Color color;
+  final double touchSize;
 
   @override
   Widget build(BuildContext context) {
@@ -490,7 +534,7 @@ class _BarBtn extends StatelessWidget {
       icon: Icon(icon, color: color, size: 20),
       visualDensity: VisualDensity.compact,
       padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+      constraints: BoxConstraints(minWidth: touchSize, minHeight: touchSize),
     );
   }
 }

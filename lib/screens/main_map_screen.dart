@@ -11,7 +11,6 @@ import 'package:flutter_map_marker_popup/src/state/popup_event.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/store_links.dart';
 import '../data/app_rating_prefs.dart';
@@ -44,6 +43,7 @@ import '../services/simple_location_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/system_ui.dart';
 import '../utils/geo_helpers.dart';
+import '../utils/facility_phone_dialer.dart';
 import '../utils/maps_launch.dart';
 import '../utils/misafirhane_compact_sheet_height.dart';
 import '../utils/route_facility_lookup.dart';
@@ -53,8 +53,6 @@ import '../utils/main_map_search.dart';
 import '../widgets/app_rating_dialog.dart';
 import '../widgets/distance_permission_chip.dart';
 import '../widgets/facility_detail_card.dart';
-import '../kami/kami_overlay.dart';
-import '../widgets/emergency_bottom_sheet.dart';
 import '../providers/facility_filter_provider.dart';
 import '../providers/main_map_search_ui_provider.dart';
 import '../widgets/main_map_search_chrome.dart';
@@ -62,11 +60,10 @@ import '../widgets/map_facility_markers_layer.dart';
 import '../widgets/city_overview_marker.dart';
 import '../widgets/map_facility_preview_card.dart';
 import '../widgets/misafirhane_map_marker.dart';
-import '../widgets/misafirhane_marker_info_popup.dart';
 import '../widgets/misafirhane_search_results_sheet.dart';
 import '../widgets/rotalink_tile_layer.dart';
 import '../widgets/map_weather_chip.dart';
-import '../widgets/rotalink_pro_chip.dart';
+import '../widgets/emergency_bottom_sheet.dart';
 import '../widgets/weather_bottom_sheet.dart';
 import '../widgets/rotalink_app_drawer.dart';
 import '../widgets/rotalink_app_header.dart';
@@ -192,6 +189,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
   /// Marker seçiminde altta gösterilen önizleme kartı.
   Misafirhane? _mapPreviewFacility;
 
+  /// Harita pin'inden açılan Google Maps tarzı alt detay kartı.
+  Misafirhane? _mapMarkerDetailFacility;
+
   /// Ana ekran genel Türkiye görünümünden il görünümüne marker dokunuşuyla geçildi mi.
   /// `null` ise henüz il odaklı görünüm yoktur.
   String? _mainMapFocusedCity;
@@ -230,6 +230,11 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
 
   /// Arama sonuçları (Konaklama/Gezi/…) paneli harita [Stack] içinde — Scaffold bottom sheet değil.
   bool _inlineTabbedSearchOpen = false;
+  bool _facilityDetailVisible = false;
+  bool get _detailPresentationVisible =>
+      (_inlineTabbedSearchOpen && _facilityDetailVisible) ||
+      _compactFacilityDetailOpen ||
+      _mapMarkerDetailFacility != null;
   RotaDataState? _tabbedSheetRotaData;
   Misafirhane? _tabbedSheetHighlight;
   int _tabbedSheetInitialTab = 0;
@@ -314,7 +319,23 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
       await _performSearch(ctx, data);
       await _waitUntilSearchResultsVisible();
     };
+    bridge.isFacilityDetailOpen = () => _detailPresentationVisible;
     bridge.openCategory = _openCategoryFromDashboard;
+    bridge.feedbackFacility = () =>
+        _searchResultsPanelKey.currentState?.visibleFacility ??
+        _mapPreviewFacility;
+    bridge.openFacility = (ctx, facility) async {
+      final data = _cachedRotaData;
+      if (data == null || !mounted) return;
+      await _openTabbedSearchResults(
+        ctx,
+        data,
+        [facility],
+        highlightTarget: facility,
+        requestLocation: false,
+      );
+      await _openFacilityDetailInPanel(facility);
+    };
     bridge.openRoutePlan = _openRoutePlanning;
     bridge.applyRoutePlan = (outcome) async {
       final data = _cachedRotaData;
@@ -593,6 +614,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     _syncSearchPanelOpen(false);
     setState(() {
       _inlineTabbedSearchOpen = false;
+      _facilityDetailVisible = false;
       _tabbedSheetRotaData = null;
       _tabbedSheetHighlight = null;
       _tabbedSheetInitialTab = 0;
@@ -729,6 +751,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
       readyToExit = false;
       isSheetVisible = true;
       _mapPreviewFacility = null;
+      _mapMarkerDetailFacility = null;
       _markerOverride = null;
       _mainMapFocusedCity = null;
       _weatherSearchCity = null;
@@ -1085,7 +1108,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
   void _showMisafirhanePopupFor(Misafirhane m) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final hl = _searchSheetHighlight;
+      final hl = _mapMarkerDetailFacility ?? _searchSheetHighlight;
       _popupController.showPopupsOnlyFor([
         MisafirhaneMapMarker(
           misafirhane: m,
@@ -1093,6 +1116,87 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
         ),
       ]);
     });
+  }
+
+  int _ignoreMapTapUntilMs = 0;
+
+  void _selectFacilityOnMap(Misafirhane m) {
+    final alreadyOpen =
+        _mapMarkerDetailFacility != null &&
+        _mapMarkerDetailFacility!.sameFavoriteIdentity(m) &&
+        _attachedBottomSheet != null;
+    if (alreadyOpen) {
+      _dismissMapFacilitySelection();
+      return;
+    }
+    _ignoreMapTapUntilMs = DateTime.now().millisecondsSinceEpoch + 450;
+    setState(() => _mapMarkerDetailFacility = m);
+    _showMisafirhanePopupFor(m);
+    _openFacilityMapSheet(m);
+    _focusFacilityForMapSheet(m);
+  }
+
+  void _dismissMapFacilitySelection() {
+    _mapMarkerDetailFacility = null;
+    _popupController.hideAllPopups();
+    _closeAttachedBottomSheetOnly();
+    if (mounted) setState(() {});
+  }
+
+  void _openFacilityMapSheet(Misafirhane m) {
+    if (_attachedBottomSheet != null) {
+      _closeAttachedBottomSheetOnly();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (_mapMarkerDetailFacility == null ||
+            !_mapMarkerDetailFacility!.sameFavoriteIdentity(m)) {
+          return;
+        }
+        _presentFacilityMapSheet(m);
+      });
+      return;
+    }
+    _presentFacilityMapSheet(m);
+  }
+
+  void _focusFacilityForMapSheet(Misafirhane m) {
+    if (!_validFacilityCoords(m)) return;
+    final dest = latLngOrFallback(m.latitude, m.longitude);
+    try {
+      final cam = _mapController.camera;
+      if (cam.zoom < 13) {
+        _mapController.move(dest, 15);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          if (_mapMarkerDetailFacility == null ||
+              !_mapMarkerDetailFacility!.sameFavoriteIdentity(m)) {
+            return;
+          }
+          _nudgeMapForFacilitySheet(m);
+        });
+        return;
+      }
+      _nudgeMapForFacilitySheet(m);
+    } catch (_) {}
+  }
+
+  void _nudgeMapForFacilitySheet(Misafirhane m) {
+    if (!_validFacilityCoords(m)) return;
+    try {
+      final cam = _mapController.camera;
+      final dest = latLngOrFallback(m.latitude, m.longitude);
+      final sp = cam.latLngToScreenPoint(dest);
+      final targetY = cam.nonRotatedSize.y * 0.22;
+      final dy = sp.y - targetY;
+      if (dy.abs() < 18) return;
+      final newCenter = cam.pointToLatLng(
+        math.Point<double>(
+          cam.nonRotatedSize.x / 2,
+          cam.nonRotatedSize.y / 2 + dy,
+        ),
+      );
+      _mapController.move(newCenter, cam.zoom);
+    } catch (_) {}
   }
 
   Future<void> _animateTowardsMisafirhane(Misafirhane m) async {
@@ -1119,29 +1223,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
         _mainMapFocusedCity != null ||
         _searchController.text.trim().isNotEmpty ||
         _mapPreviewFacility != null ||
+        _mapMarkerDetailFacility != null ||
         _misafirhaneFacilityPopupOpen;
-  }
-
-  bool get _shouldInterceptMainMapMarkerTap =>
-      _isMainMapOverviewActive && _mainMapFocusedCity == null;
-
-  void _handleMarkerTapOnMainOverview(Marker marker) {
-    if (marker is! MisafirhaneMapMarker) return;
-    final cityKey = _normalizeCityKey(
-      IlIlce.canonicalIl(marker.misafirhane.il) ?? marker.misafirhane.il,
-    );
-    _OverviewCitySummary? summary;
-    for (final item in _overviewCitySummaries(
-      _cachedRotaData,
-      ref.read(facilityTypeFilterProvider),
-    )) {
-      if (_normalizeCityKey(item.cityName) == cityKey) {
-        summary = item;
-        break;
-      }
-    }
-    if (summary == null) return;
-    _handleOverviewCityTap(summary);
   }
 
   void _handleOverviewCityTap(_OverviewCitySummary summary) {
@@ -1160,6 +1243,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
       _markerOverride = summary.facilities;
       _searchSheetHighlight = null;
       _mapPreviewFacility = null;
+      _mapMarkerDetailFacility = null;
       _misafirhaneFacilityPopupOpen = false;
       readyToExit = false;
       isSheetVisible = true;
@@ -1223,6 +1307,13 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     final scaffold = _scaffoldKey.currentState;
     if (scaffold != null && scaffold.isDrawerOpen) {
       scaffold.closeDrawer();
+      return;
+    }
+
+    if (_mapMarkerDetailFacility != null) {
+      _dismissMapFacilitySelection();
+      _lastExitBackAt = null;
+      FocusManager.instance.primaryFocus?.unfocus();
       return;
     }
 
@@ -1368,6 +1459,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     _popupController.hideAllPopups();
     setState(() {
       _inlineTabbedSearchOpen = false;
+      _facilityDetailVisible = false;
       _tabbedSheetRotaData = null;
       _tabbedSheetHighlight = null;
       _mainMapFocusedCity = null;
@@ -1977,14 +2069,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     Misafirhane? facility,
   ) async {
     if (target.action == DeepLinkAction.call) {
-      final phone = facility?.telefon.trim() ?? '';
-      if (phone.isEmpty) return;
-      final uri = Uri(scheme: 'tel', path: phone.replaceAll(RegExp(r'\s'), ''));
-      try {
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        }
-      } catch (_) {}
+      if (facility != null && context.mounted) {
+        await FacilityPhoneDialer.open(context, facility);
+      }
       return;
     }
     if (target.action != DeepLinkAction.map || !context.mounted) return;
@@ -2029,6 +2116,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     bool reopenNextBackExitsSearch = false,
     int initialTabIndex = 0,
     String? geziYemekHighlight,
+    bool requestLocation = true,
   }) async {
     try {
       if (!mounted || !context.mounted) return;
@@ -2070,6 +2158,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
       if (_inlineTabbedSearchOpen) {
         setState(() {
           _inlineTabbedSearchOpen = false;
+          _facilityDetailVisible = false;
           _tabbedSheetRotaData = null;
           _tabbedSheetHighlight = null;
         });
@@ -2090,14 +2179,16 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
         _tabbedSheetGeziYemekHighlight = geziYemekHighlight;
       });
       _syncSearchPanelOpen(true);
-      // Arama açılınca her zaman sistem konum izin popup'ını dene (oturum reddi engellemesin).
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        unawaited(() async {
-          await SimpleLocationService.prepareForUserInitiatedPermissionDialog();
-          await _ensureLocationPermissionAndLocationForLists();
-        }());
-      });
+      // Nearby/manual selection has already resolved the user's permission choice.
+      if (requestLocation) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          unawaited(() async {
+            await SimpleLocationService.prepareForUserInitiatedPermissionDialog();
+            await _ensureLocationPermissionAndLocationForLists();
+          }());
+        });
+      }
     } catch (e, st) {
       debugPrint('Arama sonuç sheet: $e\n$st');
     }
@@ -2276,9 +2367,16 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                                 }
                               },
                               onTap: (tapPosition, point) {
+                                if (DateTime.now().millisecondsSinceEpoch <
+                                    _ignoreMapTapUntilMs) {
+                                  return;
+                                }
                                 _popupController.hideAllPopups();
                                 if (_mapPreviewFacility != null) {
                                   unawaited(_closeMapPreviewAnimated());
+                                }
+                                if (_mapMarkerDetailFacility != null) {
+                                  _dismissMapFacilitySelection();
                                 }
                               },
                             ),
@@ -2309,18 +2407,22 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                                 ),
                                 MapFacilityPopupMarkersLayer(
                                   baseFacilities: baseDisplay,
-                                  highlight: _searchSheetHighlight,
+                                  highlight:
+                                      _mapMarkerDetailFacility ??
+                                      _searchSheetHighlight,
                                   visible: showFacilityMarkers,
                                   popupController: _popupController,
                                   onMarkerTap:
                                       (popupSpec, popupState, popupController) {
-                                        if (_shouldInterceptMainMapMarkerTap) {
-                                          _handleMarkerTapOnMainOverview(
-                                            popupSpec.marker,
+                                        if (popupSpec.marker
+                                            is MisafirhaneMapMarker) {
+                                          _selectFacilityOnMap(
+                                            (popupSpec.marker
+                                                    as MisafirhaneMapMarker)
+                                                .misafirhane,
                                           );
                                           return;
                                         }
-
                                         if (popupState.selectedPopupSpecs
                                             .contains(popupSpec)) {
                                           popupController.hideAllPopups();
@@ -2347,30 +2449,13 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                                     snap: PopupSnap.markerTop,
                                     builder: (ctx, marker) {
                                       if (marker is MisafirhaneMapMarker) {
-                                        return MisafirhaneMarkerInfoPopup(
-                                          misafirhane: marker.misafirhane,
-                                          onInceleHaritaArama: (q) async {
-                                            final d =
-                                                rotaForUi ?? _cachedRotaData;
-                                            if (d == null) {
-                                              if (context.mounted) {
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  const SnackBar(
-                                                    content: Text(
-                                                      'Harita verisi henüz yüklenemedi.',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                              return;
-                                            }
-                                            if (!mounted || !context.mounted)
-                                              return;
-                                            _searchController.text = q;
-                                            await _performSearch(context, d);
-                                          },
+                                        return ConstrainedBox(
+                                          constraints: const BoxConstraints(
+                                            maxWidth: 240,
+                                          ),
+                                          child: MapFacilityPreviewCard(
+                                            misafirhane: marker.misafirhane,
+                                          ),
                                         );
                                       }
                                       return const SizedBox.shrink();
@@ -2393,10 +2478,20 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                           child: MisafirhaneSearchResultsPanel(
                             key: _searchResultsPanelKey,
                             listVisible: isSheetVisible,
-                            topInset:
-                                searchChromeTop +
-                                MainMapSearchChrome.blockHeight +
-                                4,
+                            topInset: _facilityDetailVisible
+                                ? 0
+                                : searchChromeTop +
+                                      (_inlineTabbedSearchOpen
+                                          ? MainMapSearchChrome
+                                                .resultsBlockHeight
+                                          : MainMapSearchChrome.blockHeight) +
+                                      4,
+                            onDetailChanged: (visible) {
+                              if (!mounted) return;
+                              setState(() => _facilityDetailVisible = visible);
+                              widget.navBridge?.onDetailVisibilityChanged
+                                  ?.call();
+                            },
                             onViewModeChanged: _setSearchListVisible,
                             rotaData: _tabbedSheetRotaData!,
                             mapLocationState: _mapLocationState,
@@ -2406,7 +2501,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                             favoritesRepo: _favoritesRepo,
                             onFavoritesChanged: _reloadFavoritesCache,
                             onTesisSelect: (m) async {
-                              _showMisafirhanePopupFor(m);
+                              _selectFacilityOnMap(m);
                             },
                             onRequestLocationPermission:
                                 _onSearchSheetRequestLocation,
@@ -2432,7 +2527,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                               const gapAboveMarker = 8.0;
                               final minTopBelowSearch =
                                   toolbarBottom +
-                                  MainMapSearchChrome.blockHeight +
+                                  (_inlineTabbedSearchOpen
+                                      ? MainMapSearchChrome.resultsBlockHeight
+                                      : MainMapSearchChrome.blockHeight) +
                                   8 +
                                   (_inlineTabbedSearchOpen ? 64 : 0);
                               final cardW = math.min(
@@ -2497,7 +2594,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                       ),
                       Positioned(
                         right: 16,
-                        bottom: 8,
+                        // Ortak Bildir butonunun sabit alanını boş bırak.
+                        bottom: widget.navBridge != null ? 64 : 8,
                         child: AnimatedOpacity(
                           duration: const Duration(milliseconds: 280),
                           curve: Curves.easeOutCubic,
@@ -2595,106 +2693,77 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                                       ),
                                     ),
                                   ),
-                                if (!showListFab &&
-                                    !_inlineTabbedSearchOpen &&
-                                    _attachedBottomSheet == null) ...[
-                                  KamiMapOverlay(
-                                    repository: widget.repository,
-                                    initialData: _cachedRotaData,
-                                    userLocationHint: _userLocationLatLng,
-                                    fabAnchorKey: onboarding?.targetKey(
-                                      OnboardingTarget.kami,
-                                    ),
-                                    onRoutePlan: (outcome) async {
-                                      final data = _cachedRotaData;
-                                      if (data == null) return;
-                                      await _applyRoutePlan(
-                                        context,
-                                        data,
-                                        outcome.stops,
-                                        precomputedSegments: outcome.segments,
-                                      );
-                                    },
-                                  ),
-                                  const IgnorePointer(
-                                    child: SizedBox(
-                                      height:
-                                          KamiMapOverlay.gapAboveEmergencyFab,
-                                    ),
-                                  ),
-                                  _EmergencyFab(
-                                    anchorKey: onboarding?.targetKey(
-                                      OnboardingTarget.emergency,
-                                    ),
-                                    onTap: () => unawaited(
-                                      showEmergencyBottomSheet(context),
-                                    ),
-                                  ),
-                                ],
                               ],
                             ),
                           ),
                         ),
                       ),
-                      Positioned(
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        child: RotalinkAppHeader(
-                          overlayOnMap: true,
-                          onMenu: () => _scaffoldKey.currentState?.openDrawer(),
-                          onTitleTap: _goToInitialMapHome,
-                          menuAnchorKey: onboarding?.targetKey(
-                            OnboardingTarget.menu,
-                          ),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              KeyedSubtree(
-                                key: onboarding?.targetKey(
-                                  OnboardingTarget.weather,
-                                ),
-                                child: MapWeatherChip(
-                                  compact: true,
-                                  liveGps: _userLocationLatLng,
-                                  locationGranted: _mapLocationState
-                                      .locationPermissionGranted,
-                                  searchedCity: _weatherSearchCity,
-                                  focusedCity: _mainMapFocusedCity,
-                                  mapCenter: _center,
-                                  rotaData: rotaForUi,
-                                ),
+                      if (!_detailPresentationVisible)
+                        Positioned(
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          child: RotalinkAppHeader(
+                            overlayOnMap: true,
+                            onMenu: () =>
+                                _scaffoldKey.currentState?.openDrawer(),
+                            onTitleTap: _goToInitialMapHome,
+                            menuAnchorKey: onboarding?.targetKey(
+                              OnboardingTarget.menu,
+                            ),
+                            trailing: KeyedSubtree(
+                              key: onboarding?.targetKey(
+                                OnboardingTarget.weather,
                               ),
-                              const SizedBox(width: 8),
-                              const RotalinkProChip(),
-                            ],
+                              child: MapWeatherChip(
+                                compact: true,
+                                liveGps: _userLocationLatLng,
+                                locationGranted:
+                                    _mapLocationState.locationPermissionGranted,
+                                searchedCity: _weatherSearchCity,
+                                focusedCity: _mainMapFocusedCity,
+                                mapCenter: _center,
+                                rotaData: rotaForUi,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                      MainMapSearchChrome(
-                        anchorKey: onboarding?.targetKey(
-                          OnboardingTarget.searchChrome,
+                      if (!_detailPresentationVisible)
+                        MainMapSearchChrome(
+                          compactResults: _inlineTabbedSearchOpen,
+                          anchorKey: onboarding?.targetKey(
+                            OnboardingTarget.searchChrome,
+                          ),
+                          top: searchChromeTop,
+                          searchBarSession: _searchBarSession,
+                          controller: _searchController,
+                          ilOptionsSorted: _getIlOptions(rotaForUi),
+                          onSubmitted: rotaForUi != null
+                              ? () => unawaited(
+                                  _performSearch(context, rotaForUi),
+                                )
+                              : null,
+                          onSearchCleared: () {
+                            if (!mounted) return;
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            _onMainSearchCleared();
+                            setState(() => _searchBarSession++);
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              if (mounted) _fitTurkeyOverviewCamera();
+                            });
+                          },
+                          onClearPressed: () {
+                            if (!mounted) return;
+                            final shell = RotalinkShellScope.find(context);
+                            if (shell != null) {
+                              shell.goHome();
+                            } else {
+                              _resetSearchToHome();
+                            }
+                          },
+                          focusNode: _searchBarFocusNode,
+                          onFocusChanged: _onSearchBarFocusChanged,
                         ),
-                        top: searchChromeTop,
-                        searchBarSession: _searchBarSession,
-                        controller: _searchController,
-                        ilOptionsSorted: _getIlOptions(rotaForUi),
-                        onSubmitted: rotaForUi != null
-                            ? () =>
-                                  unawaited(_performSearch(context, rotaForUi))
-                            : null,
-                        onSearchCleared: () {
-                          if (!mounted) return;
-                          FocusManager.instance.primaryFocus?.unfocus();
-                          _onMainSearchCleared();
-                          setState(() => _searchBarSession++);
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (mounted) _fitTurkeyOverviewCamera();
-                          });
-                        },
-                        focusNode: _searchBarFocusNode,
-                        onFocusChanged: _onSearchBarFocusChanged,
-                      ),
                     ],
                   );
                 },
@@ -2710,30 +2779,12 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  Future<void> _dialFacilityPhone(BuildContext context, String phone) async {
-    final p = phone.trim();
-    if (p.isEmpty) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Telefon numarası yok')));
-      }
-      return;
-    }
-    final uri = Uri(scheme: 'tel', path: p.replaceAll(RegExp(r'\s'), ''));
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Arama başlatılamadı')));
-      }
-    }
+  Future<void> _dialFacilityPhone(BuildContext context, Misafirhane facility) async {
+    await FacilityPhoneDialer.open(context, facility);
   }
 
   Future<void> _shareFacility(Misafirhane m) async {
-    final phone = m.telefon.trim();
+    final phone = m.telefonNumaralari.join(' / ');
     await Share.share(
       StoreLinks.shareMessage(m.isim, [
         if (phone.isNotEmpty) 'Telefon: $phone',
@@ -2773,6 +2824,94 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
         ),
       ),
     );
+  }
+
+  void _presentFacilityMapSheet(Misafirhane m) {
+    widget.navBridge?.onDetailVisibilityChanged?.call();
+    final scaffoldState = _scaffoldKey.currentState;
+    if (scaffoldState == null) return;
+    final ctrl = scaffoldState.showBottomSheet(
+      (sheetCtx) {
+        final sheetH = misafirhaneCompactDetailSheetHeight(sheetCtx);
+        return SizedBox(
+          height: sheetH,
+          child: Material(
+            color: AppColors.surfaceOf(sheetCtx),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: StatefulBuilder(
+              builder: (ctx, setModal) {
+                return ListenableBuilder(
+                  listenable: _mapLocationState,
+                  builder: (context, _) {
+                    return FacilityDetailCard(
+                      misafirhane: m,
+                      fromMap: true,
+                      mapLocationState: _mapLocationState,
+                      isFavorite: _favoritesCache.any(
+                        (f) => f.sameFavoriteIdentity(m),
+                      ),
+                      onBack: () {
+                        if (sheetCtx.mounted) Navigator.pop(sheetCtx);
+                      },
+                      onCall: () =>
+                          unawaited(_dialFacilityPhone(context, m)),
+                      onShare: () => unawaited(_shareFacility(m)),
+                      onFavorite: () async {
+                        await _favoritesRepo.toggle(m);
+                        await _reloadFavoritesCache();
+                        if (ctx.mounted) setModal(() {});
+                      },
+                      onInspect: () =>
+                          unawaited(openMapSearch(context, m.il, m.isim)),
+                      onReview: () => unawaited(
+                        pushOnShellNavigator<void>(
+                          MaterialPageRoute<void>(
+                            builder: (_) => YorumScreen(
+                              facilityId: ReviewRepository.sanitizeFacilityId(
+                                m.stableFacilityId,
+                              ),
+                              facilityName: m.isim,
+                            ),
+                          ),
+                        ),
+                      ),
+                      onShowOnMap: () {
+                        unawaited(openMapSearch(context, m.il, m.isim));
+                      },
+                      onRequestLocation: () async {
+                        await _ensureLocationPermissionAndLocationForLists(
+                          fromDistanceChip: true,
+                        );
+                      },
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        );
+      },
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      enableDrag: true,
+    );
+    _attachedBottomSheet = ctrl;
+    ctrl.closed.then((_) {
+      if (!mounted) return;
+      if (_attachedBottomSheet == ctrl) {
+        _attachedBottomSheet = null;
+      }
+      if (_mapMarkerDetailFacility != null &&
+          _mapMarkerDetailFacility!.sameFavoriteIdentity(m)) {
+        _mapMarkerDetailFacility = null;
+        _popupController.hideAllPopups();
+        setState(() {});
+        widget.navBridge?.onDetailVisibilityChanged?.call();
+      }
+    });
   }
 
   void _openMisafirhaneSheet(
@@ -2893,6 +3032,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                 _closeCompactFacilityDetail = () => setCompactDetail(null);
               }
             });
+            if (mounted) setState(() {});
+            widget.navBridge?.onDetailVisibilityChanged?.call();
             if (m == null && previous != null) {
               restoreCompactListScroll(previous);
             }
@@ -2938,7 +3079,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                               ),
                               onBack: () => setCompactDetail(null),
                               onCall: () => unawaited(
-                                _dialFacilityPhone(context, detail.telefon),
+                                _dialFacilityPhone(context, detail),
                               ),
                               onShare: () => unawaited(_shareFacility(detail)),
                               onFavorite: () =>
@@ -3130,7 +3271,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                                                 onTap: () => unawaited(
                                                   _dialFacilityPhone(
                                                     context,
-                                                    m.telefon,
+                                                    m,
                                                   ),
                                                 ),
                                               ),
@@ -3226,6 +3367,8 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
       _attachedBottomSheet = null;
       _closeCompactFacilityDetail = null;
       _compactFacilityDetailOpen = false;
+      setState(() {});
+      widget.navBridge?.onDetailVisibilityChanged?.call();
     });
   }
 
@@ -3324,8 +3467,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
   }
 
   Future<void> _openRoutePlanning() async {
-    final outcome = await pushOnShellNavigator<RoutePlanOutcome>(
+    final outcome = await pushOrReplaceOnShellNavigator<RoutePlanOutcome>(
       MaterialPageRoute<RoutePlanOutcome>(
+        settings: const RouteSettings(name: RotalinkShellRoutes.routePlan),
         builder: (_) => RoutePlanScreen(
           repository: widget.repository,
           embeddedInShell: true,
@@ -3862,63 +4006,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
         _attachedBottomSheet = null;
       }
     });
-  }
-}
-
-class _EmergencyFab extends StatelessWidget {
-  const _EmergencyFab({required this.onTap, this.anchorKey});
-
-  final VoidCallback onTap;
-  final Key? anchorKey;
-
-  @override
-  Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: anchorKey,
-      child: Tooltip(
-        message: AppStrings.fabEmergency,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Material(
-              elevation: 12,
-              shape: const CircleBorder(),
-              color: const Color(0xFFD32F2F),
-              child: InkWell(
-                customBorder: const CircleBorder(),
-                onTap: onTap,
-                child: SizedBox(
-                  width: 56,
-                  height: 56,
-                  child: const Icon(
-                    Icons.priority_high,
-                    color: AppColors.white,
-                    size: 28,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              AppStrings.emergencyLabel,
-              style: TextStyle(
-                color: AppColors.emergencyLabel,
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1.4,
-                shadows: const [
-                  Shadow(
-                    color: Color(0x40000000),
-                    offset: Offset(0, 1),
-                    blurRadius: 1,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

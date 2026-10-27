@@ -6,7 +6,7 @@ import 'kami_system_instruction.dart';
 import 'response_builder.dart';
 import 'rule_engine.dart';
 
-/// Yerel KAMİ orkestratörü: Intent → Rule → Response.
+/// Yerel Rota orkestratörü: Intent → Rule → Response.
 ///
 /// Davranış kuralları: [KamiSystemInstruction.text]
 /// Gemini/OpenAI yok. İleride [KamiAssistantService] yerine başka
@@ -17,7 +17,7 @@ class KamiService implements KamiAssistantService {
     KamiRuleEngine? engine,
   }) : engine = engine ?? KamiRuleEngine();
 
-  /// KAMİ sistem yönergesi — bölgesel öneri ve veri kaynağı kuralları.
+  /// Rota sistem yönergesi — bölgesel öneri ve veri kaynağı kuralları.
   static String get systemInstruction => KamiSystemInstruction.text;
   /// Her istekte güncel RTDB snapshot + konum.
   final Future<KamiQueryContext?> Function() contextProvider;

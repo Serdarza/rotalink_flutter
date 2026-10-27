@@ -11,7 +11,7 @@ final isMapSearchChromeActiveProvider = Provider<bool>((ref) {
   return ref.watch(searchBarFocusedProvider) || ref.watch(searchPanelOpenProvider);
 });
 
-/// Harita üzerindeki yuvarlak butonlar (FAB, KAMİ, ACİL vb.) gizlensin mi.
+/// Harita üzerindeki yuvarlak butonlar (FAB, Rota, ACİL vb.) gizlensin mi.
 final shouldHideMapOverlayButtonsProvider = Provider<bool>((ref) {
   return ref.watch(isMapSearchChromeActiveProvider);
 });

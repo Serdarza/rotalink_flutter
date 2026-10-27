@@ -40,7 +40,7 @@ class OnboardingStep {
 /// İlk açılış adım adım tur kontrolcüsü.
 class AppOnboardingController extends ChangeNotifier {
   AppOnboardingController({required VoidCallback onEnsureHome})
-      : _onEnsureHome = onEnsureHome;
+    : _onEnsureHome = onEnsureHome;
 
   final VoidCallback _onEnsureHome;
   final Map<OnboardingTarget, GlobalKey> _keys = {};
@@ -81,24 +81,6 @@ class AppOnboardingController extends ChangeNotifier {
       icon: Icons.wb_sunny_rounded,
       target: OnboardingTarget.weather,
       align: OnboardingTooltipAlign.below,
-      ensureHome: true,
-    ),
-    OnboardingStep(
-      title: 'KAMİ asistan',
-      body:
-          'Yapay zekâ seyahat asistanınız. Örneğin «Ankara\'ya gidiyorum, misafirhane öner» diyerek rota ve konaklama önerisi alabilirsiniz.',
-      icon: Icons.smart_toy_rounded,
-      target: OnboardingTarget.kami,
-      align: OnboardingTooltipAlign.left,
-      ensureHome: true,
-    ),
-    OnboardingStep(
-      title: 'Acil durum',
-      body:
-          'Kırmızı ACİL düğmesi: SOS, en yakın hastane ve acil yardım numaraları. Yolda güvende kalmanız için her zaman elinizin altında.',
-      icon: Icons.emergency_rounded,
-      target: OnboardingTarget.emergency,
-      align: OnboardingTooltipAlign.left,
       ensureHome: true,
     ),
     OnboardingStep(

@@ -1,0 +1,3186 @@
+{
+  "aciklama": "Yalnızca resmi kaynakta doğrulanan kış noktaları. Termal kayıtları Sağlık Bakanlığı 21.09.2019 lisanslı kamu/belediye kaplıcaları ile Kamu Tesisleri dizinindeki kamu termalleridir. Özel tesisler ve mükerrer kayıtlar yer almaz. Termal ücretler yalnız resmî tesis/kurum kaynaklarından kontrol edilerek ucretBilgisi alanında tutulur; tarife yılı belirsizse ayrıca belirtilir. Eksik ücretler tahmin edilmez.",
+  "kayitlar": [
+    {
+      "id": "kayak-bursa-uludag",
+      "kategori": "kayak",
+      "il": "Bursa",
+      "ilce": "",
+      "isim": "Uludağ Kayak Merkezi",
+      "kurumTuru": "Kış sporları merkezi",
+      "kisaAciklama": "Bursa'nın kuzey yamaçlarındaki ulusal kış sporları merkezi. Teleferik ve karayoluyla ulaşılır.",
+      "adres": "Bursa'ya yaklaşık 36 km, Uludağ kuzey yamaçları",
+      "telefon": "0224 800 15 00",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "latitude": 40.103992,
+      "longitude": 29.132888,
+      "anaBilgiler": [
+        {
+          "baslik": "Şehir mesafesi",
+          "deger": "Bursa'ya 36 km"
+        },
+        {
+          "baslik": "Kayak alanı rakımı",
+          "deger": "1750–2543 m"
+        },
+        {
+          "baslik": "Zirve",
+          "deger": "Karatepe 2543 m"
+        },
+        {
+          "baslik": "Pist sayısı",
+          "deger": "13 pist"
+        },
+        {
+          "baslik": "Mekanik tesis",
+          "deger": "8 telesiyej, 7 T-bar"
+        },
+        {
+          "baslik": "Sezon",
+          "deger": "Aralık sonu – Mart sonu"
+        },
+        {
+          "baslik": "Ulaşım",
+          "deger": "Karayolu ve teleferik"
+        }
+      ],
+      "resmiKaynak": "https://www.ktb.gov.tr/EN-99234/bursa---uludag.html",
+      "sonDogrulama": "2026-10-22",
+      "pistHaritasi": {
+        "sayfaUrl": "https://gouludag.com/tr/harita",
+        "kaynakAdi": "Uludağ Alan Başkanlığı",
+        "resmi": true,
+        "sonKontrol": "2026-10-22",
+        "durum": "sayfa"
+      }
+    },
+    {
+      "id": "kayak-bolu-kartalkaya",
+      "kategori": "kayak",
+      "il": "Bolu",
+      "ilce": "",
+      "isim": "Kartalkaya Kayak Merkezi",
+      "kurumTuru": "Kış sporları merkezi",
+      "kisaAciklama": "Köroğlu Dağları'nda alp, kayaklı koşu ve tur kayağı için uygun kayak merkezidir.",
+      "adres": "Bolu güneydoğusu, Köroğlu Dağları",
+      "telefon": "",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "latitude": 40.585966,
+      "longitude": 31.809815,
+      "anaBilgiler": [
+        {
+          "baslik": "Şehir mesafesi",
+          "deger": "Bolu'nun 38 km güneydoğusu"
+        },
+        {
+          "baslik": "Kayak alanı rakımı",
+          "deger": "1850–2200 m"
+        },
+        {
+          "baslik": "Pist",
+          "deger": "12 pist, yaklaşık 20 km"
+        },
+        {
+          "baslik": "Mekanik tesis",
+          "deger": "2 telesiyej, 6 T-bar, 3 baby lift"
+        },
+        {
+          "baslik": "Sezon",
+          "deger": "1 Aralık – 31 Mart"
+        },
+        {
+          "baslik": "Kayak türü",
+          "deger": "Alp, kayaklı koşu ve tur kayağı"
+        }
+      ],
+      "resmiKaynak": "https://www.ktb.gov.tr/EN-99231/bolu-kartalkaya.html",
+      "sonDogrulama": "2026-10-22",
+      "pistHaritasi": {
+        "sayfaUrl": "https://kartalotel.com/en/ski/ski-map/",
+        "gorselUrl": "https://kartalotel.com/qaqiruv/themes/ajans360/assets/img/tmp/Kartalkaya-Pist-Harita@2x-80.jpg",
+        "kaynakAdi": "Kartal Otel",
+        "resmi": false,
+        "sonKontrol": "2026-10-22",
+        "durum": "gorsel"
+      }
+    },
+    {
+      "id": "kayak-kastamonu-ilgaz",
+      "kategori": "kayak",
+      "il": "Kastamonu",
+      "ilce": "Ilgaz",
+      "isim": "Ilgaz Dağı Kayak Merkezi",
+      "kurumTuru": "Kış sporları merkezi",
+      "kisaAciklama": "Ilgaz Dağı Milli Parkı içinde alp, kuzey disiplini, tur kayağı ve snowboard imkânı sunar.",
+      "adres": "Ilgaz Dağı",
+      "telefon": "",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "latitude": 41.067658,
+      "longitude": 33.732755,
+      "anaBilgiler": [
+        {
+          "baslik": "Zirve",
+          "deger": "Büyükhacet 2587 m"
+        },
+        {
+          "baslik": "Yurduntepe rakımı",
+          "deger": "1838–2330 m"
+        },
+        {
+          "baslik": "Pist uzunluğu",
+          "deger": "Yurduntepe 5600 m (2 etap)"
+        },
+        {
+          "baslik": "Sezon",
+          "deger": "20 Aralık – 30 Mart"
+        },
+        {
+          "baslik": "Kayak türü",
+          "deger": "Alp, kuzey disiplini, tur kayağı, snowboard"
+        },
+        {
+          "baslik": "Konum",
+          "deger": "Milli park içinde"
+        }
+      ],
+      "resmiKaynak": "https://kastamonu.ktb.gov.tr/Eklenti/112738,kastamonu-e-brosurpdf.pdf?0=",
+      "sonDogrulama": "2026-10-22",
+      "pistHaritasi": {
+        "sonKontrol": "2026-10-22",
+        "durum": "yok"
+      }
+    },
+    {
+      "id": "kayak-isparta-davraz",
+      "kategori": "kayak",
+      "il": "Isparta",
+      "ilce": "",
+      "isim": "Davraz Kayak Merkezi",
+      "kurumTuru": "Kış sporları merkezi",
+      "kisaAciklama": "Eğirdir Gölü manzaralı kayak merkezi. Alp, kuzey disiplini ve tur kayağı yapılır.",
+      "adres": "Isparta merkezine yaklaşık 26 km, Davraz Dağı",
+      "telefon": "0501 109 00 32",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "latitude": 37.771014,
+      "longitude": 30.749874,
+      "anaBilgiler": [
+        {
+          "baslik": "Şehir mesafesi",
+          "deger": "Isparta'ya yaklaşık 26 km"
+        },
+        {
+          "baslik": "Pist uzunluğu",
+          "deger": "25 km"
+        },
+        {
+          "baslik": "Pist sayısı",
+          "deger": "14 pist"
+        },
+        {
+          "baslik": "Kayak alanı rakımı",
+          "deger": "1650–2344 m"
+        },
+        {
+          "baslik": "Zirve",
+          "deger": "Ulparçukuru 2635 m"
+        },
+        {
+          "baslik": "Sezon",
+          "deger": "Aralık – Nisan"
+        },
+        {
+          "baslik": "Kayak türü",
+          "deger": "Alp, kuzey disiplini, tur kayağı, snowboard"
+        }
+      ],
+      "resmiKaynak": "https://isparta.ktb.gov.tr/TR-165310/davraz-kayak-merkezi.html",
+      "sonDogrulama": "2026-10-22",
+      "pistHaritasi": {
+        "sayfaUrl": "https://davrazkayakmerkezi.org/pist-haritasi",
+        "gorselUrl": "https://davrazkayakmerkezi.org/shared/uploads/legacy/1b53e9879f85-harita_tr1.png",
+        "kaynakAdi": "Isparta Davraz Kayak Merkezi",
+        "resmi": true,
+        "sonKontrol": "2026-10-22",
+        "durum": "gorsel"
+      }
+    },
+    {
+      "id": "kayak-antalya-saklikent",
+      "kategori": "kayak",
+      "il": "Antalya",
+      "ilce": "",
+      "isim": "Saklıkent Kayak Merkezi",
+      "kurumTuru": "Kış sporları merkezi",
+      "kisaAciklama": "Antalya'ya 50 km. Kış veya ilkbaharda aynı gün deniz ve kayak planlanabilir.",
+      "adres": "Antalya'ya yaklaşık 50 km, Bakırlıdağ çevresi",
+      "telefon": "",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "latitude": 36.834286,
+      "longitude": 30.33054,
+      "anaBilgiler": [
+        {
+          "baslik": "Şehir mesafesi",
+          "deger": "Antalya'ya 50 km, yaklaşık 1,5 saat"
+        },
+        {
+          "baslik": "Kayak alanı rakımı",
+          "deger": "1800–2547 m"
+        },
+        {
+          "baslik": "Zirve",
+          "deger": "Bakırlıdağ 2547 m"
+        },
+        {
+          "baslik": "Sezon",
+          "deger": "20 Aralık – 30 Mart"
+        },
+        {
+          "baslik": "Mekanik tesis",
+          "deger": "1400 m telesiyej, 950 m ve 650 m teleski"
+        },
+        {
+          "baslik": "Kayak türü",
+          "deger": "Alp, tur kayağı ve yamaç paraşütü"
+        }
+      ],
+      "resmiKaynak": "https://teda.ktb.gov.tr/Eklenti/6591,skicentersofturkeypdf.pdf?0=",
+      "sonDogrulama": "2026-10-22",
+      "pistHaritasi": {
+        "sayfaUrl": "https://www.saklikent.com.tr/saklikent-kayak-merkezi/menu/tr/6/pistler-ve-telesiyej.aspx",
+        "kaynakAdi": "Saklıkent Kayak Merkezi",
+        "resmi": true,
+        "sonKontrol": "2026-10-22",
+        "durum": "sayfa"
+      }
+    },
+    {
+      "id": "kayak-kayseri-erciyes",
+      "kategori": "kayak",
+      "il": "Kayseri",
+      "ilce": "",
+      "isim": "Erciyes Kayak Merkezi",
+      "kurumTuru": "Kış sporları merkezi",
+      "kisaAciklama": "Türkiye'nin en geniş kayak altyapılarından biri. Dört kapıdan girilir; gondol ve telesiyej hattı vardır.",
+      "adres": "Kayseri'ye yaklaşık 25 km, Erciyes Dağı",
+      "telefon": "0352 342 39 17",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "latitude": 38.550677,
+      "longitude": 35.492352,
+      "anaBilgiler": [
+        {
+          "baslik": "Şehir mesafesi",
+          "deger": "Kayseri'ye yaklaşık 25 km"
+        },
+        {
+          "baslik": "Pist sayısı",
+          "deger": "41 pist"
+        },
+        {
+          "baslik": "Pist uzunluğu",
+          "deger": "112 km"
+        },
+        {
+          "baslik": "En uzun pist",
+          "deger": "4210 m"
+        },
+        {
+          "baslik": "Mekanik tesis",
+          "deger": "19 tesis, 2 gondol"
+        },
+        {
+          "baslik": "Giriş kapıları",
+          "deger": "Develi, Tekir, Hisarcık, Hacılar"
+        }
+      ],
+      "resmiKaynak": "https://kulturportali.gov.tr/turkiye/kayseri/turizmaktiviteleri/erciyes-dagi--kayak-merkezi-",
+      "sonDogrulama": "2026-10-22",
+      "pistHaritasi": {
+        "sayfaUrl": "https://www.erciyeskayak.com/tr/pist-haritasi",
+        "gorselUrl": "https://www.erciyeskayak.com/img/gallery/erciyes-pist-haritasi.png",
+        "kaynakAdi": "Erciyes Kayak",
+        "resmi": true,
+        "sonKontrol": "2026-10-22",
+        "durum": "gorsel"
+      }
+    },
+    {
+      "id": "kayak-erzurum-palandoken",
+      "kategori": "kayak",
+      "il": "Erzurum",
+      "ilce": "Palandöken",
+      "isim": "Palandöken Kayak Merkezi",
+      "kurumTuru": "Kış sporları merkezi",
+      "kisaAciklama": "Şehir merkezine yaklaşık 10 dakika. Gece kayağı yapılır; FIS onaylı pistleri vardır.",
+      "adres": "Palandöken, Erzurum",
+      "telefon": "0442 317 08 04",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "latitude": 39.844691,
+      "longitude": 41.285856,
+      "anaBilgiler": [
+        {
+          "baslik": "Şehir mesafesi",
+          "deger": "Merkeze yaklaşık 10 dakika"
+        },
+        {
+          "baslik": "Pist sayısı",
+          "deger": "44 pist"
+        },
+        {
+          "baslik": "Pist uzunluğu",
+          "deger": "51 km"
+        },
+        {
+          "baslik": "Zirve",
+          "deger": "3176 m"
+        },
+        {
+          "baslik": "En uzun pist",
+          "deger": "12 km kesintisiz pist"
+        },
+        {
+          "baslik": "Özellik",
+          "deger": "Gece kayağı"
+        }
+      ],
+      "resmiKaynak": "https://erzurum.ktb.gov.tr/tr-56072/kis-turizmi.html",
+      "sonDogrulama": "2026-10-22",
+      "pistHaritasi": {
+        "sayfaUrl": "https://www.ejder3200.com/merkez/palandoken",
+        "kaynakAdi": "EJDER3200 Kayak Merkezleri A.Ş.",
+        "resmi": true,
+        "sonKontrol": "2026-10-22",
+        "durum": "sayfa"
+      }
+    },
+    {
+      "id": "kayak-erzurum-konakli",
+      "kategori": "kayak",
+      "il": "Erzurum",
+      "ilce": "",
+      "isim": "Konaklı Kayak Merkezi",
+      "kurumTuru": "Kış sporları merkezi",
+      "kisaAciklama": "2011 Dünya Üniversiteler Kış Oyunları'na ev sahipliği yapan sakin kayak merkezidir.",
+      "adres": "Konaklı, Erzurum",
+      "telefon": "0442 317 08 04",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "latitude": 39.779453,
+      "longitude": 41.20694,
+      "anaBilgiler": [
+        {
+          "baslik": "Şehir mesafesi",
+          "deger": "Erzurum'a 17 km"
+        },
+        {
+          "baslik": "Kayak alanı rakımı",
+          "deger": "2200–3185 m"
+        },
+        {
+          "baslik": "Pist sayısı",
+          "deger": "11 pist"
+        },
+        {
+          "baslik": "Pist uzunluğu",
+          "deger": "35 km"
+        },
+        {
+          "baslik": "Sezon",
+          "deger": "Ocak – Mart"
+        },
+        {
+          "baslik": "Kayak türü",
+          "deger": "Alp disiplini ve snowboard"
+        }
+      ],
+      "resmiKaynak": "https://erzurum.ktb.gov.tr/tr-56072/kis-turizmi.html",
+      "sonDogrulama": "2026-10-22",
+      "pistHaritasi": {
+        "sayfaUrl": "https://www.ejder3200.com/merkez/konakli",
+        "kaynakAdi": "EJDER3200 Kayak Merkezleri A.Ş.",
+        "resmi": true,
+        "sonKontrol": "2026-10-22",
+        "durum": "sayfa"
+      }
+    },
+    {
+      "id": "kayak-erzurum-kandilli",
+      "kategori": "kayak",
+      "il": "Erzurum",
+      "ilce": "Aşkale",
+      "isim": "Kandilli Kayak Merkezi",
+      "kurumTuru": "Kış sporları merkezi",
+      "kisaAciklama": "Kayaklı koşu ve biatlon için kuzey disiplini merkezidir. 2011 Kış Oyunları burada yapıldı.",
+      "adres": "Aşkale, Kandilli",
+      "telefon": "",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "anaBilgiler": [
+        {
+          "baslik": "Şehir mesafesi",
+          "deger": "Erzurum'a 36 km"
+        },
+        {
+          "baslik": "Pist rakımı",
+          "deger": "1713–1767 m"
+        },
+        {
+          "baslik": "Alan",
+          "deger": "160 hektar"
+        },
+        {
+          "baslik": "Kayaklı koşu",
+          "deger": "2,5 / 3,75 / 5 km pistler"
+        },
+        {
+          "baslik": "Kayak türü",
+          "deger": "Kayaklı koşu ve biatlon"
+        },
+        {
+          "baslik": "Kullanım",
+          "deger": "Dört mevsim çok amaçlı"
+        }
+      ],
+      "resmiKaynak": "https://erzurum.ktb.gov.tr/tr-56072/kis-turizmi.html",
+      "sonDogrulama": "2026-10-22",
+      "pistHaritasi": {
+        "sonKontrol": "2026-10-22",
+        "durum": "yok"
+      }
+    },
+    {
+      "id": "kayak-kars-sarikamis",
+      "kategori": "kayak",
+      "il": "Kars",
+      "ilce": "Sarıkamış",
+      "isim": "Sarıkamış Kayak Merkezi",
+      "kurumTuru": "Kış sporları merkezi",
+      "kisaAciklama": "Soğanlı Dağları eteklerinde kristal karıyla bilinen kayak merkezidir. FIS tescilli pistleri vardır.",
+      "adres": "Sarıkamış, Kars'ın güneybatısı",
+      "telefon": "0474 223 21 36",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "latitude": 40.301595,
+      "longitude": 42.60374,
+      "anaBilgiler": [
+        {
+          "baslik": "Şehir mesafesi",
+          "deger": "Kars'a 52 km, ilçeye 1,5 km"
+        },
+        {
+          "baslik": "Pist sayısı",
+          "deger": "9 pist"
+        },
+        {
+          "baslik": "Pist uzunluğu",
+          "deger": "17 km"
+        },
+        {
+          "baslik": "En uzun pist",
+          "deger": "3500 m"
+        },
+        {
+          "baslik": "FIS",
+          "deger": "5 km pist Uluslararası Kayak Federasyonu tescilli"
+        },
+        {
+          "baslik": "Kar türü",
+          "deger": "Kristal kar"
+        }
+      ],
+      "resmiKaynak": "https://kars.ktb.gov.tr/Eklenti/82532,rota-karspdf.pdf?0=",
+      "sonDogrulama": "2026-10-22",
+      "pistHaritasi": {
+        "sayfaUrl": "https://www.sarikamisdagas.com.tr/",
+        "kaynakAdi": "Sarıkamış Dağ A.Ş.",
+        "resmi": true,
+        "sonKontrol": "2026-10-22",
+        "durum": "yok"
+      }
+    },
+    {
+      "id": "gezi-bursa-uludag-mp",
+      "kategori": "kisGezisi",
+      "il": "Bursa",
+      "ilce": "",
+      "isim": "Uludağ Milli Parkı",
+      "kurumTuru": "Milli park",
+      "kisaAciklama": "Kültür ve Turizm Bakanlığı, Uludağ'ı bitki örtüsü ve yaban hayatı nedeniyle milli park olarak tanıtır. Kışın da ziyaret edilen bir dağ alanıdır.",
+      "adres": "Uludağ, Bursa",
+      "telefon": "",
+      "kullanimTuru": "Günübirlik",
+      "resmiKaynak": "https://www.ktb.gov.tr/EN-99234/bursa---uludag.html",
+      "sonDogrulama": "2026-10-22"
+    },
+    {
+      "id": "gezi-erzurum-palandoken-dag",
+      "kategori": "kisGezisi",
+      "il": "Erzurum",
+      "ilce": "Palandöken",
+      "isim": "Palandöken Dağı",
+      "kurumTuru": "Doğal alan",
+      "kisaAciklama": "Erzurum İl Kültür ve Turizm Müdürlüğü, Palandöken Dağı çevresini dört mevsim gezi, piknik ve seyir alanı olarak tanıtır.",
+      "adres": "Palandöken Dağı, Erzurum",
+      "telefon": "",
+      "kullanimTuru": "Günübirlik",
+      "resmiKaynak": "https://erzurum.ktb.gov.tr/tr-56072/kis-turizmi.html",
+      "sonDogrulama": "2026-10-22"
+    },
+    {
+      "id": "gezi-kars-allahuekber",
+      "kategori": "kisGezisi",
+      "il": "Kars",
+      "ilce": "Sarıkamış",
+      "isim": "Sarıkamış Allahuekber Dağları Milli Parkı",
+      "kurumTuru": "Milli park",
+      "kisaAciklama": "Kars İl Kültür ve Turizm Müdürlüğü, 2004'te kurulan milli parkı sarıçam ormanları ve Sarıkamış çevresiyle tanıtır.",
+      "adres": "Sarıkamış, Allahuekber Dağları",
+      "telefon": "",
+      "kullanimTuru": "Günübirlik",
+      "resmiKaynak": "https://kars.ktb.gov.tr/Eklenti/82532,rota-karspdf.pdf?0=",
+      "sonDogrulama": "2026-10-22"
+    },
+    {
+      "id": "gezi-ardahan-cildir",
+      "kategori": "kisGezisi",
+      "il": "Ardahan",
+      "ilce": "Çıldır",
+      "isim": "Çıldır Gölü",
+      "kurumTuru": "Korunan doğal alan",
+      "kisaAciklama": "Kars İl Kültür ve Turizm Müdürlüğü, gölün kışın donduğunu ve yüzeyde atlı kızak gezileri yapıldığını belirtir. Gölün büyük bölümü Ardahan sınırındadır.",
+      "adres": "Çıldır, Ardahan",
+      "telefon": "",
+      "kullanimTuru": "Günübirlik",
+      "resmiKaynak": "https://kars.ktb.gov.tr/Eklenti/82532,rota-karspdf.pdf?0=",
+      "sonDogrulama": "2026-10-22"
+    },
+    {
+      "id": "termal-afyon-afbel",
+      "kategori": "termal",
+      "il": "Afyonkarahisar",
+      "ilce": "Merkez",
+      "isim": "AFBEL Termal & SPA Otel",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Kamu Tesisleri dizininde Afyonkarahisar Belediyesi iştiraki termal otel olarak kayıtlıdır.",
+      "adres": "Dörtyol Mahallesi, 2150. Sokak No:4, 03030 Anıtkaya / Merkez / Afyonkarahisar",
+      "telefon": "0272 999 16 50",
+      "kullanimTuru": "Konaklamalı",
+      "resmiKaynak": "https://www.afbeltermal.com/",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 38.788232,
+      "longitude": 30.473028,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.afbeltermal.com/"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Resmî sitede yayımlanmış sayısal güncel tarife bulunamadı; acente fiyatları kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-afyon-gazligol",
+      "kategori": "termal",
+      "il": "Afyonkarahisar",
+      "ilce": "İhsaniye",
+      "isim": "Belediye Gazlıgöl Termal Kaplıcaları",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Kamu Tesisleri dizininde İhsaniye Gazlıgöl belediye kaplıcası olarak kayıtlıdır.",
+      "adres": "Cumhuriyet Mahallesi, 03370 Gazlıgöl/İhsaniye/Afyonkarahisar, Türkiye",
+      "telefon": "0272 273 61 62",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "resmiKaynak": "https://www.ihsaniye.gov.tr/termal-turizm",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 38.936653,
+      "longitude": 30.499327,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.ihsaniye.gov.tr/termal-turizm",
+          "https://www.afyon.bel.tr/kurumsal/stratejik-yonetim/komisyon-raporlari/plan-ve-butce-komisyon-raporlari/2025-yili-plan-ve-butce-komisyon-raporlari/mayis-2025-plan-ve-butce-komisyonu-raporlari"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediyenin bulunan tarifesi 2025 yılına ait; 2026 geçerliliği doğrulanamadığı için fiyat eklenmedi."
+      }
+    },
+    {
+      "id": "termal-afyon-heybeli",
+      "kategori": "termal",
+      "il": "Afyonkarahisar",
+      "ilce": "Bolvadin",
+      "isim": "Bolvadin Heybeli Termal Tesisleri",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Kamu Tesisleri dizininde Bolvadin Belediyesi termal tesisi olarak kayıtlıdır.",
+      "adres": "Güvenevler, Afyon Konya Yolu 25. Km, Bolvadin / Afyonkarahisar",
+      "telefon": "0272 248 36 36",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "resmiKaynak": "https://www.bolvadin.gov.tr/heybeli-kizil-kirse-kaplicasi",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 38.64526,
+      "longitude": 30.833879,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.bolvadin.gov.tr/heybeli-kizil-kirse-kaplicasi"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediye/kurum kaynaklarında 2026 sayısal ücret doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-afyon-hudai",
+      "kategori": "termal",
+      "il": "Afyonkarahisar",
+      "ilce": "Sandıklı",
+      "isim": "Hüdai Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca tesisleri listesinde işletmecisi Sandıklı Belediyesi olarak kayıtlıdır.",
+      "adres": "Tozkoparan Mevkii Çakır Mah. Sandıklı/Afyonkarahisar",
+      "telefon": "0272 535 73 27",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hudai.sandikli.bel.tr/iletisim",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 38.432397,
+      "longitude": 30.184115,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Konaklama ücretleri daire başına geceliktir. ABCD bloklarında üst katlarda küvet, alt katlarda özel havuz bulunur.",
+        "kaynaklar": [
+          "https://hudai.sandikli.bel.tr/konaklama/abcd-bloklari",
+          "https://hudai.sandikli.bel.tr/konaklama/kaymakam-bloklari",
+          "https://hudai.sandikli.bel.tr/konaklama/kochisar-bloklari",
+          "https://hudai.sandikli.bel.tr/konaklama/resadiye-bloklari"
+        ],
+        "kalemler": [
+          {
+            "tur": "konaklama",
+            "ad": "ABCD blokları",
+            "tutar": 1200,
+            "birim": "daire / gece",
+            "kaynakUrl": "https://hudai.sandikli.bel.tr/konaklama/abcd-bloklari",
+            "kosul": "",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Kaymakam blokları",
+            "tutar": 2000,
+            "birim": "daire / gece",
+            "kaynakUrl": "https://hudai.sandikli.bel.tr/konaklama/kaymakam-bloklari",
+            "kosul": "",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Koçhisar blokları",
+            "tutar": 1750,
+            "birim": "daire / gece",
+            "kaynakUrl": "https://hudai.sandikli.bel.tr/konaklama/kochisar-bloklari",
+            "kosul": "",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Reşadiye blokları",
+            "tutar": 1750,
+            "birim": "daire / gece",
+            "kaynakUrl": "https://hudai.sandikli.bel.tr/konaklama/resadiye-bloklari",
+            "kosul": "",
+            "baslangic": true
+          }
+        ],
+        "arastirmaNotu": "Resmî sitede yayımlanan tarife kontrol edildi; tarife yılı/yürürlük tarihi belirtilmiyor. 2026 yılına ait olduğu ayrıca teyit edilemedi. Aile banyosu ve umumi hamam sayfalarında sayısal ücret bulunamadı; haber sitelerindeki fiyatlar kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-afyon-iscehisar",
+      "kategori": "termal",
+      "il": "Afyonkarahisar",
+      "ilce": "İscehisar",
+      "isim": "İscehisar Belediyesi Termal Tesisi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Kocakır Mevkii Kavak Mahallesi İscehisar/Afyonkarahisar",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.iscehisar.bel.tr/haberdetay-615-sifa-kaynagi-jeotermal-kaplica-tesisimiz-hizmete-acildi.html"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Bulunan belediye fiyat duyurusu 2021 yılına ait; 2026 fiyatı olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-ankara-ayas-tbb",
+      "kategori": "termal",
+      "il": "Ankara",
+      "ilce": "Ayaş",
+      "isim": "Ayaş Türkiye Barolar Birliği Termal Yaşam Merkezi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Barolar Birliği",
+      "kisaAciklama": "Kamu Tesisleri dizininde Türkiye Barolar Birliği Ayaş termal yaşam merkezi olarak kayıtlıdır.",
+      "adres": "Hacıveli Mahallesi, Ankara Caddesi No:1, 06710 Ayaş / Ankara",
+      "telefon": "0312 700 00 55",
+      "kullanimTuru": "Konaklamalı",
+      "resmiKaynak": "https://www.barobirlik.org.tr/Haberler/turkiye-barolar-birligi-ayas-termal-yasam-merkezi-hizmete-girmistir-66928",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 40.019746,
+      "longitude": 32.336913,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.barobirlik.org.tr/Haberler/satis-duyurusu-86317"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "TBB tesisine ilişkin satış duyurusu bulundu; 2026 ziyaretçi tarifesi doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-ankara-kizilcahamam-buyuk",
+      "kategori": "termal",
+      "il": "Ankara",
+      "ilce": "Kızılcahamam",
+      "isim": "Kızılcahamam Belediyesi Büyük Kaplıca",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı listesinde Kızılcahamam Belediyesi termal kaplıca işletmesi olarak kayıtlıdır.",
+      "adres": "Yenice Mah. Soğuksu Cad. No: 3 Kızılcahamam-ankara",
+      "telefon": "0312 736 20 00",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://kizilcahamam.bel.tr/TesisDetayi/BUYUK-KAPLICA/45",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 40.469648,
+      "longitude": 32.639411,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "0–6 yaş ücretsiz, 6–12 yaş yarım ücret, 12 yaş ve üzeri tam ücrettir. Özel aile kabinlerine girişte evlilik cüzdanı istenir. Kadınlar için bone ve mayo, erkekler için bone ve şort zorunludur. 20 kişilik VIP Fin hamamı için tesisten fiyat alınır.",
+        "kaynaklar": [
+          "https://kizilcahamam.bel.tr/TesisDetayi/BUYUK-KAPLICA/45"
+        ],
+        "kalemler": [
+          {
+            "tur": "giris",
+            "ad": "Kaplıca girişi",
+            "tutar": 400,
+            "birim": "kişi",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/BUYUK-KAPLICA/45",
+            "kosul": "",
+            "baslangic": true
+          },
+          {
+            "tur": "giris",
+            "ad": "Çocuk girişi",
+            "tutar": 0,
+            "birim": "çocuk",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/BUYUK-KAPLICA/45",
+            "kosul": "0–6 yaş",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Saunasız özel kabin",
+            "tutar": 1700,
+            "birim": "4 kişilik kabin / 90 dakika",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/BUYUK-KAPLICA/45",
+            "kosul": "Aile kabini için evlilik cüzdanı isteniyor.",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Saunalı özel kabin",
+            "tutar": 2000,
+            "birim": "4 kişilik kabin / 90 dakika",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/BUYUK-KAPLICA/45",
+            "kosul": "Aile kabini için evlilik cüzdanı isteniyor.",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Fin hamamı VIP",
+            "tutar": 5000,
+            "birim": "10 kişilik kabin / 90 dakika",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/BUYUK-KAPLICA/45",
+            "kosul": "Aile kabini için evlilik cüzdanı isteniyor.",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Gelin hamamı VIP paketi",
+            "tutar": 12000,
+            "birim": "10 kişi / 2 saat",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/BUYUK-KAPLICA/45",
+            "kosul": "Organizasyon paketi; standart aile banyosu ücreti değildir.",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Gelin hamamı VIP paketi",
+            "tutar": 20000,
+            "birim": "20 kişi / 150 dakika",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/BUYUK-KAPLICA/45",
+            "kosul": "Organizasyon paketi; standart aile banyosu ücreti değildir.",
+            "baslangic": false
+          }
+        ],
+        "arastirmaNotu": "Resmî sitede yayımlanan tarife kontrol edildi; tarife yılı/yürürlük tarihi belirtilmiyor. 2026 yılına ait olduğu ayrıca teyit edilemedi. 6–12 yaş yarım ücret. Kaynakta 0–6 yaş ücretsiz olarak belirtiliyor; yaş sınırları tesisle teyit edilmeli. 20 kişilik Fin hamamında fiyat talep edilmesi isteniyor."
+      }
+    },
+    {
+      "id": "termal-ankara-kizilcahamam-kucuk",
+      "kategori": "termal",
+      "il": "Ankara",
+      "ilce": "Kızılcahamam",
+      "isim": "Kızılcahamam Belediyesi Küçük Kaplıca",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı listesinde Kızılcahamam Belediyesi küçük kaplıca tesisi olarak kayıtlıdır.",
+      "adres": "Yenice Mah. Namık Kemal Cad. No: 32 Kızılcahamam-ankara",
+      "telefon": "0312 736 22 26",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://kizilcahamam.bel.tr/TesisDetayi/KUCUK-KAPLICA/24",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 40.469379,
+      "longitude": 32.644339,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Hafta içi halk günü tarifesi, hafta sonu ve resmî tatillerde ayrı tarife uygulanır. Aile kabini en fazla 4 kişiliktir; 90 dakikalık kullanımda jakuzi, özel havuz ve iki kurna bulunur. Bone ve uygun yüzme kıyafeti zorunludur. Çalışma saatleri 07.00–24.00 arasındadır.",
+        "kaynaklar": [
+          "https://kizilcahamam.bel.tr/TesisDetayi/KUCUK-KAPLICA/24"
+        ],
+        "kalemler": [
+          {
+            "tur": "giris",
+            "ad": "Umumi kaplıca / halk günü",
+            "tutar": 200,
+            "birim": "kişi",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/KUCUK-KAPLICA/24",
+            "kosul": "Hafta içi",
+            "baslangic": true
+          },
+          {
+            "tur": "giris",
+            "ad": "Umumi kaplıca",
+            "tutar": 250,
+            "birim": "kişi",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/KUCUK-KAPLICA/24",
+            "kosul": "Hafta sonu",
+            "baslangic": true
+          },
+          {
+            "tur": "giris",
+            "ad": "Umumi kaplıca",
+            "tutar": 250,
+            "birim": "kişi",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/KUCUK-KAPLICA/24",
+            "kosul": "Resmî tatil ve bayram",
+            "baslangic": true
+          },
+          {
+            "tur": "giris",
+            "ad": "Çocuk girişi",
+            "tutar": 125,
+            "birim": "kişi",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/KUCUK-KAPLICA/24",
+            "kosul": "6–9 yaş",
+            "baslangic": false
+          },
+          {
+            "tur": "giris",
+            "ad": "Çocuk girişi",
+            "tutar": 0,
+            "birim": "kişi",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/KUCUK-KAPLICA/24",
+            "kosul": "0–5 yaş",
+            "baslangic": false
+          },
+          {
+            "tur": "giris",
+            "ad": "Belediye indirim kartı",
+            "tutar": 125,
+            "birim": "kişi",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/KUCUK-KAPLICA/24",
+            "kosul": "İndirim kartı sahipleri",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Özel aile kabini",
+            "tutar": 1500,
+            "birim": "kabin / 90 dakika",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/KUCUK-KAPLICA/24",
+            "kosul": "En fazla 4 kişi; özel havuz ve jakuzi.",
+            "baslangic": true
+          }
+        ],
+        "arastirmaNotu": "Resmî sitede yayımlanan tarife kontrol edildi; tarife yılı/yürürlük tarihi belirtilmiyor. 2026 yılına ait olduğu ayrıca teyit edilemedi."
+      }
+    },
+    {
+      "id": "termal-ankara-soguksu",
+      "kategori": "termal",
+      "il": "Ankara",
+      "ilce": "Kızılcahamam",
+      "isim": "Kızılcahamam Belediyesi Soğuksu Otel",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Kamu Tesisleri dizininde Kızılcahamam Belediyesi Soğuksu Otel olarak kayıtlıdır.",
+      "adres": "Yenice Mahallesi, Soğuksu Caddesi No:50, Kızılcahamam / Ankara",
+      "telefon": "0312 736 30 01",
+      "kullanimTuru": "Konaklamalı",
+      "resmiKaynak": "https://kizilcahamam.bel.tr/TesisDetayi/SOGUKSU-OTEL/22",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Oda ücretleri günlük olup odada konaklayacak kişi sayısına göre değişir.",
+        "kaynaklar": [
+          "https://kizilcahamam.bel.tr/TesisDetayi/SOGUKSU-OTEL/22"
+        ],
+        "kalemler": [
+          {
+            "tur": "konaklama",
+            "ad": "1 kişilik oda",
+            "tutar": 2000,
+            "birim": "oda / gün",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/SOGUKSU-OTEL/22",
+            "kosul": "",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "2 kişilik oda",
+            "tutar": 3000,
+            "birim": "oda / gün",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/SOGUKSU-OTEL/22",
+            "kosul": "",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "3 kişilik oda",
+            "tutar": 4000,
+            "birim": "oda / gün",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/SOGUKSU-OTEL/22",
+            "kosul": "",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "4 kişilik oda",
+            "tutar": 5000,
+            "birim": "oda / gün",
+            "kaynakUrl": "https://kizilcahamam.bel.tr/TesisDetayi/SOGUKSU-OTEL/22",
+            "kosul": "",
+            "baslangic": true
+          }
+        ],
+        "arastirmaNotu": "Resmî sitede yayımlanan tarife kontrol edildi; tarife yılı/yürürlük tarihi belirtilmiyor. 2026 yılına ait olduğu ayrıca teyit edilemedi."
+      }
+    },
+    {
+      "id": "termal-ankara-hakimevi",
+      "kategori": "termal",
+      "il": "Ankara",
+      "ilce": "Kızılcahamam",
+      "isim": "Kızılcahamam Eğitim ve Dinlenme Tesisi (Hakimevi)",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Vakıf",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde vakıf tesisi olarak kayıtlıdır.",
+      "adres": "Akçay Mah. Gençlik Cad. No: 3 Kızılcahamam-ankara",
+      "telefon": "0312 736 61 53",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "latitude": 40.472042,
+      "longitude": 32.649275,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Kamu/mensup ve misafir tarifeleri ayrıdır. Yarım pansiyon konaklamaya açık büfe kahvaltı, sabit menü akşam yemeği, umumi termal havuz, hamam ve sauna kullanımı dâhildir.",
+        "kaynaklar": [
+          "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+          "https://www.kizilcahamamhakimevi.com/konaklama"
+        ],
+        "kalemler": [
+          {
+            "tur": "konaklama",
+            "ad": "Standart oda / 1 kişi",
+            "tutar": 3500,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup · yarım pansiyon",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Standart oda / 2 kişi",
+            "tutar": 5000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup · yarım pansiyon",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Standart oda / 3 kişi",
+            "tutar": 6300,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup · yarım pansiyon",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Standart oda / ek yatak",
+            "tutar": 1600,
+            "birim": "ek yatak / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Standart oda / çocuk",
+            "tutar": 1200,
+            "birim": "çocuk / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup · 4–6 yaş",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Süit oda / 1 kişi",
+            "tutar": 4500,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup · yarım pansiyon",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Süit oda / 2 kişi",
+            "tutar": 5700,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup · yarım pansiyon",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Süit oda / ek yatak",
+            "tutar": 1600,
+            "birim": "ek yatak / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Süit oda / çocuk",
+            "tutar": 1425,
+            "birim": "çocuk / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup · 4–6 yaş",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Standart oda / 1 kişi",
+            "tutar": 5250,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir · yarım pansiyon",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Standart oda / 2 kişi",
+            "tutar": 7500,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir · yarım pansiyon",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Standart oda / 3 kişi",
+            "tutar": 9450,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir · yarım pansiyon",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Standart oda / ek yatak",
+            "tutar": 2400,
+            "birim": "ek yatak / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Standart oda / çocuk",
+            "tutar": 1800,
+            "birim": "çocuk / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir · 4–6 yaş",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Süit oda / 1 kişi",
+            "tutar": 6750,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir · yarım pansiyon",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Süit oda / 2 kişi",
+            "tutar": 8550,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir · yarım pansiyon",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Süit oda / ek yatak",
+            "tutar": 2400,
+            "birim": "ek yatak / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Süit oda / çocuk",
+            "tutar": 2140,
+            "birim": "çocuk / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir · 4–6 yaş",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Çocuk konaklama",
+            "tutar": 0,
+            "birim": "çocuk / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "0–3 yaş; yetişkin konaklamasına bağlıdır.",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Paylaşımlı oda",
+            "tutar": 6250,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "1 mensup + 1 misafir · toplam ücret",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Paylaşımlı oda",
+            "tutar": 8400,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "1 mensup + 2 misafir · toplam ücret",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Paylaşımlı oda",
+            "tutar": 10862.5,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "1 mensup + 3 misafir · toplam ücret",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Paylaşımlı oda",
+            "tutar": 7350,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "2 mensup + 1 misafir · toplam ücret",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Paylaşımlı oda",
+            "tutar": 9875,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "2 mensup + 2 misafir · toplam ücret",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Paylaşımlı oda",
+            "tutar": 8887.5,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "3 mensup + 1 misafir · toplam ücret",
+            "baslangic": false
+          },
+          {
+            "tur": "havuz",
+            "ad": "Günübirlik umumi havuz",
+            "tutar": 500,
+            "birim": "kişi / 3 saat",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Günübirlik aile termal",
+            "tutar": 900,
+            "birim": "aile banyosu / 1 saat",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Konaklayan aile termal",
+            "tutar": 650,
+            "birim": "aile banyosu / 1 saat",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Kamu ve mensup · yalnız konaklayanlar; oda bedeli ayrıca ödenir.",
+            "baslangic": false
+          },
+          {
+            "tur": "havuz",
+            "ad": "Günübirlik umumi havuz",
+            "tutar": 750,
+            "birim": "kişi / 3 saat",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Günübirlik aile termal",
+            "tutar": 1350,
+            "birim": "aile banyosu / 1 saat",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Konaklayan aile termal",
+            "tutar": 975,
+            "birim": "aile banyosu / 1 saat",
+            "kaynakUrl": "https://www.kizilcahamamhakimevi.com/_files/ugd/e28351_680f0eb3c3144e9d92da1231739336b2.pdf",
+            "kosul": "Misafir · yalnız konaklayanlar; oda bedeli ayrıca ödenir.",
+            "baslangic": false
+          }
+        ],
+        "arastirmaNotu": "Resmî sitede yayımlanan tarife kontrol edildi; tarife yılı/yürürlük tarihi belirtilmiyor. 2026 yılına ait olduğu ayrıca teyit edilemedi. Kurumun kendi alan adındaki PDF tarife kullanıldı. Kamu/mensup ve misafir ücretleri ayrıdır. Konaklama yarım pansiyondur; umumi termal havuz, hamam ve sauna dâhildir. Başlangıç fiyatında genel misafir tarifesi kullanılır."
+      }
+    },
+    {
+      "id": "termal-ankara-kizilcahamam-fizik-tedavi-ve-rehabilitas",
+      "kategori": "termal",
+      "il": "Ankara",
+      "ilce": "Kızılcahamam",
+      "isim": "Kızılcahamam Fizik Tedavi ve Rehabilitasyon Merkezi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Devlet hastanesi",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde devlet hastanesi tesisi olarak kayıtlıdır.",
+      "adres": "İsmetpaşa Mah. Akyüzler Cad. No: 1 Kızılcahamam",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://kizilcahamamdh.saglik.gov.tr/TR-73367/fizik-tedavi-servisi.html"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Devlet hastanesinin hizmet sayfasında kaplıca ziyaretine ait 2026 tarife bulunamadı; tıbbi işlem bedelleri giriş/havuz ücreti olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-ankara-sifa",
+      "kategori": "termal",
+      "il": "Ankara",
+      "ilce": "Kızılcahamam",
+      "isim": "Kızılcahamam Şifa Termal Sosyal Tesisi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Kamu Tesisleri dizininde Ankara Büyükşehir Belediyesi Şifa Termal Sosyal Tesisi olarak kayıtlıdır.",
+      "adres": "Yenice Mah., Namık Kemal Cad. No:41, Kızılcahamam / Ankara",
+      "telefon": "0312 736 72 43",
+      "kullanimTuru": "Konaklamalı",
+      "resmiKaynak": "https://www.ankara.bel.tr/tesis/sifa-termal-tesisi",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 40.469055,
+      "longitude": 32.642656,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Ücretsiz 4 gece 5 günlük konaklamaya ulaşım, üç öğün yemek, çay, kahve, meşrubat, internet, havuz ve kaplıca kullanımı dâhildir. Hizmetten ABB Yaşlılara Hizmet Merkezi ve Engellilere Hizmet Merkezi üyeleri ile ilgili müdürlükçe belirlenen şehit yakınları, gaziler ve gazi yakınları başvuru yoluyla yararlanır.",
+        "kaynaklar": [
+          "https://www.ankara.bel.tr/tesis/sifa-termal-tesisi"
+        ],
+        "kalemler": [
+          {
+            "tur": "konaklama",
+            "ad": "Sosyal hizmet konaklaması",
+            "tutar": 0,
+            "birim": "4 gece / 5 gün",
+            "kaynakUrl": "https://www.ankara.bel.tr/tesis/sifa-termal-tesisi",
+            "kosul": "Yalnız ABB kabul koşullarını sağlayan ve başvurusu onaylanan gruplar; yemek, ulaşım, havuz ve kaplıca dâhil.",
+            "baslangic": true
+          }
+        ],
+        "arastirmaNotu": "ABB tarafından belirlenen şehit/gazi yakınları, gaziler, engelli bireyler ve 65 yaş üstü vatandaşlar için başvurulu sosyal hizmettir. Genel ziyaretçilere açık ücret tarifesi değildir. Tarife yılı belirtilmemiştir."
+      }
+    },
+    {
+      "id": "termal-ankara-medrese",
+      "kategori": "termal",
+      "il": "Ankara",
+      "ilce": "Haymana",
+      "isim": "Medrese Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Medrese Mah. Fatih Cad. No: 4 Haymana-ankara",
+      "telefon": "0312 658 29 02",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.haymana.bel.tr/upload/icerikdosyalar/xIJnd21aQ1spPRK.pdf"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediyenin kent rehberinde tesis tanıtılıyor; 2026 giriş, aile banyosu veya konaklama bedeli doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-ankara-saray",
+      "kategori": "termal",
+      "il": "Ankara",
+      "ilce": "Haymana",
+      "isim": "Saray Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Seyran Mah. Hüseyin Gökşen Cad. No: 4 Haymana-ankara",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.haymana.bel.tr/ihaleler/seyran-ve-medrese-kaplicalari-kira-ihale-ilani/5"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Kayıt Saray adını taşıyor; bulunan belediye duyurusu Seyran adlı tesisin 2021 kira ihalesine ait. Tesis kimliği ve güncel ziyaretçi ücreti kesinleşmediği için fiyat aktarılmadı."
+      }
+    },
+    {
+      "id": "termal-ankara-haymana-merkez",
+      "kategori": "termal",
+      "il": "Ankara",
+      "ilce": "Haymana",
+      "isim": "Tarihi Haymana Kaplıca Tesisleri",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Kamu Tesisleri dizininde Haymana merkez kaplıcası olarak kayıtlıdır. Medrese ve Saray kaplıcalarından ayrı bir tesistir.",
+      "adres": "Çaldağ Mah., Hüdaverdi Çetinkaya Sk. No:43, 06860 Haymana/Ankara",
+      "telefon": "0312 658 10 07",
+      "kullanimTuru": "Günübirlik",
+      "resmiKaynak": "https://www.haymana.bel.tr/tarihi-merkez/tarihi-haymana-kaplica-tesisleri/140",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 39.432295,
+      "longitude": 32.492276,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.haymana.bel.tr/tarihi-merkez/tarihi-haymana-kaplica-tesisleri/140"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediyenin tesis sayfasında yeni kompleks tanıtılıyor; yayımlanmış 2026 sayısal ziyaretçi tarifesi bulunamadı."
+      }
+    },
+    {
+      "id": "termal-balikesir-afrodit",
+      "kategori": "termal",
+      "il": "Balıkesir",
+      "ilce": "Güre",
+      "isim": "Afrodit Termal",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Güre Mahallesi-edremit",
+      "telefon": "",
+      "kullanimTuru": "Konaklamalı",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://edremit.bel.tr/Kultur/Otel/8"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediye tanıtımında güncel sayısal tarife bulunamadı; rezervasyon/acente fiyatları kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-balikesir-aytac",
+      "kategori": "termal",
+      "il": "Balıkesir",
+      "ilce": "Balya",
+      "isim": "Aytaç Termal",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Ilıca Mahallesi-balya/Balıkesir",
+      "telefon": "",
+      "kullanimTuru": "Konaklamalı",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Tesis ve bağlı kurum adına yapılan 2026 tarife araştırmasında doğrulanabilir resmî güncel giriş, havuz, aile banyosu veya konaklama ücreti bulunamadı. Eski ruhsat listesi fiyat kanıtı olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-balikesir-bigadic",
+      "kategori": "termal",
+      "il": "Balıkesir",
+      "ilce": "Bigadiç",
+      "isim": "Bigadiç Belediyesi Hisarköy Termal Tesisleri",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Hisarköy Mahallesi Bigadiç/Balıkesir",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.bigadic.bel.tr/tesisler/hisarkoy-termal"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediyenin tesis sayfasında sayısal tarife bulunamadı."
+      }
+    },
+    {
+      "id": "termal-balikesir-form",
+      "kategori": "termal",
+      "il": "Balıkesir",
+      "ilce": "Edremit",
+      "isim": "Form Termal Otel",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Güre Mahallesi Edremit/Balıkesir",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://formtermal.com/hakkimizda/",
+          "https://formtermalotel.com/"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Tesisin tanıtım sayfalarında yayımlanmış güncel sayısal tarife doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-balikesir-hattusa",
+      "kategori": "termal",
+      "il": "Balıkesir",
+      "ilce": "Güre",
+      "isim": "Hattuşa Kazdağları Termal Tesis",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Güre Beldesi-edremit",
+      "telefon": "",
+      "kullanimTuru": "Konaklamalı",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.hattusa.com.tr/hattusa-termal-kazdaglari"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Resmî sayfada sabit sayısal tarife doğrulanamadı; acente teklifleri kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-balikesir-eman",
+      "kategori": "termal",
+      "il": "Balıkesir",
+      "ilce": "Sındırgı",
+      "isim": "Sındırgı Belediyesi Sosyal Tesisleri (Eman Termal)",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Kamu Tesisleri dizininde Sındırgı Belediyesi Eman Termal tesisi olarak kayıtlıdır.",
+      "adres": "Hisaralan Mevkii, Sındırgı / Balıkesir",
+      "telefon": "0266 400 02 34",
+      "kullanimTuru": "Konaklamalı",
+      "resmiKaynak": "https://www.sindirgi.bel.tr/News/Detail/1454",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.emantermal.com/",
+          "https://www.sindirgi.bel.tr/News/Detail/1454"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Tesis ve belediye kaynaklarında yayımlanmış sayısal güncel tarife doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-bingol-universite",
+      "kategori": "termal",
+      "il": "Bingöl",
+      "ilce": "Merkez",
+      "isim": "Bingöl Üniversitesi Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Üniversite",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde işletmecisi Bingöl Üniversitesi olarak kayıtlıdır.",
+      "adres": "Merkez Ilıcalar Beldesi Kös Deresi Bingöl-erzurum Karayolu Üzeri 22.km Bingöl",
+      "telefon": "0426 252 50 04",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://ilicalar.bingol.edu.tr/iletisim/",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 38.987943,
+      "longitude": 40.672737,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Konaklama ücretine kahvaltı ve havuz kullanımı dâhildir. Diğer öğünler restoran üzerinden ayrıca ücretlendirilir. Aile havuzu kullanım süresi 90 dakikadır.",
+        "kaynaklar": [
+          "https://ilicalar.bingol.edu.tr/fiyat-bilgileri/",
+          "https://ilicalar.bingol.edu.tr/duyurular/tesisimizde-hizmet-ucretleri-guncellendi/"
+        ],
+        "kalemler": [
+          {
+            "tur": "aileBanyosu",
+            "ad": "Aile havuzu",
+            "tutar": 1000,
+            "birim": "90 dakika",
+            "kaynakUrl": "https://ilicalar.bingol.edu.tr/fiyat-bilgileri/",
+            "kosul": "",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Çift kişilik veya üç kişilik oda",
+            "tutar": 3250,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://ilicalar.bingol.edu.tr/fiyat-bilgileri/",
+            "kosul": "Kahvaltı ve havuz dâhil; diğer yemekler hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "İki ayrı yataklı oda",
+            "tutar": 2750,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://ilicalar.bingol.edu.tr/fiyat-bilgileri/",
+            "kosul": "Kahvaltı ve havuz dâhil; diğer yemekler hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "İki ayrı yataklı odada tek kişi",
+            "tutar": 2000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://ilicalar.bingol.edu.tr/fiyat-bilgileri/",
+            "kosul": "Kahvaltı ve havuz dâhil; diğer yemekler hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Çift kişilik yataklı odada tek kişi",
+            "tutar": 2250,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://ilicalar.bingol.edu.tr/fiyat-bilgileri/",
+            "kosul": "Kahvaltı ve havuz dâhil; diğer yemekler hariç.",
+            "baslangic": true
+          }
+        ],
+        "arastirmaNotu": "Resmî fiyat sayfasında havuz 250 TL, 06.03.2026 tarihli resmî duyuruda 200 TL yazıyor. Çelişen havuz ücretleri ve buna bağlı çocuk tarifesi doğrulanmış fiyat olarak eklenmedi. Diğer kalemler resmî fiyat sayfasından alındı; bu sayfada tarife yılı belirtilmiyor. Konaklama kahvaltı ve havuz kullanımını içerir."
+      }
+    },
+    {
+      "id": "termal-bolu-aibu",
+      "kategori": "termal",
+      "il": "Bolu",
+      "ilce": "Karacasu",
+      "isim": "Abant İzzet Baysal Üniversitesi Karacasu FTR Hastanesi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Üniversite",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde üniversite tesisi olarak kayıtlıdır.",
+      "adres": "Karacasu Bolu",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://boluftreah.saglik.gov.tr/TR%2C71653/"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Hastane/üniversite için kaplıca ziyaretine ait 2026 giriş ve konaklama tarifesi doğrulanamadı; tıbbi işlem ve SGK bedelleri ziyaretçi ücreti sayılmadı."
+      }
+    },
+    {
+      "id": "termal-bolu-ftr",
+      "kategori": "termal",
+      "il": "Bolu",
+      "ilce": "Karacasu",
+      "isim": "Bolu Fizik Tedavi ve Rehabilitasyon Hastanesi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Sağlık Bakanlığı",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde sağlık bakanlığı tesisi olarak kayıtlıdır.",
+      "adres": "Karacasu / Bolu",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://boluftreah.saglik.gov.tr/TR%2C71653/"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Hastane kaynağında 2026 kaplıca ziyaretçi tarifesi doğrulanamadı; tıbbi işlem ve SGK bedelleri ziyaretçi ücreti sayılmadı."
+      }
+    },
+    {
+      "id": "termal-bursa-polisevi",
+      "kategori": "termal",
+      "il": "Bursa",
+      "ilce": "Osmangazi",
+      "isim": "Bursa Polisevi Termal Tesisleri",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Emniyet",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde emniyet tesisi olarak kayıtlıdır.",
+      "adres": "Çekirge Mah. Selvinaz Sok. No.5/1 Osmangazi/Bursa",
+      "telefon": "0224 239 69 00",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "latitude": 40.1953,
+      "longitude": 29.0286,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Tesis ve bağlı kurum adına yapılan 2026 tarife araştırmasında doğrulanabilir resmî güncel giriş, havuz, aile banyosu veya konaklama ücreti bulunamadı. Eski ruhsat listesi fiyat kanıtı olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-bursa-gemlik",
+      "kategori": "termal",
+      "il": "Bursa",
+      "ilce": "Gemlik",
+      "isim": "Gemlik Termal Tesisi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Kamu Tesisleri dizininde Bursa Büyükşehir Belediyesi Gemlik Termal Tesisi olarak kayıtlıdır.",
+      "adres": "Yener Sokak, Hisar Mahallesi, Gemlik / Bursa",
+      "telefon": "0224 800 20 60",
+      "kullanimTuru": "Günübirlik ve konaklamalı",
+      "resmiKaynak": "https://www.burfas.com.tr/faaliyetlerimiz/gemlik-termal",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 40.423394,
+      "longitude": 29.15984,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.burfas.com.tr/faaliyetlerimiz/gemlik-termal"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "İşletmeci BURFAŞ tesis sayfasında sayısal tarife bulunamadı."
+      }
+    },
+    {
+      "id": "termal-bursa-tumbuldek",
+      "kategori": "termal",
+      "il": "Bursa",
+      "ilce": "Paşa",
+      "isim": "Tümbüldek Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Akarca Köyü M.kemal Paşa/Bursa",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.mustafakemalpasa.bel.tr/mustafakemalpasa/tumbuldek-kaplicalari"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediye tesis sayfasında 2026 sayısal tarife bulunamadı."
+      }
+    },
+    {
+      "id": "termal-canakkale-bardakcilar",
+      "kategori": "termal",
+      "il": "Çanakkale",
+      "ilce": "Çan",
+      "isim": "Bardakçılar Dağ Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Köy",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde köy tesisi olarak kayıtlıdır.",
+      "adres": "Bardakçılar Köyü Çan-çanakkale",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.canakkale.gov.tr/can"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Valilikte tesis tanıtımı bulundu; köy/tesis kaynaklarından 2026 ziyaretçi tarifesi doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-canakkale-kucuktepe",
+      "kategori": "termal",
+      "il": "Çanakkale",
+      "ilce": "Çan",
+      "isim": "Küçüktepe Karaılıca Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Köy",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde köy tesisi olarak kayıtlıdır.",
+      "adres": "Küçüktepe Köyü Muhtarlığı Çan-çanakkale",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Tesis ve bağlı kurum adına yapılan 2026 tarife araştırmasında doğrulanabilir resmî güncel giriş, havuz, aile banyosu veya konaklama ücreti bulunamadı. Eski ruhsat listesi fiyat kanıtı olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-erzurum-aziziye",
+      "kategori": "termal",
+      "il": "Erzurum",
+      "ilce": "Aziziye",
+      "isim": "Aziziye Termal Tesisi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde işletmecisi Aziziye Belediyesi olarak kayıtlıdır.",
+      "adres": "Yeni Mah.aziziye Cad.no 122 Aziziye/Erzurum",
+      "telefon": "0442 631 30 28",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://okuldisiogrenme.eba.gov.tr/mekan-detay/aziziye-belediyesi-ilica-termal-tesisleri-10300",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://aziziyetermal.com.tr/"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Resmî sitede oda için 0,00 TL yer tutucu görünüyor; ücretsiz konaklama kanıtı olmadığından fiyat olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-istanbul-ataturk",
+      "kategori": "termal",
+      "il": "İstanbul",
+      "ilce": "Çeşme",
+      "isim": "Atatürk Kaplıca Tesisi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Atatürk Mah. Kuruçeşme Caddesi No: 28 Esenyurt",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.esenyurt.bel.tr/assets/uploads/documents/bacd0153-5c78-4d6b-a844-b1d73d5387c5.pdf"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediye tesis bilgisi bulundu; 2026 sayısal tarife doğrulanamadı. Eski faaliyet raporundaki koşullu ücretsiz kullanım güncel fiyat kabul edilmedi."
+      }
+    },
+    {
+      "id": "termal-istanbul-saadetdere",
+      "kategori": "termal",
+      "il": "İstanbul",
+      "ilce": "Esenyurt",
+      "isim": "Saadetdere Kaplıca Tesisi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Turgut Özal Mah. 64. Sk. No: 10 Esenyurt İstanbul",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.esenyurt.bel.tr/assets/uploads/documents/bacd0153-5c78-4d6b-a844-b1d73d5387c5.pdf"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediye tesis bilgisi bulundu; 2026 sayısal tarife doğrulanamadı. Eski faaliyet raporundaki koşullu ücretsiz kullanım güncel fiyat kabul edilmedi."
+      }
+    },
+    {
+      "id": "termal-izmir-balcova",
+      "kategori": "termal",
+      "il": "İzmir",
+      "ilce": "Balçova",
+      "isim": "Balçova Termal Otel ve Sosyal Tesisleri",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Valilik",
+      "kisaAciklama": "Kamu Tesisleri dizininde İzmir Valiliği Balçova Termal Otel ve Sosyal Tesisleri olarak kayıtlıdır. Dokuz Eylül Üniversitesi kaplıca biriminden ayrı bir tesistir.",
+      "adres": "Vali Hüseyin Öğütcen Caddesi No:16/1 İç Kapı No:1, 35330 Balçova / İzmir",
+      "telefon": "444 76 11",
+      "kullanimTuru": "Konaklamalı",
+      "resmiKaynak": "https://www.balcovatermal.com/",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 38.388062,
+      "longitude": 27.035314,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Termal havuz kullanım süresi 120 dakikadır. Emekli indirimi haftanın her günü geçerlidir. Havuzlar 08.00–18.30 arasında kullanılabilir; dışarıdan son giriş 17.00, tesisten çıkış 19.00’dur. 12 yaş ve altındaki çocuklar termal havuzlara kabul edilmez.",
+        "kaynaklar": [
+          "https://www.balcovatermal.com/fiyat/termal-havuz-kullanimi/64/"
+        ],
+        "kalemler": [
+          {
+            "tur": "havuz",
+            "ad": "Termal havuz",
+            "tutar": 1250,
+            "birim": "kişi / 120 dakika",
+            "kaynakUrl": "https://www.balcovatermal.com/fiyat/termal-havuz-kullanimi/64/",
+            "kosul": "Genel tarife; 12 yaş üzeri.",
+            "baslangic": true
+          },
+          {
+            "tur": "havuz",
+            "ad": "Termal havuz / emekli",
+            "tutar": 1065,
+            "birim": "kişi / 120 dakika",
+            "kaynakUrl": "https://www.balcovatermal.com/fiyat/termal-havuz-kullanimi/64/",
+            "kosul": "Emekli misafirler; haftanın 7 günü.",
+            "baslangic": false
+          }
+        ],
+        "arastirmaNotu": "Resmî sitede yayımlanan tarife kontrol edildi; tarife yılı/yürürlük tarihi belirtilmiyor. 2026 yılına ait olduğu ayrıca teyit edilemedi. 12 yaş ve altı termal havuza alınmıyor. Kapalı olan normal yüzme havuzları/aquapark için fiyat eklenmedi."
+      }
+    },
+    {
+      "id": "termal-izmir-deu",
+      "kategori": "termal",
+      "il": "İzmir",
+      "ilce": "Balçova",
+      "isim": "Dokuz Eylül Üniversitesi Kaplıca Birimi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Üniversite",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde Dokuz Eylül Üniversitesi Uygulama ve Araştırma Hastanesi tesisi olarak kayıtlıdır.",
+      "adres": "İnciraltı Mah. Mithatpaşa Cad. İnciraltı Yerleşkesi No: 1606 Balçova/İzmir",
+      "telefon": "0232 412 22 22",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hastane.deu.edu.tr/iletisim-ulasim.html",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://hastane.deu.edu.tr/iletisim-ulasim.html"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Üniversite hastanesine ait 2026 kaplıca ziyaretçi tarifesi doğrulanamadı; tıbbi işlem bedelleri kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-izmir-nebiler",
+      "kategori": "termal",
+      "il": "İzmir",
+      "ilce": "Dikili",
+      "isim": "Nebiler Köy Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Köy",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde köy tesisi olarak kayıtlıdır.",
+      "adres": "Nebiler Köyü Dikili/İzmir",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.izmir.bel.tr/tr/BirimDetay/199"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediye tanıtım kaynağında 2026 sayısal ziyaretçi tarifesi doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-kahramanmaras-ilica",
+      "kategori": "termal",
+      "il": "Kahramanmaraş",
+      "ilce": "Onikişubat",
+      "isim": "Kahramanmaraş Büyükşehir Belediyesi Ilıca Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Ilıca Mah.yunus Emre Cad. No: 43/F Onikişubat K.maraş",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://kahramanmaras.bel.tr/fs/fields/attachments/haziran_ayi_ihtisas_komisyon_raporlari.pdf"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediyede bulunan Ilıca Jeotermal Hamam tarifesi 2019 yılına ait; 2026 fiyatı olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-kayseri-yesilhisar",
+      "kategori": "termal",
+      "il": "Kayseri",
+      "ilce": "Yeşilhisar",
+      "isim": "Yeşilhisar İçmece Sosyal Tesisleri",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde işletmecisi Yeşilhisar Belediyesi olarak kayıtlıdır.",
+      "adres": "İçmece Mah. İçmece Küme Evleri No: 22 Yeşilhisar/Kayseri",
+      "telefon": "0352 651 29 29",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://kayseri.bel.tr/kesfet-listeleme/yesilhisar-icmeceleri",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://kayseri.bel.tr/kesfet-listeleme/yesilhisar-icmeceleri"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediyenin tesis sayfasında sayısal tarife bulunamadı; 2026 ziyaretçi bedelleri doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-kirsehir-ahi-evran",
+      "kategori": "termal",
+      "il": "Kırşehir",
+      "ilce": "Merkez",
+      "isim": "Ahi Evran Üniversitesi Kaplıca Tesisi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Üniversite",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde üniversite tesisi olarak kayıtlıdır.",
+      "adres": "Kusdıllı Mah.terme Caddesi No.135 Merkez-kırsehır",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Tesis ve bağlı kurum adına yapılan 2026 tarife araştırmasında doğrulanabilir resmî güncel giriş, havuz, aile banyosu veya konaklama ücreti bulunamadı. Eski ruhsat listesi fiyat kanıtı olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-kocaeli-golcuk",
+      "kategori": "termal",
+      "il": "Kocaeli",
+      "ilce": "Gölcük",
+      "isim": "Gölcük Belediyesi Yazlık Ilıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde Gölcük Belediyesi termal tesisi olarak kayıtlıdır.",
+      "adres": "Yazlık Yeni Mahalle Osmanlı Caddesi No: 1 Gölcük/Kocaeli",
+      "telefon": "0262 433 23 33",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://golcuk.bel.tr/ne-nerede-d/1/2/-yazlik-ilica",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://golcuk.bel.tr/ne-nerede-d/1/2/-yazlik-ilica"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "2026 fiyatları haber sitelerinde yer alsa da resmî belediye/tesis kaynağından doğrulanamadığı için eklenmedi."
+      }
+    },
+    {
+      "id": "termal-konya-ilgin",
+      "kategori": "termal",
+      "il": "Konya",
+      "ilce": "Ilgın",
+      "isim": "Ilgın Belediyesi Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde işletmecisi Ilgın Belediyesi olarak kayıtlıdır.",
+      "adres": "Ilıca Mah.inönü Cad.kaplıca Civarı Mevkii Ilgın Ilgın/Konya",
+      "telefon": "0332 882 71 52",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://www.ilginkaplicalari.com/iletisim.php",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 38.278241,
+      "longitude": 31.888818,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.ilginkaplicalari.com/"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Resmî sitede tarih/oda seçimi olmadan yayımlanmış güncel sayısal tarife doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-kutahya-citgol",
+      "kategori": "termal",
+      "il": "Kütahya",
+      "ilce": "Simav",
+      "isim": "Çitgöl Termal Tesisleri",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde işletmecisi Çitgöl Belediyesi olarak kayıtlıdır.",
+      "adres": "Kovancık Mevkii-çitgöl-simav-kütahya",
+      "telefon": "0274 543 22 67",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://www.simav.gov.tr/simav-kaplicalari",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://citgol.bel.tr/",
+          "https://www.simav.gov.tr/simav-kaplicalari"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediye sitesi hazırlanıyor; kurum tanıtımında 2026 sayısal tarife bulunamadı."
+      }
+    },
+    {
+      "id": "termal-kutahya-eynal",
+      "kategori": "termal",
+      "il": "Kütahya",
+      "ilce": "Simav",
+      "isim": "Eynal Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde işletmecisi Simav Belediyesi olarak kayıtlıdır.",
+      "adres": "Eynal Kaplıcaları Mevkii- Simav- Kütahya",
+      "telefon": "0274 547 20 01",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://www.simav.bel.tr/istirak/eynal-kaplicalari/7/",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Apart ücretleri geceliktir. Tarife 30.12.2026 tarihine kadar geçerlidir.",
+        "kaynaklar": [
+          "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar"
+        ],
+        "kalemler": [
+          {
+            "tur": "konaklama",
+            "ad": "A Blok",
+            "tutar": 4500,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          },
+          {
+            "tur": "konaklama",
+            "ad": "A1 Blok",
+            "tutar": 4000,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          },
+          {
+            "tur": "konaklama",
+            "ad": "B1 Blok",
+            "tutar": 2500,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          },
+          {
+            "tur": "konaklama",
+            "ad": "B2 Blok",
+            "tutar": 2500,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          },
+          {
+            "tur": "konaklama",
+            "ad": "B3 Blok üst kat",
+            "tutar": 2500,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          },
+          {
+            "tur": "konaklama",
+            "ad": "B3 Blok alt kat",
+            "tutar": 2500,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          },
+          {
+            "tur": "konaklama",
+            "ad": "B4 Blok",
+            "tutar": 2500,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          },
+          {
+            "tur": "konaklama",
+            "ad": "B5 Blok",
+            "tutar": 3000,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          },
+          {
+            "tur": "konaklama",
+            "ad": "B Blok üst kat",
+            "tutar": 3500,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          },
+          {
+            "tur": "konaklama",
+            "ad": "B Blok alt kat",
+            "tutar": 4000,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Dubleks",
+            "tutar": 8000,
+            "birim": "apart / gece",
+            "kaynakUrl": "https://www.eynalkaplicalari.com.tr/Anasayfa/Apartlar",
+            "kosul": "",
+            "baslangic": true,
+            "gecerlilikBitis": "2026-12-30"
+          }
+        ],
+        "arastirmaNotu": "Resmî apart ücretleri 30.12.2026 tarihine kadar geçerli olarak yayımlanıyor. Hamam, havuz ve aile banyosu için güncel sayısal ücret doğrulanamadı. Taş Konaklar kaplıca yerleşkesinden farklı bir konumda olduğundan bu termal tesisin ücretlerine eklenmedi."
+      }
+    },
+    {
+      "id": "termal-kutahya-gobel",
+      "kategori": "termal",
+      "il": "Kütahya",
+      "ilce": "Tavşanlı",
+      "isim": "Göbel Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde işletmecisi Tavşanlı Belediyesi olarak kayıtlıdır.",
+      "adres": "Göbel Kaplıcası -tavşanlı-kütahya",
+      "telefon": "0274 653 21 55",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://www.gobeltermal.com/iletisim",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Daire ve villa ücretleri belirtilen kapasitedeki aile için geceliktir. Hafta içi en az 2 gecelik konaklamalarda indirimli günlük tarife uygulanır. Kapasiteyi aşan her kişi için gecelik 750 TL ek ücret alınır.",
+        "kaynaklar": [
+          "https://www.gobeltermal.com/konaklama/2-1-apart-daireler",
+          "https://www.gobeltermal.com/konaklama/lux-havuzlu-villalar",
+          "https://www.gobeltermal.com/konaklama/dubleks-daireler",
+          "https://www.gobeltermal.com/konaklama/havuzlu-dubleks-daireler"
+        ],
+        "kalemler": [
+          {
+            "tur": "konaklama",
+            "ad": "2+1 apart",
+            "tutar": 3750,
+            "birim": "4 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/2-1-apart-daireler",
+            "kosul": "Hafta içi tek gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "2+1 apart",
+            "tutar": 4250,
+            "birim": "4 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/2-1-apart-daireler",
+            "kosul": "Hafta sonu tek gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "2+1 apart",
+            "tutar": 2500,
+            "birim": "4 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/2-1-apart-daireler",
+            "kosul": "Hafta içi en az 2 gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Kapasite üzeri ilave kişi",
+            "tutar": 750,
+            "birim": "kişi / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/2-1-apart-daireler",
+            "kosul": "2+1 apart",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Lüks havuzlu villa",
+            "tutar": 7000,
+            "birim": "6 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/lux-havuzlu-villalar",
+            "kosul": "Hafta içi tek gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Lüks havuzlu villa",
+            "tutar": 8250,
+            "birim": "6 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/lux-havuzlu-villalar",
+            "kosul": "Hafta sonu tek gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Lüks havuzlu villa",
+            "tutar": 6000,
+            "birim": "6 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/lux-havuzlu-villalar",
+            "kosul": "Hafta içi en az 2 gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Kapasite üzeri ilave kişi",
+            "tutar": 750,
+            "birim": "kişi / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/lux-havuzlu-villalar",
+            "kosul": "Lüks havuzlu villa",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Dubleks daire",
+            "tutar": 5500,
+            "birim": "4 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/dubleks-daireler",
+            "kosul": "Hafta içi tek gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Dubleks daire",
+            "tutar": 6500,
+            "birim": "4 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/dubleks-daireler",
+            "kosul": "Hafta sonu tek gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Dubleks daire",
+            "tutar": 4500,
+            "birim": "4 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/dubleks-daireler",
+            "kosul": "Hafta içi en az 2 gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Kapasite üzeri ilave kişi",
+            "tutar": 750,
+            "birim": "kişi / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/dubleks-daireler",
+            "kosul": "Dubleks daire",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Havuzlu dubleks",
+            "tutar": 5500,
+            "birim": "4 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/havuzlu-dubleks-daireler",
+            "kosul": "Hafta içi tek gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Havuzlu dubleks",
+            "tutar": 7500,
+            "birim": "4 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/havuzlu-dubleks-daireler",
+            "kosul": "Hafta sonu tek gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Havuzlu dubleks",
+            "tutar": 4500,
+            "birim": "4 kişilik aile / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/havuzlu-dubleks-daireler",
+            "kosul": "Hafta içi en az 2 gece",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Kapasite üzeri ilave kişi",
+            "tutar": 750,
+            "birim": "kişi / gece",
+            "kaynakUrl": "https://www.gobeltermal.com/konaklama/havuzlu-dubleks-daireler",
+            "kosul": "Havuzlu dubleks",
+            "baslangic": false
+          }
+        ],
+        "arastirmaNotu": "Resmî sitede yayımlanan tarife kontrol edildi; tarife yılı/yürürlük tarihi belirtilmiyor. 2026 yılına ait olduğu ayrıca teyit edilemedi. 1+1 sayfasındaki tarife başlığı başka daire tipini gösterdiği için o fiyatlar eklenmedi. Hafta içi en az 2 gece indirimleri ayrıca belirtilmiştir. Umumi havuz ve aile banyosu için sayısal tarife doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-kutahya-yoncali",
+      "kategori": "termal",
+      "il": "Kütahya",
+      "ilce": "Merkez",
+      "isim": "Kütahya Yoncalı Uygulama Oteli (Termal)",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "MEB",
+      "kisaAciklama": "Kamu Tesisleri dizininde Millî Eğitim Bakanlığı Yoncalı Uygulama Oteli olarak kayıtlıdır.",
+      "adres": "Yoncalı Mahallesi, Sekiören Caddesi No:14/2, Merkez / Kütahya",
+      "telefon": "0274 250 00 65",
+      "kullanimTuru": "Konaklamalı",
+      "resmiKaynak": "https://yoncali.meb.k12.tr/icerikler/yoncaliuygulamaoteliacildi_4206398.html",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 39.485642,
+      "longitude": 29.836754,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://yoncali.meb.k12.tr/icerikler/yoncaliuygulamaoteliacildi_4206398.html"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "MEB okul/uygulama oteli kaynaklarında 2026 otel tarifesi doğrulanamadı. Öğrenci pansiyon taksitleri otel bedeli olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-manisa-kula",
+      "kategori": "termal",
+      "il": "Manisa",
+      "ilce": "Kula",
+      "isim": "Kula Emir Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde işletmecisi Kula Belediyesi olarak kayıtlıdır.",
+      "adres": "Şehitlioğlu Köyü Acısu Mevki Kula/Manisa",
+      "telefon": "0531 741 52 95",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://www.kula.bel.tr/istirak/emir-kaplicalari/21/",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.kula.bel.tr/istirak/emir-kaplicalari/21/"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediye kaynaklarında güncel sayısal tarife doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-manisa-kursunlu",
+      "kategori": "termal",
+      "il": "Manisa",
+      "ilce": "Kurşunlu",
+      "isim": "Kurşunlu Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde belediye tesisi olarak kayıtlıdır.",
+      "adres": "Kurşunlu Kaplıcaları Allahdiye Köyü Banyolar Mevkii Salihli Manisa",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.salihli.bel.tr/Duyurular"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "12.10.2026 belediye duyurusunda termal havuz/jakuzi tadilat nedeniyle kapalı görünüyor. Kullanılabilir güncel tarife doğrulanamadı."
+      }
+    },
+    {
+      "id": "termal-samsun-havza",
+      "kategori": "termal",
+      "il": "Samsun",
+      "ilce": "Havza",
+      "isim": "Havza Fizik Tedavi ve Rehabilitasyon Merkezi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Üniversite",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde üniversite tesisi olarak kayıtlıdır.",
+      "adres": "İmaret Mah. Şehit Uzman Çavuş Osman Ünal Sok. No: 25 Havza/Samsun",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Konaklama yarım pansiyondur; vergi ve KDV dâhildir. Rezervasyonda bedelin %30’u kaparo olarak alınır. Aile odası en fazla 3 kişiliktir. 0–3 yaş ücretsiz, 4–6 yaş %50 indirimlidir. OMÜ personeli, emeklileri ve birinci derece yakınlarına %20; tedavi gören hasta ve bir refakatçisine en az 10 günlük konaklamada %25; en az 15 kişilik, tek faturalı gruplara %10 indirim uygulanır. Oda-kahvaltı seçiminde oda ücretine %10 indirim yapılır. Ek yatağa indirim uygulanmaz.",
+        "kaynaklar": [
+          "https://sks.omu.edu.tr/kurumsal/birimler/iktisadi-isletme-birimi/havza-fizik-tedavi-ve-rehabilitasyon-merkezi/"
+        ],
+        "kalemler": [
+          {
+            "tur": "konaklama",
+            "ad": "İki yataklı odada tek kişi",
+            "tutar": 1800,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://sks.omu.edu.tr/kurumsal/birimler/iktisadi-isletme-birimi/havza-fizik-tedavi-ve-rehabilitasyon-merkezi/",
+            "kosul": "Yarım pansiyon; KDV ve vergiler dâhil.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "İki yataklı odada iki kişi",
+            "tutar": 3200,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://sks.omu.edu.tr/kurumsal/birimler/iktisadi-isletme-birimi/havza-fizik-tedavi-ve-rehabilitasyon-merkezi/",
+            "kosul": "Yarım pansiyon; KDV ve vergiler dâhil.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Çift kişilik yataklı odada tek kişi",
+            "tutar": 2000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://sks.omu.edu.tr/kurumsal/birimler/iktisadi-isletme-birimi/havza-fizik-tedavi-ve-rehabilitasyon-merkezi/",
+            "kosul": "Yarım pansiyon; KDV ve vergiler dâhil.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Çift kişilik yataklı odada iki kişi",
+            "tutar": 3200,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://sks.omu.edu.tr/kurumsal/birimler/iktisadi-isletme-birimi/havza-fizik-tedavi-ve-rehabilitasyon-merkezi/",
+            "kosul": "Yarım pansiyon; KDV ve vergiler dâhil.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Aile odası / en fazla 3 kişi",
+            "tutar": 4500,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://sks.omu.edu.tr/kurumsal/birimler/iktisadi-isletme-birimi/havza-fizik-tedavi-ve-rehabilitasyon-merkezi/",
+            "kosul": "Yarım pansiyon; KDV ve vergiler dâhil.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Ek yatak",
+            "tutar": 1000,
+            "birim": "yatak / gece",
+            "kaynakUrl": "https://sks.omu.edu.tr/kurumsal/birimler/iktisadi-isletme-birimi/havza-fizik-tedavi-ve-rehabilitasyon-merkezi/",
+            "kosul": "İndirim uygulanmaz.",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Çocuk konaklama",
+            "tutar": 0,
+            "birim": "çocuk / gece",
+            "kaynakUrl": "https://sks.omu.edu.tr/kurumsal/birimler/iktisadi-isletme-birimi/havza-fizik-tedavi-ve-rehabilitasyon-merkezi/",
+            "kosul": "0–3 yaş; yetişkin konaklamasına bağlıdır.",
+            "baslangic": false
+          },
+          {
+            "tur": "havuz",
+            "ad": "Konaklamasız havuz, sauna ve hamam",
+            "tutar": 200,
+            "birim": "kişi / 1 saat",
+            "kaynakUrl": "https://sks.omu.edu.tr/kurumsal/birimler/iktisadi-isletme-birimi/havza-fizik-tedavi-ve-rehabilitasyon-merkezi/",
+            "kosul": "",
+            "baslangic": true
+          },
+          {
+            "tur": "havuz",
+            "ad": "Konaklamasız havuz, sauna ve hamam / kamu",
+            "tutar": 150,
+            "birim": "kişi / 1 saat",
+            "kaynakUrl": "https://sks.omu.edu.tr/kurumsal/birimler/iktisadi-isletme-birimi/havza-fizik-tedavi-ve-rehabilitasyon-merkezi/",
+            "kosul": "Kamu mensupları",
+            "baslangic": false
+          }
+        ],
+        "arastirmaNotu": "Resmî sitede yayımlanan tarife kontrol edildi; tarife yılı/yürürlük tarihi belirtilmiyor. 2026 yılına ait olduğu ayrıca teyit edilemedi. Konaklama yarım pansiyon, vergi ve KDV dâhil. Aile odası en fazla 3 kişi içindir. 4–6 yaş çocuklara %50 indirim; OMÜ personeli/emeklileri ve birinci derece yakınlarına konaklamada %20, en az 10 gün tedavi gören hasta ve bir refakatçisine %25, en az 15 kişilik gruba %10 indirim; oda-kahvaltı seçiminde %10 indirim belirtiliyor. İndirimler birleştirilerek fiyat hesaplanmadı."
+      }
+    },
+    {
+      "id": "termal-sivas-cumhuriyet",
+      "kategori": "termal",
+      "il": "Sivas",
+      "ilce": "Yıldızeli",
+      "isim": "Cumhuriyet Üniversitesi Kaplıca Merkezi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Üniversite",
+      "kisaAciklama": "Sağlık Bakanlığı 21.09.2019 lisanslı kaplıca listesinde üniversite tesisi olarak kayıtlıdır.",
+      "adres": "Sıcak Çermik Mevkii Kalın Beldesi Yıldızeli/Sivas",
+      "telefon": "",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf",
+      "sonDogrulama": "2019-09-21",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://hsgm.saglik.gov.tr/depo/birimler/cevre-sagligi-db/Dokumanlar/Diger/KaplicaPeloditalossolistesi_21092019tesisDetay.pdf"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Tesis ve bağlı kurum adına yapılan 2026 tarife araştırmasında doğrulanabilir resmî güncel giriş, havuz, aile banyosu veya konaklama ücreti bulunamadı. Eski ruhsat listesi fiyat kanıtı olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-sivas-soguk-cermik",
+      "kategori": "termal",
+      "il": "Sivas",
+      "ilce": "Çermik",
+      "isim": "Soğuk Çermik Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde işletmecisi Sivas Belediyesi olarak kayıtlıdır.",
+      "adres": "Beypınar Mevkii Soğuk Çermik Kaplıcası Sivas",
+      "telefon": "0553 383 81 13",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://www.sivaskaplica.com/iletisim",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://www.sivaskaplica.com/soguk-cermik-apart",
+          "https://kaplica.sivas.bel.tr/soguk-cermik-kaplicasi"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediyenin tanıtım sayfasında fiyat yok; havuz rezervasyon sayfasının dinamik tarifesine erişilemedi."
+      }
+    },
+    {
+      "id": "termal-tokat-resadiye",
+      "kategori": "termal",
+      "il": "Tokat",
+      "ilce": "Çermik",
+      "isim": "Reşadiye Belediye Kaplıcası",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Belediye",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde işletmecisi Reşadiye Belediyesi olarak kayıtlıdır.",
+      "adres": "Çermik Mahallesi Ahmet Yesevi Cad. No: 8 Reşadiye Tokat",
+      "telefon": "0356 461 55 55",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://resadiye.bel.tr/iletisim/",
+      "sonDogrulama": "2026-10-22",
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "",
+        "kaynaklar": [
+          "https://resadiye.bel.tr/"
+        ],
+        "kalemler": [],
+        "arastirmaNotu": "Belediye kaynaklarında 2026 ziyaretçi tarifesi doğrulanamadı; kiralama ihale bedelleri ziyaretçi ücreti olarak kullanılmadı."
+      }
+    },
+    {
+      "id": "termal-yalova-bakanlik",
+      "kategori": "termal",
+      "il": "Yalova",
+      "ilce": "Termal",
+      "isim": "Yalova Termal Tesisi",
+      "tesisSinifi": "kamu",
+      "kurumTuru": "Sağlık Bakanlığı",
+      "kisaAciklama": "Sağlık Bakanlığı kaplıca listesinde bakanlık tesisi olarak kayıtlıdır.",
+      "adres": "Termal-yalova",
+      "telefon": "0226 675 74 00",
+      "kullanimTuru": "",
+      "resmiKaynak": "https://www.yalovatermal.com/iletisim",
+      "sonDogrulama": "2026-10-22",
+      "latitude": 40.603379,
+      "longitude": 29.173883,
+      "ucretBilgisi": {
+        "sonKontrol": "2026-10-24",
+        "arastirmaYili": 2026,
+        "aciklama": "Oda-kahvaltı tarifesine kahvaltı; yarım pansiyona kahvaltı ve akşam yemeği dâhildir. Konaklama vergisi ve KDV fiyatlara dâhildir. 0–5 yaş ücretsizdir; 6 yaş üzeri için ilave yatak ücreti alınır. Sağlık Bakanlığı personeli ile anne, baba, eş ve çocuklarına liste üzerinden %50 indirim uygulanır; cuma-cumartesi, bayram, resmî tatil, sömestr ve ara tatilde bu indirim geçerli değildir. Konaklama listesi bayram, resmî tatil, sömestr ve ara tatilde geçerli değildir. Otel misafirleri açık havuz ve Kurşunlu Banyo’yu ücretsiz, Sultan Banyo’yu %50 indirimli kullanabilir. Hamam ve havuz için rezervasyon gerekmez; masaj ve kese ayrıca ücretlidir.",
+        "kaynaklar": [
+          "https://www.yalovatermal.com/Fiyatlar"
+        ],
+        "kalemler": [
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel arka / 1 kişi",
+            "tutar": 6500,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Oda ve kahvaltı · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel arka / 1 kişi",
+            "tutar": 7500,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Yarım pansiyon · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel arka / 1 kişi",
+            "tutar": 6000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Kampanyalı yarım pansiyon (%20 indirim) · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel arka / 2 kişi",
+            "tutar": 8000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Oda ve kahvaltı · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel arka / 2 kişi",
+            "tutar": 10000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Yarım pansiyon · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel arka / 2 kişi",
+            "tutar": 8000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Kampanyalı yarım pansiyon (%20 indirim) · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel ön / 1 kişi",
+            "tutar": 7500,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Oda ve kahvaltı · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel ön / 1 kişi",
+            "tutar": 8500,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Yarım pansiyon · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel ön / 1 kişi",
+            "tutar": 6800,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Kampanyalı yarım pansiyon (%20 indirim) · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel ön / 2 kişi",
+            "tutar": 10000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Oda ve kahvaltı · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel ön / 2 kişi",
+            "tutar": 12000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Yarım pansiyon · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel ön / 2 kişi",
+            "tutar": 9600,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Kampanyalı yarım pansiyon (%20 indirim) · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel süit / 2 kişi",
+            "tutar": 11500,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Oda ve kahvaltı · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel süit / 2 kişi",
+            "tutar": 13500,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Yarım pansiyon · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Termal Otel süit / 2 kişi",
+            "tutar": 10800,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Kampanyalı yarım pansiyon (%20 indirim) · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "İlave yatak",
+            "tutar": 3500,
+            "birim": "yatak / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Oda ve kahvaltı · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "İlave yatak",
+            "tutar": 4500,
+            "birim": "yatak / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Yarım pansiyon · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "İlave yatak",
+            "tutar": 3600,
+            "birim": "yatak / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Kampanyalı yarım pansiyon (%20 indirim) · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": false
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Apart / 5 kişi",
+            "tutar": 12000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Oda ve kahvaltı · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "konaklama",
+            "ad": "Apart / 5 kişi",
+            "tutar": 17000,
+            "birim": "oda / gece",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Yarım pansiyon · bayram ve özel tatil dönemleri hariç.",
+            "baslangic": true
+          },
+          {
+            "tur": "havuz",
+            "ad": "Açık havuz ve Kurşunlu Banyo / yetişkin",
+            "tutar": 800,
+            "birim": "kişi / 180 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": true
+          },
+          {
+            "tur": "havuz",
+            "ad": "Açık havuz ve Kurşunlu Banyo / çocuk",
+            "tutar": 600,
+            "birim": "çocuk / 180 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": false
+          },
+          {
+            "tur": "giris",
+            "ad": "Kurşunlu Hamamı / yetişkin",
+            "tutar": 700,
+            "birim": "kişi / 90 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": true
+          },
+          {
+            "tur": "giris",
+            "ad": "Kurşunlu Hamamı / çocuk",
+            "tutar": 500,
+            "birim": "çocuk / 90 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sultan Banyo / yetişkin",
+            "tutar": 800,
+            "birim": "kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sultan Banyo / 2 kişi",
+            "tutar": 1000,
+            "birim": "2 kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sultan Banyo / ilave kişi",
+            "tutar": 250,
+            "birim": "ilave kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sultan Banyo / VIP oda",
+            "tutar": 1400,
+            "birim": "oda / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": true
+          },
+          {
+            "tur": "giris",
+            "ad": "Valide Hamamı / yetişkin",
+            "tutar": 350,
+            "birim": "kişi / 90 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": true
+          },
+          {
+            "tur": "giris",
+            "ad": "Valide Hamamı / çocuk",
+            "tutar": 270,
+            "birim": "çocuk / 90 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sıra banyo / yetişkin",
+            "tutar": 800,
+            "birim": "kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sıra banyo / 2 kişi",
+            "tutar": 1000,
+            "birim": "2 kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sıra banyo / ilave kişi",
+            "tutar": 300,
+            "birim": "ilave kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta içi",
+            "baslangic": false
+          },
+          {
+            "tur": "havuz",
+            "ad": "Açık havuz ve Kurşunlu Banyo / yetişkin",
+            "tutar": 1000,
+            "birim": "kişi / 180 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": true
+          },
+          {
+            "tur": "havuz",
+            "ad": "Açık havuz ve Kurşunlu Banyo / çocuk",
+            "tutar": 800,
+            "birim": "çocuk / 180 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": false
+          },
+          {
+            "tur": "giris",
+            "ad": "Kurşunlu Hamamı / yetişkin",
+            "tutar": 900,
+            "birim": "kişi / 90 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": true
+          },
+          {
+            "tur": "giris",
+            "ad": "Kurşunlu Hamamı / çocuk",
+            "tutar": 700,
+            "birim": "çocuk / 90 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sultan Banyo / yetişkin",
+            "tutar": 1000,
+            "birim": "kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sultan Banyo / 2 kişi",
+            "tutar": 1250,
+            "birim": "2 kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sultan Banyo / ilave kişi",
+            "tutar": 300,
+            "birim": "ilave kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sultan Banyo / VIP oda",
+            "tutar": 1600,
+            "birim": "oda / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": true
+          },
+          {
+            "tur": "giris",
+            "ad": "Valide Hamamı / yetişkin",
+            "tutar": 400,
+            "birim": "kişi / 90 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": true
+          },
+          {
+            "tur": "giris",
+            "ad": "Valide Hamamı / çocuk",
+            "tutar": 300,
+            "birim": "çocuk / 90 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": false
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sıra banyo / yetişkin",
+            "tutar": 1000,
+            "birim": "kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sıra banyo / 2 kişi",
+            "tutar": 1250,
+            "birim": "2 kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": true
+          },
+          {
+            "tur": "aileBanyosu",
+            "ad": "Sıra banyo / ilave kişi",
+            "tutar": 350,
+            "birim": "ilave kişi / 60 dakika",
+            "kaynakUrl": "https://www.yalovatermal.com/Fiyatlar",
+            "kosul": "Hafta sonu",
+            "baslangic": false
+          }
+        ],
+        "arastirmaNotu": "2026 konaklama tarifesi ve aynı resmî sayfadaki hafta içi/sonu kaplıca listeleri kontrol edildi. Konaklamada vergi ve KDV dâhil. Bayram, resmî tatil, sömestr ve ara tatilde konaklama listesi geçerli değil. Sağlık Bakanlığı personeli ve anne/baba/eş/çocukları için liste üzerinden %50 indirim yalnız belirtilen günlerde uygulanıyor; hafta sonu ve tatillerde uygulanmıyor. Otel misafirlerine açık havuz ve Kurşunlu Banyo dâhil; Sultan Banyo %50 indirimli. Ayrı tarifeler birbiriyle toplanmadı."
+      }
+    }
+  ]
+}

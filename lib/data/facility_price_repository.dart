@@ -30,10 +30,14 @@ class FacilityPriceRepository {
   bool get isReady => _byKey.isNotEmpty || _loadedEmpty;
 
   bool _loadedEmpty = false;
+  Future<void>? _readyInFlight;
 
   /// Açılışta: önbellek + en fazla saatte bir sürüm kontrolü (değiştiyse indir).
   /// Debug derlemede her açılışta kontrol edilir.
-  Future<void> ensureLocalDataReady() async {
+  Future<void> ensureLocalDataReady() => _readyInFlight ??=
+      _ensureLocalDataReady().whenComplete(() => _readyInFlight = null);
+
+  Future<void> _ensureLocalDataReady() async {
     if (await FiyatLocalCache.hasCache()) {
       await _loadFromLocalCache();
       unawaited(_maybeSyncIfRemoteVersionChanged());

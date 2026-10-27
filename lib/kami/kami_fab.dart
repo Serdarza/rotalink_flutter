@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'kami_animation.dart';
 import 'kami_messages.dart';
 
-/// KAMİ FAB — verilen logo, mevcut 56px yuvarlak boyut.
+/// Rota FAB — verilen logo, mevcut 56px yuvarlak boyut.
 class KamiFab extends StatelessWidget {
   const KamiFab({
     super.key,
@@ -37,7 +37,7 @@ class KamiFab extends StatelessWidget {
               decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                  image: AssetImage('assets/images/kami_logo.png'),
+                  image: AssetImage(KamiMessages.logoAsset),
                   fit: BoxFit.cover,
                 ),
               ),

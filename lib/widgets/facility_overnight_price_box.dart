@@ -13,6 +13,7 @@ import '../models/misafirhane.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import '../theme/app_colors.dart';
 import '../utils/stay_cost_calculator.dart';
+import '../utils/minimum_price_amount.dart';
 import 'facility_price_report_sheet.dart';
 import 'stay_cost_calculator_sheet.dart';
 import 'facility_tariff_view.dart';
@@ -27,6 +28,7 @@ class FacilityOvernightPriceBox extends StatefulWidget {
     required this.facility,
     this.topSpacing = 0,
     this.compact = false,
+    this.detailPresentation = false,
   });
 
   final Misafirhane facility;
@@ -34,6 +36,7 @@ class FacilityOvernightPriceBox extends StatefulWidget {
 
   /// Kart / sohbet görünümü: yalnızca özet; detaylı tarife alt sayfada açılır.
   final bool compact;
+  final bool detailPresentation;
 
   @override
   State<FacilityOvernightPriceBox> createState() =>
@@ -132,9 +135,10 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
   Future<void> _openTariffSheet(Misafirhane priced) async {
     final entry = priced.fiyatKaydi;
     final tariff = entry?.tarife;
-    if (tariff == null) return;
+    if (tariff == null && entry == null) return;
     await showModalBottomSheet<void>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
@@ -155,9 +159,46 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 12),
-            _TariffDetails(tariff: tariff),
-            const SizedBox(height: 4),
+            if (tariff != null)
+              _TariffDetails(tariff: tariff)
+            else ...[
+              for (final row in [
+                (
+                  label: FacilityPricing.sivilLabel,
+                  defined: priced.fiyatSivilDefined,
+                  value: priced.fiyatSivil,
+                ),
+                (
+                  label: FacilityPricing.kamuLabel,
+                  defined: priced.fiyatKamuDefined,
+                  value: priced.fiyatKamuPersoneli,
+                ),
+                (
+                  label: FacilityPricing.kurumLabel,
+                  defined: priced.fiyatKurumDefined,
+                  value: priced.fiyatKurumPersoneli,
+                ),
+              ])
+                if (row.defined)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _PriceRow(
+                      label: row.label,
+                      defined: row.defined,
+                      value: row.value,
+                      labelColor: AppColors.textMutedOf(ctx),
+                      valueColor: AppColors.textStrongOf(ctx),
+                      unavailableColor: Theme.of(ctx).colorScheme.error,
+                    ),
+                  ),
+            ],
+            const SizedBox(height: 12),
             _footerFor(entry),
+            const SizedBox(height: 8),
+            Text(
+              FacilityPricing.note,
+              style: TextStyle(fontSize: 11, color: AppColors.textMutedOf(ctx)),
+            ),
           ],
         ),
       ),
@@ -421,6 +462,9 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
         ? const <({String label, double min, double max})>[]
         : tariff?.derivedRanges() ?? const [];
     final footer = _footerFor(entry);
+    if (widget.detailPresentation) {
+      return _detailPriceCard(context, priced, tariff, hasLegacy, derived);
+    }
 
     return Padding(
       padding: EdgeInsets.only(top: widget.topSpacing),
@@ -578,6 +622,273 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _detailPriceCard(
+    BuildContext context,
+    Misafirhane priced,
+    FacilityTariff? tariff,
+    bool hasLegacy,
+    List<({String label, double min, double max})> derived,
+  ) {
+    String summary(String? value) {
+      if (value == null) return FacilityPricing.unavailableLabel;
+      final minimum = minimumPriceAmount(value);
+      return minimum == null ? value : formatTl(minimum);
+    }
+
+    final prices = <({String label, String value, bool unavailable})>[
+      if (hasLegacy) ...[
+        if (priced.fiyatSivilDefined)
+          (
+            label: FacilityPricing.sivilLabel,
+            value: summary(priced.fiyatSivil),
+            unavailable: priced.fiyatSivil == null,
+          ),
+        if (priced.fiyatKamuDefined)
+          (
+            label: FacilityPricing.kamuLabel,
+            value: summary(priced.fiyatKamuPersoneli),
+            unavailable: priced.fiyatKamuPersoneli == null,
+          ),
+        if (priced.fiyatKurumDefined)
+          (
+            label: FacilityPricing.kurumLabel,
+            value: summary(priced.fiyatKurumPersoneli),
+            unavailable: priced.fiyatKurumPersoneli == null,
+          ),
+      ] else
+        for (final range in derived)
+          (label: range.label, value: formatTl(range.min), unavailable: false),
+    ];
+    final canCalculate = StayCostCalculator.isAvailable(tariff);
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceOf(context),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.borderOf(context)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.account_balance_wallet_outlined,
+                color: AppColors.primary,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Güncel Fiyatlar',
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 128),
+                child: OutlinedButton.icon(
+                  onPressed: () => unawaited(_openReport(isCorrection: true)),
+                  icon: const Icon(Icons.edit_outlined, size: 14),
+                  label: const Text(
+                    FacilityPricing.reportWrongButton,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    minimumSize: const Size(0, 32),
+                    tapTargetSize: MaterialTapTargetSize.padded,
+                    visualDensity: VisualDensity.compact,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 9,
+                      vertical: 6,
+                    ),
+                    side: BorderSide(
+                      color: AppColors.primary.withValues(alpha: 0.4),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (tariff?.birim?.trim().isNotEmpty ?? false)
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Text(
+                'Başlangıç fiyatları · ${tariff!.birim}',
+                style: TextStyle(
+                  color: AppColors.textMutedOf(context),
+                  fontSize: 11,
+                ),
+              ),
+            ),
+          const SizedBox(height: 10),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns =
+                  constraints.maxWidth < 300 ||
+                      MediaQuery.textScalerOf(context).scale(12) > 15
+                  ? (constraints.maxWidth < 260 ? 1 : 2)
+                  : 3;
+              final visibleColumns = prices.length.clamp(1, columns);
+              final width =
+                  (constraints.maxWidth - 8 * (visibleColumns - 1)) /
+                  visibleColumns;
+              return Wrap(
+                spacing: 8,
+                runSpacing: 10,
+                children: [
+                  for (final (index, price) in prices.indexed)
+                    SizedBox(
+                      width: width,
+                      child: Column(
+                        children: [
+                          Icon(
+                            index == 0
+                                ? Icons.groups_outlined
+                                : index == 1
+                                ? Icons.person_outline_rounded
+                                : Icons.verified_outlined,
+                            color: AppColors.primary,
+                            size: 23,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            price.label,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                price.value,
+                                maxLines: 1,
+                                softWrap: false,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: price.unavailable ? 13 : 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: price.unavailable
+                                      ? Theme.of(context).colorScheme.error
+                                      : AppColors.textStrongOf(context),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+          if (priced.fiyatKaydi != null || canCalculate)
+            Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final detail = OutlinedButton.icon(
+                    onPressed: () => unawaited(_openTariffSheet(priced)),
+                    icon: const Icon(Icons.description_outlined, size: 19),
+                    label: const Text(
+                      FacilityPricing.showDetailedTariff,
+                      textAlign: TextAlign.center,
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      minimumSize: const Size(0, 48),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 10,
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  );
+                  final calculate = FilledButton.icon(
+                    onPressed: () =>
+                        unawaited(showStayCostCalculator(context, priced)),
+                    icon: const Icon(Icons.calculate_outlined, size: 19),
+                    label: const Text(
+                      'Konaklama ücretini hesapla',
+                      textAlign: TextAlign.center,
+                    ),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(0, 48),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 10,
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  );
+                  final buttons = [
+                    if (priced.fiyatKaydi != null) detail,
+                    if (canCalculate) calculate,
+                  ];
+                  if (constraints.maxWidth < 300 ||
+                      MediaQuery.textScalerOf(context).scale(12) > 15) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final (i, button) in buttons.indexed) ...[
+                          if (i > 0) const SizedBox(height: 8),
+                          button,
+                        ],
+                      ],
+                    );
+                  }
+                  return IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final (i, button) in buttons.indexed) ...[
+                          if (i > 0) const SizedBox(width: 8),
+                          Expanded(child: button),
+                        ],
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+        ],
       ),
     );
   }

@@ -33,6 +33,8 @@ class _DeferredMainMapState extends State<DeferredMainMap> {
   }
 
   Future<void> _loadMap() async {
+    await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
+    if (!mounted) return;
     await map_lib.loadLibrary();
     if (!mounted) return;
     setState(() => _ready = true);

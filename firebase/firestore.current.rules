@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+
+    // ── Kampanyalar: yalnızca okuma ──────────────────────────────────────────
+    match /KAMPANYALAR/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+
+    // ── Misafirhane yorumları ────────────────────────────────────────────────
+    match /misafirhaneReviews/{facilityId}/yorumlar/{reviewId} {
+      allow read: if true;
+
+
+      // Yeni yorum ekleme: zorunlu alanlar + değer doğrulama
+      allow create: if
+        request.resource.data.keys().hasAll(
+          ['userId', 'userName', 'rating', 'text', 'createdAt']
+        )
+        && request.resource.data.userId   is string
+        && request.resource.data.userId.size() >= 10
+        && request.resource.data.userId.size() <= 128
+        && request.resource.data.userName is string
+        && request.resource.data.userName.size() <= 100
+        && request.resource.data.text     is string
+        && request.resource.data.text.size() >= 3
+        && request.resource.data.text.size() <= 2000
+        && request.resource.data.rating   is int
+        && request.resource.data.rating   >= 1
+        && request.resource.data.rating   <= 5
+        && request.resource.data.createdAt is int
+        // likes alanı olmamalı (create'de gönderilmez)
+        && !request.resource.data.keys().hasAny(['likes']);
+
+
+      // Beğeni güncelleme: YALNIZCA likes alanı değişebilir
+      allow update: if
+        request.resource.data.diff(resource.data)
+          .affectedKeys().hasOnly(['likes']);
+
+
+      // Silme: Firebase Auth olmadığı için kısıtlanamaz;
+      // uygulama zaten sadece kendi yorumunu siliyor.
+      allow delete: if true;
+    }
+
+
+    // ── Misafirhane puan özeti (istemci _refreshAggregate ile günceller) ─────
+    match /misafirhaneRatings/{facilityId} {
+      allow read: if true;
+
+
+      // Sadece averageRating + reviewCount alanlarına izin ver
+      allow create, update: if
+        request.resource.data.keys().hasOnly(['averageRating', 'reviewCount'])
+        && request.resource.data.averageRating is number
+        && request.resource.data.averageRating >= 0.0
+        && request.resource.data.averageRating <= 5.0
+        && request.resource.data.reviewCount   is int
+        && request.resource.data.reviewCount   >= 0;
+
+
+      allow delete: if false;
+    }
+
+
+    // ── Diğer tüm koleksiyonlar: erişim tamamen kapalı ──────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

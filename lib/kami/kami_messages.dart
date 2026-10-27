@@ -1,6 +1,6 @@
 import 'dart:math';
 
-/// KAMİ konuşma balonu mesaj havuzu.
+/// Rota konuşma balonu mesaj havuzu.
 ///
 /// Her uygulama oturumunda [pickRandomBubbleMessage] ile tek bir mesaj seçilir.
 abstract final class KamiMessages {
@@ -42,17 +42,19 @@ abstract final class KamiMessages {
   }
 
   static const String welcomeHeadline = 'Merhaba';
-  static const String welcomeName = 'Ben KAMİ';
+  static const String displayName = 'Rota';
+  static const String logoAsset = 'assets/images/kami_logo.png';
+  static const String welcomeName = 'Ben Rota';
   static const String welcomeBody =
       'Türkiye genelinde kamu misafirhaneleri, belediye sosyal tesisleri, '
       'gezilecek yerler, yöresel yemekler ve rota planlamada yanınızdayım.';
 
   static const String welcomeTagline = 'Rotalink ile güvenli seyahat';
   static const String sourceLabel = 'Rotalink';
-  static const String appBarTitle = 'KAMİ';
+  static const String appBarTitle = 'Rota';
   static const String appBarSubtitle = 'Akıllı Kamu Seyahat Asistanı';
   static const String inputHint = 'Bana bir şey sor...';
-  static const String fabTooltip = 'KAMİ — Akıllı seyahat asistanı';
+  static const String fabTooltip = 'Rota — Akıllı seyahat asistanı';
 
   static String pickRandomBubbleMessage([Random? random]) {
     final rng = random ?? Random();

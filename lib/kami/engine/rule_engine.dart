@@ -74,7 +74,7 @@ class KamiRuleEngine {
       case KamiIntentType.help:
         return KamiPayload(
           intent: KamiIntentType.help,
-          title: 'KAMİ ne yapabilir?',
+          title: 'Rota ne yapabilir?',
           subtitle: intent.city != null
               ? '${intent.city} için yemek, gezi, konaklama veya belediye tesisi sorabilirsiniz. Tüm cevaplar Rotalink veritabanından gelir.'
               : 'Örnek: "İstanbul orduevi", "Kayseri\'de ne yenir?", "Ankara gezilecek yerler", "Yakınımdaki öğretmenevleri".',

@@ -33,7 +33,7 @@ FacilityNightPrice? singleNightPriceFor(Misafirhane m, BestValueBasis basis) {
 /// Fiyat sıralaması: fiyatı olanlar ucuzdan pahalıya, eşitlikte ve fiyatsızlarda
 /// gelen (yakınlık) sırası korunur.
 ({List<(Misafirhane, FacilityNightPrice)> priced, List<Misafirhane> unpriced})
-    sortFacilitiesByPrice(List<Misafirhane> facilities, BestValueBasis basis) {
+sortFacilitiesByPrice(List<Misafirhane> facilities, BestValueBasis basis) {
   final s = splitFacilitiesByPrice(facilities, basis, sortByPrice: true);
   return (priced: s.priced, unpriced: s.unpriced);
 }
@@ -45,10 +45,12 @@ FacilityNightPrice? singleNightPriceFor(Misafirhane m, BestValueBasis basis) {
   List<(Misafirhane, FacilityNightPrice)> priced,
   List<Misafirhane> unpriced,
   int overBudget,
-}) splitFacilitiesByPrice(
+})
+splitFacilitiesByPrice(
   List<Misafirhane> facilities,
   BestValueBasis basis, {
   bool sortByPrice = false,
+  bool descending = false,
   double? maxAmount,
 }) {
   final priced = <(int, Misafirhane, FacilityNightPrice)>[];
@@ -66,7 +68,9 @@ FacilityNightPrice? singleNightPriceFor(Misafirhane m, BestValueBasis basis) {
   }
   if (sortByPrice) {
     priced.sort((a, b) {
-      final c = a.$3.amount.compareTo(b.$3.amount);
+      final c = descending
+          ? b.$3.amount.compareTo(a.$3.amount)
+          : a.$3.amount.compareTo(b.$3.amount);
       return c != 0 ? c : a.$1.compareTo(b.$1);
     });
   }
@@ -96,9 +100,11 @@ FacilityNightPrice? singleNightPriceFor(Misafirhane m, BestValueBasis basis) {
 
 /// Sivil veya kamu personeli için tek kişi / gece fiyatı olan tesis sayısı.
 int countFacilitiesWithNightPrice(List<Misafirhane> facilities) => facilities
-    .where((m) =>
-        singleNightPriceFor(m, BestValueBasis.sivil) != null ||
-        singleNightPriceFor(m, BestValueBasis.kamu) != null)
+    .where(
+      (m) =>
+          singleNightPriceFor(m, BestValueBasis.sivil) != null ||
+          singleNightPriceFor(m, BestValueBasis.kamu) != null,
+    )
     .length;
 
 /// Arama sonuçlarında "en uygun konaklama" seçimi.
@@ -188,7 +194,8 @@ double? _singleNightPrice(
       final name = _norm(row.ad);
       if (_excludedRow.hasMatch(name)) continue;
       final unit = _norm(row.birim ?? table.birim ?? tariff.birim ?? '');
-      final perPerson = _perPersonUnit.hasMatch(unit) || _perPersonUnit.hasMatch(name);
+      final perPerson =
+          _perPersonUnit.hasMatch(unit) || _perPersonUnit.hasMatch(name);
       final single = row.kisi == 1 || _singleRoom.hasMatch(name);
       if (!perPerson && !single) continue;
       for (final id in ids) {

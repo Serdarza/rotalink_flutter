@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// KAMİ FAB için hafif "nefes alma" (pulse) ölçek animasyonu.
+/// Rota FAB için hafif "nefes alma" (pulse) ölçek animasyonu.
 ///
 /// ~8 saniyede bir %100 → %108 → %100; süreklilik abartılı değil.
 class KamiPulseAnimation extends StatefulWidget {

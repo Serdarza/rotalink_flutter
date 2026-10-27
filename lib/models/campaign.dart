@@ -20,6 +20,14 @@ class Campaign {
   final DateTime? createdAt;
   final List<String> tags;
 
+  /// Rotalink'in kendi tesis/kampanya katılım duyurusu.
+  bool get isRotalinkPromotion {
+    final uri = Uri.tryParse(linkUrl?.trim() ?? '');
+    return uri?.scheme == 'mailto' &&
+        uri?.path.toLowerCase() == 'rotalinkinfo@gmail.com' &&
+        title.toLowerCase().contains('rotalink');
+  }
+
   factory Campaign.fromMap(Map<String, dynamic> d, {required String id}) {
     final link = _firstNonBlankString([
       d['link'],
@@ -30,11 +38,9 @@ class Campaign {
     final title = (titleRaw != null && titleRaw.isNotEmpty)
         ? titleRaw
         : (_string(d['baslik']) ?? '').trim();
-    final org = _firstNonBlankString([
-      d['kurum'],
-      d['kurulus'],
-      d['kampanyaKurumu'],
-    ]) ?? '';
+    final org =
+        _firstNonBlankString([d['kurum'], d['kurulus'], d['kampanyaKurumu']]) ??
+        '';
     final summary = _string(d['aciklama']) ?? '';
     final ts = d['tarih'];
     DateTime? createdAt;
@@ -57,12 +63,20 @@ class Campaign {
     );
   }
 
-  factory Campaign.fromJson(Map<String, dynamic> json, {String? id, int? index}) {
-    final title = (_string(json['baslik']) ?? _string(json['kampanyaBaslik']) ?? '')
-        .trim();
-    final resolvedId = id ??
+  factory Campaign.fromJson(
+    Map<String, dynamic> json, {
+    String? id,
+    int? index,
+  }) {
+    final title =
+        (_string(json['baslik']) ?? _string(json['kampanyaBaslik']) ?? '')
+            .trim();
+    final resolvedId =
+        id ??
         _string(json['id'])?.trim() ??
-        (index != null ? 'kampanya-$index' : 'kampanya-${title.hashCode.abs()}');
+        (index != null
+            ? 'kampanya-$index'
+            : 'kampanya-${title.hashCode.abs()}');
     return Campaign.fromMap(json, id: resolvedId);
   }
 
@@ -100,7 +114,10 @@ class Campaign {
     return null;
   }
 
-  static List<String> _tagsFromDoc(Map<String, dynamic> d, String organization) {
+  static List<String> _tagsFromDoc(
+    Map<String, dynamic> d,
+    String organization,
+  ) {
     final seen = <String>{};
     final out = <String>[];
     void add(String s) {
@@ -109,6 +126,7 @@ class Campaign {
       seen.add(t);
       out.add(t);
     }
+
     if (organization.trim().isNotEmpty) add(organization);
     final e = d['etiketler'];
     if (e is String) {

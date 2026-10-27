@@ -8,6 +8,7 @@ class MainMapSearchChrome extends StatelessWidget {
   const MainMapSearchChrome({
     super.key,
     this.anchorKey,
+    this.compactResults = false,
     required this.top,
     required this.searchBarSession,
     required this.controller,
@@ -15,6 +16,7 @@ class MainMapSearchChrome extends StatelessWidget {
     required this.ilOptionsSorted,
     this.onSubmitted,
     this.onSearchCleared,
+    this.onClearPressed,
     this.onFocusChanged,
   });
 
@@ -23,8 +25,10 @@ class MainMapSearchChrome extends StatelessWidget {
   static const double gap = 4;
 
   /// Toolbar altı boşluk — arama çubuğu konumu.
-  static const double topGapBelowToolbar = 20;
+  static const double topGapBelowToolbar = 10;
   static const double blockHeight = searchBarHeight + gap + filterChipsHeight;
+  static const double resultsBlockHeight = searchBarHeight;
+  final bool compactResults;
 
   final Key? anchorKey;
   final double top;
@@ -34,6 +38,7 @@ class MainMapSearchChrome extends StatelessWidget {
   final List<String>? ilOptionsSorted;
   final VoidCallback? onSubmitted;
   final VoidCallback? onSearchCleared;
+  final VoidCallback? onClearPressed;
   final ValueChanged<bool>? onFocusChanged;
 
   @override
@@ -43,7 +48,7 @@ class MainMapSearchChrome extends StatelessWidget {
       left: 0,
       right: 0,
       top: top,
-      height: blockHeight,
+      height: compactResults ? resultsBlockHeight : blockHeight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -56,16 +61,19 @@ class MainMapSearchChrome extends StatelessWidget {
               ilOptionsSorted: ilOptionsSorted,
               onSubmitted: onSubmitted,
               onSearchCleared: onSearchCleared,
+              onClearPressed: onClearPressed,
               onFocusChanged: onFocusChanged,
               ignoreKeyboardInset: true,
               restrained: true,
             ),
           ),
-          const SizedBox(height: gap),
-          const SizedBox(
-            height: filterChipsHeight,
-            child: FacilityTypeFilterChips(),
-          ),
+          if (!compactResults) ...[
+            const SizedBox(height: gap),
+            const SizedBox(
+              height: filterChipsHeight,
+              child: FacilityTypeFilterChips(),
+            ),
+          ],
         ],
       ),
     );

@@ -15,6 +15,7 @@ class FacilityLocationFilterBar extends ConsumerWidget {
     super.key,
     required this.allFacilities,
     this.onSelectIl,
+    this.districtOnly = false,
   });
 
   /// İl seçici sayıları için tüm tesisler.
@@ -22,6 +23,7 @@ class FacilityLocationFilterBar extends ConsumerWidget {
 
   /// İl seçilince yeni arama başlatır; null ise il düğmesi gizlenir.
   final ValueChanged<String>? onSelectIl;
+  final bool districtOnly;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -35,6 +37,32 @@ class FacilityLocationFilterBar extends ConsumerWidget {
         : null;
 
     final title = il == null ? 'Birden çok il' : IlIlce.label(il, ilce ?? '');
+
+    if (districtOnly) {
+      final district = _FilterPill(
+        label: 'İlçe',
+        value: ilce ?? 'Tüm ilçeler',
+        active: ilce != null,
+        onTap: il == null
+            ? null
+            : () => _pickIlce(context, ref, il, summary, ilce),
+      );
+      if (onSelectIl == null) return district;
+      return Row(
+        children: [
+          Expanded(
+            child: _FilterPill(
+              label: 'İl',
+              value: il ?? 'Tüm iller',
+              active: il != null,
+              onTap: () => _pickIl(context, il),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(child: district),
+        ],
+      );
+    }
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
@@ -269,6 +297,7 @@ const String kIlceUnknownLabel = 'İlçesi belirsiz';
 class ListLocationFilterBar extends StatelessWidget {
   const ListLocationFilterBar({
     super.key,
+    this.compact = false,
     required this.il,
     required this.ilce,
     required this.count,
@@ -281,6 +310,7 @@ class ListLocationFilterBar extends StatelessWidget {
     this.onSelectIl,
   });
 
+  final bool compact;
   final String? il;
   final String? ilce;
   final int count;
@@ -301,6 +331,37 @@ class ListLocationFilterBar extends StatelessWidget {
         : ilce == kIlceUnknown
         ? '$il · $kIlceUnknownLabel'
         : IlIlce.label(il, ilce ?? '');
+    if (compact) {
+      return SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
+        child: Row(
+          children: [
+            if (onSelectIl != null) ...[
+              SizedBox(
+                width: 140,
+                child: _FilterPill(
+                  label: 'İl',
+                  value: il ?? 'İl seç',
+                  onTap: () => _pickIl(context),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ],
+            SizedBox(
+              width: 165,
+              child: _FilterPill(
+                label: 'İlçe',
+                value: ilceLabel ?? 'Tüm ilçeler',
+                active: ilce != null,
+                onTap: il == null ? null : () => _pickIlce(context, il),
+                onClear: ilce == null ? null : () => onSelectIlce(null),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 10, 16, 10),
       decoration: BoxDecoration(

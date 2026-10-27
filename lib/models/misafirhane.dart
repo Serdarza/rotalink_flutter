@@ -10,6 +10,7 @@ class Misafirhane {
     required this.il,
     required this.adres,
     required this.telefon,
+    this.telefon2 = '',
     required this.latitude,
     required this.longitude,
     required this.tip,
@@ -29,6 +30,25 @@ class Misafirhane {
   final String il;
   final String adres;
   final String telefon;
+  final String telefon2;
+
+  /// Eski birleşik kayıtları ve ayrı ikinci numarayı aynı şekilde okur.
+  List<String> get telefonNumaralari {
+    final result = <String>[];
+    final seen = <String>{};
+    for (final raw in [telefon, telefon2]) {
+      for (final part in raw.split(
+        RegExp(r'\s*(?:/|;|\||\n|\bve\b)\s*', caseSensitive: false),
+      )) {
+        final value = part.trim();
+        final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+        if (digits.length < 7 || digits.length > 15) continue;
+        if (seen.add(digits)) result.add(value);
+      }
+    }
+    return result;
+  }
+
   final double latitude;
   final double longitude;
   final String tip;
@@ -66,6 +86,7 @@ class Misafirhane {
         ilce: ilce,
         adres: adres,
         telefon: telefon,
+        telefon2: telefon2,
         latitude: latitude,
         longitude: longitude,
         tip: tip,
@@ -78,6 +99,7 @@ class Misafirhane {
         ilce: ilce,
         adres: adres,
         telefon: telefon,
+        telefon2: telefon2,
         latitude: latitude,
         longitude: longitude,
         tip: tip,
@@ -98,6 +120,7 @@ class Misafirhane {
         ilce: ilce,
         adres: adres,
         telefon: telefon,
+        telefon2: telefon2,
         latitude: latitude,
         longitude: longitude,
         tip: tip,
@@ -118,6 +141,7 @@ class Misafirhane {
         ilce: (ilce ?? this.ilce).trim(),
         adres: (adres ?? this.adres).trim(),
         telefon: telefon,
+        telefon2: telefon2,
         latitude: latitude,
         longitude: longitude,
         tip: tip,
@@ -139,6 +163,7 @@ class Misafirhane {
         'ilce': ilce,
         'adres': adres,
         'telefon': telefon,
+        if (telefon2.isNotEmpty) 'telefon2': telefon2,
         'latitude': latitude,
         'longitude': longitude,
         'tip': tip,
@@ -150,7 +175,20 @@ class Misafirhane {
     final isim = _str(m, const ['isim', 'tesis_adi', 'name', 'title']);
     final il = _str(m, const ['il', 'il_adi', 'province', 'sehir']);
     final adres = _str(m, const ['adres', 'adres_bilgisi', 'address']);
-    final telefon = _str(m, const ['telefon', 'phone', 'tel', 'telefon_no']);
+    final telefon = _str(m, const [
+      'telefon',
+      'phone',
+      'tel',
+      'telefon_no',
+      'numara1',
+    ]);
+    final telefon2 = _str(m, const [
+      'telefon2',
+      'telefon_2',
+      'phone2',
+      'secondary_phone',
+      'numara2',
+    ]);
     final lat = _dbl(m, const ['latitude', 'enlem', 'lat']);
     final lon = _dbl(m, const ['longitude', 'boylam', 'lng', 'lon']);
     final tip = _str(m, const ['tip', 'tesis_tipi', 'type', 'facility_type']);
@@ -163,6 +201,7 @@ class Misafirhane {
       ilce: ilce,
       adres: adres,
       telefon: telefon,
+      telefon2: telefon2,
       latitude: lat,
       longitude: lon,
       tip: tip,

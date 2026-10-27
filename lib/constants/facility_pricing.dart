@@ -30,7 +30,7 @@ abstract final class FacilityPricing {
       'Paylaştığınız bilgi incelenir; uygunsa uygulamada güncellenir.';
   static const reportSivilHint = 'Örn. 1.500 TL veya 1.200 – 2.000 TL';
   static const reportNoteHint = 'Kaynak, tarih veya kısa açıklama (isteğe bağlı)';
-  static const reportSubmit = 'E-posta ile gönder';
+  static const reportSubmit = 'Gönder';
   static const reportMailFailed = 'E-posta uygulaması açılamadı.';
   static const reportNeedOnePrice =
       'En az bir fiyat alanı doldurun.';

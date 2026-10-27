@@ -1,0 +1,19 @@
+{
+  "indexes": [
+    { "collectionGroup": "feedback_reports", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "feedback_reports", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "type", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "feedback_reports", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "type", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] }
+  ],
+  "fieldOverrides": [
+    { "collectionGroup": "feedback_reports", "fieldPath": "description", "indexes": [] },
+    { "collectionGroup": "feedback_reports", "fieldPath": "email", "indexes": [] },
+    { "collectionGroup": "feedback_reports", "fieldPath": "adminNote", "indexes": [] },
+    { "collectionGroup": "feedback_reports", "fieldPath": "submissionHash", "indexes": [] },
+    { "collectionGroup": "feedback_reports", "fieldPath": "facilityId", "indexes": [] },
+    { "collectionGroup": "feedback_reports", "fieldPath": "facilityName", "indexes": [] },
+    { "collectionGroup": "feedback_reports", "fieldPath": "appVersion", "indexes": [] },
+    { "collectionGroup": "feedback_reports", "fieldPath": "sourcePage", "indexes": [] },
+    { "collectionGroup": "feedback_reports", "fieldPath": "platform", "indexes": [] },
+    { "collectionGroup": "feedback_reports", "fieldPath": "contactConsent", "indexes": [] }
+  ]
+}

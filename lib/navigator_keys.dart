@@ -14,18 +14,33 @@ final GlobalKey<NavigatorState> rotalinkShellBodyNavigatorKey =
 Future<T?> pushOnShellNavigator<T>(Route<T> route) =>
     _pushDeferred<T>(rotalinkShellBodyNavigatorKey.currentState, route);
 
-/// Tam ekran sayfalar (KAMİ) — kabuk gezgininde overlay hatası riski olan akışlar için.
+/// Kampanya gibi üst sayfa açıkken önce ana rotaya inmek anasayfayı gösterir.
+/// Üst sayfanın yerine yeni sayfa konur.
+Future<T?> pushOrReplaceOnShellNavigator<T>(Route<T> route) => _pushDeferred<T>(
+  rotalinkShellBodyNavigatorKey.currentState,
+  route,
+  replaceIfCanPop: true,
+);
+
+/// Tam ekran sayfalar (Rota) — kabuk gezgininde overlay hatası riski olan akışlar için.
 Future<T?> pushOnRootNavigator<T>(Route<T> route) =>
     _pushDeferred<T>(rotalinkNavigatorKey.currentState, route);
 
-Future<T?> _pushDeferred<T>(NavigatorState? nav, Route<T> route) {
+Future<T?> _pushDeferred<T>(
+  NavigatorState? nav,
+  Route<T> route, {
+  bool replaceIfCanPop = false,
+}) {
   final completer = Completer<T?>();
   void pushNow() {
     if (nav == null) {
       if (!completer.isCompleted) completer.complete(null);
       return;
     }
-    nav.push<T>(route).then((value) {
+    final Future<T?> opened = replaceIfCanPop && nav.canPop()
+        ? nav.pushReplacement<T, void>(route)
+        : nav.push<T>(route);
+    opened.then((value) {
       if (!completer.isCompleted) completer.complete(value);
     });
   }

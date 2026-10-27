@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../billing/price_access.dart';
 import '../billing/pro_service.dart';
@@ -22,6 +21,7 @@ import '../services/review_repository.dart';
 import '../services/simple_location_service.dart';
 import '../theme/app_colors.dart';
 import '../utils/best_value_facility.dart';
+import '../utils/facility_phone_dialer.dart';
 import '../utils/il_ilce.dart';
 import '../utils/maps_launch.dart';
 import '../utils/search_normalize.dart';
@@ -164,26 +164,12 @@ class _NationwidePriceSheetState extends State<_NationwidePriceSheet> {
     }
   }
 
-  Future<void> _dial(String phone) async {
-    final p = phone.trim();
-    if (p.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Telefon numarası yok')),
-      );
-      return;
-    }
-    final uri = Uri(scheme: 'tel', path: p.replaceAll(RegExp(r'\s'), ''));
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Arama başlatılamadı')),
-      );
-    }
+  Future<void> _dial(Misafirhane facility) async {
+    await FacilityPhoneDialer.open(context, facility);
   }
 
   Future<void> _share(Misafirhane m) async {
-    final phone = m.telefon.trim();
+    final phone = m.telefonNumaralari.join(' / ');
     await Share.share(
       StoreLinks.shareMessage(m.isim, [
         if (phone.isNotEmpty) 'Telefon: $phone',
@@ -226,7 +212,7 @@ class _NationwidePriceSheetState extends State<_NationwidePriceSheet> {
                     (f) => f.sameFavoriteIdentity(detail),
                   ),
                   onBack: () => setState(() => _detail = null),
-                  onCall: () => unawaited(_dial(detail.telefon)),
+                  onCall: () => unawaited(_dial(detail)),
                   onShare: () => unawaited(_share(detail)),
                   onFavorite: () => unawaited(_toggleFavorite(detail)),
                   onInspect: () => unawaited(

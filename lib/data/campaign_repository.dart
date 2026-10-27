@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 
 import '../models/campaign.dart';
+import '../services/campaign_push_service.dart';
 import '../services/network_service.dart';
 import 'github_kampanya_data_source.dart';
 import 'kampanya_local_cache.dart';
@@ -75,7 +76,10 @@ class CampaignRepository {
         return _memoryCampaigns = const [];
       }
       final decoded = jsonDecode(raw);
-      return _memoryCampaigns = Campaign.parseListFromRoot(decoded);
+      final campaigns = Campaign.parseListFromRoot(decoded);
+      _memoryCampaigns = campaigns;
+      await CampaignPushService.notifyNewCampaigns(campaigns.map((c) => c.id));
+      return campaigns;
     } catch (err, st) {
       _log('Yerel kampanya önbelleği okunamadı: $err', st);
       return _memoryCampaigns = const [];
@@ -121,6 +125,7 @@ class CampaignRepository {
       final campaigns = Campaign.parseListFromRoot(decoded);
       _memoryCampaigns = campaigns;
       _updates.add(campaigns);
+      await CampaignPushService.notifyNewCampaigns(campaigns.map((c) => c.id));
 
       final version =
           expectedVersion ??
