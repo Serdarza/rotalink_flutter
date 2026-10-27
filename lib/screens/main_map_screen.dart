@@ -33,6 +33,7 @@ import '../l10n/app_strings.dart';
 import '../map_location_state.dart';
 import '../models/gezi_yemek_item.dart';
 import '../models/misafirhane.dart';
+import '../utils/facility_phone_dialer.dart';
 import '../models/route_plan_outcome.dart';
 import '../models/route_stop.dart';
 import '../services/osrm_route_service.dart';
@@ -1977,14 +1978,9 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     Misafirhane? facility,
   ) async {
     if (target.action == DeepLinkAction.call) {
-      final phone = facility?.telefon.trim() ?? '';
-      if (phone.isEmpty) return;
-      final uri = Uri(scheme: 'tel', path: phone.replaceAll(RegExp(r'\s'), ''));
-      try {
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        }
-      } catch (_) {}
+      if (facility != null && context.mounted) {
+        await FacilityPhoneDialer.open(context, facility);
+      }
       return;
     }
     if (target.action != DeepLinkAction.map || !context.mounted) return;
@@ -2710,30 +2706,12 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  Future<void> _dialFacilityPhone(BuildContext context, String phone) async {
-    final p = phone.trim();
-    if (p.isEmpty) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Telefon numarası yok')));
-      }
-      return;
-    }
-    final uri = Uri(scheme: 'tel', path: p.replaceAll(RegExp(r'\s'), ''));
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Arama başlatılamadı')));
-      }
-    }
+  Future<void> _dialFacilityPhone(BuildContext context, Misafirhane facility) async {
+    await FacilityPhoneDialer.open(context, facility);
   }
 
   Future<void> _shareFacility(Misafirhane m) async {
-    final phone = m.telefon.trim();
+    final phone = m.telefonNumaralari.join(' / ');
     await Share.share(
       StoreLinks.shareMessage(m.isim, [
         if (phone.isNotEmpty) 'Telefon: $phone',
@@ -2938,7 +2916,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                               ),
                               onBack: () => setCompactDetail(null),
                               onCall: () => unawaited(
-                                _dialFacilityPhone(context, detail.telefon),
+                                _dialFacilityPhone(context, detail),
                               ),
                               onShare: () => unawaited(_shareFacility(detail)),
                               onFavorite: () =>
@@ -3130,7 +3108,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                                                 onTap: () => unawaited(
                                                   _dialFacilityPhone(
                                                     context,
-                                                    m.telefon,
+                                                    m,
                                                   ),
                                                 ),
                                               ),
