@@ -28,6 +28,7 @@ import '../data/kamp_repository.dart';
 import '../data/sosyal_menu_repository.dart';
 import '../models/gezi_yemek_item.dart';
 import '../models/misafirhane.dart';
+import '../utils/facility_phone_dialer.dart';
 import '../models/sosyal_item.dart';
 import '../map_location_state.dart';
 import '../services/nominatim_geocode_cache.dart';
@@ -1047,28 +1048,12 @@ class MisafirhaneSearchResultsPanelState
     );
   }
 
-  Future<void> _dialPhone(BuildContext ctx, String phone) async {
-    final p = phone.trim();
-    if (p.isEmpty) {
-      ScaffoldMessenger.of(
-        ctx,
-      ).showSnackBar(const SnackBar(content: Text('Telefon numarası yok')));
-      return;
-    }
-    final uri = Uri(scheme: 'tel', path: p.replaceAll(RegExp(r'\s'), ''));
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (ctx.mounted) {
-        ScaffoldMessenger.of(
-          ctx,
-        ).showSnackBar(const SnackBar(content: Text('Arama başlatılamadı')));
-      }
-    }
+  Future<void> _dialPhone(BuildContext ctx, Misafirhane facility) async {
+    await FacilityPhoneDialer.open(ctx, facility);
   }
 
   Future<void> _shareMisafirhane(Misafirhane m) async {
-    final phone = m.telefon.trim();
+    final phone = m.telefonNumaralari.join(' / ');
     await Share.share(
       StoreLinks.shareMessage(m.isim, [
         if (phone.isNotEmpty) 'Telefon: $phone',
@@ -1208,7 +1193,7 @@ class MisafirhaneSearchResultsPanelState
                                               ),
                                               onCall: () => _dialPhone(
                                                 context,
-                                                detail.telefon,
+                                                detail,
                                               ),
                                               onShare: () => unawaited(
                                                 _shareMisafirhane(detail),

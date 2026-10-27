@@ -25426,9 +25426,10 @@
       "tip": "Orduevi",
       "il": "Adana",
       "adres": "Güzelyalı Mah. 81037 Sk. NO3 Çukuova/Adana",
-      "telefon": "(0322) 233 08 97 / (0322) 233 69 57",
+      "telefon": "(0322) 233 08 97",
       "latitude": 37.03942764407602,
-      "longitude": 35.31825103819647
+      "longitude": 35.31825103819647,
+      "telefon2": "(0322) 233 69 57"
     },
     {
       "isim": "Adana Polis Evi",
@@ -25715,9 +25716,10 @@
       "il": "Ağrı",
       "kullanıcı": "Subay/Astsubay",
       "adres": "Leylakpınar Mahallesi, Hanibaba Caddesi No: 70",
-      "telefon": "(0472) 215 17 66 / (0472) 215 69 61",
+      "telefon": "(0472) 215 17 66",
       "latitude": 39.71960628227269,
-      "longitude": 43.05354133832909
+      "longitude": 43.05354133832909,
+      "telefon2": "(0472) 215 69 61"
     },
     {
       "isim": "Ağrı Dsi 85. Şube Misafirhanesi",
@@ -26772,9 +26774,10 @@
       "tip": "Orduevi",
       "il": "Antalya",
       "adres": null,
-      "telefon": "(0242) 242 86 55 / (0242) 243 88 55",
+      "telefon": "(0242) 242 86 55",
       "latitude": 36.886432696633776,
-      "longitude": 30.700467153531715
+      "longitude": 30.700467153531715,
+      "telefon2": "(0242) 243 88 55"
     },
     {
       "isim": "Antalya MEB Uygulama Oteli",
@@ -27339,9 +27342,10 @@
       "tip": "Polisevi",
       "il": "Balıkesir",
       "adres": "Küçükköy Mah. Sarımsaklı Bulvarı 4. Sk. No:4, Ayvalık/Balıkesir (Ayvalık Polis Moral Eğitim Merkezi)",
-      "telefon": "(0266) 324 60 09 / 0505 318 10 40",
+      "telefon": "(0266) 324 60 09",
       "latitude": 39.26825189522491,
-      "longitude": 26.6748965383062
+      "longitude": 26.6748965383062,
+      "telefon2": "0505 318 10 40"
     },
     {
       "isim": "Balıkesir Koca Seyit Havalimanı Misafirhanesi",
@@ -27564,9 +27568,10 @@
       "tip": "Orduevi",
       "il": "Balıkesir",
       "adres": "YALI MAH.BALIKESİR CAD.HAMDİ YÜCEL SİTESİ 1/C BLOK DAİRE: 5 ERDEK /BALIKESİR",
-      "telefon": "(0266) 835 10 70 / (0266) 835 68 54",
+      "telefon": "(0266) 835 10 70",
       "latitude": 40.39183554271541,
-      "longitude": 27.809086718775507
+      "longitude": 27.809086718775507,
+      "telefon2": "(0266) 835 68 54"
     },
     {
       "isim": "MSB Erdek Özel Eğitim Merkezi Komutanlığı",
@@ -27582,9 +27587,10 @@
       "tip": "Orduevi",
       "il": "Balıkesir",
       "adres": "Ören Mah. Uğur Cad. No:51 Burhaniye",
-      "telefon": "(0266) 416 54 10 / (0266) 416 54 11",
+      "telefon": "(0266) 416 54 10",
       "latitude": 39.49408981909883,
-      "longitude": 26.93155568064632
+      "longitude": 26.93155568064632,
+      "telefon2": "(0266) 416 54 11"
     },
     {
       "isim": "Sındırgı Öğretmenevi",
@@ -30012,9 +30018,10 @@
       "tip": "Orduevi",
       "il": "Gaziantep",
       "adres": "Beyazlar Mah. Ordu Caddesi Şahinbey/Gaziantep",
-      "telefon": "(0342) 336 12 41 / (0342) 336 12 42",
+      "telefon": "(0342) 336 12 41",
       "latitude": 37.05911191644274,
-      "longitude": 37.35958597934842
+      "longitude": 37.35958597934842,
+      "telefon2": "(0342) 336 12 42"
     },
     {
       "isim": "Gaziantep Öğretmenevi ve Akşam Sanat Okulu",
@@ -30147,9 +30154,10 @@
       "tip": "Orduevi",
       "il": "Giresun",
       "adres": "Kale Mah. Eşref Dizmdar Cad. No: 34",
-      "telefon": "(0454) 215 06 55 / (0454) 216 77 36",
+      "telefon": "(0454) 215 06 55",
       "latitude": 40.920521117997836,
-      "longitude": 38.386658089000655
+      "longitude": 38.386658089000655,
+      "telefon2": "(0454) 216 77 36"
     },
     {
       "isim": "Giresun Öğretmen Evi",
@@ -30876,9 +30884,10 @@
       "tip": "Orduevi",
       "il": "İstanbul",
       "adres": "Kazlıdere Mah. Eski Ankara Cad. Kara Subay lojmanları",
-      "telefon": "(0216) 341 50 83 / (0216) 341 50 88",
+      "telefon": "(0216) 341 50 83",
       "latitude": 41.04664451072113,
-      "longitude": 29.03489481418671
+      "longitude": 29.03489481418671,
+      "telefon2": "(0216) 341 50 88"
     },
     {
       "isim": "Beylerbeyi Sabancı Polisevi Sosyal Tesisi",
@@ -31029,9 +31038,10 @@
       "tip": "Et ve Süt Kurumu Misafirhanesi",
       "il": "İstanbul",
       "adres": "Kavaklı Mahallesi, Kosova Caddesi No:17, Beylikdüzü / İstanbul",
-      "telefon": "(0212) 690 51 71 / (0212) 690 55 52",
+      "telefon": "(0212) 690 51 71",
       "latitude": 41.002,
-      "longitude": 28.6405
+      "longitude": 28.6405,
+      "telefon2": "(0212) 690 55 52"
     },
     {
       "isim": "Eti Maden İstanbul Misafirhanesi",
@@ -31065,18 +31075,20 @@
       "tip": "Öğretmenevi",
       "il": "İstanbul",
       "adres": "Cankurtaran Mahallesi, Ahırkapı Caddesi No:7-9, Fatih / İstanbul",
-      "telefon": "(0212) 517 68 93 / (0212) 517 24 11",
+      "telefon": "(0212) 517 68 93",
       "latitude": 41.004310990651476,
-      "longitude": 28.9815
+      "longitude": 28.9815,
+      "telefon2": "(0212) 517 24 11"
     },
     {
       "isim": "Fatih Sarayburnu Askeri Gazino",
       "tip": "Orduevi",
       "il": "İstanbul",
       "adres": "Kennedy Cad. Gülhane Parkı Giriş Yanı Eminönü/Sirkeci",
-      "telefon": "(0212) 513 34 88 / (0545) 513 34 88",
+      "telefon": "(0212) 513 34 88",
       "latitude": 41.015691614027986,
-      "longitude": 28.985951923720588
+      "longitude": 28.985951923720588,
+      "telefon2": "(0545) 513 34 88"
     },
     {
       "isim": "Hazine ve Maliye Bakanlığı Beyazıt Eğitim Tesisi ve Konukevi",
@@ -31326,9 +31338,10 @@
       "tip": "Misafirhane",
       "il": "İstanbul",
       "adres": "Orhantepe Mahallesi, 30 Ağustos Caddesi No:2, Cevizli, Kartal / İstanbul",
-      "telefon": "(0216) 457 34 00 / (0216) 457 34 03",
+      "telefon": "(0216) 457 34 00",
       "latitude": 40.9055,
-      "longitude": 29.1755
+      "longitude": 29.1755,
+      "telefon2": "(0216) 457 34 03"
     },
     {
       "isim": "MSB Beşiktaş Milli Savunma Üniversitesi Kışla Gazinosu",
@@ -31389,9 +31402,10 @@
       "tip": "Orduevi",
       "il": "İstanbul",
       "adres": "HHO K.lığı Yeşil Yurt Mah. Eski Havaalanı Cad.",
-      "telefon": "(0212) 242 40 86 / (0542) 229 71 12",
+      "telefon": "(0212) 242 40 86",
       "latitude": 41.17875770345221,
-      "longitude": 29.066689804740978
+      "longitude": 29.066689804740978,
+      "telefon2": "(0542) 229 71 12"
     },
     {
       "isim": "Sanayi Bakanlığı Şişli Misafirhanesi",
@@ -31749,9 +31763,10 @@
       "tip": "orduevi",
       "il": "İzmir",
       "adres": "Atatürk Mah.",
-      "telefon": "(0232) 812 15 21 / (0232) 812 15 22",
+      "telefon": "(0232) 812 15 21",
       "latitude": 38.65474479389741,
-      "longitude": 26.725601182968802
+      "longitude": 26.725601182968802,
+      "telefon2": "(0232) 812 15 22"
     },
     {
       "isim": "DHMİ Havacılık Akademisi İzmir Eğitim Tesisi",
@@ -31785,9 +31800,10 @@
       "tip": "Üniversite Konukevi",
       "il": "İzmir",
       "adres": "Erzene Mahallesi, Ege Üniversitesi Lojmanları No:2, 35040 Bornova / İzmir",
-      "telefon": "(0232) 311 21 33 / (0232) 388 14 47",
+      "telefon": "(0232) 311 21 33",
       "latitude": 38.464981079102,
-      "longitude": 27.235050201416
+      "longitude": 27.235050201416,
+      "telefon2": "(0232) 388 14 47"
     },
     {
       "isim": "Foça Jandarma Sosyal Tesisi",
@@ -31884,9 +31900,10 @@
       "tip": "Tarım Müdürlüğü Misafirhanesi",
       "il": "İzmir",
       "adres": "Kazımdirik Mahallesi, Üniversite Caddesi No:47, Bornova / İzmir",
-      "telefon": "(0232) 462 10 11 / (0232) 486 89 79",
+      "telefon": "(0232) 462 10 11",
       "latitude": 38.44997079690832,
-      "longitude": 27.197145153972365
+      "longitude": 27.197145153972365,
+      "telefon2": "(0232) 486 89 79"
     },
     {
       "isim": "İzmir Karaburun-Akdağ Havacılık Akademisi Eğitim Tesisi",
@@ -32487,9 +32504,10 @@
       "tip": "Orduevi",
       "il": "Kars",
       "adres": "Cumhuriyet Mah. Şehit Yusuf Bey Cad. No:1",
-      "telefon": "(0474) 212 32 99 / (0474) 212 60 24",
+      "telefon": "(0474) 212 32 99",
       "latitude": 40.61235755184985,
-      "longitude": 43.103939347958956
+      "longitude": 43.103939347958956,
+      "telefon2": "(0474) 212 60 24"
     },
     {
       "isim": "Kars Polis Evi",
@@ -32550,9 +32568,10 @@
       "tip": "Üniversite Sosyal Tesisi",
       "il": "Kastamonu",
       "adres": "Bostan Köyü Ilgaz Dağı Milli Parklar Kastamonu Merkez, Kastamonu",
-      "telefon": "(0312) 215 55 62 / (0366) 239 10 61",
+      "telefon": "(0312) 215 55 62",
       "latitude": 41.074585379118375,
-      "longitude": 33.72916735441342
+      "longitude": 33.72916735441342,
+      "telefon2": "(0366) 239 10 61"
     },
     {
       "isim": "Araç Öğretmenevi",
@@ -32893,10 +32912,11 @@
       "tip": "Öğretmenevi",
       "il": "Kayseri",
       "adres": "Kiçiköy Mah. Sağlık Cad. No:20, Talas / Kayseri",
-      "telefon": "(0352) 222 26 06 / 0531 104 37 64",
+      "telefon": "(0352) 222 26 06",
       "latitude": 38.691525,
       "longitude": 35.55576,
-      "ilce": "Talas"
+      "ilce": "Talas",
+      "telefon2": "0531 104 37 64"
     },
     {
       "isim": "Kayseri Pınarbaşı Öğretmenevi İnönü",
@@ -33056,9 +33076,10 @@
       "tip": "Orduevi",
       "il": "Kıbrıs",
       "adres": "Güzelyurt / KKTC",
-      "telefon": "(0392) 714 26 20 / (0539) 121 03 78",
+      "telefon": "(0392) 714 26 20",
       "latitude": 35.20258367412148,
-      "longitude": 32.99505563792705
+      "longitude": 32.99505563792705,
+      "telefon2": "(0539) 121 03 78"
     },
     {
       "isim": "Kırklar Askeri Gazino Md.lüğü",
@@ -33767,9 +33788,10 @@
       "tip": "Orduevi",
       "il": "Konya",
       "adres": "Horozluhan Mah. Ankara Cad. 151 Selçuklu, Konya",
-      "telefon": "(0332) 321 14 11 / (0332) 322 69 70",
+      "telefon": "(0332) 321 14 11",
       "latitude": 37.87571882288522,
-      "longitude": 32.47926366351373
+      "longitude": 32.47926366351373,
+      "telefon2": "(0332) 322 69 70"
     },
     {
       "isim": "Konya Orman Bölge Müdürlüğü Misafirhanesi",
@@ -34334,9 +34356,10 @@
       "tip": "Orduevi",
       "il": "Mardin",
       "adres": "Nusaybin Yolu Üzeri Kayacan Mah.",
-      "telefon": "(0482) 212 77 13 / (0482) 212 77 14",
+      "telefon": "(0482) 212 77 13",
       "latitude": 37.30663968361864,
-      "longitude": 40.757481610049986
+      "longitude": 40.757481610049986,
+      "telefon2": "(0482) 212 77 14"
     },
     {
       "isim": "Mardin Merkez Öğretmenevi",
@@ -34496,9 +34519,10 @@
       "tip": "Öğretmenevi",
       "il": "Mersin",
       "adres": "Merkez Mahallesi, Saim Göküş Parkı yanı, Erdemli / Mersin",
-      "telefon": "(0324) 516 24 11 / (0324) 515 25 37",
+      "telefon": "(0324) 516 24 11",
       "latitude": 36.60364661726761,
-      "longitude": 34.314014996526375
+      "longitude": 34.314014996526375,
+      "telefon2": "(0324) 515 25 37"
     },
     {
       "isim": "Gülnar Öğretmenevi",
@@ -34541,9 +34565,10 @@
       "tip": "Eğitim Enstitüsü Misafirhanesi",
       "il": "Mersin",
       "adres": "Dumlupınar Mahallesi, Gazi Mustafa Kemal Bulvarı No:459E, Yenişehir / Mersin",
-      "telefon": "(0324) 331 03 60 / (0555) 059 75 87",
+      "telefon": "(0324) 331 03 60",
       "latitude": 36.7855,
-      "longitude": 34.5755
+      "longitude": 34.5755,
+      "telefon2": "(0555) 059 75 87"
     },
     {
       "isim": "Mersin İlce Emniyet Müdürlüğü Polis evi",
@@ -34559,9 +34584,10 @@
       "tip": "Karayolları Misafirhanesi",
       "il": "Mersin",
       "adres": "Gazi Mustafa Kemal Bulvarı (Devlet Hastanesi karşısı), Toroslar / Mersin — Karayolları 5. Bölge",
-      "telefon": "(0324) 322 98 04 / (0324) 322 98 06",
+      "telefon": "(0324) 322 98 04",
       "latitude": 36.81036948288838,
-      "longitude": 34.618763083352846
+      "longitude": 34.618763083352846,
+      "telefon2": "(0324) 322 98 06"
     },
     {
       "isim": "Mersin Karayolları Narlıkuyu Dinlenme Tesisleri",
@@ -34586,9 +34612,10 @@
       "tip": "Öğretmenevi",
       "il": "Mersin",
       "adres": "Dumlupınar Mahallesi, Adnan Menderes Bulvarı No:124, Yenişehir / Mersin",
-      "telefon": "(0324) 328 81 11 / (0554) 959 57 06",
+      "telefon": "(0324) 328 81 11",
       "latitude": 36.77700416816808,
-      "longitude": 34.58129692166305
+      "longitude": 34.58129692166305,
+      "telefon2": "(0554) 959 57 06"
     },
     {
       "isim": "Mersin Üniversitesi Konukevi",
@@ -34622,9 +34649,10 @@
       "tip": "DSİ Misafirhanesi",
       "il": "Mersin",
       "adres": "Yenimahalle, Burç Sokak No:6, Silifke / Mersin",
-      "telefon": "(0324) 713 08 93 / (0324) 713 08 94",
+      "telefon": "(0324) 713 08 93",
       "latitude": 36.35830999392174,
-      "longitude": 33.93080842349768
+      "longitude": 33.93080842349768,
+      "telefon2": "(0324) 713 08 94"
     },
     {
       "isim": "Silifke Lütfi Elvan Öğretmenevi ve ASO Müdürlüğü",
@@ -34676,9 +34704,10 @@
       "tip": "Orduevi",
       "il": "Muğla",
       "adres": null,
-      "telefon": "(0252) 421 02 02 / (0252) 421 04 51",
+      "telefon": "(0252) 421 02 02",
       "latitude": 36.88340164701198,
-      "longitude": 28.44847004636548
+      "longitude": 28.44847004636548,
+      "telefon2": "(0252) 421 04 51"
     },
     {
       "isim": "Bodrum Öğretmenevi",
@@ -34694,9 +34723,10 @@
       "tip": "orduevi",
       "il": "Muğla",
       "adres": "Eski Çeşme Mah. Osman Nuri Bilgin Cad. No: 1",
-      "telefon": "(0252) 313 02 48 / (0252) 313 02 49",
+      "telefon": "(0252) 313 02 48",
       "latitude": 37.03231329760216,
-      "longitude": 27.419035527235994
+      "longitude": 27.419035527235994,
+      "telefon2": "(0252) 313 02 49"
     },
     {
       "isim": "Dalaman Ceza infaz Kurumu Oteli",
@@ -34748,9 +34778,10 @@
       "tip": "Orduevi",
       "il": "Muğla",
       "adres": null,
-      "telefon": "(0252) 421 04 77 / (0252) 441 10 00",
+      "telefon": "(0252) 421 04 77",
       "latitude": 36.883812792037915,
-      "longitude": 28.448778165422528
+      "longitude": 28.448778165422528,
+      "telefon2": "(0252) 441 10 00"
     },
     {
       "isim": "Marmaris Hisarönü Jandarma Yerleştirme Eğitim Merkezi Komutanlığı",
@@ -36325,9 +36356,10 @@
       "tip": "Öğretmenevi",
       "il": "Sivas",
       "adres": "Cumhuriyet Mahallesi. Hoca Ahmet Yesevi Caddesi. No:42. Akıncılar – SİVAS",
-      "telefon": "0346 361 55 93 / 0534 662 96 90",
+      "telefon": "0346 361 55 93",
       "latitude": 40.08246539803624,
-      "longitude": 38.34330281756656
+      "longitude": 38.34330281756656,
+      "telefon2": "0534 662 96 90"
     },
     {
       "isim": "Cumhuriyet Üniversitesi Konuk Evi 2",
@@ -36523,9 +36555,10 @@
       "tip": "orduevi",
       "il": "Tekirdağ",
       "adres": "Tekir Yaylası/Erciyes",
-      "telefon": "(0282) 623 59 59 / (0282) 623 60 03",
+      "telefon": "(0282) 623 59 59",
       "latitude": 40.97245951759144,
-      "longitude": 27.88566706777979
+      "longitude": 27.88566706777979,
+      "telefon2": "(0282) 623 60 03"
     },
     {
       "isim": "Süleymanpaşa Mesleki ve Teknik Anadolu Lisesi Uygulama Oteli",
@@ -38368,9 +38401,10 @@
       "tip": "Orduevi",
       "il": "İstanbul",
       "adres": "Kaynarca Mah., Sahil Blv., No.: 1-Pendik/İSTANBUL",
-      "telefon": "(0216) 395 19 15 / (0216) 493 94 94",
+      "telefon": "(0216) 395 19 15",
       "latitude": 40.8697767,
-      "longitude": 29.2624443
+      "longitude": 29.2624443,
+      "telefon2": "(0216) 493 94 94"
     },
     {
       "isim": "Kocaeli Darıca Yerel Özel Eğitim Merkezi (Kamp)",
@@ -38728,9 +38762,10 @@
       "tip": "Sosyal Tesis",
       "il": "Giresun",
       "adres": "Teyyaredüzü Mahallesi, Atatürk Bulvarı No:46, Giresun",
-      "telefon": "(0454) 215 02 19 / (0505) 318 28 21",
+      "telefon": "(0454) 215 02 19",
       "latitude": 40.913683004311316,
-      "longitude": 38.345680765241774
+      "longitude": 38.345680765241774,
+      "telefon2": "(0505) 318 28 21"
     },
     {
       "isim": "Hakkari Karayolları Misafirhanesi",
@@ -39304,9 +39339,10 @@
       "tip": "Orduevi",
       "il": "İzmir",
       "adres": "Hıdırlık Mah., Cumhuriyet Blv.-Seferihisar/İZMİR",
-      "telefon": "(0232) 743 50 68 / (0232) 743 57 25",
+      "telefon": "(0232) 743 50 68",
       "latitude": 38.1831059,
-      "longitude": 26.8232967
+      "longitude": 26.8232967,
+      "telefon2": "(0232) 743 57 25"
     },
     {
       "isim": "Edirne Keşan Mecidiye Askeri Kampı (MSB Özel Eğitim Merkezi)",
@@ -39619,9 +39655,10 @@
       "tip": "Orduevi",
       "il": "Ankara",
       "adres": "Kavaklıdere Mah., Gülözü Sk.-Çankaya/ANKARA",
-      "telefon": "(0312) 416 48 90 / (0312) 417 50 50",
+      "telefon": "(0312) 416 48 90",
       "latitude": 39.9108061,
-      "longitude": 32.8556988
+      "longitude": 32.8556988,
+      "telefon2": "(0312) 417 50 50"
     },
     {
       "isim": "Ankara Kızılay Uzman Erbaş Misafirhanesi",
@@ -39916,9 +39953,10 @@
       "tip": "Orduevi",
       "il": "Çanakkale",
       "adres": "Fatih Mah., İnönü Cad., No.:47/1-Gökçeada/ÇANAKKALE",
-      "telefon": "(0286) 887 37 99 / (0286) 887 41 81",
+      "telefon": "(0286) 887 37 99",
       "latitude": 40.1959655,
-      "longitude": 25.903218
+      "longitude": 25.903218,
+      "telefon2": "(0286) 887 41 81"
     },
     {
       "isim": "Çanakkale Şehit Pilot Oktay Güngördü Vardiya Yatakhanesi Md.lüğü",
@@ -40096,9 +40134,10 @@
       "tip": "Orduevi",
       "il": "Diyarbakır",
       "adres": "Avcısuyu Devegeçidi Kayapınar-Merkez/DİYARBAKIR",
-      "telefon": "(0412) 335 11 11 / (0412) 335 24 56",
+      "telefon": "(0412) 335 11 11",
       "latitude": 38.07139340000001,
-      "longitude": 39.990226
+      "longitude": 39.990226,
+      "telefon2": "(0412) 335 24 56"
     },
     {
       "isim": "Diyarbakır Orman İşletme Md.lüğü Misafirhanesi",
@@ -40195,9 +40234,10 @@
       "tip": "Orduevi",
       "il": "Edirne",
       "adres": "Sarıcapaşa Mah., Talatpaşa Cad., No.:170-Merkez/EDİRNE",
-      "telefon": "(0284) 212 75 15 / (0284) 213 91 76",
+      "telefon": "(0284) 212 75 15",
       "latitude": 41.6759891,
-      "longitude": 26.560331
+      "longitude": 26.560331,
+      "telefon2": "(0284) 213 91 76"
     },
     {
       "isim": "Elazığ Meteoroloji 13. Bölge Md.lüğü Misafirhanesi",
@@ -40564,9 +40604,10 @@
       "tip": "Orduevi",
       "il": "İstanbul",
       "adres": "İstasyon Mah., Şehitler Cad.-Tuzla/İSTANBUL",
-      "telefon": "(0216) 395 16 76 / (0216) 395 16 77",
+      "telefon": "(0216) 395 16 76",
       "latitude": 40.825451,
-      "longitude": 29.3270577
+      "longitude": 29.3270577,
+      "telefon2": "(0216) 395 16 77"
     },
     {
       "isim": "İstanbul İkmal Maliye Okulu K.lığı Kışla Gazino Md.lüğü",
@@ -41590,9 +41631,10 @@
       "tip": "Orduevi",
       "il": "Tunceli",
       "adres": "Diyap Ağa Mah., Süleyman Kahraman Cad., No.:28-Hozat/TUNCELİ",
-      "telefon": "(0428) 561 29 65 / (0428) 561 29 66",
+      "telefon": "(0428) 561 29 65",
       "latitude": 39.0828312,
-      "longitude": 39.2335706
+      "longitude": 39.2335706,
+      "telefon2": "(0428) 561 29 66"
     },
     {
       "isim": "Tunceli Jandarma Sosyal Tesis Md.lüğü",
@@ -42148,9 +42190,10 @@
       "tip": "Polisevi",
       "il": "Afyonkarahisar",
       "adres": "Dörtyol Mah. Kütahya Yolu Bulvarı No:12, Merkez/Afyonkarahisar",
-      "telefon": "(0272) 251 52 62 / 0505 318 03 53",
+      "telefon": "(0272) 251 52 62",
       "latitude": 38.8386094,
-      "longitude": 30.4323735
+      "longitude": 30.4323735,
+      "telefon2": "0505 318 03 53"
     },
     {
       "isim": "Ankara Hacı Bayram Veli Üniversitesi AOÇ Konukevi",
