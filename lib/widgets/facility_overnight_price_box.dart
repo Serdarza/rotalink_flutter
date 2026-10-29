@@ -110,8 +110,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
           error ??
               (left > 0
                   ? 'Fiyatlar açıldı. Kalan ücretsiz hak: $left.'
-                  : 'Fiyatlar açıldı. Ücretsiz haklarınız bitti; '
-                        'tüm tesisler için Rotalink Pro.'),
+                  : 'Fiyatlar açıldı. ${FreePriceQuota.exhaustedLabel}'),
         ),
       ),
     );
@@ -394,13 +393,19 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                     ),
                   )
                 else
-                  Text(
-                    'Ücretsiz ${FreePriceQuota.limit} tesis hakkınızı kullandınız.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: labelColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
+                  TextButton(
+                    onPressed: () => unawaited(_openPro()),
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      textStyle: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        height: 1.35,
+                      ),
+                    ),
+                    child: const Text(
+                      FreePriceQuota.exhaustedLabel,
+                      textAlign: TextAlign.center,
                     ),
                   ),
               ],
