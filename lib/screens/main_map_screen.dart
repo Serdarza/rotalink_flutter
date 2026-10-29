@@ -74,13 +74,8 @@ import '../services/review_repository.dart';
 import 'route_plan_screen.dart';
 import 'yorum_screen.dart';
 
-/// Yüksek doğruluk istemez; aksi halde Google Play "Konum doğruluğu" penceresi sık tetiklenir.
-const _kRotalinkLocationSettingsLow = LocationSettings(
-  accuracy: LocationAccuracy.low,
-  timeLimit: Duration(seconds: 12),
-);
-
 /// Canlı konum: ~25 m veya yeni fix → mesafe satırları güncellenir.
+/// Yüksek doğruluk istemez; aksi halde Google Play "Konum doğruluğu" penceresi sık tetiklenir.
 const _kLocationStreamSettings = LocationSettings(
   accuracy: LocationAccuracy.low,
   distanceFilter: 25,
@@ -387,11 +382,13 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
         ).listen(
           (pos) {
             if (!mounted) return;
-            if (!isValidWgs84LatLng(pos.latitude, pos.longitude)) return;
+            if (!isUsableDeviceLocation(pos.latitude, pos.longitude)) return;
             final ll = LatLng(pos.latitude, pos.longitude);
             _userLocationLatLng = ll;
             unawaited(UserLocationCache.save(ll));
+            // Liste bu bildirimi dinler ve tesisleri mesafeye göre yeniden dizer.
             _mapLocationState.update(ll, true);
+            _resortOpenSearchByDistance();
           },
           onError: (_) {
             _stopLocationStream();
@@ -1428,6 +1425,11 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     try {
       if (!mounted) return;
       await _syncLocationUiFromPermissionOnly();
+      if (!mounted || _usableUserPoint(_userLocationLatLng)) return;
+      if (!await SimpleLocationService.isLocationGranted()) return;
+      final last = await Geolocator.getLastKnownPosition();
+      if (!mounted) return;
+      _adoptUserPosition(last);
     } catch (e, st) {
       debugPrint('Konum (arama hazırlık): $e\n$st');
     }
@@ -1477,26 +1479,36 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     try {
       final granted = await SimpleLocationService.isLocationGranted();
       if (!mounted) return;
+      var gpsOn = false;
+      if (granted) {
+        gpsOn = await Geolocator.isLocationServiceEnabled();
+        if (!mounted) return;
+      }
       if (!granted) {
         await UserLocationCache.clear();
         _userLocationLatLng = null;
-      } else if (_userLocationLatLng == null ||
-          !isValidWgs84LatLng(
-            _userLocationLatLng!.latitude,
-            _userLocationLatLng!.longitude,
-          )) {
+        _stopLocationStream();
+      } else if (!_usableUserPoint(_userLocationLatLng)) {
         // GPS kapalıyken eski önbellek yüklenmez; aksi halde eski mesafe görünür.
-        final gpsOn = await Geolocator.isLocationServiceEnabled();
-        if (!mounted) return;
         if (gpsOn) {
           final cached = await UserLocationCache.load();
           if (!mounted) return;
-          if (cached != null) _userLocationLatLng = cached;
+          if (cached != null &&
+              isUsableDeviceLocation(cached.latitude, cached.longitude)) {
+            _userLocationLatLng = cached;
+          }
         } else {
           _userLocationLatLng = null;
         }
       }
       if (!mounted) return;
+      // İzin ve GPS varsa akışı açık tut. Tek seferlik okuma zaman aşımına
+      // düşse bile sonraki düzeltme listeyi sıralar.
+      if (granted && gpsOn) {
+        _startLocationStream();
+      } else if (!gpsOn) {
+        _stopLocationStream();
+      }
       _mapLocationState.update(_userLocationLatLng, granted);
       setState(() {});
     } catch (e, st) {
@@ -1568,80 +1580,87 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     }
   }
 
+  bool _usableUserPoint(LatLng? ll) =>
+      ll != null && isUsableDeviceLocation(ll.latitude, ll.longitude);
+
+  void _adoptUserPosition(Position? pos) {
+    if (!mounted || pos == null) return;
+    if (!isUsableDeviceLocation(pos.latitude, pos.longitude)) return;
+    final ll = LatLng(pos.latitude, pos.longitude);
+    _userLocationLatLng = ll;
+    unawaited(UserLocationCache.save(ll));
+    _mapLocationState.update(ll, true);
+    _resortOpenSearchByDistance();
+    setState(() {});
+  }
+
+  /// Açık arama listesini güncel konuma göre yakından uzağa dizer.
+  void _resortOpenSearchByDistance() {
+    if (!_inlineTabbedSearchOpen) return;
+    final user = _userLocationLatLng;
+    if (!_usableUserPoint(user)) return;
+    final source = ref.read(searchPanelFacilitiesSourceProvider);
+    if (source.isEmpty) return;
+    final sorted = sortMisafirhaneByDistance(source, user);
+    if (sorted.length == source.length) {
+      var same = true;
+      for (var i = 0; i < sorted.length; i++) {
+        if (sorted[i].stableFacilityId != source[i].stableFacilityId) {
+          same = false;
+          break;
+        }
+      }
+      if (same) return;
+    }
+    ref.read(searchPanelFacilitiesSourceProvider.notifier).state =
+        List<Misafirhane>.unmodifiable(sorted);
+  }
+
   Future<void> _applyLocationAfterPermissionGranted() async {
     SimpleLocationService.clearSessionGpsSuppression();
 
-    // 1) Hızlı önizleme: lastKnown
+    // 1) Hızlı önizleme: lastKnown — liste hemen sıralanabilsin.
     try {
-      final last = await Geolocator.getLastKnownPosition();
-      if (last != null &&
-          isValidWgs84LatLng(last.latitude, last.longitude) &&
-          mounted) {
-        final ll = LatLng(last.latitude, last.longitude);
-        _userLocationLatLng = ll;
-        unawaited(UserLocationCache.save(ll));
-        if (await Geolocator.isLocationServiceEnabled()) {
-          _startLocationStream();
-        }
-        final granted = await SimpleLocationService.isLocationGranted();
-        if (mounted) {
-          _mapLocationState.update(ll, granted);
-          setState(() {});
-        }
-      }
+      _adoptUserPosition(await Geolocator.getLastKnownPosition());
     } catch (_) {}
+    if (!mounted) return;
 
-    // 2) Güncel GPS — GPS kapalı olsa bile dene (bazı cihazlarda sistem diyaloğu açılır).
-    try {
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: _kRotalinkLocationSettingsLow,
+    // 2) Güncel konum. Zaman aşımı akışı durdurmaz.
+    final fresh = await SimpleLocationService.currentPosition();
+    if (!mounted) return;
+    if (fresh != null) {
+      _adoptUserPosition(fresh);
+    } else if (!_usableUserPoint(_userLocationLatLng)) {
+      final fallback = await SimpleLocationService.currentPosition(
+        forceLocationManager: true,
       );
       if (!mounted) return;
-      if (isValidWgs84LatLng(pos.latitude, pos.longitude)) {
-        final ll = LatLng(pos.latitude, pos.longitude);
-        _userLocationLatLng = ll;
-        unawaited(UserLocationCache.save(ll));
-        _startLocationStream();
-        final granted = await SimpleLocationService.isLocationGranted();
-        if (mounted) {
-          _mapLocationState.update(ll, granted);
-          setState(() {});
-        }
-      }
-    } catch (_) {
-      if (_userLocationLatLng == null) {
-        _stopLocationStream();
-        if (mounted && !await Geolocator.isLocationServiceEnabled()) {
-          // GPS kapalı: kullanıcıya sor (otomatik ayar açma yok).
-          final go = await showDialog<bool>(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: const Text(AppStrings.locationServicesOffDialogTitle),
-              content: const Text(AppStrings.locationServicesOffDialogBody),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('İptal'),
+      if (fallback != null) {
+        _adoptUserPosition(fallback);
+      } else if (mounted && !await Geolocator.isLocationServiceEnabled()) {
+        if (!mounted) return;
+        final go = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text(AppStrings.locationServicesOffDialogTitle),
+            content: const Text(AppStrings.locationServicesOffDialogBody),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: const Text('İptal'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: const Text(
+                  AppStrings.locationServicesOffDialogOpenSettings,
                 ),
-                FilledButton(
-                  onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text(
-                    AppStrings.locationServicesOffDialogOpenSettings,
-                  ),
-                ),
-              ],
-            ),
-          );
-          if (go == true && mounted) {
-            _pendingLocationCheckAfterSettings = true;
-            await Geolocator.openLocationSettings();
-          }
-        } else if (mounted) {
-          _toast(context, AppStrings.locationServicesOffSnack);
-        }
-      } else {
-        if (await Geolocator.isLocationServiceEnabled()) {
-          _startLocationStream();
+              ),
+            ],
+          ),
+        );
+        if (go == true && mounted) {
+          _pendingLocationCheckAfterSettings = true;
+          await Geolocator.openLocationSettings();
         }
       }
     }
@@ -2034,12 +2053,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
       if (!mounted || !context.mounted) return;
       final granted = await SimpleLocationService.isLocationGranted();
       LatLng? userForSort;
-      if (granted &&
-          _userLocationLatLng != null &&
-          isValidWgs84LatLng(
-            _userLocationLatLng!.latitude,
-            _userLocationLatLng!.longitude,
-          )) {
+      if (granted && _usableUserPoint(_userLocationLatLng)) {
         userForSort = _userLocationLatLng;
       }
       if (!mounted || !context.mounted) return;

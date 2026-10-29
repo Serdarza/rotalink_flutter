@@ -103,4 +103,30 @@ class SimpleLocationService {
       return PermissionRequestOutcome.denied;
     }
   }
+
+  /// Güncel konum. Başarısızsa null; arama listesi bu yüzden kapanmaz.
+  /// Android yedek denemesi için [forceLocationManager] true verilir.
+  static Future<Position?> currentPosition({
+    bool forceLocationManager = false,
+  }) async {
+    try {
+      final LocationSettings settings =
+          forceLocationManager &&
+              !kIsWeb &&
+              defaultTargetPlatform == TargetPlatform.android
+          ? AndroidSettings(
+              accuracy: LocationAccuracy.low,
+              forceLocationManager: true,
+              timeLimit: const Duration(seconds: 12),
+            )
+          : const LocationSettings(
+              accuracy: LocationAccuracy.low,
+              timeLimit: Duration(seconds: 12),
+            );
+      return await Geolocator.getCurrentPosition(locationSettings: settings);
+    } catch (e, st) {
+      debugPrint('Rotalink konum okunamadı: $e\n$st');
+      return null;
+    }
+  }
 }

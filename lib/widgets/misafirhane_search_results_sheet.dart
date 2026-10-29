@@ -179,7 +179,7 @@ class MisafirhaneSearchResultsPanelState
     var ctx = rowKey.currentContext;
     if (ctx == null) {
       // Lazy list: satır henüz build edilmediyse yaklaşık ofsete git.
-      final facilities = ref.read(filteredTesisListProvider);
+      final facilities = _lodgingForDisplay(ref.read(filteredTesisListProvider));
       final idx = facilities.indexWhere(
         (f) => f.sameFavoriteIdentity(facility),
       );
@@ -754,6 +754,16 @@ class MisafirhaneSearchResultsPanelState
     return cached;
   }
 
+  /// Yakınlık sırası. Fiyat sıralaması açıkken dokunulmaz.
+  /// Konum sonradan gelince [MapLocationState] dinleyicisi listeyi yeniden kurar.
+  List<Misafirhane> _lodgingForDisplay(List<Misafirhane> facilities) {
+    if (_sortByPrice && PriceAccess.unlocked) return facilities;
+    return sortMisafirhaneByDistance(
+      facilities,
+      widget.mapLocationState.userLocation,
+    );
+  }
+
   double _distanceMetersToUser(LatLng? point) {
     final u = widget.mapLocationState.userLocation;
     if (u == null || point == null) return double.infinity;
@@ -763,7 +773,7 @@ class MisafirhaneSearchResultsPanelState
 
   List<GeziYemekItem> _sortedGezi(List<GeziYemekItem> list) {
     final u = widget.mapLocationState.userLocation;
-    if (u == null || !isValidWgs84LatLng(u.latitude, u.longitude)) {
+    if (u == null || !isUsableDeviceLocation(u.latitude, u.longitude)) {
       return List<GeziYemekItem>.from(list);
     }
     final keyed = <({GeziYemekItem g, double d})>[];
@@ -776,7 +786,7 @@ class MisafirhaneSearchResultsPanelState
 
   List<SosyalItem> _sortedSosyal(List<SosyalItem> list) {
     final u = widget.mapLocationState.userLocation;
-    if (u == null || !isValidWgs84LatLng(u.latitude, u.longitude)) {
+    if (u == null || !isUsableDeviceLocation(u.latitude, u.longitude)) {
       return List<SosyalItem>.from(list);
     }
     final keyed = <({SosyalItem s, double d})>[];
@@ -1307,7 +1317,10 @@ class MisafirhaneSearchResultsPanelState
   List<Widget> _tabSlivers(BuildContext context) {
     switch (_tabIndex) {
       case 0:
-        return _tesisTabSlivers(context, ref.watch(filteredTesisListProvider));
+        return _tesisTabSlivers(
+          context,
+          _lodgingForDisplay(ref.watch(filteredTesisListProvider)),
+        );
       case 1:
         return _geziTabSlivers(context, _sortedGezi(_geziShown));
       case 2:
