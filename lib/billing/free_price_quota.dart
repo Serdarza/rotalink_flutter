@@ -12,6 +12,10 @@ class FreePriceQuota {
   static final FreePriceQuota instance = FreePriceQuota._();
 
   static const int limit = 1;
+
+  /// Hak bitince tesis kartı, uyarı ve kayıt reddi aynı cümleyi gösterir.
+  static const String exhaustedLabel =
+      "Ücretsiz hakkınız kalmadı. Pro'ya geçin.";
   static const String _keyFacilities = 'rotalink_free_price_facilities';
   static const String _keyExhausted = 'rotalink_free_price_exhausted';
 
@@ -47,7 +51,7 @@ class FreePriceQuota {
   Future<String?> unlock(String facilityId) async {
     await initialize();
     if (contains(facilityId)) return null;
-    if (remaining == 0) return 'Ücretsiz $limit tesis hakkınızı kullandınız.';
+    if (remaining == 0) return exhaustedLabel;
     if (_claiming) return 'İşlem sürüyor, lütfen bekleyin.';
     _claiming = true;
     try {
@@ -65,7 +69,7 @@ class FreePriceQuota {
           _exhausted = true;
           unlockedIds.value = List.unmodifiable(unlockedIds.value);
           await _save((p) => p.setBool(_keyExhausted, true));
-          return 'Bu cihazda ücretsiz $limit tesis hakkı daha önce kullanıldı.';
+          return exhaustedLabel;
         case FreePassClaim.unavailable:
           return 'Fiyat açılamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.';
       }
