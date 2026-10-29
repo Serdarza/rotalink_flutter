@@ -1,7 +1,7 @@
 /// Tesis fiyat UI metinleri (fiyat değerleri GitHub tesis JSON'undan gelir).
 abstract final class FacilityPricing {
   static const note =
-      'En güncel fiyat bilgisini tesisten öğrenebilirsiniz.';
+      'Ücretler kurum tarafından değiştirilebilir. Güncel fiyatı ilgili tesisten teyit ediniz.';
 
   static const unavailableLabel = 'Kalamaz';
 
@@ -16,6 +16,10 @@ abstract final class FacilityPricing {
   static const sivilLabel = 'Sivil misafir';
   static const kamuLabel = 'Kamu personeli';
   static const kurumLabel = 'Kurum personeli';
+
+  static const pricesLoading = 'Fiyatlar yükleniyor';
+  static const pricesLoadFailed = 'Fiyatlar yüklenemedi';
+  static const pricesRetry = 'Yeniden dene';
 
   static const missingPriceTitle = 'Ücret bilgisi kayıtlı değil';
   static const missingPriceBody =
@@ -43,6 +47,11 @@ abstract final class FacilityPricing {
       'Harita, arama ve tesis bilgileri ücretsiz kullanılmaya devam eder.';
   static const unlockWithProButton = 'Rotalink Pro’ya geç';
 
+  /// Kalan ücretsiz fiyat hakkı. Sayı çağıran kotadan gelir.
+  static String freeRightsButton(int remaining) => remaining <= 0
+      ? 'Hakkınız Bitti, Pro ile Devam Edin'
+      : '$remaining Ücretsiz Hakkınız Var';
+
   static const bestValueTitle = 'Bu aramada en uygun konaklama';
   static String bestValueTitleIl(String il) => '$il için en uygun konaklama';
   static const bestValueSingleTitle = 'Fiyatı görülebilen konaklama';
@@ -50,6 +59,7 @@ abstract final class FacilityPricing {
   static String bestValueCompared(int n) =>
       'Fiyatı resmî kaynaktan doğrulanmış $n tesis arasında';
   static const bestValueCta = 'Pro ile en uygun fiyatı gör';
+  static const bestValueOpenWithRight = 'Fiyatı hakkımla aç';
   static const bestValueOpen = 'Tesisi incele';
 
   static const sortDistance = 'Yakınlık';

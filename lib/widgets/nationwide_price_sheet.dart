@@ -83,6 +83,7 @@ class _NationwidePriceSheetState extends State<_NationwidePriceSheet> {
   void initState() {
     super.initState();
     ProService.instance.isPro.addListener(_refresh);
+    FacilityPriceRepository.instance.updates.addListener(_refresh);
     _location.addListener(_refresh);
     unawaited(_loadFavorites());
     unawaited(_hydrateLocation(request: false));
@@ -91,6 +92,7 @@ class _NationwidePriceSheetState extends State<_NationwidePriceSheet> {
   @override
   void dispose() {
     ProService.instance.isPro.removeListener(_refresh);
+    FacilityPriceRepository.instance.updates.removeListener(_refresh);
     _location.removeListener(_refresh);
     _location.dispose();
     super.dispose();

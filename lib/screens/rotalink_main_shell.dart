@@ -20,6 +20,7 @@ import '../widgets/pro_support_banner.dart';
 import '../widgets/rotalink_glass_bottom_nav.dart';
 import '../widgets/feedback_report_button.dart';
 import 'nearby_guesthouses_screen.dart';
+import 'location_discovery_screen.dart';
 import 'about_screen.dart';
 import 'discover_screen.dart';
 import 'favorites_hub_screen.dart';
@@ -50,6 +51,8 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   bool _showDashboard = true;
   bool _showSearchHub = false;
   bool _showFavoritesHub = false;
+  bool _returnToSearchHubOnSearchBack = false;
+  int _surfaceEpoch = 0;
 
   Timer? _proSupportTimer;
   bool _showProSupportBanner = false;
@@ -170,7 +173,26 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
 
   NavigatorState? get _bodyNav => rotalinkShellBodyNavigatorKey.currentState;
 
+  int _bumpSurface() => ++_surfaceEpoch;
+
+  bool _surfaceCurrent(int epoch) => mounted && epoch == _surfaceEpoch;
+
+  /// Ara seçiliyken sonuçsuz kalan eski haritayı kapatır.
+  void _returnToSearchHub() {
+    if (!mounted || _selected != RotalinkBottomNavItem.search) return;
+    if (_navBridge.hasActiveOverlay?.call() ?? false) return;
+    if (_showSearchHub) return;
+    _bumpSurface();
+    setState(() {
+      _showDashboard = false;
+      _showSearchHub = true;
+      _showFavoritesHub = false;
+    });
+  }
+
   void _goHome() {
+    _bumpSurface();
+    _returnToSearchHubOnSearchBack = false;
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() {
       _selected = RotalinkBottomNavItem.home;
@@ -182,16 +204,11 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     _navBridge.resetToHome?.call();
   }
 
-  void _openMap() {
-    unawaited(RotalinkSystemUi.applyEdgeToEdge());
-    unawaited(
-      _openMapSurface(() async {
-        _navBridge.resetToHome?.call();
-      }, selected: RotalinkBottomNavItem.home),
-    );
-  }
+  void _openMap() => _openRoutePlan();
 
   void _openFavorites() {
+    _bumpSurface();
+    _returnToSearchHubOnSearchBack = false;
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() {
       _selected = RotalinkBottomNavItem.favorites;
@@ -202,14 +219,16 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   }
 
   void _openFavoritesOnMap() {
+    final epoch = _bumpSurface();
+    _returnToSearchHubOnSearchBack = false;
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
     unawaited(() async {
       await _ensureMapReady();
-      if (!mounted) return;
+      if (!mounted || epoch != _surfaceEpoch) return;
       final ctx = _bodyNav?.context;
-      if (ctx == null) return;
+      if (ctx == null || !ctx.mounted) return;
       await _navBridge.openFavorites?.call(ctx);
-      if (!mounted) return;
+      if (!_surfaceCurrent(epoch)) return;
       setState(() {
         _selected = RotalinkBottomNavItem.favorites;
         _showDashboard = false;
@@ -220,6 +239,8 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   }
 
   void _openSearch() {
+    _bumpSurface();
+    _returnToSearchHubOnSearchBack = false;
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() {
       _selected = RotalinkBottomNavItem.search;
@@ -241,19 +262,61 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     );
   }
 
+  void _submitSearchHubCityQuery(String query) {
+    _returnToSearchHubOnSearchBack = true;
+    _submitSearchQuery(query);
+  }
+
+  void _openNearbyFromSearchHub() {
+    _returnToSearchHubOnSearchBack = false;
+    final nav = _bodyNav;
+    if (nav == null) return;
+    final epoch = _bumpSurface();
+    setState(() => _selected = RotalinkBottomNavItem.search);
+    unawaited(() async {
+      final opened = nav.pushNamed(RotalinkShellRoutes.nearby);
+      for (var i = 0; i < 30 && _surfaceCurrent(epoch); i++) {
+        if (_currentRouteName(nav) == RotalinkShellRoutes.nearby) break;
+        await WidgetsBinding.instance.endOfFrame;
+      }
+      if (!_surfaceCurrent(epoch)) return;
+      if (_currentRouteName(nav) != RotalinkShellRoutes.nearby) return;
+      setState(() {
+        _showDashboard = false;
+        _showSearchHub = false;
+        _showFavoritesHub = false;
+      });
+      await opened;
+      if (!_surfaceCurrent(epoch)) return;
+      setState(() {
+        _selected = RotalinkBottomNavItem.search;
+        _showDashboard = false;
+        _showSearchHub = true;
+        _showFavoritesHub = false;
+      });
+    }());
+  }
+
   void _openRoutePlan() {
+    _returnToSearchHubOnSearchBack = false;
+    final epoch = _bumpSurface();
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() => _selected = RotalinkBottomNavItem.route);
     // Kampanya açıkken popUntil anasayfayı bir kare gösterir; rota sayfası
     // üst sayfanın yerine konur ([pushOrReplaceOnShellNavigator]).
     unawaited(() async {
       await _ensureMapReady();
-      if (!mounted) return;
-      await _revealAfterRoutePush(_navBridge.openRoutePlan?.call());
+      if (!_surfaceCurrent(epoch)) return;
+      await _revealAfterRoutePush(
+        _bodyNav?.pushNamed(RotalinkShellRoutes.locationDiscovery),
+        epoch: epoch,
+      );
     }());
   }
 
   void _openDiscoverTab() {
+    _returnToSearchHubOnSearchBack = false;
+    final epoch = _bumpSurface();
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
     setState(() => _selected = RotalinkBottomNavItem.discover);
     final nav = _bodyNav;
@@ -267,7 +330,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
         (route) => route.settings.name == RotalinkShellRoutes.home,
       );
     }
-    unawaited(_revealAfterRoutePush(null));
+    unawaited(_revealAfterRoutePush(null, epoch: epoch));
   }
 
   Future<void> _openKami() async {
@@ -303,25 +366,32 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     Future<void> Function() work, {
     required RotalinkBottomNavItem selected,
   }) async {
+    final epoch = _bumpSurface();
     setState(() => _selected = selected);
     _bodyNav?.popUntil((route) => route.isFirst);
     await _ensureMapReady();
+    if (!_surfaceCurrent(epoch)) return;
     await work();
     await WidgetsBinding.instance.endOfFrame;
-    if (!mounted) return;
+    if (!_surfaceCurrent(epoch)) return;
+    final idleOnSearch = selected == RotalinkBottomNavItem.search &&
+        !(_navBridge.hasActiveOverlay?.call() ?? false);
     setState(() {
       _showDashboard = false;
-      _showSearchHub = false;
       _showFavoritesHub = false;
+      _showSearchHub = idleOnSearch;
     });
   }
 
   /// Tam sayfa rota Navigator'da belirdikten sonra overlay'i kaldır.
-  Future<void> _revealAfterRoutePush(Future<void>? pending) async {
+  Future<void> _revealAfterRoutePush(
+    Future<void>? pending, {
+    required int epoch,
+  }) async {
     await WidgetsBinding.instance.endOfFrame;
     // Sayfa kayma animasyonu bitmeden overlay kalkarsa eski harita görünür.
     await Future<void>.delayed(const Duration(milliseconds: 320));
-    if (!mounted) return;
+    if (!_surfaceCurrent(epoch)) return;
     setState(() {
       _showDashboard = false;
       _showSearchHub = false;
@@ -330,12 +400,25 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
     if (pending != null) await pending;
   }
 
+  String? _currentRouteName(NavigatorState nav) {
+    String? name;
+    nav.popUntil((route) {
+      name = route.settings.name;
+      return true;
+    });
+    return name;
+  }
+
   Future<void> _handleShellBack() async {
     if (!mounted) return;
 
     // Üst sayfa (yorum, karşılaştırma, keşfet vb.) → bir adım geri.
     final nav = _bodyNav;
     if (nav != null && nav.canPop()) {
+      final onMap = _currentRouteName(nav) == RotalinkShellRoutes.locationDiscovery;
+      if (onMap && LocationDiscoveryScreen.tryConsumeBack?.call() == true) {
+        return;
+      }
       // Keşfet tam sayfa sekmedir; son rota kapanınca ana menüye dön.
       // Arama/favori/rota harita üstündedir — Yorum/karşılaştır kapanınca
       // listeyi bozma.
@@ -369,6 +452,17 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
         final handler = _navBridge.handleSystemBack;
         if (handler != null) {
           await handler();
+          if (!mounted) return;
+          if (_returnToSearchHubOnSearchBack &&
+              !(_navBridge.hasActiveOverlay?.call() ?? false)) {
+            _returnToSearchHubOnSearchBack = false;
+            setState(() {
+              _selected = RotalinkBottomNavItem.search;
+              _showDashboard = false;
+              _showSearchHub = true;
+              _showFavoritesHub = false;
+            });
+          }
           return;
         }
       }
@@ -388,6 +482,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   }
 
   void _openCategory(int tabIndex) {
+    _returnToSearchHubOnSearchBack = false;
     unawaited(RotalinkSystemUi.applyEdgeToEdge());
     unawaited(
       _openMapSurface(() async {
@@ -401,7 +496,11 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
   Future<void> _openDashboardRoute(String routeName) async {
     final nav = _bodyNav;
     if (nav == null) return;
-    await _revealAfterRoutePush(nav.pushNamed(routeName));
+    final epoch = _bumpSurface();
+    await _revealAfterRoutePush(nav.pushNamed(routeName), epoch: epoch);
+    if (!_surfaceCurrent(epoch) || _selected != RotalinkBottomNavItem.home) {
+      return;
+    }
     if (!mounted || _selected != RotalinkBottomNavItem.home) return;
     setState(() {
       _showDashboard = true;
@@ -445,6 +544,12 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
             ),
           ),
         );
+      case RotalinkShellRoutes.locationDiscovery:
+        return MaterialPageRoute<void>(
+          settings: settings,
+          builder: (_) =>
+              LocationDiscoveryScreen(repository: widget.repository),
+        );
       case RotalinkShellRoutes.winterDiscover:
         return MaterialPageRoute<void>(
           settings: settings,
@@ -458,7 +563,9 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
       case RotalinkShellRoutes.pro:
         return MaterialPageRoute<void>(
           settings: settings,
-          builder: (_) => const ProScreen(),
+          builder: (_) => ProScreen(
+            closeWhenPurchased: settings.arguments == true,
+          ),
         );
       case RotalinkShellRoutes.home:
       default:
@@ -495,6 +602,7 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
       },
       child: RotalinkShellScope(
         goHome: _goHome,
+        returnToSearchHub: _returnToSearchHub,
         selectTab: (tab) {
           switch (tab) {
             case RotalinkBottomNavItem.home:
@@ -525,7 +633,9 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
                   ? null
                   : ValueListenableBuilder<String>(
                       valueListenable: _feedbackPage,
-                      builder: (context, page, _) => FeedbackReportButton(
+                      builder: (context, page, _) => page == 'konum-facility'
+                          ? const SizedBox.shrink()
+                          : FeedbackReportButton(
                         sourcePage: _showDashboard
                             ? 'Ana Sayfa'
                             : _showSearchHub
@@ -574,7 +684,8 @@ class _RotalinkMainShellState extends State<RotalinkMainShell> {
                         repository: widget.repository,
                         onBack: _goHome,
                         onQuery: _submitSearchQuery,
-                        onCategory: _openCategory,
+                        onCitySelected: _submitSearchHubCityQuery,
+                        onNearby: _openNearbyFromSearchHub,
                       ),
                     ),
                   if (_showFavoritesHub)

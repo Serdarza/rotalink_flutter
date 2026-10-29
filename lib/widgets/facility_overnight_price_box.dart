@@ -3,6 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../billing/free_price_quota.dart';
+import '../billing/premium_account_bridge.dart';
+import '../billing/premium_auth_service.dart';
+import '../billing/premium_presentation.dart';
+import '../billing/premium_price_access.dart';
 import '../billing/price_access.dart';
 import '../billing/pro_service.dart';
 import '../constants/facility_pricing.dart';
@@ -52,12 +56,21 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
     super.initState();
     ProService.instance.isPro.addListener(_onProChanged);
     FreePriceQuota.instance.unlockedIds.addListener(_onProChanged);
+    PremiumPriceAccess.instance.unlockedIds.addListener(_onProChanged);
+    ServerPremiumAccountBridge.instance.addListener(_onProChanged);
+    FacilityPriceRepository.instance.updates.addListener(_onProChanged);
+    if (!FacilityPriceRepository.instance.isReady) {
+      unawaited(FacilityPriceRepository.instance.ensureLocalDataReady());
+    }
   }
 
   @override
   void dispose() {
     ProService.instance.isPro.removeListener(_onProChanged);
     FreePriceQuota.instance.unlockedIds.removeListener(_onProChanged);
+    PremiumPriceAccess.instance.unlockedIds.removeListener(_onProChanged);
+    ServerPremiumAccountBridge.instance.removeListener(_onProChanged);
+    FacilityPriceRepository.instance.updates.removeListener(_onProChanged);
     super.dispose();
   }
 
@@ -118,6 +131,196 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
         ),
       ),
     );
+  }
+
+  bool get _signedIn {
+    final user = PremiumAuthService.instance.currentUser;
+    return user != null && !user.isAnonymous;
+  }
+
+  PremiumAccountSnapshot? get _account =>
+      ServerPremiumAccountBridge.instance.account;
+
+  bool get _paidPlan {
+    final account = _account;
+    if (account?.plan == null) return false;
+    return account!.status == PremiumSubscriptionStatus.active ||
+        account.status == PremiumSubscriptionStatus.renewalOff;
+  }
+
+  int get _freeRemaining {
+    if (_signedIn) {
+      return _account?.priceUsage?.remaining ??
+          FreePriceQuota.instance.remaining;
+    }
+    return FreePriceQuota.instance.remaining;
+  }
+
+  void _openWithRight() {
+    unawaited(_signedIn ? _unlockWithAccount() : _unlockWithFreeQuota());
+  }
+
+  String get _lockTitle {
+    if (_paidPlan) {
+      final left = _account?.priceUsage?.remaining;
+      if (left == 0) return 'Bu dönemin fiyat hakkı doldu';
+      return '${_account!.plan!.label} Pro';
+    }
+    if (_freeRemaining > 0) {
+      return _freeRemaining == 1
+          ? '1 ücretsiz fiyat hakkınız var'
+          : '$_freeRemaining ücretsiz fiyat hakkınız var';
+    }
+    return 'Ücretsiz fiyat hakkınız doldu';
+  }
+
+  String get _lockBody {
+    if (_paidPlan) {
+      final quota = _account?.priceUsage;
+      if (quota == null) {
+        return 'Paketinizin fiyat hakkıyla bu tesisin ücretini açabilirsiniz.';
+      }
+      if (quota.remaining == 0) {
+        return 'Dönem yenilenince haklar yeniden açılır. Daha fazla tesis için paketinizi yükseltebilirsiniz.';
+      }
+      return 'Bu dönemde ${quota.remaining} fiyat hakkınız kaldı. Ücreti görmek için bu tesisi açın.';
+    }
+    if (_freeRemaining > 0) {
+      return 'Bu tesisin ücretini ücretsiz hakkınızla açabilir veya daha fazlası için Pro’ya geçebilirsiniz.';
+    }
+    return 'Konaklama ücretlerini görmek için Pro’ya geçin.';
+  }
+
+  void _lockPreviewTap() {
+    if (_paidPlan) {
+      final left = _account?.priceUsage?.remaining;
+      if (left == 0) {
+        unawaited(_openPro());
+      } else {
+        _openWithRight();
+      }
+      return;
+    }
+    if (_freeRemaining > 0) {
+      _openWithRight();
+      return;
+    }
+    unawaited(_openPro());
+  }
+
+  List<Widget> _lockActions(Color muted) {
+    final buttonText = const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700);
+    final filled = FilledButton.styleFrom(
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      textStyle: buttonText,
+    );
+    final outlined = OutlinedButton.styleFrom(
+      foregroundColor: AppColors.primary,
+      side: BorderSide(color: AppColors.primary.withValues(alpha: 0.45)),
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      textStyle: buttonText,
+    );
+    if (_paidPlan) {
+      final quota = _account?.priceUsage;
+      if (quota != null && quota.remaining == 0) {
+        return [
+          FilledButton(
+            onPressed: () => unawaited(_openPro()),
+            style: filled,
+            child: const Text('Paketleri incele'),
+          ),
+        ];
+      }
+      return [
+        FilledButton(
+          onPressed: _unlocking ? null : _openWithRight,
+          style: filled,
+          child: _unlocking
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text('Ücreti görmek için aç'),
+        ),
+        if (quota != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'Kalan hak ${quota.remaining} / ${quota.total}',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: muted,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+      ];
+    }
+    if (_freeRemaining > 0) {
+      return [
+        FilledButton(
+          onPressed: _unlocking ? null : _openWithRight,
+          style: filled,
+          child: _unlocking
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(FacilityPricing.freeRightsButton(_freeRemaining)),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton(
+          onPressed: () => unawaited(_openPro()),
+          style: outlined,
+          child: const Text('Pro’ya geç'),
+        ),
+      ];
+    }
+    return [
+      FilledButton(
+        onPressed: () => unawaited(_openPro()),
+        style: filled,
+        child: Text(FacilityPricing.freeRightsButton(0)),
+      ),
+    ];
+  }
+
+  Future<void> _unlockWithAccount() async {
+    setState(() => _unlocking = true);
+    final result = await PremiumPriceAccess.instance.claim(
+      facilityId: widget.facility.stableFacilityId,
+      il: widget.facility.il,
+      isim: widget.facility.isim,
+    );
+    if (!mounted) return;
+    setState(() => _unlocking = false);
+    if (result.limitReached) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.message ?? 'Fiyat görüntüleme hakkınız doldu.'),
+        ),
+      );
+      await _openPro();
+      return;
+    }
+    if (result.message != null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(result.message!)));
+    }
   }
 
   Future<void> _openPro() async {
@@ -197,7 +400,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
             const SizedBox(height: 8),
             Text(
               FacilityPricing.note,
-              style: TextStyle(fontSize: 11, color: AppColors.textMutedOf(ctx)),
+              style: const TextStyle(fontSize: 11, color: Color(0xFFD32F2F)),
             ),
           ],
         ),
@@ -242,6 +445,68 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
     final titleColor = isDark
         ? Colors.white.withValues(alpha: 0.92)
         : AppColors.textStrongOf(context);
+
+    final prices = FacilityPriceRepository.instance;
+    if (!prices.isReady) {
+      return Padding(
+        padding: EdgeInsets.only(top: widget.topSpacing),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: surface,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: border),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+            child: prices.loadFailed
+                ? Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        FacilityPricing.pricesLoadFailed,
+                        style: TextStyle(
+                          color: titleColor,
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      FilledButton(
+                        onPressed: () => unawaited(
+                          prices.ensureLocalDataReady(),
+                        ),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: const Text(FacilityPricing.pricesRetry),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          FacilityPricing.pricesLoading,
+                          style: TextStyle(
+                            color: titleColor,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+      );
+    }
 
     if (!priced.hasFiyatBilgisi) {
       return Padding(
@@ -341,109 +606,20 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Icon(
-                        Icons.lock_outline_rounded,
-                        size: 20,
-                        color: AppColors.primary.withValues(alpha: 0.9),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            FacilityPricing.lockedTitle,
-                            style: TextStyle(
-                              color: titleColor,
-                              fontSize: 13.5,
-                              fontWeight: FontWeight.w700,
-                              height: 1.25,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            FacilityPricing.lockedBody,
-                            style: TextStyle(
-                              color: labelColor,
-                              fontSize: 12.5,
-                              height: 1.4,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                _PriceLockHeader(
+                  title: _lockTitle,
+                  body: _lockBody,
+                  titleColor: titleColor,
+                  bodyColor: labelColor,
                 ),
                 const SizedBox(height: 12),
                 _ProPreview(
                   facility: priced,
-                  onTap: () => unawaited(_openPro()),
+                  includesTitle: 'Ücreti açınca görecekleriniz',
+                  onTap: _lockPreviewTap,
                 ),
                 const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: () => unawaited(_openPro()),
-                  icon: const Icon(Icons.workspace_premium_outlined, size: 20),
-                  label: const Text(FacilityPricing.unlockWithProButton),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                if (FreePriceQuota.instance.remaining > 0)
-                  TextButton.icon(
-                    onPressed: _unlocking
-                        ? null
-                        : () => unawaited(_unlockWithFreeQuota()),
-                    icon: _unlocking
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.lock_open_rounded, size: 18),
-                    label: Text(
-                      'Bu tesisin fiyatını ücretsiz gör '
-                      '(${FreePriceQuota.instance.remaining}/${FreePriceQuota.limit} hak)',
-                    ),
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      textStyle: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  )
-                else
-                  Text(
-                    'Ücretsiz ${FreePriceQuota.limit} tesis hakkınızı kullandınız.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: labelColor,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                ..._lockActions(labelColor),
               ],
             ),
           ),
@@ -525,8 +701,8 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
               const SizedBox(height: 4),
               Text(
                 FacilityPricing.note,
-                style: TextStyle(
-                  color: labelColor,
+                style: const TextStyle(
+                  color: Color(0xFFD32F2F),
                   fontSize: 11.5,
                   height: 1.35,
                 ),
@@ -896,11 +1072,79 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
 
 /// Kilitli durumda: tesisin gerçek tarife yapısı + maskeli tutarlar
 /// ve Pro ile açılacak içeriğin veriden türetilmiş özeti.
+class _PriceLockHeader extends StatelessWidget {
+  const _PriceLockHeader({
+    required this.title,
+    required this.body,
+    required this.titleColor,
+    required this.bodyColor,
+  });
+
+  final String title;
+  final String body;
+  final Color titleColor;
+  final Color bodyColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            Icons.lock_outline_rounded,
+            size: 20,
+            color: AppColors.primary.withValues(alpha: 0.9),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: titleColor,
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  height: 1.25,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                body,
+                style: TextStyle(
+                  color: bodyColor,
+                  fontSize: 12.5,
+                  height: 1.4,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ProPreview extends StatelessWidget {
-  const _ProPreview({required this.facility, required this.onTap});
+  const _ProPreview({
+    required this.facility,
+    required this.onTap,
+    this.includesTitle = FacilityPricing.proIncludesTitle,
+  });
 
   final Misafirhane facility;
   final VoidCallback onTap;
+  final String includesTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -1026,7 +1270,7 @@ class _ProPreview extends StatelessWidget {
         if (perks.isNotEmpty) ...[
           const SizedBox(height: 10),
           Text(
-            FacilityPricing.proIncludesTitle,
+            includesTitle,
             style: TextStyle(
               color: titleColor,
               fontSize: 12.5,

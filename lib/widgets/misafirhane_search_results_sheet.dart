@@ -23,7 +23,6 @@ import '../data/firebase_rota_repository.dart';
 import '../data/gezi_yemek_repository.dart';
 import '../data/hediyelik_repository.dart';
 import '../data/kamp_repository.dart';
-import '../data/sosyal_menu_repository.dart';
 import '../models/gezi_yemek_item.dart';
 import '../models/misafirhane.dart';
 import '../models/sosyal_item.dart';
@@ -46,7 +45,6 @@ import 'best_value_pro_card.dart';
 import 'facility_compare_widgets.dart';
 import 'facility_detail_card.dart';
 import 'facility_location_filter_bar.dart';
-import 'sosyal_menu_sheet.dart';
 import 'search_results_ui.dart';
 
 /// Kotlin [MisafirhaneBottomSheet] (arama modu): Tesis / Gezi / Yemek / Sosyal sekmeleri.
@@ -260,6 +258,10 @@ class MisafirhaneSearchResultsPanelState
   void initState() {
     super.initState();
     ProService.instance.isPro.addListener(_onProChanged);
+    FacilityPriceRepository.instance.updates.addListener(_onProChanged);
+    if (!FacilityPriceRepository.instance.isReady) {
+      unawaited(FacilityPriceRepository.instance.ensureLocalDataReady());
+    }
     FacilityCompareSelection.instance.addListener(_onCompareChanged);
     widget.mapLocationState.addListener(_onMapLocationChanged);
     HediyelikRepository.instance.byIl.addListener(_onHediyelikChanged);
@@ -335,6 +337,7 @@ class MisafirhaneSearchResultsPanelState
     _listScroll?.dispose();
     _listScroll = null;
     ProService.instance.isPro.removeListener(_onProChanged);
+    FacilityPriceRepository.instance.updates.removeListener(_onProChanged);
     FacilityCompareSelection.instance.removeListener(_onCompareChanged);
     widget.mapLocationState.removeListener(_onMapLocationChanged);
     HediyelikRepository.instance.byIl.removeListener(_onHediyelikChanged);
@@ -879,7 +882,7 @@ class MisafirhaneSearchResultsPanelState
             _geocodeMissGeziYemek.add(r.key);
             changed = true;
           case GeocodeStatus.error:
-            // Sonra tekrar dene; UI'da "Mesafe hesaplanıyor" kalsın.
+            _geocodeMissGeziYemek.add(r.key);
             break;
         }
       }
@@ -932,6 +935,7 @@ class MisafirhaneSearchResultsPanelState
             _geocodeMissSosyal.add(r.key);
             changed = true;
           case GeocodeStatus.error:
+            _geocodeMissSosyal.add(r.key);
             break;
         }
       }
@@ -1307,11 +1311,6 @@ class MisafirhaneSearchResultsPanelState
                             ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      FacilityLocationFilterBar(
-                        allFacilities: _allSearchFacilities,
-                        onSelectIl: widget.onSelectIl,
-                      ),
                       const SizedBox(height: 16),
                       OutlinedButton(
                         onPressed: () {
@@ -1319,10 +1318,6 @@ class MisafirhaneSearchResultsPanelState
                                   .read(facilityTypeFilterProvider.notifier)
                                   .state =
                               kFacilityFilterAll;
-                          sheetRef
-                                  .read(facilityIlceFilterProvider.notifier)
-                                  .state =
-                              null;
                           updateSheet(() {});
                         },
                         child: const Text('Filtreleri Temizle'),
@@ -1960,7 +1955,6 @@ class MisafirhaneSearchResultsPanelState
     final ilce = _sosyalIlceLine(s);
     final aciklama = s.aciklama.trim();
     final ll = _latLngSosyal(s);
-    final menu = SosyalMenuRepository.instance.lookup(s.il, s.isim);
     return _rowCard(
       child: InkWell(
         onTap: () => unawaited(openMapSearch(context, s.il, s.isim)),
@@ -2028,33 +2022,13 @@ class MisafirhaneSearchResultsPanelState
                 facilityPoint: ll,
                 spacingAbove: 10,
               ),
-              if (menu != null) ...[
-                const SizedBox(height: 10),
-                Text(
-                  '${menu.tesisMenusu ? 'Menü' : 'Belediye tarifesi'}: '
-                  '${menu.urunSayisi} ürün · ${sosyalMenuKaynakSatiri(menu)}',
-                  style: const TextStyle(
-                    color: Color(0xFF6B7C82),
-                    fontSize: 12,
-                    height: 1.3,
-                  ),
-                ),
-              ],
               const SizedBox(height: 12),
               AraActionRow(
                 children: [
-                  if (menu != null)
-                    _sosyalActionChip(
-                      icon: Icons.restaurant_menu_rounded,
-                      label: 'Menü',
-                      primary: true,
-                      onTap: () =>
-                          unawaited(showSosyalMenuSheet(context, menu)),
-                    ),
                   _sosyalActionChip(
                     icon: Icons.map_outlined,
                     label: 'Harita',
-                    primary: menu == null,
+                    primary: true,
                     onTap: () =>
                         unawaited(openMapSearch(context, s.il, s.isim)),
                   ),
@@ -2136,14 +2110,9 @@ class MisafirhaneSearchResultsPanelState
 
 /// Eşleşen liste satırında yumuşak, yavaş sarı vurgu.
 class _SearchHighlightFlash extends StatefulWidget {
-  const _SearchHighlightFlash({
-    super.key,
-    required this.child,
-    this.totalMs = 7000,
-  });
+  const _SearchHighlightFlash({super.key, required this.child});
 
   final Widget child;
-  final int totalMs;
 
   @override
   State<_SearchHighlightFlash> createState() => _SearchHighlightFlashState();
@@ -2158,7 +2127,7 @@ class _SearchHighlightFlashState extends State<_SearchHighlightFlash>
     super.initState();
     _c = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: widget.totalMs),
+      duration: const Duration(milliseconds: 7000),
     )..forward();
   }
 

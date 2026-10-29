@@ -468,7 +468,7 @@ void main() {
               repository: SearchRepository(),
               onBack: () => home++,
               onQuery: (_) => queries++,
-              onCategory: (_) {},
+              onNearby: () {},
             ),
           ),
         ),

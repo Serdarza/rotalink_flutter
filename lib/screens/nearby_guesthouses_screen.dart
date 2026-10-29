@@ -52,11 +52,16 @@ class _NearbyGuesthousesScreenState extends State<NearbyGuesthousesScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    FacilityPriceRepository.instance.updates.addListener(_onPrices);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) unawaited(_locate(requestPermission: true));
     });
     unawaited(_prepareAddresses());
     unawaited(_preparePrices());
+  }
+
+  void _onPrices() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _preparePrices() async {
@@ -82,6 +87,7 @@ class _NearbyGuesthousesScreenState extends State<NearbyGuesthousesScreen>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    FacilityPriceRepository.instance.updates.removeListener(_onPrices);
     super.dispose();
   }
 

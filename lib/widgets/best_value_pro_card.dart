@@ -1,7 +1,13 @@
+import 'dart:async';
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
+import '../billing/free_price_quota.dart';
+import '../billing/premium_account_bridge.dart';
+import '../billing/premium_auth_service.dart';
+import '../billing/premium_presentation.dart';
+import '../billing/premium_price_access.dart';
 import '../billing/price_access.dart';
 import '../billing/pro_service.dart';
 import '../constants/facility_pricing.dart';
@@ -15,9 +21,15 @@ const _goldDeep = Color(0xFFB8860B);
 const _tealDark = Color(0xFF00566B);
 
 /// Arama sonuçlarının en üstünde: fiyatı doğrulanmış en uygun konaklama.
-/// Pro değilse tesis adı ve tutar bulanık; dokununca Pro ekranı açılır.
-/// Pro ise gerçek tesis ve tutar görünür; dokununca [onOpenFacility].
-class BestValueProCard extends StatelessWidget {
+///
+/// Erişim üç katmanlıdır:
+/// - Eski Pro: tesis ve tutar açık, dokununca [onOpenFacility].
+/// - Paketli hesap (Gümüş / Altın / Platin): tesis adı açık; tutar bu tesis
+///   için hak kullanılmışsa görünür, yoksa bulanıktır ve dokununca tesis
+///   kartı açılır (hak orada kullanılır). Pro ekranına yönlendirilmez.
+/// - Ücretsiz hakkı olan hesap: ad ve tutar kapalıdır; hak bu kartta düşer
+///   ve açılan fiyat kayıtlı kalır. Hak bitince Pro ekranı açılır.
+class BestValueProCard extends StatefulWidget {
   const BestValueProCard({
     super.key,
     required this.pick,
@@ -27,10 +39,101 @@ class BestValueProCard extends StatelessWidget {
   final VoidCallback onOpenFacility;
 
   @override
-  Widget build(BuildContext context) => ValueListenableBuilder<bool>(
-    valueListenable: ProService.instance.isPro,
-    builder: (context, _, _) {
-      final unlocked = PriceAccess.unlocked;
+  State<BestValueProCard> createState() => _BestValueProCardState();
+}
+
+class _BestValueProCardState extends State<BestValueProCard> {
+  var _busy = false;
+
+  bool get _signedIn {
+    final user = PremiumAuthService.instance.currentUser;
+    return user != null && !user.isAnonymous;
+  }
+
+  int? get _freeRemaining {
+    if (_signedIn) {
+      return ServerPremiumAccountBridge.instance.account?.priceUsage?.remaining;
+    }
+    return FreePriceQuota.instance.remaining;
+  }
+
+  bool get _canSpendFree {
+    final remaining = _freeRemaining;
+    return remaining == null ? _signedIn : remaining > 0;
+  }
+
+  Future<void> _spendFreeRight() async {
+    final facility = widget.pick.facility;
+    final left = _freeRemaining;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: const Icon(Icons.lock_open_rounded, color: AppColors.primary),
+        title: const Text('Fiyatı ücretsiz gör'),
+        content: Text(
+          left == null
+              ? 'Bu tesisteki ücret açılır ve daha sonra da görünür kalır.'
+              : 'Bu tesisteki ücret açılır ve daha sonra da görünür kalır.\n\n'
+                    'Kalan ücretsiz hakkınız: $left.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Fiyatı aç'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _busy = true);
+    String? message;
+    if (_signedIn) {
+      final result = await PremiumPriceAccess.instance.claim(
+        facilityId: facility.stableFacilityId,
+        il: facility.il,
+        isim: facility.isim,
+      );
+      message = result.message;
+      if (result.limitReached && mounted) {
+        Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
+      }
+    } else {
+      message = await FreePriceQuota.instance.unlock(facility.stableFacilityId);
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    if (message == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  static bool _paidPlan(PremiumAccountSnapshot? account) {
+    if (account?.plan == null) return false;
+    return account!.status == PremiumSubscriptionStatus.active ||
+        account.status == PremiumSubscriptionStatus.renewalOff;
+  }
+
+  @override
+  Widget build(BuildContext context) => ListenableBuilder(
+    listenable: Listenable.merge([
+      ProService.instance.isPro,
+      ServerPremiumAccountBridge.instance,
+      PremiumPriceAccess.instance.unlockedIds,
+      FreePriceQuota.instance.unlockedIds,
+    ]),
+    builder: (context, _) {
+      final pick = widget.pick;
+      final facilityId = pick.facility.stableFacilityId;
+      final paidPlan = _paidPlan(ServerPremiumAccountBridge.instance.account);
+      final showPrice = PriceAccess.unlockedFor(facilityId);
+      final showName = showPrice || paidPlan;
+      final unlocked = showPrice;
+      final canSpendFree = !unlocked && !paidPlan && _canSpendFree;
+      final freeRemaining =
+          _freeRemaining ?? FreePriceQuota.instance.remaining;
       final title = pick.isComparison
           ? (pick.il != null
                 ? FacilityPricing.bestValueTitleIl(pick.il!)
@@ -40,8 +143,11 @@ class BestValueProCard extends StatelessWidget {
           ? FacilityPricing.sivilLabel
           : FacilityPricing.kamuLabel;
       void open() {
-        if (unlocked) {
-          onOpenFacility();
+        if (_busy) return;
+        if (showName) {
+          widget.onOpenFacility();
+        } else if (canSpendFree) {
+          unawaited(_spendFreeRight());
         } else {
           Navigator.of(context).pushNamed(RotalinkShellRoutes.pro);
         }
@@ -50,7 +156,7 @@ class BestValueProCard extends StatelessWidget {
       final details = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (unlocked)
+          if (showName)
             Text(
               [
                 pick.facility.il,
@@ -60,7 +166,7 @@ class BestValueProCard extends StatelessWidget {
             ),
           Text(
             [
-              if (unlocked && pick.facility.tip.trim().isNotEmpty)
+              if (showName && pick.facility.tip.trim().isNotEmpty)
                 pick.facility.tip,
               basis,
             ].join(' · '),
@@ -99,7 +205,11 @@ class BestValueProCard extends StatelessWidget {
           button: true,
           label: unlocked
               ? '${pick.facility.isim}, ${formatTl(pick.price)}'
-              : '$title. ${FacilityPricing.bestValueCta}',
+              : canSpendFree
+              ? '$title. ${FacilityPricing.freeRightsButton(freeRemaining)}'
+              : showName
+              ? '${pick.facility.isim}. ${FacilityPricing.bestValueOpenWithRight}'
+              : '$title. ${FacilityPricing.freeRightsButton(0)}',
           child: Material(
             clipBehavior: Clip.antiAlias,
             color: _tealDark,
@@ -131,7 +241,7 @@ class BestValueProCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: unlocked
+                            child: showName
                                 ? Text(
                                     pick.facility.isim,
                                     style: const TextStyle(
@@ -195,7 +305,14 @@ class BestValueProCard extends StatelessWidget {
                         },
                       ),
                       const SizedBox(height: 10),
-                      _CtaButton(unlocked: unlocked, onTap: open),
+                      _CtaButton(
+                        unlocked: unlocked,
+                        paidPlan: showName && !unlocked,
+                        canSpendFree: canSpendFree,
+                        freeRemaining: freeRemaining,
+                        busy: _busy,
+                        onTap: open,
+                      ),
                     ],
                   ),
                 ),
@@ -269,25 +386,55 @@ class _Blurred extends StatelessWidget {
 }
 
 class _CtaButton extends StatelessWidget {
-  const _CtaButton({required this.unlocked, required this.onTap});
+  const _CtaButton({
+    required this.unlocked,
+    required this.paidPlan,
+    required this.canSpendFree,
+    required this.freeRemaining,
+    required this.busy,
+    required this.onTap,
+  });
 
   final bool unlocked;
+
+  /// Paketli hesap: tesis açık, tutar bu tesiste hak kullanılınca görünür.
+  final bool paidPlan;
+  final bool canSpendFree;
+  final int freeRemaining;
+  final bool busy;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final light = unlocked || paidPlan || canSpendFree;
     return SizedBox(
       width: double.infinity,
       child: FilledButton.icon(
-        onPressed: onTap,
-        icon: Icon(
-          unlocked ? Icons.arrow_forward_rounded : Icons.lock_open_rounded,
-          size: 18,
+        onPressed: busy ? null : onTap,
+        icon: busy
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Icon(
+                unlocked
+                    ? Icons.arrow_forward_rounded
+                    : Icons.lock_open_rounded,
+                size: 18,
+              ),
+        label: Text(
+          unlocked
+              ? 'Tesisi İncele'
+              : paidPlan
+              ? FacilityPricing.bestValueOpenWithRight
+              : FacilityPricing.freeRightsButton(
+                  canSpendFree ? freeRemaining : 0,
+                ),
         ),
-        label: Text(unlocked ? 'Tesisi İncele' : FacilityPricing.bestValueCta),
         style: FilledButton.styleFrom(
-          backgroundColor: unlocked ? Colors.white : _gold,
-          foregroundColor: unlocked
+          backgroundColor: light ? Colors.white : _gold,
+          foregroundColor: light
               ? AppColors.primary
               : const Color(0xFF3D2A00),
           padding: const EdgeInsets.symmetric(vertical: 11),

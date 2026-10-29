@@ -77,9 +77,9 @@ class FacilityCompareScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 14),
-              Text(
+              const Text(
                 FacilityPricing.note,
-                style: TextStyle(color: AppColors.textStrongOf(context).withValues(alpha: 0.55), fontSize: 12),
+                style: TextStyle(color: Color(0xFFD32F2F), fontSize: 12),
               ),
             ],
           );

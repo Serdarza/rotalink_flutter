@@ -26,6 +26,11 @@ val hasFullSigningConfig: Boolean =
 // Personal release APK updates the installed test app without erasing its data.
 // Normal store builds retain their existing production signing/configuration.
 val personalApk = providers.environmentVariable("ROTALINK_PERSONAL_APK").orNull == "true"
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) file.inputStream().use { load(it) }
+}
+val googleMapsApiKey = localProperties.getProperty("googleMapsApiKey", "")
 
 android {
     // Play Store / mevcut Kotlin uygulaması ile aynı paket — değiştirmeyin.
@@ -46,6 +51,7 @@ android {
     defaultConfig {
         // Play Store güncellemesi için Kotlin ile aynı applicationId olmalı.
         applicationId = "com.serdarza.rotalink"
+        manifestPlaceholders["googleMapsApiKey"] = googleMapsApiKey
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -115,6 +121,7 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("androidx.activity:activity-ktx:1.9.3")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 }
 
 // Flutter Gradle eklentisi bazen [compileOptions] birleşiminden önce AAR metadata kontrolü yapıyor;

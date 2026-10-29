@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
+import '../services/place_resolver.dart';
 import '../utils/text_encoding.dart';
 
 enum GeocodeStatus {
@@ -47,6 +49,41 @@ abstract final class NominatimGeocodeCache {
     return o.point;
   }
 
+  static Future<GeocodeOutcome> nominatim(String query) =>
+      _searchNominatim(query.trim());
+
+  /// Cami, adres ve tesis adı. İl sonda yazılır; en uygun Türkiye sonucu seçilir.
+  static Future<({String name, double latitude, double longitude})?> rankedPlace(
+    String query,
+  ) async {
+    final phrase = PlaceResolver.searchPhrase(query);
+    List<_NominatimHit> rows = const [];
+    for (var attempt = 0; attempt < 2; attempt++) {
+      try {
+        rows = await _nominatimRows(phrase);
+        break;
+      } on _NominatimFailure {
+        if (attempt == 1) return null;
+        await Future<void>.delayed(const Duration(milliseconds: 700));
+      }
+    }
+    if (rows.isEmpty) return null;
+    rows.sort((a, b) {
+      final byName = _rank(b, query).compareTo(_rank(a, query));
+      if (byName != 0) return byName;
+      return b.importance.compareTo(a.importance);
+    });
+    final best = rows.first;
+    final label = best.name.trim().isEmpty ? phrase : best.name.trim();
+    return (name: label, latitude: best.latitude, longitude: best.longitude);
+  }
+
+  static int _rank(_NominatimHit hit, String query) {
+    var score = PlaceResolver.placeScore('${hit.name} ${hit.display}', query);
+    if (hit.type == 'place_of_worship' || hit.type == 'mosque') score += 4;
+    return score;
+  }
+
   static Future<GeocodeOutcome> searchDetailed(String query) async {
     final raw = query.trim();
     if (raw.isEmpty) return const GeocodeOutcome.miss();
@@ -62,12 +99,14 @@ abstract final class NominatimGeocodeCache {
 
     final photonQ = raw.replaceAll(',', ' ').replaceAll(RegExp(r'\s+'), ' ');
     final photon = await _searchPhoton(photonQ);
+    debugPrint('[Geocode] photon "$photonQ": ${photon.status.name}');
     if (photon.status == GeocodeStatus.hit) {
       _hits[k] = photon.point!;
       return photon;
     }
 
     final nom = await _searchNominatim(raw);
+    debugPrint('[Geocode] nominatim "$raw": ${nom.status.name}');
     if (nom.status == GeocodeStatus.hit) {
       _hits[k] = nom.point!;
       return nom;
@@ -108,7 +147,7 @@ abstract final class NominatimGeocodeCache {
       );
       final res = await http
           .get(uri, headers: {'User-Agent': _userAgent})
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 4));
       if (res.statusCode == 429 || res.statusCode >= 500) {
         return const GeocodeOutcome.error();
       }
@@ -142,38 +181,85 @@ abstract final class NominatimGeocodeCache {
   }
 
   static Future<GeocodeOutcome> _searchNominatim(String query) async {
+    try {
+      final rows = await _nominatimRows(query, limit: 1);
+      if (rows.isEmpty) return const GeocodeOutcome.miss();
+      final first = rows.first;
+      return GeocodeOutcome.hit(LatLng(first.latitude, first.longitude));
+    } on _NominatimFailure {
+      return const GeocodeOutcome.error();
+    }
+  }
+
+  static Future<List<_NominatimHit>> _nominatimRows(
+    String query, {
+    int limit = 5,
+  }) async {
     final wait =
         _nominatimMinGap - DateTime.now().difference(_lastNominatimCall);
     if (wait > Duration.zero) {
       await Future<void>.delayed(wait);
     }
     _lastNominatimCall = DateTime.now();
-
     try {
       final uri = Uri.parse(
         'https://nominatim.openstreetmap.org/search'
         '?q=${Uri.encodeComponent(query)}'
-        '&format=json&limit=1&countrycodes=tr',
+        '&format=jsonv2&limit=$limit&countrycodes=tr',
       );
       final res = await http
           .get(uri, headers: {'User-Agent': _userAgent})
           .timeout(const Duration(seconds: 12));
       if (res.statusCode == 429 || res.statusCode >= 500) {
-        return const GeocodeOutcome.error();
+        throw const _NominatimFailure();
       }
-      if (res.statusCode != 200) return const GeocodeOutcome.error();
+      if (res.statusCode != 200) throw const _NominatimFailure();
       final list = jsonDecode(responseText(res));
-      if (list is! List || list.isEmpty) {
-        return const GeocodeOutcome.miss();
+      if (list is! List) return const [];
+      final rows = <_NominatimHit>[];
+      for (final item in list) {
+        if (item is! Map) continue;
+        final lat = double.tryParse(item['lat']?.toString() ?? '');
+        final lon = double.tryParse(item['lon']?.toString() ?? '');
+        if (lat == null || lon == null) continue;
+        final importance = item['importance'];
+        rows.add(
+          _NominatimHit(
+            name: item['name']?.toString() ?? '',
+            display: item['display_name']?.toString() ?? '',
+            type: item['type']?.toString() ?? '',
+            latitude: lat,
+            longitude: lon,
+            importance: importance is num ? importance.toDouble() : 0,
+          ),
+        );
       }
-      final o = list.first;
-      if (o is! Map) return const GeocodeOutcome.miss();
-      final lat = double.tryParse(o['lat']?.toString() ?? '');
-      final lon = double.tryParse(o['lon']?.toString() ?? '');
-      if (lat == null || lon == null) return const GeocodeOutcome.miss();
-      return GeocodeOutcome.hit(LatLng(lat, lon));
-    } catch (_) {
-      return const GeocodeOutcome.error();
+      return rows;
+    } catch (error) {
+      if (error is _NominatimFailure) rethrow;
+      throw const _NominatimFailure();
     }
   }
+}
+
+class _NominatimHit {
+  const _NominatimHit({
+    required this.name,
+    required this.display,
+    required this.type,
+    required this.latitude,
+    required this.longitude,
+    required this.importance,
+  });
+
+  final String name;
+  final String display;
+  final String type;
+  final double latitude;
+  final double longitude;
+  final double importance;
+}
+
+class _NominatimFailure {
+  const _NominatimFailure();
 }

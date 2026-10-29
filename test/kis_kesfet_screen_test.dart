@@ -346,17 +346,13 @@ void main() {
     expect(erciyes.pistHaritasiEksik, isFalse);
   });
 
-  testWidgets('il araması temizlenir ve yalnız kayak ile termal gösterilir', (
-    tester,
-  ) async {
+  testWidgets('kayak ve termalde il arama kutusu yoktur', (tester) async {
     await tester.pumpWidget(
       const MaterialApp(home: KisKesfetScreen(places: places)),
     );
-    await tester.enterText(find.byType(TextField), 'izmir');
     await tester.pumpAndSettle();
-    expect(find.text('Aradığınız il bu kategoride yok.'), findsOneWidget);
-    await tester.tap(find.byTooltip('Aramayı temizle'));
-    await tester.pumpAndSettle();
+    expect(find.text('Gitmek istediğin ili ara'), findsNothing);
+    expect(find.byType(TextField), findsNothing);
     expect(find.text('Bursa'), findsOneWidget);
     expect(find.text('Kış Gezileri'), findsNothing);
     expect(

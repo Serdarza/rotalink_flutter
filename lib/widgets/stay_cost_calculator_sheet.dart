@@ -9,7 +9,7 @@ import '../theme/app_colors.dart';
 import '../utils/stay_cost_calculator.dart';
 import 'facility_tariff_view.dart' show formatTl;
 
-/// Fiyatı açık (Pro) tesiste toplam konaklama ücreti hesaplayıcı.
+/// Fiyatı açık tesiste toplam konaklama ücreti hesaplayıcı.
 Future<void> showStayCostCalculator(BuildContext context, Misafirhane priced) {
   final tariff = priced.fiyatKaydi?.tarife;
   if (!StayCostCalculator.isAvailable(tariff)) return Future.value();

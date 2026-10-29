@@ -7,6 +7,7 @@ abstract final class RotalinkShellRoutes {
   static const String settings = '/settings';
   static const String holidays = '/holidays';
   static const String nearby = '/nearby-guesthouses';
+  static const String locationDiscovery = '/location-discovery';
   static const String winterDiscover = '/kis-kesfet';
   static const String suggestion = '/suggestion';
   static const String pro = '/pro';

@@ -244,14 +244,12 @@ class _WelcomeHeader extends StatelessWidget {
             letterSpacing: 0.2,
           ),
         ),
-        const SizedBox(height: 2),
+        const SizedBox(height: 4),
         Text(
-          'Türkiye’yi Birlikte Keşfedelim!',
-          style: Theme.of(
-            context,
-          ).textTheme.displaySmall?.copyWith(fontSize: 27, height: 1.15),
+          'Türkiye’yi birlikte keşfedelim',
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         CustomSearchBar(
           controller: controller,
           ilOptionsSorted: ilOptionsSorted,

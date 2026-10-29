@@ -8,6 +8,10 @@ class NearbyGuesthouse {
   final double km;
   String get distanceLabel =>
       '${km.toStringAsFixed(1).replaceAll('.', ',')} km uzaklıkta · (Kuş Uçuşu)';
+
+  /// Konuma Göre kartları. Mevcut yakın liste etiketi [distanceLabel] olarak kalır.
+  String get birdFlightLabel =>
+      '${km.toStringAsFixed(1).replaceAll('.', ',')} km · Kuş uçuşu';
 }
 
 /// Coordinates stay in memory. Zero coordinates in the existing data mean missing.

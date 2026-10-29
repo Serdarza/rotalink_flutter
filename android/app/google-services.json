@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "409913824071",
+    "firebase_url": "https://rotalink-d738c-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "rotalink-d738c",
     "storage_bucket": "rotalink-d738c.firebasestorage.app"
   },
@@ -12,7 +13,20 @@
           "package_name": "com.serdarza.rotalink"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "409913824071-r1sna61db19vtvfvn5si1hu8cu2ga29f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.serdarza.rotalink",
+            "certificate_hash": "8ae7eea1bdc49fde068ae162286abce7e214e41e"
+          }
+        },
+        {
+          "client_id": "409913824071-tgg4fj1ce17evm0hg58peg4qftqidhc7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB5_7XVR9Qe5qxG8g-zyx6i-kjwob3aEWM"
@@ -20,7 +34,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "409913824071-tgg4fj1ce17evm0hg58peg4qftqidhc7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "409913824071-j2q53ir4lia9vtcg9un36fda5334tvtn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.serdarza.rotalink"
+              }
+            }
+          ]
         }
       }
     }

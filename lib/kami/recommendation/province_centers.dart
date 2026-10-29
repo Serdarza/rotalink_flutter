@@ -55,6 +55,8 @@ abstract final class KamiProvinceCenters {
     'kars': LatLng(40.6013, 43.0975),
     'kastamonu': LatLng(41.3887, 33.7827),
     'kayseri': LatLng(38.7312, 35.4787),
+    // Kuzey Kıbrıs. Tesis sayısı buradan okunmaz; daire konumu Lefkoşa'dır.
+    'kibris': LatLng(35.1856, 33.3823),
     'kilis': LatLng(36.7165, 37.1147),
     'kirikkale': LatLng(39.8468, 33.5153),
     'kirklareli': LatLng(41.7350, 27.2256),

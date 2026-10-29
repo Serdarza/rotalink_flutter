@@ -28,7 +28,9 @@ class ProService {
   static bool cachedEntitlementActive(SharedPreferences prefs) {
     final giftEndMs = prefs.getInt(_keyGiftEndMs);
     if (giftEndMs != null &&
-        DateTime.fromMillisecondsSinceEpoch(giftEndMs).isAfter(DateTime.now())) {
+        DateTime.fromMillisecondsSinceEpoch(
+          giftEndMs,
+        ).isAfter(DateTime.now())) {
       return true;
     }
     if (!(prefs.getBool(_keyActive) ?? false)) return false;
@@ -59,7 +61,9 @@ class ProService {
   final ValueNotifier<DateTime?> expiryAt = ValueNotifier<DateTime?>(null);
 
   /// Eski uygulama içi hediye kodundan kalan bitiş (yeni kod yazılmaz).
-  final ValueNotifier<DateTime?> legacyGiftEndsAt = ValueNotifier<DateTime?>(null);
+  final ValueNotifier<DateTime?> legacyGiftEndsAt = ValueNotifier<DateTime?>(
+    null,
+  );
 
   String? _legacyGiftPlan;
 
@@ -276,6 +280,13 @@ class ProService {
 
     switch (decision) {
       case StoreGrant.ignoreUnknownProduct:
+        // Stage 3 verifies these products on the server before finishing the
+        // StoreKit transaction. The legacy listener must not race that flow.
+        if (ProProducts.premiumIds.contains(purchase.productID)) return;
+        if (purchase.pendingCompletePurchase) {
+          await _iap.completePurchase(purchase);
+        }
+        return;
       case StoreGrant.ignoreExpiredRestore:
         if (purchase.pendingCompletePurchase) {
           await _iap.completePurchase(purchase);

@@ -34,7 +34,11 @@
         android:icon="@mipmap/ic_launcher"
         android:extractNativeLibs="false"
         android:resizeableActivity="true"
-        android:usesCleartextTraffic="false">
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false"
+        android:networkSecurityConfig="@xml/network_security_config"
+        tools:replace="android:allowBackup,android:usesCleartextTraffic,android:networkSecurityConfig">
+        <meta-data android:name="com.google.android.geo.API_KEY" android:value="${googleMapsApiKey}" />
         <meta-data android:name="firebase_messaging_auto_init_enabled" android:value="false" />
         <service android:name="io.flutter.plugins.firebase.messaging.FlutterFirebaseMessagingService"
             tools:node="remove" />

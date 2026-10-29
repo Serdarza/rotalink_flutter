@@ -3,6 +3,8 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../billing/premium_account_bridge.dart';
+import '../billing/pro_service.dart';
 import '../models/facility_tariff.dart';
 import '../theme/app_colors.dart';
 
@@ -511,6 +513,11 @@ class PriceMetaFooter extends StatelessWidget {
       dogrulama == null &&
       kaynak == null;
 
+  /// Ücretsiz hakla açılan tarifede kaynak adresi görünmez.
+  static bool get _paidProSeesSource =>
+      ProService.instance.hasProAccess ||
+      ServerPremiumAccountBridge.instance.account?.plan != null;
+
   static String _formatDate(String raw) {
     final d = DateTime.tryParse(raw);
     if (d == null) return raw;
@@ -525,6 +532,15 @@ class PriceMetaFooter extends StatelessWidget {
     final style = TextStyle(color: p.label, fontSize: 11.5, height: 1.35);
     final uri = kaynak == null ? null : Uri.tryParse(kaynak!);
     final isLink = uri != null && uri.hasScheme && uri.host.isNotEmpty;
+    final showKaynak =
+        kaynak != null && (!isLink || _paidProSeesSource);
+
+    if (dogrulama == null &&
+        gecerlilik == null &&
+        guncelleme == null &&
+        !showKaynak) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -554,7 +570,7 @@ class PriceMetaFooter extends StatelessWidget {
         if (gecerlilik != null) Text('Geçerlilik: $gecerlilik', style: style),
         if (guncelleme != null)
           Text('Son güncelleme: ${_formatDate(guncelleme!)}', style: style),
-        if (kaynak != null)
+        if (showKaynak)
           isLink
               ? InkWell(
                   onTap: () =>

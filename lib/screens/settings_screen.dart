@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-import 'device_test_screen.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -104,32 +102,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       body: ListView(
         padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottom),
         children: [
-          if (kDebugMode &&
-              !kIsWeb &&
-              (defaultTargetPlatform == TargetPlatform.android ||
-                  defaultTargetPlatform == TargetPlatform.iOS)) ...[
-            _card(
-              context,
-              padding: EdgeInsets.zero,
-              child: ListTile(
-                leading: const Icon(
-                  Icons.phonelink_setup,
-                  color: AppColors.primary,
-                ),
-                title: const Text('Yönetici testi'),
-                subtitle: const Text(
-                  'Pop-up ve bildirimleri yalnızca bu telefonda deneyin.',
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const DeviceTestScreen(),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 22),
-          ],
           _sectionTitle(context, AppStrings.drawerAppearance),
           const SizedBox(height: 8),
           _card(

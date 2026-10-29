@@ -19,6 +19,11 @@ abstract final class ProProducts {
   static const String yearly = 'rotalink_pro_yearly';
 
   static const Set<String> ids = {monthly, yearly};
+  static const Set<String> premiumIds = {
+    'rotalink_silver_monthly',
+    'rotalink_gold_monthly',
+    'rotalink_platinum_yearly',
+  };
 
   static const String androidPackage = 'com.serdarza.rotalink';
 
@@ -27,8 +32,7 @@ abstract final class ProProducts {
   static const String _appleSubscriptions =
       'https://apps.apple.com/account/subscriptions';
 
-  static bool get _isApple =>
-      !kIsWeb && (Platform.isIOS || Platform.isMacOS);
+  static bool get _isApple => !kIsWeb && (Platform.isIOS || Platform.isMacOS);
 
   /// Mağaza adı — kullanıcı metinlerinde kullanılır.
   static String get storeName => _isApple ? 'App Store' : 'Google Play';

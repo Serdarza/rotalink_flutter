@@ -45,7 +45,9 @@ class RotalinkGlassBottomNav extends StatelessWidget {
     return Material(
       color: AppColors.surfaceOf(context),
       elevation: 12,
-      shadowColor: Colors.black.withValues(alpha: AppColors.isDark(context) ? 0.4 : 0.14),
+      shadowColor: Colors.black.withValues(
+        alpha: AppColors.isDark(context) ? 0.4 : 0.14,
+      ),
       child: SafeArea(
         top: false,
         child: DecoratedBox(
@@ -84,8 +86,8 @@ class RotalinkGlassBottomNav extends StatelessWidget {
                 ),
                 _NavSlot(
                   selected: selected == RotalinkBottomNavItem.route,
-                  icon: Icons.alt_route_rounded,
-                  label: AppStrings.bottomRoutePlan,
+                  icon: Icons.map_rounded,
+                  label: 'Harita',
                   onTap: onRoutePlan,
                   anchorKey: navTargetKeys[OnboardingTarget.navRoute],
                 ),
@@ -114,8 +116,6 @@ class _NavSlot extends StatelessWidget {
     this.anchorKey,
   });
 
-  static const _inactiveColor = Color(0xFF5A6A72);
-
   final bool selected;
   final IconData icon;
   final String label;
@@ -124,7 +124,7 @@ class _NavSlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? AppColors.primary : _inactiveColor;
+    final color = selected ? AppColors.primary : AppColors.textMutedOf(context);
 
     return Expanded(
       child: KeyedSubtree(

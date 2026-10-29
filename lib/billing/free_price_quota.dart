@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,7 +13,19 @@ class FreePriceQuota {
   FreePriceQuota._();
   static final FreePriceQuota instance = FreePriceQuota._();
 
-  static const int limit = 1;
+  static int _serverLimit = 1;
+  static int get limit => _serverLimit;
+
+  /// Admin panelindeki ücretsiz fiyat hakkı. Uygulama güncellemesi gerekmez.
+  void applyServerLimit(int value) {
+    if (value < 0 || value > 100) return;
+    _serverLimit = value;
+    if (_exhausted && unlockedIds.value.length < value) {
+      _exhausted = false;
+      unawaited(_save((prefs) => prefs.setBool(_keyExhausted, false)));
+    }
+    unlockedIds.value = List.unmodifiable(unlockedIds.value);
+  }
   static const String _keyFacilities = 'rotalink_free_price_facilities';
   static const String _keyExhausted = 'rotalink_free_price_exhausted';
 
@@ -23,8 +37,11 @@ class FreePriceQuota {
   bool _claiming = false;
   Future<void>? _loading;
 
-  int get remaining =>
-      _exhausted ? 0 : (limit - unlockedIds.value.length).clamp(0, limit);
+  int get remaining {
+    final left = (limit - unlockedIds.value.length).clamp(0, limit);
+    if (_exhausted && unlockedIds.value.length >= limit) return 0;
+    return left;
+  }
 
   bool contains(String facilityId) => unlockedIds.value.contains(facilityId);
 
@@ -37,6 +54,9 @@ class FreePriceQuota {
       unlockedIds.value = List.unmodifiable(
         prefs.getStringList(_keyFacilities) ?? const <String>[],
       );
+      if (_exhausted && unlockedIds.value.length < limit) {
+        _exhausted = false;
+      }
     } catch (e) {
       debugPrint('[Pro] ücretsiz fiyat hakları okunamadı: $e');
     }

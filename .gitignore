@@ -46,6 +46,7 @@ app.*.map.json
 
 # Play Store imza — asla repoya eklemeyin
 android/key.properties
+ios/Flutter/GoogleMaps.xcconfig
 android/upload_certificate.pem
 *.jks
 *.keystore

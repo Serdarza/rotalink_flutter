@@ -6,7 +6,6 @@ import '../models/kis_kesfet_place.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
 import '../theme/ara_ui.dart';
-import '../utils/search_normalize.dart';
 import '../widgets/kis_kesfet_ui.dart';
 import 'kis_kesfet_il_screen.dart';
 
@@ -20,7 +19,6 @@ class KisKesfetScreen extends StatefulWidget {
 class _KisKesfetScreenState extends State<KisKesfetScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
-  final _search = TextEditingController();
   List<KisKesfetPlace>? _places;
   Object? _error;
   static const _kategoriler = [
@@ -69,7 +67,6 @@ class _KisKesfetScreenState extends State<KisKesfetScreen>
   @override
   void dispose() {
     _tabs.dispose();
-    _search.dispose();
     super.dispose();
   }
 
@@ -125,51 +122,6 @@ class _KisKesfetScreenState extends State<KisKesfetScreen>
                       subtitle: KisKesfetUi.subtitleFor(_aktif),
                     ),
                     const SizedBox(height: 18),
-                    TextField(
-                      controller: _search,
-                      onChanged: (_) => setState(() {}),
-                      onSubmitted: (_) => FocusScope.of(context).unfocus(),
-                      textInputAction: TextInputAction.search,
-                      style: TextStyle(color: AppColors.textStrongOf(context)),
-                      decoration: InputDecoration(
-                        hintText: 'Gitmek istediğin ili ara',
-                        hintStyle: TextStyle(
-                          color: AppColors.textMutedOf(context),
-                          fontSize: 14,
-                        ),
-                        prefixIcon: Icon(Icons.search_rounded, color: accent),
-                        suffixIcon: _search.text.isEmpty
-                            ? null
-                            : IconButton(
-                                tooltip: 'Aramayı temizle',
-                                onPressed: () => setState(_search.clear),
-                                icon: const Icon(Icons.close_rounded, size: 20),
-                              ),
-                        filled: true,
-                        fillColor: AppColors.surfaceOf(context),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 15,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide(
-                            color: AppColors.borderOf(context),
-                          ),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide(
-                            color: AppColors.borderOf(context),
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(18),
-                          borderSide: BorderSide(color: accent, width: 1.5),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
                     Row(
                       children: [
                         for (var i = 0; i < _kategoriler.length; i++) ...[
@@ -215,7 +167,7 @@ class _KisKesfetScreenState extends State<KisKesfetScreen>
       controller: _tabs,
       children: [
         for (final kategori in _kategoriler)
-          _IlList(kategori: kategori, places: places, query: _search.text),
+          _IlList(kategori: kategori, places: places),
       ],
     );
   }
@@ -281,26 +233,16 @@ class _KategoriChip extends StatelessWidget {
 }
 
 class _IlList extends StatelessWidget {
-  const _IlList({
-    required this.kategori,
-    required this.places,
-    required this.query,
-  });
+  const _IlList({required this.kategori, required this.places});
   final KisKesfetKategori kategori;
   final List<KisKesfetPlace> places;
-  final String query;
 
   @override
   Widget build(BuildContext context) {
     final grouped = KisKesfetRepository.groupByIl(
       KisKesfetRepository.forCategory(places, kategori),
     );
-    final needle = normalizeForSearch(query);
-    final iller = KisKesfetRepository.sortedIller(grouped)
-        .where(
-          (il) => needle.isEmpty || normalizeForSearch(il).contains(needle),
-        )
-        .toList();
+    final iller = KisKesfetRepository.sortedIller(grouped);
     if (grouped.isEmpty) {
       return const _EmptyMessage(
         text: 'Bu kategoride henüz doğrulanmış kayıt yok.',

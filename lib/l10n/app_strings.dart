@@ -155,8 +155,4 @@ abstract final class AppStrings {
       'Öneriniz için teşekkür ederiz. Geri bildiriminiz bizim için çok değerli.';
   static const String suggestionOk = 'Tamam';
   static const String suggestionMailFailed = 'E-posta uygulaması açılamadı.';
-
-  static const String onboardingNext = 'İleri';
-  static const String onboardingSkip = 'Atla';
-  static const String onboardingFinish = 'Başla';
 }

@@ -36,11 +36,13 @@ class CustomSearchBar extends StatefulWidget {
     this.onSearchCleared,
     this.onClearPressed,
     this.onFilterPressed,
+    this.onHistoryPressed,
     this.onFocusChanged,
     this.ignoreKeyboardInset = false,
     this.emphasized = false,
     this.restrained = false,
     this.compactHome = false,
+    this.hintText,
   });
 
   final TextEditingController controller;
@@ -62,6 +64,9 @@ class CustomSearchBar extends StatefulWidget {
   /// Filtre ikonu tıklandığında (geçilmezse ikon soluk gösterilir).
   final VoidCallback? onFilterPressed;
 
+  /// Harita arama kutusundaki hesap geçmişi. Verilmezse düğme görünmez.
+  final VoidCallback? onHistoryPressed;
+
   /// Odak değişimi — ana harita arama kromu animasyonu için.
   final ValueChanged<bool>? onFocusChanged;
 
@@ -74,6 +79,9 @@ class CustomSearchBar extends StatefulWidget {
   /// Ara ekranı: sade beyaz yüzey, ince gri çerçeve, odakta turkuaz çerçeve.
   final bool restrained;
   final bool compactHome;
+
+  /// Verilirse daktilo ipucunun yerine bu metin görünür.
+  final String? hintText;
 
   @override
   State<CustomSearchBar> createState() => _CustomSearchBarState();
@@ -202,9 +210,11 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                 ? InputBorder.none
                 : null,
             filled: (widget.compactHome || widget.restrained) ? false : null,
-            hintText: (widget.compactHome || widget.restrained)
-                ? 'İl veya misafirhane ara...'
-                : null,
+            hintText:
+                widget.hintText ??
+                ((widget.compactHome || widget.restrained)
+                    ? 'İl veya misafirhane ara...'
+                    : null),
             hintStyle: TextStyle(
               fontSize: 14,
               color: AppColors.textMutedOf(context),
@@ -219,7 +229,8 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
         ListenableBuilder(
           listenable: Listenable.merge([controller, focusNode]),
           builder: (_, _) {
-            if (widget.compactHome ||
+            if (widget.hintText != null ||
+                widget.compactHome ||
                 widget.restrained ||
                 controller.text.isNotEmpty ||
                 focusNode.hasFocus) {
@@ -483,6 +494,16 @@ class _CustomSearchBarState extends State<CustomSearchBar> {
                             widget.controller.clear();
                             widget.onClearPressed?.call();
                           },
+                        ),
+
+                      if (widget.onHistoryPressed != null)
+                        _BarBtn(
+                          touchSize: (widget.compactHome || widget.restrained)
+                              ? 44
+                              : 36,
+                          icon: Icons.history,
+                          tooltip: 'Geçmiş',
+                          onPressed: widget.onHistoryPressed,
                         ),
 
                       // ── Mikrofon ──────────────────────────────────────

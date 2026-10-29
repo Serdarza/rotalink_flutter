@@ -1,6 +1,7 @@
 import EventKit
 import EventKitUI
 import Flutter
+import GoogleMaps
 import UIKit
 import workmanager_apple
 
@@ -12,6 +13,10 @@ import workmanager_apple
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    if let mapsKey = Bundle.main.object(forInfoDictionaryKey: "GMSApiKey") as? String,
+       !mapsKey.isEmpty, !mapsKey.contains("$(") {
+      GMSServices.provideAPIKey(mapsKey)
+    }
     // BGTaskScheduler, planlanan görevin işleyicisi kayıtlı değilse uygulamayı çökertir.
     // Kimlik, Info.plist ve lib/services/pro_update_notifier.dart ile aynı olmalı.
     WorkmanagerPlugin.setPluginRegistrantCallback { registry in

@@ -1,1122 +1,662 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../billing/premium_presentation.dart';
+import '../billing/premium_account_bridge.dart';
+import '../billing/premium_auth_service.dart';
 import '../billing/pro_products.dart';
-import '../billing/pro_service.dart';
 import '../constants/store_links.dart';
 import '../navigation/rotalink_shell_scope.dart';
 import '../theme/app_colors.dart';
 import '../theme/system_ui.dart';
+import '../widgets/premium_usage_widgets.dart';
 
-/// Rotalink Pro — ücretli özellikler ve uygulamanın geliştirilmesine destek.
+/// Keeps /pro navigation intact. The default adapter reads catalog and legacy
+/// state; new subscriptions require the verified Stage 3 account adapter.
 class ProScreen extends StatefulWidget {
-  const ProScreen({super.key});
-
+  const ProScreen({super.key, this.controller, this.closeWhenPurchased = false});
+  final PremiumUiController? controller;
+  final bool closeWhenPurchased;
   @override
   State<ProScreen> createState() => _ProScreenState();
 }
 
 class _ProScreenState extends State<ProScreen> {
-  static const List<_ProBenefit> _benefits = [
-    _ProBenefit(
-      icon: Icons.payments_outlined,
-      title: 'Konaklama fiyatları',
-      detail:
-          'Fiyat bilgisi olan misafirhane ve tesislerde güncel ücretleri '
-          'anında görün.',
-    ),
-    _ProBenefit(
-      icon: Icons.account_balance_wallet_outlined,
-      title: 'Fiyat sıralaması ve bütçe filtresi',
-      detail:
-          'Tesisleri ucuzdan pahalıya dizin, bütçenizi aşanları tek '
-          'dokunuşla gizleyin.',
-    ),
-    _ProBenefit(
-      icon: Icons.calculate_outlined,
-      title: 'Konaklama ücreti hesaplama',
-      detail:
-          'Gece, yetişkin, çocuk, ek yatak ve kahvaltıya göre toplam '
-          'konaklama ücretini tarifeden hesaplayın.',
-    ),
-    _ProBenefit(
-      icon: Icons.compare_arrows_rounded,
-      title: 'Tesis karşılaştırma',
-      detail:
-          '3 tesise kadar fiyat, uzaklık ve konaklama şartlarını yan yana '
-          'görün.',
-    ),
-    _ProBenefit(
-      icon: Icons.notifications_active_outlined,
-      title: 'Fiyat ve kampanya bildirimleri',
-      detail:
-          'Favori tesisinizin fiyatı değişince ve mesleğinize yeni kampanya '
-          'gelince haber alın.',
-    ),
-  ];
-
-  static const List<String> _freeFeatures = [
-    'Harita ve arama',
-    'Tesis bilgileri',
-    'Kamu kampanyaları',
-    'Resmî tatiller',
-    '1 tesisin fiyatı',
-  ];
-
-  final ProService _pro = ProService.instance;
-  StreamSubscription<String>? _messageSub;
-  bool _restoring = false;
+  late final PremiumUiController _controller;
+  StreamSubscription<String>? _messages;
+  StreamSubscription<User?>? _accountChanges;
+  final _plansKey = GlobalKey();
+  PremiumPlan _selected = PremiumPlan.gold;
+  var _returnAfterPurchase = false;
 
   @override
   void initState() {
     super.initState();
-    _messageSub = _pro.messages.listen(_showMessage);
-    // Ekran açılışında plan listesi boşsa mağazadan tekrar dene.
-    if (_pro.products.value.isEmpty) {
-      unawaited(_pro.loadProducts());
+    _controller =
+        widget.controller ??
+        StorePremiumUiController(
+          accountBridge: ServerPremiumAccountBridge.instance,
+        );
+    _messages = _controller.messages.listen(_showMessage);
+    _controller.addListener(_maybeReturnToKonum);
+    if (widget.controller == null) {
+      _accountChanges = PremiumAuthService.instance.userChanges.listen((_) {
+        unawaited(_run(_controller.refresh));
+      });
     }
+    unawaited(_run(_controller.refresh));
   }
 
   @override
   void dispose() {
-    _messageSub?.cancel();
+    _messages?.cancel();
+    _accountChanges?.cancel();
+    _controller.removeListener(_maybeReturnToKonum);
+    if (widget.controller == null) _controller.dispose();
     super.dispose();
   }
 
-  void _showMessage(String message) {
+  void _showMessage(String text) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      SnackBar(content: Text(text), behavior: SnackBarBehavior.floating),
     );
   }
 
-  Future<void> _onRestore() async {
-    if (_restoring) return;
-    setState(() => _restoring = true);
-    await _pro.restore();
-    if (mounted) setState(() => _restoring = false);
+  Future<void> _run(Future<void> Function() action) async {
+    try {
+      await action();
+    } on PremiumSignInCanceled {
+      return;
+    } on StateError catch (error) {
+      _showMessage(error.message);
+    } on FirebaseAuthException catch (error) {
+      _showMessage(
+        error.code == 'requires-recent-login'
+            ? 'Hesabı silmek için yeniden giriş yapıp tekrar deneyin.'
+            : 'Hesap işlemi tamamlanamadı.',
+      );
+    } catch (_) {
+      _showMessage('İşlem tamamlanamadı. Lütfen tekrar deneyin.');
+    }
   }
 
-  Future<void> _openManageSubscription() async {
-    final uri = Uri.parse(ProProducts.manageUrl(_pro.activeProductId));
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
-      _showMessage('Abonelik sayfası açılamadı.');
+  Future<void> _buy(PremiumPlan plan) async {
+    if (widget.closeWhenPurchased) _returnAfterPurchase = true;
+    if (widget.controller == null) {
+      await PremiumAuthService.instance.ensureAccountForPurchase();
+      await _controller.refresh();
+      if (_controller.state.account == null) {
+        await _controller.refresh();
+      }
+    }
+    await _controller.purchase(plan);
+  }
+
+  void _maybeReturnToKonum() {
+    if (!widget.closeWhenPurchased || !_returnAfterPurchase || !mounted) {
+      return;
+    }
+    final state = _controller.state;
+    if (state.purchasePending || state.account?.plan == null) return;
+    _returnAfterPurchase = false;
+    Navigator.of(context).pop(true);
+  }
+
+  void _showPlans() {
+    final target = _plansKey.currentContext;
+    if (target != null) {
+      unawaited(
+        Scrollable.ensureVisible(
+          target,
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 280),
+          alignment: 0.03,
+        ),
+      );
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    final bottomInset = RotalinkShellScope.scrollBottomPadding(context);
-    final muted = _mutedText(context);
-
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
-      child: Scaffold(
+  Widget build(BuildContext context) => AnnotatedRegion<SystemUiOverlayStyle>(
+    value: RotalinkSystemUi.forBrightness(Theme.of(context).brightness),
+    child: Scaffold(
+      backgroundColor: AppColors.canvasOf(context),
+      appBar: AppBar(
+        title: const Text('Pro'),
         backgroundColor: AppColors.canvasOf(context),
-        appBar: AppBar(
-          title: const Text('Rotalink Pro'),
-          backgroundColor: AppColors.surfaceOf(context),
-          foregroundColor: AppColors.textStrongOf(context),
-          elevation: 0,
-          scrolledUnderElevation: 0,
-          surfaceTintColor: Colors.transparent,
-        ),
-      body: ValueListenableBuilder<bool>(
-        valueListenable: _pro.isPro,
-        builder: (context, isPro, _) {
-          return ValueListenableBuilder<DateTime?>(
-            valueListenable: _pro.legacyGiftEndsAt,
-            builder: (context, legacyGiftEnd, _) {
-          final hasAccess = isPro || _pro.legacyGiftActive;
-          return SingleChildScrollView(
-            padding: EdgeInsets.fromLTRB(20, 16, 20, 28 + bottomInset),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _Hero(isPro: hasAccess),
-                const SizedBox(height: 14),
-                _SupportCard(isPro: hasAccess),
-                const SizedBox(height: 26),
-                const _SectionTitle('Pro ile gelenler'),
-                const SizedBox(height: 12),
-                for (final benefit in _benefits) ...[
-                  _BenefitTile(benefit: benefit),
-                  const SizedBox(height: 10),
-                ],
-                const SizedBox(height: 4),
-                const _FreeFeatures(items: _freeFeatures),
-                const SizedBox(height: 26),
-                if (isPro)
-                  _ActiveCard(pro: _pro, onManage: _openManageSubscription)
-                else ...[
-                  const _SectionTitle('Planınızı seçin'),
-                  const SizedBox(height: 12),
-                  _PlanSection(pro: _pro),
-                ],
-                if (legacyGiftEnd != null) ...[
-                  const SizedBox(height: 18),
-                  _LegacyGiftNotice(endsAt: legacyGiftEnd),
-                ],
-                const SizedBox(height: 14),
-                TextButton(
-                  onPressed: _restoring ? null : _onRestore,
-                  child: Text(
-                    _restoring
-                        ? 'Kontrol ediliyor…'
-                        : 'Satın alımlarımı geri yükle',
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Ödeme, satın alma onayıyla ${ProProducts.storeName} '
-                  'hesabınızdan alınır. Abonelik, dönem bitmeden en az 24 saat '
-                  'önce iptal edilmezse aynı ücretle otomatik yenilenir. '
-                  'Yenilemeyi dilediğiniz zaman ${ProProducts.storeName} hesap '
-                  'ayarlarınızdan kapatabilirsiniz; iptal, dönem sonuna kadar '
-                  'erişiminizi etkilemez. Hediye abonelik kodları '
-                  '${ProProducts.storeName} üzerinden kullanılır; uygulama '
-                  'içinde kod girilmez.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 11.5, height: 1.5, color: muted),
-                ),
-                const SizedBox(height: 10),
-                const _LegalLinks(),
-              ],
-            ),
-          );
-            },
-          );
-        },
+        foregroundColor: AppColors.textStrongOf(context),
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        surfaceTintColor: Colors.transparent,
       ),
-    ),
-    );
-  }
-}
-
-Color _mutedText(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark
-    ? Colors.white.withValues(alpha: 0.62)
-    : const Color(0xFF6B7280);
-
-class _LegalLinks extends StatelessWidget {
-  const _LegalLinks();
-
-  Future<void> _open(String url) async {
-    final uri = Uri.parse(url);
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        TextButton(
-          onPressed: () => unawaited(_open(StoreLinks.privacyPolicy)),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            foregroundColor: AppColors.primary,
-          ),
-          child: const Text(
-            'Gizlilik Politikası',
-            style: TextStyle(
-              fontSize: 12,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ),
-        const Text(' · ', style: TextStyle(color: Color(0xFF9CA3AF))),
-        TextButton(
-          onPressed: () => unawaited(_open(StoreLinks.termsOfUse)),
-          style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            minimumSize: Size.zero,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            foregroundColor: AppColors.primary,
-          ),
-          child: const Text(
-            'Kullanım Koşulları',
-            style: TextStyle(
-              fontSize: 12,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Hero extends StatelessWidget {
-  const _Hero({required this.isPro});
-
-  final bool isPro;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFFF6C343), Color(0xFFE09A12), Color(0xFFC47A00)],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFFE09A12).withValues(alpha: 0.32),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  isPro
-                      ? Icons.verified_rounded
-                      : Icons.workspace_premium_rounded,
-                  color: Colors.white,
-                  size: 30,
-                ),
+      body: ListenableBuilder(
+        listenable: _controller,
+        builder: (context, _) {
+          final state = _controller.state;
+          final account = state.account;
+          return SafeArea(
+            top: false,
+            bottom: false,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                4,
+                16,
+                28 + RotalinkShellScope.scrollBottomPadding(context),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  isPro ? 'Pro üyesisiniz' : 'Rotalink Pro',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          Text(
-            isPro
-                ? 'Rotalink\'i desteklediğiniz için teşekkür ederiz. Tüm Pro '
-                      'özellikleri hesabınızda açık.'
-                : 'Konaklamada doğru fiyatı görün, bütçenize uygun tesisi '
-                      'saniyeler içinde bulun.',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.92),
-              fontSize: 14,
-              height: 1.45,
-            ),
-          ),
-          if (!isPro) ...[
-            const SizedBox(height: 14),
-            const Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _HeroChip(
-                  icon: Icons.event_repeat_rounded,
-                  label: 'İstediğiniz zaman iptal',
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _HeroChip extends StatelessWidget {
-  const _HeroChip({required this.icon, required this.label});
-
-  final IconData icon;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: Colors.white),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Reklamsız bağımsız geliştirme: aboneliğin neyi mümkün kıldığı.
-class _SupportCard extends StatelessWidget {
-  const _SupportCard({required this.isPro});
-
-  final bool isPro;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderOf(context)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: BoxDecoration(
-              color: AppColors.isDark(context)
-                  ? AppColors.darkPrimarySoft
-                  : AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.favorite_rounded,
-              color: AppColors.primary,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isPro
-                      ? 'Desteğiniz Rotalink\'i büyütüyor'
-                      : 'Reklam yok, desteğiniz var',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  isPro
-                      ? 'Rotalink\'te reklam göstermiyoruz. Aboneliğiniz; tesis '
-                            'bilgilerinin ve fiyatların güncel tutulmasına, yeni '
-                            'özelliklerin geliştirilmesine doğrudan katkı sağlıyor.'
-                      : 'Rotalink\'te reklam göstermiyoruz. Tesis bilgilerini ve '
-                            'fiyatları güncel tutmak, yeni özellikler geliştirmek ve '
-                            'sunucu giderlerini karşılamak Pro üyelerimizin '
-                            'desteğiyle mümkün oluyor.',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontSize: 18),
-    );
-  }
-}
-
-class _ProBenefit {
-  const _ProBenefit({
-    required this.icon,
-    required this.title,
-    required this.detail,
-  });
-
-  final IconData icon;
-  final String title;
-  final String detail;
-}
-
-class _BenefitTile extends StatelessWidget {
-  const _BenefitTile({required this.benefit});
-
-  final _ProBenefit benefit;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderOf(context)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: AppColors.isDark(context)
-                  ? AppColors.darkPrimarySoft
-                  : AppColors.primarySoft,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(benefit.icon, size: 21, color: AppColors.primary),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  benefit.title,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  benefit.detail,
-                  style: TextStyle(
-                    fontSize: 13,
-                    height: 1.4,
-                    color: _mutedText(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FreeFeatures extends StatelessWidget {
-  const _FreeFeatures({required this.items});
-
-  final List<String> items;
-
-  @override
-  Widget build(BuildContext context) {
-    final muted = _mutedText(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Herkes için ücretsiz kalmaya devam eder',
-          style: TextStyle(
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-            color: muted,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 12,
-          runSpacing: 6,
-          children: [
-            for (final item in items)
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.check_circle_rounded, size: 15, color: muted),
-                  const SizedBox(width: 4),
-                  Text(item, style: TextStyle(fontSize: 12.5, color: muted)),
-                ],
-              ),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _PlanSection extends StatefulWidget {
-  const _PlanSection({required this.pro});
-
-  final ProService pro;
-
-  @override
-  State<_PlanSection> createState() => _PlanSectionState();
-}
-
-class _PlanSectionState extends State<_PlanSection> {
-  String _selectedId = ProProducts.yearly;
-
-  static String _money(ProductDetails p, double value) {
-    final floored = (value * 100).floorToDouble() / 100;
-    return NumberFormat.currency(
-      locale: 'tr_TR',
-      symbol: p.currencySymbol,
-      decimalDigits: 2,
-    ).format(floored);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<ProductDetails>>(
-      valueListenable: widget.pro.products,
-      builder: (context, products, _) {
-        if (products.isEmpty) {
-          return const _PlansUnavailable();
-        }
-        ProductDetails? byId(String id) {
-          for (final p in products) {
-            if (p.id == id) return p;
-          }
-          return null;
-        }
-
-        final monthly = byId(ProProducts.monthly);
-        final yearly = byId(ProProducts.yearly);
-        final ordered = [?yearly, ?monthly];
-        final selected = byId(_selectedId) ?? ordered.first;
-
-        int? savingPercent;
-        if (monthly != null && yearly != null && monthly.rawPrice > 0) {
-          final pct = ((1 - yearly.rawPrice / (monthly.rawPrice * 12)) * 100)
-              .floor();
-          if (pct >= 10) savingPercent = pct;
-        }
-
-        return ValueListenableBuilder<bool>(
-          valueListenable: widget.pro.purchasePending,
-          builder: (context, pending, _) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (final product in ordered) ...[
-                  _PlanOption(
-                    title: product.id == ProProducts.yearly
-                        ? 'Yıllık'
-                        : 'Aylık',
-                    price: product.price,
-                    period: product.id == ProProducts.yearly ? '/ yıl' : '/ ay',
-                    subtitle: product.id == ProProducts.yearly
-                        ? 'Ayda ${_money(product, product.rawPrice / 12)} · 12 ay kesintisiz'
-                        : 'Esnek kullanım, istediğiniz zaman iptal',
-                    badge:
-                        product.id == ProProducts.yearly &&
-                            savingPercent != null
-                        ? '%$savingPercent tasarruf'
-                        : null,
-                    selected: product.id == selected.id,
-                    disabled: pending,
-                    onTap: () => setState(() => _selectedId = product.id),
-                  ),
-                  const SizedBox(height: 10),
-                ],
-                const SizedBox(height: 6),
-                SizedBox(
-                  height: 54,
-                  child: FilledButton(
-                    onPressed: pending
-                        ? null
-                        : () => unawaited(widget.pro.buy(selected)),
-                    style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    child: pending
-                        ? const SizedBox(
-                            width: 22,
-                            height: 22,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.4,
-                              color: Colors.white,
-                            ),
-                          )
-                        : Text(
-                            selected.id == ProProducts.yearly
-                                ? 'Yıllık Pro\'ya geç · ${selected.price}'
-                                : 'Aylık Pro\'ya geç · ${selected.price}',
-                          ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Güvenli ödeme ${ProProducts.storeName} üzerinden yapılır.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 12, color: _mutedText(context)),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class _PlanOption extends StatelessWidget {
-  const _PlanOption({
-    required this.title,
-    required this.price,
-    required this.period,
-    required this.subtitle,
-    required this.badge,
-    required this.selected,
-    required this.disabled,
-    required this.onTap,
-  });
-
-  final String title;
-  final String price;
-  final String period;
-  final String subtitle;
-  final String? badge;
-  final bool selected;
-  final bool disabled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final border = selected
-        ? AppColors.primary
-        : (isDark
-              ? Colors.white.withValues(alpha: 0.14)
-              : AppColors.primary.withValues(alpha: 0.18));
-
-    return Opacity(
-      opacity: disabled ? 0.55 : 1,
-      child: Material(
-        color: selected
-            ? AppColors.primary.withValues(alpha: isDark ? 0.16 : 0.06)
-            : AppColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: disabled ? null : onTap,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(14, 16, 16, 16),
-            decoration: BoxDecoration(
-              border: Border.all(color: border, width: selected ? 2 : 1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  selected
-                      ? Icons.radio_button_checked_rounded
-                      : Icons.radio_button_off_rounded,
-                  color: selected ? AppColors.primary : _mutedText(context),
-                  size: 22,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1040),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 4,
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w800,
-                            ),
+                      const _PremiumHero(),
+                      const SizedBox(height: 16),
+                      if (state.legacy.hasAccess) ...[
+                        _LegacyMembership(
+                          legacy: state.legacy,
+                          onManage: () =>
+                              unawaited(_run(_controller.manageSubscription)),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (account != null) ...[
+                        PremiumUsageSummary(
+                          account: account,
+                          onManage: state.purchasePending || state.restoring
+                              ? null
+                              : () => unawaited(
+                                  _run(_controller.manageSubscription),
+                                ),
+                          onChoosePlan: _showPlans,
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      _SectionHeading(
+                        key: _plansKey,
+                        title: 'Paketinizi seçin',
+                      ),
+                      const SizedBox(height: 12),
+                      for (final plan in const [
+                        PremiumPlan.silver,
+                        PremiumPlan.gold,
+                        PremiumPlan.platinum,
+                      ]) ...[
+                        _PlanCard(
+                          plan: plan,
+                          selected: _selected == plan,
+                          state: state,
+                          onSelect: () => setState(() => _selected = plan),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
+                      const SizedBox(height: 6),
+                      _StartButton(
+                        plan: _selected,
+                        state: state,
+                        linkAccountOnBuy: widget.controller == null,
+                        onBuy: () => unawaited(_run(() => _buy(_selected))),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Ödeme, telefonda açık olan ${ProProducts.storeName} hesabından alınır. Ayrı oturum açılmaz. Aynı hesap sonraki telefonda da tanınır.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: AppColors.textMutedOf(context),
+                          fontSize: 12,
+                          height: 1.45,
+                        ),
+                      ),
+                      if (state.catalogMessage != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          state.catalogMessage!,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.textMutedOf(context),
+                            fontSize: 12,
+                            height: 1.4,
                           ),
-                          if (badge != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF16A34A),
-                                borderRadius: BorderRadius.circular(20),
+                        ),
+                      ],
+                      TextButton.icon(
+                        key: const ValueKey('premium-restore'),
+                        onPressed: state.restoring || state.purchasePending
+                            ? null
+                            : () => unawaited(_run(_controller.restore)),
+                        icon: const Icon(Icons.restore_rounded, size: 18),
+                        label: Text(
+                          state.restoring
+                              ? 'Kontrol ediliyor…'
+                              : 'Satın almayı geri yükle',
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 8,
+                        children: [
+                          for (final link in [
+                            ('Gizlilik Politikası', StoreLinks.privacyPolicy),
+                            ('Kullanım Koşulları', StoreLinks.termsOfUse),
+                          ])
+                            TextButton(
+                              onPressed: () => unawaited(
+                                _run(() async {
+                                  if (!await launchUrl(
+                                    Uri.parse(link.$2),
+                                    mode: LaunchMode.externalApplication,
+                                  )) {
+                                    throw StateError('Link unavailable');
+                                  }
+                                }),
                               ),
                               child: Text(
-                                badge!,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10.5,
-                                  fontWeight: FontWeight.w800,
-                                ),
+                                link.$1,
+                                style: const TextStyle(fontSize: 11.5),
                               ),
                             ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          color: _mutedText(context),
-                        ),
-                      ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      price,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    Text(
-                      period,
-                      style: TextStyle(
-                        fontSize: 11.5,
-                        color: _mutedText(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
+          );
+        },
+      ),
+    ),
+  );
+}
+
+class _PremiumHero extends StatelessWidget {
+  const _PremiumHero();
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+    decoration: BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF0A8A98), Color(0xFF07586A), Color(0xFF123448)],
+      ),
+      borderRadius: BorderRadius.circular(22),
+      boxShadow: const [
+        BoxShadow(
+          color: Color(0x330A8A98),
+          blurRadius: 18,
+          offset: Offset(0, 8),
+        ),
+      ],
+    ),
+    child: const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Rotalink Pro',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 26,
+            height: 1.1,
+            fontWeight: FontWeight.w800,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _PlansUnavailable extends StatelessWidget {
-  const _PlansUnavailable();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceOf(context),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.borderOf(context)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Icon(Icons.info_outline, color: AppColors.warning, size: 22),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Abonelik planları şu anda yüklenemedi. İnternet bağlantınızı '
-              'kontrol edip tekrar deneyin.',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(height: 1.45),
-            ),
+        SizedBox(height: 8),
+        Text(
+          'Reklamsız Rotalink, sizin desteğinizle büyüyor! 💚',
+          style: TextStyle(
+            color: Color(0xFFE7F6F8),
+            fontSize: 15,
+            height: 1.4,
+            fontWeight: FontWeight.w800,
           ),
-        ],
-      ),
-    );
-  }
+        ),
+        SizedBox(height: 6),
+        Text(
+          'Pro aboneliğiniz yalnızca ayrıcalıklı özelliklere erişim değil, Rotalink\'in gelişimine ve hizmetlerini sürdürebilmesine verdiğiniz değerli bir destektir.',
+          style: TextStyle(color: Color(0xFFE7F6F8), fontSize: 15, height: 1.4),
+        ),
+      ],
+    ),
+  );
 }
 
-class _ActiveCard extends StatefulWidget {
-  const _ActiveCard({required this.pro, required this.onManage});
-
-  final ProService pro;
-  final VoidCallback onManage;
-
-  @override
-  State<_ActiveCard> createState() => _ActiveCardState();
+({Color accent, List<Color> colors}) _metalOf(PremiumPlan plan, bool dark) {
+  return switch (plan) {
+    PremiumPlan.silver => (
+      accent: dark ? const Color(0xFFD5DEE6) : const Color(0xFF5E6E7E),
+      colors: dark
+          ? const [Color(0xFF3A4550), Color(0xFF242C33)]
+          : const [Color(0xFFF7F8FA), Color(0xFFD5DEE6)],
+    ),
+    PremiumPlan.gold => (
+      accent: dark ? const Color(0xFFF3CA6A) : const Color(0xFF8A5A10),
+      colors: dark
+          ? const [Color(0xFF3C3218), Color(0xFF262014)]
+          : const [Color(0xFFFFF8E8), Color(0xFFFFEFC4)],
+    ),
+    PremiumPlan.platinum || PremiumPlan.legacyPlatinum => (
+      accent: dark ? const Color(0xFFE6D4FF) : const Color(0xFF5A2D91),
+      colors: dark
+          ? const [Color(0xFF3A2458), Color(0xFF1C102E)]
+          : const [Color(0xFFF6EEFF), Color(0xFFCDB4EE)],
+    ),
+  };
 }
 
-class _ActiveCardState extends State<_ActiveCard> {
-  Timer? _tick;
-  Duration _remaining = Duration.zero;
-
-  @override
-  void initState() {
-    super.initState();
-    widget.pro.expiryAt.addListener(_onExpiryChanged);
-    _syncRemaining();
-    _tick = Timer.periodic(const Duration(seconds: 1), (_) => _syncRemaining());
-  }
-
-  @override
-  void dispose() {
-    _tick?.cancel();
-    widget.pro.expiryAt.removeListener(_onExpiryChanged);
-    super.dispose();
-  }
-
-  void _onExpiryChanged() => _syncRemaining();
-
-  void _syncRemaining() {
-    final end = widget.pro.expiryAt.value;
-    final next = end == null ? Duration.zero : end.difference(DateTime.now());
-    final clamped = next.isNegative ? Duration.zero : next;
-    if (!mounted) return;
-    if (clamped != _remaining) {
-      setState(() => _remaining = clamped);
-    }
-  }
-
-  String get _planLabel {
-    final id = widget.pro.activeProductId;
-    if (id == ProProducts.yearly) return 'Yıllık plan';
-    if (id == ProProducts.monthly) return 'Aylık plan';
-    return 'Pro abonelik';
-  }
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({
+    required this.plan,
+    required this.selected,
+    required this.state,
+    required this.onSelect,
+  });
+  final PremiumPlan plan;
+  final bool selected;
+  final PremiumUiState state;
+  final VoidCallback onSelect;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final hasCountdown = widget.pro.expiryAt.value != null;
-    final days = _remaining.inDays;
-    final hours = _remaining.inHours.remainder(24);
-    final minutes = _remaining.inMinutes.remainder(60);
-    final seconds = _remaining.inSeconds.remainder(60);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(18),
+    final dark = AppColors.isDark(context);
+    final featured = plan == PremiumPlan.gold;
+    final metal = _metalOf(plan, dark);
+    final accent = metal.accent;
+    final offer = state.offers[plan];
+    final active =
+        state.account?.plan == plan &&
+        (state.account?.status == PremiumSubscriptionStatus.active ||
+            state.account?.status == PremiumSubscriptionStatus.renewalOff);
+    final loading = state.catalogPhase == PremiumCatalogPhase.loading;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onSelect,
+        borderRadius: BorderRadius.circular(featured ? 20 : 16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: EdgeInsets.fromLTRB(
+            14,
+            featured ? 14 : 12,
+            14,
+            featured ? 14 : 12,
+          ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: isDark
-                  ? const [Color(0xFF0F3D2E), Color(0xFF14532D)]
-                  : const [Color(0xFFE9F7EF), Color(0xFFD8F3E4)],
+              colors: metal.colors,
             ),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(featured ? 20 : 16),
             border: Border.all(
-              color: isDark ? const Color(0xFF2F6B4F) : const Color(0xFF9AD5B4),
+              color: featured || selected
+                  ? accent
+                  : AppColors.borderOf(context),
+              width: featured || selected ? 2 : 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: accent.withValues(alpha: dark ? 0.2 : 0.16),
+                blurRadius: featured ? 16 : 10,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.verified_outlined,
-                    color: isDark
-                        ? const Color(0xFF86EFAC)
-                        : const Color(0xFF1B7A4B),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Pro aboneliğiniz aktif',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: isDark
-                            ? const Color(0xFFDCFCE7)
-                            : const Color(0xFF14532D),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Text(
-                '$_planLabel · Fiyatlar açık',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.72)
-                      : const Color(0xFF166534),
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Icon(
+                  selected ? Icons.check_circle_rounded : Icons.circle_outlined,
+                  color: selected ? accent : AppColors.textMutedOf(context),
                 ),
               ),
-              if (hasCountdown) ...[
-                const SizedBox(height: 18),
-                Text(
-                  'Yenilemeye kalan süre',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.2,
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.55)
-                        : const Color(0xFF3F6B52),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: _CountdownUnit(
-                        value: days,
-                        label: 'Gün',
-                        isDark: isDark,
+                    if (featured)
+                      Text(
+                        'ÖNERİLEN PAKET',
+                        style: TextStyle(
+                          color: accent,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.4,
+                        ),
+                      ),
+                    Text(
+                      plan.title,
+                      style: TextStyle(
+                        color: AppColors.textStrongOf(context),
+                        fontSize: featured ? 18 : 16,
+                        fontWeight: FontWeight.w800,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _CountdownUnit(
-                        value: hours,
-                        label: 'Saat',
-                        isDark: isDark,
+                    const SizedBox(height: 2),
+                    Text(
+                      plan == PremiumPlan.gold
+                          ? 'Önerilen · ${plan.pitch}'
+                          : plan.pitch,
+                      style: TextStyle(
+                        color: accent,
+                        fontSize: 12.5,
+                        fontWeight: featured
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _CountdownUnit(
-                        value: minutes,
-                        label: 'Dk',
-                        isDark: isDark,
+                    const SizedBox(height: 2),
+                    Text(
+                      PremiumRightsCatalog.instance.of(plan).line,
+                      style: TextStyle(
+                        color: AppColors.textMutedOf(context),
+                        fontSize: 13,
+                        height: 1.3,
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _CountdownUnit(
-                        value: seconds,
-                        label: 'Sn',
-                        isDark: isDark,
+                    if (active)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          'Şu anki paketiniz',
+                          style: TextStyle(
+                            color: accent,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      )
+                    else if (offer == null &&
+                        state.catalogPhase == PremiumCatalogPhase.error)
+                      const Padding(
+                        padding: EdgeInsets.only(top: 4),
+                        child: Text(
+                          'Fiyat şu anda alınamıyor',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      )
+                    else if (offer == null && loading)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          'Mağaza fiyatı yükleniyor…',
+                          style: TextStyle(
+                            color: AppColors.textMutedOf(context),
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
-                    ),
                   ],
+                ),
+              ),
+              if (offer != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  offer.product.price,
+                  style: TextStyle(
+                    color: accent,
+                    fontSize: featured ? 18 : 15,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ],
             ],
           ),
         ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: widget.onManage,
-          icon: const Icon(Icons.settings_outlined, size: 18),
-          label: const Text('Aboneliği yönet'),
-        ),
-      ],
+      ),
     );
   }
 }
 
-class _CountdownUnit extends StatelessWidget {
-  const _CountdownUnit({
-    required this.value,
-    required this.label,
-    required this.isDark,
+class _StartButton extends StatelessWidget {
+  const _StartButton({
+    required this.plan,
+    required this.state,
+    required this.linkAccountOnBuy,
+    required this.onBuy,
   });
-
-  final int value;
-  final String label;
-  final bool isDark;
+  final PremiumPlan plan;
+  final PremiumUiState state;
+  final bool linkAccountOnBuy;
+  final VoidCallback onBuy;
 
   @override
   Widget build(BuildContext context) {
-    final digits = value.toString().padLeft(2, '0');
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
-      decoration: BoxDecoration(
-        color: isDark
-            ? Colors.black.withValues(alpha: 0.28)
-            : Colors.white.withValues(alpha: 0.78),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.10)
-              : const Color(0xFF9AD5B4).withValues(alpha: 0.7),
-        ),
+    final offer = state.offers[plan];
+    final active =
+        state.account?.plan == plan &&
+        (state.account?.status == PremiumSubscriptionStatus.active ||
+            state.account?.status == PremiumSubscriptionStatus.renewalOff);
+    final linkReady =
+        linkAccountOnBuy &&
+        offer != null &&
+        state.account == null &&
+        !state.legacy.hasAccess &&
+        !active;
+    final canBuy =
+        ((state.canPurchase(plan) && !active) || linkReady) &&
+        !state.purchasePending &&
+        !state.restoring;
+    final current = state.account?.plan;
+    final hasCurrentPlan =
+        current != null &&
+        (state.account?.status == PremiumSubscriptionStatus.active ||
+            state.account?.status == PremiumSubscriptionStatus.renewalOff);
+    final label = active
+        ? 'Aktif paketiniz'
+        : state.purchasePending
+        ? 'İşlem sürüyor…'
+        : !hasCurrentPlan
+        ? 'Aboneliği başlat'
+        : plan.index > current.index
+        ? 'Paket yükselt'
+        : 'Paketi değiştir';
+    return FilledButton(
+      key: ValueKey('premium-buy-${plan.name}'),
+      onPressed: canBuy ? onBuy : null,
+      style: FilledButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        disabledBackgroundColor: AppColors.borderOf(context),
+        disabledForegroundColor: AppColors.textMutedOf(context),
+        minimumSize: const Size.fromHeight(52),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
       ),
-      child: Column(
-        children: [
+      child: Text(label),
+    );
+  }
+}
+
+class _SectionHeading extends StatelessWidget {
+  const _SectionHeading({super.key, required this.title});
+  final String title;
+  @override
+  Widget build(BuildContext context) => Text(
+    title,
+    style: TextStyle(
+      color: AppColors.textStrongOf(context),
+      fontSize: 18,
+      fontWeight: FontWeight.w800,
+    ),
+  );
+}
+
+class _LegacyMembership extends StatelessWidget {
+  const _LegacyMembership({required this.legacy, required this.onManage});
+  final LegacyProSnapshot legacy;
+  final VoidCallback onManage;
+  @override
+  Widget build(BuildContext context) => Container(
+    key: const ValueKey('legacy-pro-membership'),
+    padding: const EdgeInsets.all(18),
+    decoration: BoxDecoration(
+      color: AppColors.surfaceOf(context),
+      border: Border.all(color: AppColors.primary.withValues(alpha: 0.22)),
+      borderRadius: BorderRadius.circular(21),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Icon(Icons.verified_outlined, color: AppColors.primary),
+        const SizedBox(height: 9),
+        Text(
+          'Mevcut Pro üyeliğiniz',
+          style: TextStyle(
+            color: AppColors.textStrongOf(context),
+            fontSize: 17,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 6),
+        if (legacy.active) ...[
           Text(
-            digits,
+            '${legacy.productId == ProProducts.yearly ? 'Yıllık Pro' : 'Aylık Pro'} · Erişiminiz devam ediyor.',
             style: TextStyle(
-              fontSize: 22,
-              height: 1.1,
-              fontWeight: FontWeight.w800,
-              fontFeatures: const [FontFeature.tabularFigures()],
-              color: isDark ? const Color(0xFFECFDF5) : const Color(0xFF14532D),
+              color: AppColors.textMutedOf(context),
+              fontSize: 13,
             ),
           ),
-          const SizedBox(height: 4),
+          if (legacy.estimatedEnd != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Kayıtlı dönem bitişi: ${DateFormat('dd.MM.yyyy').format(legacy.estimatedEnd!.toLocal())}',
+              style: TextStyle(
+                color: AppColors.textMutedOf(context),
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ],
+        if (legacy.giftEnd != null) ...[
+          const SizedBox(height: 6),
           Text(
-            label,
+            'Hediye Pro erişiminiz ${DateFormat('dd.MM.yyyy').format(legacy.giftEnd!.toLocal())} tarihine kadar devam ediyor.',
             style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.55)
-                  : const Color(0xFF3F6B52),
+              color: AppColors.textMutedOf(context),
+              fontSize: 12.5,
+              height: 1.5,
             ),
           ),
         ],
-      ),
-    );
-  }
+        if (legacy.active)
+          TextButton.icon(
+            onPressed: onManage,
+            icon: const Icon(Icons.settings_outlined, size: 18),
+            label: const Text('Aboneliği yönet'),
+          ),
+      ],
+    ),
+  );
 }
-
-/// Eski uygulama içi hediye Pro: yalnız kalan süre, kod girişi yok.
-class _LegacyGiftNotice extends StatelessWidget {
-  const _LegacyGiftNotice({required this.endsAt});
-
-  final DateTime endsAt;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    String when;
-    try {
-      when = DateFormat('d MMMM y', 'tr_TR').format(endsAt);
-    } catch (_) {
-      when = DateFormat('dd.MM.yyyy').format(endsAt);
-    }
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF14352A) : const Color(0xFFECFDF5),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        'Daha önce verilen hediye Pro $when tarihine kadar açık. '
-        'Yeni hediye abonelikler ${ProProducts.storeName} üzerinden verilir.',
-        style: const TextStyle(fontSize: 13.5, height: 1.4, fontWeight: FontWeight.w700),
-      ),
-    );
-  }
-}
-

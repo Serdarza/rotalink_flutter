@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
+import 'package:flutter/foundation.dart'
+    show ValueNotifier, debugPrint, kDebugMode;
 
 import '../models/facility_price_entry.dart';
 import '../models/misafirhane.dart';
@@ -27,9 +28,16 @@ class FacilityPriceRepository {
 
   int get count => _byKey.length;
 
+  /// Katalog belleğe alındığında artar. Liste ve detay bunu dinler.
+  final ValueNotifier<int> updates = ValueNotifier(0);
+
   bool get isReady => _byKey.isNotEmpty || _loadedEmpty;
 
+  /// İndirme denendi ve katalog hâlâ yok. Bu, tesiste fiyat olmadığı anlamına gelmez.
+  bool get loadFailed => _loadFailed;
+
   bool _loadedEmpty = false;
+  bool _loadFailed = false;
   Future<void>? _readyInFlight;
 
   /// Açılışta: önbellek + en fazla saatte bir sürüm kontrolü (değiştiyse indir).
@@ -38,13 +46,24 @@ class FacilityPriceRepository {
       _ensureLocalDataReady().whenComplete(() => _readyInFlight = null);
 
   Future<void> _ensureLocalDataReady() async {
+    if (isReady) return;
+    if (_loadFailed) {
+      _loadFailed = false;
+      updates.value++;
+    }
     if (await FiyatLocalCache.hasCache()) {
-      await _loadFromLocalCache();
-      unawaited(_maybeSyncIfRemoteVersionChanged());
+      final loaded = await _loadFromLocalCache();
+      if (loaded) {
+        unawaited(_maybeSyncIfRemoteVersionChanged());
+        return;
+      }
+    }
+    if (!await NetworkService.instance.isConnected()) {
+      _markFailed();
       return;
     }
-    if (!await NetworkService.instance.isConnected()) return;
     await _downloadAndPersist();
+    if (!isReady) _markFailed();
   }
 
   /// Arka plan görevi: indirilen `fiyatlar.json` belleğe alınır; önbelleğe yazılmaz.
@@ -55,13 +74,12 @@ class FacilityPriceRepository {
     return _byKey[key];
   }
 
-  /// Kart gösterimi: fiyatlar.json varsa onu kullan; yoksa tesis gömülü fiyat / yok.
+  /// Katalog hazırsa fiyatlar.json kaydını kullanır.
+  /// Henüz yüklenmediyse tesisi olduğu gibi bırakır; "kayıt yok" denmez.
   Misafirhane resolveFacility(Misafirhane m) {
+    if (!isReady) return m;
     final entry = lookup(m.il, m.isim);
-    if (entry == null) {
-      // Ayrı dosyada yok → kartta "ücret kayıtlı değil" (tesis JSON fiyatına güvenme)
-      return m.copyWithoutPrices();
-    }
+    if (entry == null) return m.copyWithoutPrices();
     return m.copyWithPriceEntry(entry);
   }
 
@@ -83,19 +101,18 @@ class FacilityPriceRepository {
     await _downloadAndPersist(expectedVersion: remoteVersion);
   }
 
-  Future<void> _loadFromLocalCache() async {
+  /// Bozuk veya boş önbellek "fiyat yok" sayılmaz; çağıran uzak dosyayı dener.
+  Future<bool> _loadFromLocalCache() async {
     try {
       final raw = await FiyatLocalCache.readJson();
-      if (raw == null) {
-        _byKey = const {};
-        _loadedEmpty = true;
-        return;
-      }
-      _applyDecoded(jsonDecode(raw));
+      if (raw == null) return false;
+      final decoded = _decode(jsonDecode(raw));
+      if (decoded == null || decoded.map.isEmpty) return false;
+      _commit(decoded.map, decoded.note);
+      return true;
     } catch (e, st) {
       _log('Yerel fiyat önbelleği okunamadı: $e', st);
-      _byKey = const {};
-      _loadedEmpty = true;
+      return false;
     }
   }
 
@@ -127,8 +144,19 @@ class FacilityPriceRepository {
   }
 
   void _applyDecoded(dynamic root) {
+    final decoded = _decode(root);
+    if (decoded == null) {
+      _log('Fiyat dosyası okunamadı.');
+      return;
+    }
+    _commit(decoded.map, decoded.note);
+    _log('Fiyat kaydı yüklendi: ${decoded.map.length} tesis');
+  }
+
+  ({Map<String, FacilityPriceEntry> map, String? note})? _decode(dynamic root) {
     final map = <String, FacilityPriceEntry>{};
     String? note;
+    List<dynamic>? list;
 
     if (root is Map) {
       final m = root.map((k, v) => MapEntry(k.toString(), v));
@@ -137,26 +165,33 @@ class FacilityPriceRepository {
         final s = n.toString().trim();
         if (s.isNotEmpty) note = s;
       }
-      final list = m['tesisler'] ?? m['fiyatlar'] ?? m['items'];
-      if (list is List) {
-        for (final item in list) {
-          final e = FacilityPriceEntry.tryParse(item);
-          if (e == null || !e.hasFiyatBilgisi) continue;
-          map[e.key] = e;
-        }
-      }
+      final raw = m['tesisler'] ?? m['fiyatlar'] ?? m['items'];
+      if (raw is List) list = raw;
     } else if (root is List) {
-      for (final item in root) {
-        final e = FacilityPriceEntry.tryParse(item);
-        if (e == null || !e.hasFiyatBilgisi) continue;
-        map[e.key] = e;
-      }
+      list = root;
     }
+    if (list == null) return null;
 
+    for (final item in list) {
+      final e = FacilityPriceEntry.tryParse(item);
+      if (e == null || !e.hasFiyatBilgisi) continue;
+      map[e.key] = e;
+    }
+    return (map: map, note: note);
+  }
+
+  void _commit(Map<String, FacilityPriceEntry> map, String? note) {
     _note = note;
     _byKey = map;
     _loadedEmpty = map.isEmpty;
-    _log('Fiyat kaydı yüklendi: ${map.length} tesis');
+    _loadFailed = false;
+    updates.value++;
+  }
+
+  void _markFailed() {
+    if (isReady || _loadFailed) return;
+    _loadFailed = true;
+    updates.value++;
   }
 
   static void _log(String message, [StackTrace? st]) {

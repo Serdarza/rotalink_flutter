@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 
 /// Kullanıcı tarafından tetiklenen izin isteğinin sonucu.
@@ -20,6 +21,8 @@ enum PermissionRequestOutcome {
 /// yol açar. Tüm konum izni işlemlerini [Geolocator] ile yapmak bu çakışmayı önler.
 class SimpleLocationService {
   SimpleLocationService._();
+
+  static const _locationChannel = MethodChannel('rotalink/location');
 
   static bool _declinedThisSession = false;
   static bool _gpsUnavailableThisSession = false;
@@ -61,6 +64,19 @@ class SimpleLocationService {
   static Future<PermissionRequestOutcome> requestFromUserTap() async {
     await prepareForUserInitiatedPermissionDialog();
     return requestOsPermissionDialog();
+  }
+
+  /// Konum kapalıysa Android’in kendi “konumu aç” penceresini gösterir.
+  /// Ayarlar sayfasına gitmez.
+  static Future<bool> promptEnableLocationService() async {
+    if (await Geolocator.isLocationServiceEnabled()) return true;
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) return false;
+    try {
+      final enabled = await _locationChannel.invokeMethod<bool>('requestService');
+      return enabled == true;
+    } catch (_) {
+      return Geolocator.isLocationServiceEnabled();
+    }
   }
 
   /// Eski API uyumu.

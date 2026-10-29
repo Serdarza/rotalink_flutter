@@ -38,6 +38,7 @@ class FacilityDetailCard extends StatelessWidget {
     required this.onShowOnMap,
     required this.onRequestLocation,
     this.fromMap = false,
+    this.showInfoReport = true,
   });
 
   final Misafirhane misafirhane;
@@ -52,6 +53,7 @@ class FacilityDetailCard extends StatelessWidget {
   final VoidCallback onShowOnMap;
   final Future<void> Function() onRequestLocation;
   final bool fromMap;
+  final bool showInfoReport;
 
   @override
   Widget build(BuildContext context) {
@@ -277,8 +279,10 @@ class FacilityDetailCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 10),
                     FacilityStayEligibilityCard(facility: m, compact: true),
-                    const SizedBox(height: 10),
-                    FacilityInfoErrorReportCard(facility: m),
+                    if (showInfoReport) ...[
+                      const SizedBox(height: 10),
+                      FacilityInfoErrorReportCard(facility: m),
+                    ],
                     const SizedBox(height: 6),
                   ],
                 ),

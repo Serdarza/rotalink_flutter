@@ -65,5 +65,9 @@ void main() {
       NearbyGuesthouse(facility('A', 39, 32), 3.42).distanceLabel,
       '3,4 km uzaklıkta · (Kuş Uçuşu)',
     );
+    expect(
+      NearbyGuesthouse(facility('A', 39, 32), 2.36).birdFlightLabel,
+      '2,4 km · Kuş uçuşu',
+    );
   });
 }

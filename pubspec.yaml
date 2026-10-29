@@ -2,7 +2,7 @@ name: rotalink_flutter
 description: Rotalink — Flutter (Android + iOS), Kotlin uygulamasıyla aynı veri kaynağı.
 publish_to: 'none'
 
-version: 4.8.2+86
+version: 4.8.4+88
 
 environment:
   sdk: ^3.11.4
@@ -39,12 +39,17 @@ dependencies:
   in_app_purchase: ^3.3.0
   # Play Billing Library 8.0+ (Play Console zorunluluğu, 31 Ağu 2026).
   in_app_purchase_android: 0.5.0
+  # Already used by in_app_purchase; expose native subscription period metadata.
+  in_app_purchase_storekit: 0.4.11
   workmanager: ^0.10.10
   flutter_secure_storage: ^10.3.4
   crypto: ^3.0.7
   app_links: ^7.0.0
   play_install_referrer: ^0.5.0
   firebase_messaging: 15.2.10
+  firebase_auth: 5.7.0
+  google_sign_in: 7.2.0
+  google_maps_flutter: 2.18.0
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +68,7 @@ flutter:
     - assets/images/social_facebook.png
     - assets/images/home_categories/
     - assets/images/home_discover/
+    - assets/images/cities/
     # Gömülü yedek veritabanı: ilk açılışta uzak (GitHub) veri bozuk/erişilemezse
     # arama boş kalmasın diye uygulamayla birlikte gelir.
     - assets/data/master_database_updated.json

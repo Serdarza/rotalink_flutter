@@ -9,12 +9,16 @@ class RotalinkShellScope extends InheritedWidget {
     super.key,
     required this.goHome,
     required this.selectTab,
+    this.returnToSearchHub,
     this.onboarding,
     required super.child,
   });
 
   final VoidCallback goHome;
   final void Function(RotalinkBottomNavItem tab) selectTab;
+
+  /// Ara sekmesinde sonuç kalmadıysa eski harita yerine arama sayfasını açar.
+  final VoidCallback? returnToSearchHub;
   final AppOnboardingController? onboarding;
 
   static RotalinkShellScope? maybeOf(BuildContext context) {

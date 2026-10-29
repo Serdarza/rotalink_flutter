@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 // ignore: implementation_imports — [PopupEvent] public export yok.
 import 'package:flutter_map_marker_popup/src/state/popup_event.dart';
 import 'package:geolocator/geolocator.dart';
@@ -61,7 +62,6 @@ import '../widgets/city_overview_marker.dart';
 import '../widgets/map_facility_preview_card.dart';
 import '../widgets/misafirhane_map_marker.dart';
 import '../widgets/misafirhane_search_results_sheet.dart';
-import '../widgets/rotalink_tile_layer.dart';
 import '../widgets/map_weather_chip.dart';
 import '../widgets/emergency_bottom_sheet.dart';
 import '../widgets/weather_bottom_sheet.dart';
@@ -152,6 +152,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
   final ValueNotifier<int> _previewPositionTick = ValueNotifier<int>(0);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final MapController _mapController = MapController();
+  gmaps.GoogleMapController? _googleMap;
   final PopupController _popupController = PopupController();
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchBarFocusNode = FocusNode();
@@ -476,8 +477,25 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
     );
   }
 
+  void _syncKonaklamaGoogle(LatLng center, double zoom) {
+    final map = _googleMap;
+    if (map == null) return;
+    if (!isValidWgs84LatLng(center.latitude, center.longitude)) return;
+    unawaited(
+      map.moveCamera(
+        gmaps.CameraUpdate.newCameraPosition(
+          gmaps.CameraPosition(
+            target: gmaps.LatLng(center.latitude, center.longitude),
+            zoom: zoom,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
+    _googleMap = null;
     WidgetsBinding.instance.removeObserver(this);
     DeepLinkService.instance.pending.removeListener(_onDeepLinkPending);
     _previewPositionTick.dispose();
@@ -641,11 +659,15 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
       return true;
     }
 
-    // Liste görünümü → önceki menü: kategori ile açıldıysa ana menü,
-    // arama ile açıldıysa temiz harita.
+    // Liste kapanınca kategori ana sayfaya, arama Ara sekmesine döner.
     final fromCategory = _searchController.text.trim().isEmpty;
     _resetSearchToHome();
-    if (fromCategory) RotalinkShellScope.find(context)?.goHome();
+    final shell = RotalinkShellScope.find(context);
+    if (fromCategory) {
+      shell?.goHome();
+    } else {
+      shell?.returnToSearchHub?.call();
+    }
     return true;
   }
 
@@ -2316,6 +2338,28 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                   return Stack(
                     clipBehavior: Clip.none,
                     children: [
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: gmaps.GoogleMap(
+                            initialCameraPosition: gmaps.CameraPosition(
+                              target: gmaps.LatLng(
+                                _center.latitude,
+                                _center.longitude,
+                              ),
+                              zoom: _zoom,
+                            ),
+                            buildingsEnabled: true,
+                            zoomControlsEnabled: false,
+                            myLocationButtonEnabled: false,
+                            mapToolbarEnabled: false,
+                            compassEnabled: false,
+                            onMapCreated: (controller) {
+                              _googleMap = controller;
+                              _syncKonaklamaGoogle(_center, _zoom);
+                            },
+                          ),
+                        ),
+                      ),
                       RepaintBoundary(
                         child: PopupScope(
                           onPopupEvent: _onMisafirhanePopupEvent,
@@ -2323,6 +2367,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                             key: const ValueKey<String>('main-map'),
                             mapController: _mapController,
                             options: MapOptions(
+                              backgroundColor: Colors.transparent,
                               initialCenter: sanitizeLatLng(_center),
                               initialZoom: clampZoom(_zoom),
                               interactionOptions: const InteractionOptions(
@@ -2365,6 +2410,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                                     _mainMapFocusedCity == null) {
                                   setState(() {});
                                 }
+                                _syncKonaklamaGoogle(_center, _zoom);
                               },
                               onTap: (tapPosition, point) {
                                 if (DateTime.now().millisecondsSinceEpoch <
@@ -2381,7 +2427,6 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                               },
                             ),
                             children: [
-                              const RotalinkTileLayer(),
                               if (_routePolylines.isNotEmpty)
                                 PolylineLayer(polylines: _routePolylines),
                               if (inRoute && rotaForUi != null) ...[
@@ -2749,7 +2794,11 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                             _onMainSearchCleared();
                             setState(() => _searchBarSession++);
                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                              if (mounted) _fitTurkeyOverviewCamera();
+                              if (!mounted) return;
+                              _fitTurkeyOverviewCamera();
+                              RotalinkShellScope.find(
+                                context,
+                              )?.returnToSearchHub?.call();
                             });
                           },
                           onClearPressed: () {

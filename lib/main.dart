@@ -13,6 +13,7 @@ import 'ads/analytics_observer.dart';
 import 'ads/firebase_analytics_service.dart';
 import 'app.dart';
 import 'billing/free_price_quota.dart';
+import 'billing/premium_price_access.dart';
 import 'billing/pro_service.dart';
 import 'bootstrap/firebase_bootstrap.dart';
 import 'deeplink/deep_link_service.dart';
@@ -112,6 +113,7 @@ Future<void> _bootstrapSecondary() async {
       }
     }(),
     FreePriceQuota.instance.initialize(),
+    PremiumPriceAccess.instance.initialize(),
     () async {
       try {
         await initializeDateFormatting('tr_TR', null);

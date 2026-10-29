@@ -20,6 +20,71 @@ class OsrmSegment {
 }
 
 abstract final class OsrmRouteService {
+  static const _agent = 'RotalinkFlutter/1.0 (https://rotalink.tr)';
+
+  /// Tek başlangıç–varış. [mode] `drive` veya `walk`. Ücretsiz OSRM; Google’a gitmez.
+  static Future<OsrmSegment?> fetchDirect({
+    required double originLat,
+    required double originLon,
+    required double destLat,
+    required double destLon,
+    required String mode,
+  }) async {
+    if (!isValidWgs84LatLng(originLat, originLon) ||
+        !isValidWgs84LatLng(destLat, destLon)) {
+      return null;
+    }
+    final coord = '$originLon,$originLat;$destLon,$destLat';
+    final query = '?overview=full&geometries=geojson';
+    // router.project-osrm.org her profil için araba grafiğini döndürür.
+    // Yürüyüş ayrı sunucudan alınır; araba yedeği yürüme süresini bozar.
+    if (mode == 'walk') {
+      return _readRoute(
+        'https://routing.openstreetmap.de/routed-foot/route/v1/foot/$coord$query',
+      );
+    }
+    return await _readRoute(
+          'https://routing.openstreetmap.de/routed-car/route/v1/driving/$coord$query',
+        ) ??
+        _readRoute(
+          'https://router.project-osrm.org/route/v1/driving/$coord$query',
+        );
+  }
+
+  static Future<OsrmSegment?> _readRoute(String url) async {
+    try {
+      final resp = await http
+          .get(Uri.parse(url), headers: {'User-Agent': _agent})
+          .timeout(const Duration(seconds: 20));
+      if (resp.statusCode != 200) return null;
+      final json = jsonDecode(responseText(resp));
+      if (json is! Map || json['code'] != 'Ok') return null;
+      final routes = json['routes'];
+      if (routes is! List || routes.isEmpty || routes.first is! Map) {
+        return null;
+      }
+      final route = routes.first as Map;
+      final coords = (route['geometry'] as Map?)?['coordinates'];
+      if (coords is! List) return null;
+      final pts = <LatLng>[];
+      for (final c in coords) {
+        if (c is List && c.length >= 2) {
+          final lon = (c[0] as num).toDouble();
+          final lat = (c[1] as num).toDouble();
+          if (isValidWgs84LatLng(lat, lon)) pts.add(LatLng(lat, lon));
+        }
+      }
+      if (pts.length < 2) return null;
+      return OsrmSegment(
+        points: pts,
+        distanceM: (route['distance'] as num?)?.toDouble() ?? 0,
+        durationS: (route['duration'] as num?)?.toDouble() ?? 0,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
   static Future<List<OsrmSegment>> fetchSegments(List<LatLng> waypoints) async {
     if (waypoints.length < 2) return const [];
     final out = <OsrmSegment>[];

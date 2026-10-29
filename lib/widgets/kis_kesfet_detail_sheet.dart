@@ -178,18 +178,27 @@ class _KisKesfetDetailBody extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  if (place.hasOfficialSource)
-                    TextButton.icon(
-                      onPressed: () => _openSource(context, place.resmiKaynak),
-                      icon: const Icon(Icons.open_in_new_rounded, size: 16),
-                      label: const Text('Resmî kaynak'),
-                      style: TextButton.styleFrom(foregroundColor: accent),
-                    ),
+              ListenableBuilder(
+                listenable: thermalPriceListenable,
+                builder: (context, _) {
+                  final sourceOpen =
+                      place.kategori != KisKesfetKategori.termal ||
+                      thermalSourceOpen(place);
+                  return Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      if (place.hasOfficialSource && sourceOpen)
+                        TextButton.icon(
+                          onPressed: () =>
+                              _openSource(context, place.resmiKaynak),
+                          icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                          label: const Text('Resmî kaynak'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: accent,
+                          ),
+                        ),
                   TextButton.icon(
                     onPressed: () => Share.share(
                       StoreLinks.shareMessage(place.isim, [
@@ -202,7 +211,9 @@ class _KisKesfetDetailBody extends StatelessWidget {
                     label: const Text('Paylaş'),
                     style: TextButton.styleFrom(foregroundColor: accent),
                   ),
-                ],
+                    ],
+                  );
+                },
               ),
             ],
           ),
