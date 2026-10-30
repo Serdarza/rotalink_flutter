@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../data/firebase_rota_repository.dart';
 import '../navigation/main_map_nav_bridge.dart';
+import '../services/ios_maps_sdk.dart';
 import 'main_map_screen.dart' deferred as map_lib;
 
 /// İlk karede harita kütüphanesini derlemez; ana sayfa hemen boyanır.
@@ -34,6 +35,8 @@ class _DeferredMainMapState extends State<DeferredMainMap> {
 
   Future<void> _loadMap() async {
     await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
+    if (!mounted) return;
+    await IosMapsSdk.resolve();
     if (!mounted) return;
     await map_lib.loadLibrary();
     if (!mounted) return;

@@ -16,7 +16,7 @@ class FacilityRoute {
 }
 
 abstract final class FacilityRouteFormat {
-  static const double walkLimitKm = 15;
+  static const double walkLimitKm = 5;
 
   static bool walkingOffered(double birdKm) => birdKm <= walkLimitKm;
 

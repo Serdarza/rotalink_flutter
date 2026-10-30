@@ -8,6 +8,7 @@ import workmanager_apple
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private let calendarStore = EKEventStore()
+  private var mapsKeyReady = false
 
   override func application(
     _ application: UIApplication,
@@ -16,12 +17,14 @@ import workmanager_apple
     if let mapsKey = Bundle.main.object(forInfoDictionaryKey: "GMSApiKey") as? String,
        !mapsKey.isEmpty, !mapsKey.contains("$(") {
       GMSServices.provideAPIKey(mapsKey)
+      mapsKeyReady = true
     }
     // BGTaskScheduler, planlanan görevin işleyicisi kayıtlı değilse uygulamayı çökertir.
     // Kimlik, Info.plist ve lib/services/pro_update_notifier.dart ile aynı olmalı.
     WorkmanagerPlugin.setPluginRegistrantCallback { registry in
       GeneratedPluginRegistrant.register(with: registry)
     }
+    WorkmanagerPlugin.registerLaunchHandlers()
     WorkmanagerPlugin.registerPeriodicTask(
       withIdentifier: "com.serdarza.rotalink.proUpdates",
       earliestBeginInSeconds: NSNumber(value: 12 * 60 * 60)
@@ -31,7 +34,19 @@ import workmanager_apple
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    registerMapsChannel(messenger: engineBridge.applicationRegistrar.messenger())
     registerCalendarChannel(messenger: engineBridge.applicationRegistrar.messenger())
+  }
+
+  private func registerMapsChannel(messenger: FlutterBinaryMessenger) {
+    let channel = FlutterMethodChannel(name: "rotalink/maps", binaryMessenger: messenger)
+    channel.setMethodCallHandler { [weak self] call, result in
+      guard call.method == "ready" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      result(self?.mapsKeyReady ?? false)
+    }
   }
 
   // MARK: - Takvime Ekle (Konaklama detayı)

@@ -35,6 +35,7 @@ import '../models/gezi_yemek_item.dart';
 import '../models/misafirhane.dart';
 import '../models/route_plan_outcome.dart';
 import '../models/route_stop.dart';
+import '../services/ios_maps_sdk.dart';
 import '../services/osrm_route_service.dart';
 import '../services/announcement_notification_scheduler.dart';
 import '../services/holiday_notification_scheduler.dart';
@@ -2338,28 +2339,29 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                   return Stack(
                     clipBehavior: Clip.none,
                     children: [
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: gmaps.GoogleMap(
-                            initialCameraPosition: gmaps.CameraPosition(
-                              target: gmaps.LatLng(
-                                _center.latitude,
-                                _center.longitude,
+                      if (IosMapsSdk.ready)
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: gmaps.GoogleMap(
+                              initialCameraPosition: gmaps.CameraPosition(
+                                target: gmaps.LatLng(
+                                  _center.latitude,
+                                  _center.longitude,
+                                ),
+                                zoom: _zoom,
                               ),
-                              zoom: _zoom,
+                              buildingsEnabled: true,
+                              zoomControlsEnabled: false,
+                              myLocationButtonEnabled: false,
+                              mapToolbarEnabled: false,
+                              compassEnabled: false,
+                              onMapCreated: (controller) {
+                                _googleMap = controller;
+                                _syncKonaklamaGoogle(_center, _zoom);
+                              },
                             ),
-                            buildingsEnabled: true,
-                            zoomControlsEnabled: false,
-                            myLocationButtonEnabled: false,
-                            mapToolbarEnabled: false,
-                            compassEnabled: false,
-                            onMapCreated: (controller) {
-                              _googleMap = controller;
-                              _syncKonaklamaGoogle(_center, _zoom);
-                            },
                           ),
                         ),
-                      ),
                       RepaintBoundary(
                         child: PopupScope(
                           onPopupEvent: _onMisafirhanePopupEvent,

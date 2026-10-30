@@ -3,8 +3,8 @@ import 'package:rotalink_flutter/services/facility_route.dart';
 
 void main() {
   test('yürüme sınırı ve süre yazımı', () {
-    expect(FacilityRouteFormat.walkingOffered(15), isTrue);
-    expect(FacilityRouteFormat.walkingOffered(15.1), isFalse);
+    expect(FacilityRouteFormat.walkingOffered(5), isTrue);
+    expect(FacilityRouteFormat.walkingOffered(5.1), isFalse);
     expect(FacilityRouteFormat.distance(850), '850 m');
     expect(FacilityRouteFormat.distance(12400), '12,4 km');
     expect(FacilityRouteFormat.summary(12400, 18 * 60), '12,4 km · 18 dk');

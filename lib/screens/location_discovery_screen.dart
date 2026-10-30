@@ -25,6 +25,7 @@ import '../kami/recommendation/province_centers.dart';
 import '../models/misafirhane.dart';
 import '../navigation/rotalink_shell_routes.dart';
 import '../navigator_keys.dart';
+import '../services/ios_maps_sdk.dart';
 import '../services/facility_route.dart';
 import '../services/facility_route_access.dart';
 import '../services/location_discovery_query.dart';
@@ -149,6 +150,9 @@ class _LocationDiscoveryScreenState extends State<LocationDiscoveryScreen> {
     unawaited(_loadHistory());
     unawaited(_loadPins());
     unawaited(_refreshMarkerNames());
+    unawaited(IosMapsSdk.resolve().then((_) {
+      if (mounted) setState(() {});
+    }));
   }
 
   Future<void> _loadPins() async {
@@ -491,9 +495,6 @@ class _LocationDiscoveryScreenState extends State<LocationDiscoveryScreen> {
     unawaited(_openSheet(_routeSheet));
     unawaited(_syncRouteFavorite(item.facility));
     unawaited(_loadMode(item, start, 'drive', serial, fit: true));
-    if (FacilityRouteFormat.walkingOffered(item.km)) {
-      unawaited(_loadMode(item, start, 'walk', serial, fit: false));
-    }
   }
 
   Future<void> _selectRouteMode(String mode) async {
@@ -1130,13 +1131,14 @@ class _LocationDiscoveryScreenState extends State<LocationDiscoveryScreen> {
     final facilities =
         widget.repository.currentState?.aramaIcinTumTesisler ??
         const <Misafirhane>[];
+    final local = _matchLocal(query, facilities);
     setState(() {
       _error = null;
-      _localSuggestions = _matchLocal(query, facilities);
+      _localSuggestions = local;
       _photonSuggestions = const [];
-      _suggesting = query.length >= 3;
+      _suggesting = query.length >= 3 && local.isEmpty;
     });
-    if (query.length < 3) return;
+    if (query.length < 3 || local.isNotEmpty) return;
     final serial = ++_suggestSerial;
     _suggestTimer = Timer(const Duration(milliseconds: 450), () async {
       final found = await _placeSuggestions(query);
@@ -1296,7 +1298,6 @@ class _LocationDiscoveryScreenState extends State<LocationDiscoveryScreen> {
           );
           return;
         }
-        title = place.name;
         point = LatLng(place.latitude, place.longitude);
       } catch (error) {
         if (!mounted) return;
@@ -1475,70 +1476,56 @@ class _LocationDiscoveryScreenState extends State<LocationDiscoveryScreen> {
       }
       debugPrint('[Harita] tesis eşleşmesi: $facilitiesAdded');
     }
-    if (entries.isEmpty && signedIn) {
-      try {
-        final predictions = await NearbySearchAccess.suggest(raw);
-        if (!mounted) return;
-        if (predictions.isNotEmpty) {
-          final first = predictions.first;
-          if (first.hasPoint) {
-            remoteError = null;
-            entries.add((
-              name: first.title,
-              point: LatLng(first.latitude!, first.longitude!),
-            ));
-          } else if (first.placeId != null) {
-            final place = await NearbySearchAccess.place(first.placeId!);
-            if (!mounted) return;
-            if (place != null) {
-              remoteError = null;
-              entries.add((
-                name: place.name,
-                point: LatLng(place.latitude, place.longitude),
-              ));
-            }
-          }
-        }
-        debugPrint('[Harita] places: ${entries.length} sonuç');
-      } catch (error) {
-        remoteError = error.toString().replaceFirst('Bad state: ', '');
-        debugPrint('[Harita] places hatası: $remoteError');
-      }
-    }
     if (entries.isEmpty) {
       final hinted = _bestSeenSuggestion(seenSuggestions, raw, specific);
-      if (hinted != null) {
+      final hintedPoint = hinted != null &&
+              hinted.latitude != 0 &&
+              hinted.longitude != 0
+          ? LatLng(hinted.latitude, hinted.longitude)
+          : null;
+      if (hinted != null && hintedPoint != null) {
         entries.add((
-          name: hinted.subtitle.isEmpty || hinted.subtitle == 'İl' || hinted.subtitle == 'İlçe'
+          name: hinted.subtitle.isEmpty ||
+                  hinted.subtitle == 'İl' ||
+                  hinted.subtitle == 'İlçe'
               ? hinted.title
               : '${hinted.title} · ${hinted.subtitle}',
-          point: LatLng(hinted.latitude, hinted.longitude),
+          point: hintedPoint,
         ));
-      }
-    }
-    if (entries.isEmpty && signedIn) {
-      for (var attempt = 0; attempt < 2 && entries.isEmpty; attempt++) {
+      } else if (hinted?.placeId != null && signedIn) {
         try {
-          final remote = await NearbySearchAccess.geocode(raw);
-          debugPrint('[Harita] Google geocode: ${remote.length} sonuç');
-          remoteError = null;
-          if (remote.isNotEmpty) {
-            final place = remote.first;
+          final place = await NearbySearchAccess.place(hinted!.placeId!);
+          if (!mounted) return;
+          if (place != null) {
+            remoteError = null;
             entries.add((
-              name: place.name,
+              name: hinted.title,
               point: LatLng(place.latitude, place.longitude),
             ));
           }
         } catch (error) {
           remoteError = error.toString().replaceFirst('Bad state: ', '');
-          debugPrint('[Harita] Google geocode hatası: $remoteError');
-          if (attempt == 0 && remoteError.contains('Çok fazla')) break;
-          if (attempt == 0) {
-            await Future<void>.delayed(const Duration(milliseconds: 400));
-          }
+          debugPrint('[Harita] places hatası: $remoteError');
         }
-        if (!mounted) return;
       }
+    }
+    if (entries.isEmpty && signedIn) {
+      try {
+        final remote = await NearbySearchAccess.geocode(raw);
+        debugPrint('[Harita] Google geocode: ${remote.length} sonuç');
+        remoteError = null;
+        if (remote.isNotEmpty) {
+          final place = remote.first;
+          entries.add((
+            name: place.name,
+            point: LatLng(place.latitude, place.longitude),
+          ));
+        }
+      } catch (error) {
+        remoteError = error.toString().replaceFirst('Bad state: ', '');
+        debugPrint('[Harita] Google geocode hatası: $remoteError');
+      }
+      if (!mounted) return;
     }
     if (entries.isEmpty) {
       try {
@@ -2054,6 +2041,9 @@ class _LocationDiscoveryScreenState extends State<LocationDiscoveryScreen> {
             backgroundColor: AppColors.canvasOf(context),
             body: Stack(
               children: [
+                if (!IosMapsSdk.ready)
+                  const ColoredBox(color: Color(0xFFE8F0E9))
+                else
                 GoogleMap(
                   initialCameraPosition: const CameraPosition(
                     target: _turkey,

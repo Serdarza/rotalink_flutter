@@ -1,2 +1,4 @@
 // Copy this file to GoogleMaps.xcconfig and put a restricted iOS Maps SDK key here.
+// Codemagic: set the GOOGLE_MAPS_API_KEY environment variable, or run
+// tool/codemagic_ios_maps_key.sh as the post-clone script.
 GOOGLE_MAPS_API_KEY = REPLACE_WITH_RESTRICTED_IOS_KEY

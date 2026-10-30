@@ -2,6 +2,12 @@ platform :ios, '13.0'
 
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
+maps_key = ENV['GOOGLE_MAPS_API_KEY'].to_s.strip
+maps_xcconfig = File.expand_path('Flutter/GoogleMaps.xcconfig', __dir__)
+if !maps_key.empty? && !File.exist?(maps_xcconfig)
+  File.write(maps_xcconfig, "GOOGLE_MAPS_API_KEY = #{maps_key}\n")
+end
+
 project 'Runner', {
   'Debug' => :debug,
   'Profile' => :release,

@@ -136,7 +136,7 @@ class FacilityRoutePanel extends StatelessWidget {
                 busy: walkBusy,
                 enabled: walking,
                 time: !walking
-                    ? '15 km+'
+                    ? '5 km+'
                     : walk == null
                     ? null
                     : FacilityRouteFormat.duration(walk!.durationSeconds),
