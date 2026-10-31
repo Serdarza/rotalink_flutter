@@ -130,7 +130,8 @@ List<Misafirhane> sortMisafirhaneByDistance(List<Misafirhane> list, LatLng? user
   if (user == null) return List<Misafirhane>.from(list);
   final uLat = user.latitude;
   final uLon = user.longitude;
-  if (!isValidWgs84LatLng(uLat, uLon)) return List<Misafirhane>.from(list);
+  // (0,0) veya geçersiz konum sıralamayı bozmasın; liste olduğu gibi kalsın.
+  if (!isUsableDeviceLocation(uLat, uLon)) return List<Misafirhane>.from(list);
 
   final keyed = <({Misafirhane m, double d})>[];
   for (final m in list) {
