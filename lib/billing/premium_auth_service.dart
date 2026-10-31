@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer' as developer;
 
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -66,7 +67,9 @@ class PremiumAuthService {
       }
       throw StateError('Google ile giriş tamamlanamadı.');
     }
-    return _firebaseFromGoogle(account);
+    final credential = await _firebaseFromGoogle(account);
+    if (credential == null) throw StateError('Google hesabı doğrulanamadı.');
+    return credential;
   }
 
   /// Links the phone's store account so the receipt can be recognized later.
@@ -96,8 +99,8 @@ class PremiumAuthService {
       final silent = GoogleSignIn.instance.attemptLightweightAuthentication();
       if (silent != null) {
         final account = await silent;
-        if (account != null) {
-          await _firebaseFromGoogle(account);
+        if (account != null &&
+            await _firebaseFromGoogle(account, retry: true) != null) {
           return;
         }
       }
@@ -110,16 +113,29 @@ class PremiumAuthService {
     await signInWithGoogle();
   }
 
-  Future<UserCredential> _firebaseFromGoogle(
-    GoogleSignInAccount account,
-  ) async {
+  /// Returns null only when [retry] is set and this attempt can be replaced
+  /// by an interactive sign-in. The billing sheet is never opened here.
+  Future<UserCredential?> _firebaseFromGoogle(
+    GoogleSignInAccount account, {
+    bool retry = false,
+  }) async {
     final idToken = account.authentication.idToken;
     if (idToken == null || idToken.isEmpty) {
+      if (retry) return null;
       throw StateError('Google hesabı doğrulanamadı.');
     }
-    return FirebaseAuth.instance.signInWithCredential(
-      GoogleAuthProvider.credential(idToken: idToken),
-    );
+    try {
+      return await FirebaseAuth.instance.signInWithCredential(
+        GoogleAuthProvider.credential(idToken: idToken),
+      );
+    } on FirebaseAuthException catch (error) {
+      developer.log(
+        'Firebase girişi reddedildi: ${error.code}',
+        name: 'PremiumAuth',
+      );
+      if (retry) return null;
+      rethrow;
+    }
   }
 
   Future<UserCredential> signInWithApple() async {
