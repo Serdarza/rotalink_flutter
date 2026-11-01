@@ -36,16 +36,33 @@ abstract final class AppNotificationsService {
   static bool get _android =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
 
+  static bool get _ios => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
   static Future<void> initialize() async {
-    if (!_android || _started) return;
+    if ((!_android && !_ios) || _started) return;
     _started = true;
     FirebaseMessaging.onBackgroundMessage(rotalinkBackgroundNotifications);
     FirebaseMessaging.instance.onTokenRefresh.listen(
       (_) => unawaited(syncSubscription()),
     );
+    if (_ios) {
+      await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      FirebaseMessaging.onMessageOpenedApp.listen((message) {
+        unawaited(openRemote(message.data));
+      });
+      final initial = await FirebaseMessaging.instance.getInitialMessage();
+      if (initial != null) await openRemote(initial.data);
+    }
     await loadPending();
     await syncSubscription();
   }
+
+  static Future<void> openRemote(Map<String, dynamic> data) =>
+      handleTap('$payloadPrefix${jsonEncode(data)}');
 
   static Future<bool> isEnabled() async =>
       (await SharedPreferences.getInstance()).getBool(prefKey) ?? true;
@@ -76,6 +93,10 @@ abstract final class AppNotificationsService {
   }
 
   static Future<void> _sync() async {
+    if (_ios) {
+      await _syncIos();
+      return;
+    }
     if (!_android) return;
     try {
       if (Firebase.apps.isEmpty) await Firebase.initializeApp();
@@ -103,6 +124,32 @@ abstract final class AppNotificationsService {
     } catch (_) {
       // Retry on app resume or when the user changes their preference.
     }
+  }
+
+  static Future<void> _syncIos() async {
+    try {
+      if (Firebase.apps.isEmpty) await Firebase.initializeApp();
+      final messaging = FirebaseMessaging.instance;
+      final enabled = await isEnabled();
+      if (!enabled) {
+        await messaging.unsubscribeFromTopic(topic).timeout(const Duration(seconds: 12));
+        return;
+      }
+      final settings = await messaging.requestPermission(alert: true, badge: true, sound: true);
+      final allowed = settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional;
+      if (!allowed) return;
+      await messaging.setAutoInitEnabled(true);
+      String? apns;
+      for (var attempt = 0; attempt < 5 && (apns == null || apns.isEmpty); attempt++) {
+        apns = await messaging.getAPNSToken();
+        if (apns == null || apns.isEmpty) {
+          await Future<void>.delayed(const Duration(seconds: 1));
+        }
+      }
+      if (apns == null || apns.isEmpty) return;
+      await messaging.subscribeToTopic(topic).timeout(const Duration(seconds: 12));
+    } catch (_) {}
   }
 
   static Map<String, String>? parseTarget(Object? value) {
