@@ -2,8 +2,7 @@
  * Termal tesislerin kayıtlı resmî sayfasını okur.
  * Canlı fiyat yazmaz. Sonuç yönetici onay kuyruğuna gider.
  */
-import { createHash } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 
 const BLOCKED = ["booking.com", "tripadvisor.com", "etstur.com", "otelz.com", "jollytur.com", "tatilsepeti.com", "google.com", "instagram.com", "facebook.com", "sikayetvar.com", "kamutesisleri.com", "wikipedia.org", "youtube.com", "x.com"];
@@ -258,26 +257,42 @@ async function main() {
   const cacheDir = process.env.THERMAL_CACHE_DIR;
   if (cacheDir) await mkdir(cacheDir, { recursive: true });
   const results = await scanFacilities(facilities, year, Number(process.env.THERMAL_DELAY_MS || 1500));
-  const payload = {
-    scanId: checkedAt.slice(0, 7),
-    checkedAt,
-    year,
-    catalogSha: createHash("sha256").update(JSON.stringify(facilities.map((row) => row.id))).digest("hex").slice(0, 16),
-    results,
-  };
-  if (cacheDir) await writeFile(cacheDir + "/last-scan.json", JSON.stringify(payload));
+  const slim = results.map((row) => ({ facilityId: row.facilityId, quotes: row.quotes, reason: row.reason }));
   const token = process.env.THERMAL_SCAN_TOKEN || "";
   const ingest = process.env.THERMAL_INGEST_URL || "";
   if (!token || !ingest) throw new Error("THERMAL_SCAN_TOKEN veya THERMAL_INGEST_URL eksik. Canlı fiyat yazılmadı.");
-  const saved = await fetch(ingest, {
-    method: "POST",
-    headers: { Authorization: "Bearer " + token, "Content-Type": "application/json", "User-Agent": USER_AGENT },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(30000),
-  });
-  if (!saved.ok) throw new Error("Onay kuyruğuna yazılamadı: HTTP " + saved.status);
-  const summary = await saved.json();
-  console.log(JSON.stringify({ scanId: payload.scanId, facilities: facilities.length, pending: summary.pending ?? null }));
+  const chunks = [];
+  let current = [];
+  let size = 200;
+  for (const item of slim) {
+    const extra = JSON.stringify(item).length + 1;
+    if (current.length && size + extra > 160000) {
+      chunks.push(current);
+      current = [];
+      size = 200;
+    }
+    current.push(item);
+    size += extra;
+  }
+  if (current.length) chunks.push(current);
+  let pending = 0;
+  for (const chunk of chunks) {
+    const saved = await fetch(ingest, {
+      method: "POST",
+      headers: { Authorization: "Bearer " + token, "Content-Type": "application/json", "User-Agent": USER_AGENT },
+      body: JSON.stringify({
+        scanId: checkedAt.slice(0, 7),
+        checkedAt,
+        year,
+        results: chunk,
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!saved.ok) throw new Error("Onay kuyruğuna yazılamadı: HTTP " + saved.status);
+    const summary = await saved.json();
+    pending += Number(summary.pending ?? 0);
+  }
+  console.log(JSON.stringify({ scanId: checkedAt.slice(0, 7), facilities: facilities.length, pending }));
 }
 
 const ranDirectly = process.argv[1] && process.argv[1].replaceAll("\\", "/").endsWith("scripts/thermal_price_scan.mjs");

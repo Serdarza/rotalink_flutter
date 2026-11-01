@@ -72,9 +72,20 @@ async function fetchText(url) {
     if (!response.ok) return "";
     const bytes = new Uint8Array(await response.arrayBuffer());
     if (bytes.byteLength > 1_500_000) return "";
-    return new TextDecoder("utf-8", { fatal: false }).decode(bytes).slice(0, 20000);
+    return priceExcerpt(new TextDecoder("utf-8", { fatal: false }).decode(bytes));
   }
   return "";
+}
+
+function priceExcerpt(text) {
+  const clean = text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  const parts = [];
+  for (const sentence of clean.split(/\n|(?<=[.!])\s+/)) {
+    if (!/TL|₺/i.test(sentence)) continue;
+    parts.push(sentence.trim());
+    if (parts.join(" ").length > 1800) break;
+  }
+  return parts.join(" ").slice(0, 1800);
 }
 
 async function main() {
@@ -95,28 +106,39 @@ async function main() {
   const checkedAt = new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Istanbul" });
   const cacheDir = process.env.LODGING_CACHE_DIR;
   if (cacheDir) await mkdir(cacheDir, { recursive: true });
-  const batchSize = Math.max(1, Number(process.env.LODGING_BATCH || 40));
+  const maxBytes = 160000;
+  let batch = [];
+  let batchBytes = 200;
   let scanned = 0;
-  for (let index = 0; index < slice.length; index += batchSize) {
-    const batch = [];
-    for (const place of slice.slice(index, index + batchSize)) {
-      let text = "";
-      if (place.officialUrl) {
-        try { text = await fetchText(place.officialUrl); } catch { text = ""; }
-        await delay(Number(process.env.LODGING_DELAY_MS || 800));
-      }
-      batch.push({ ...place, text });
-      scanned += 1;
-    }
+  async function send(results) {
+    if (!results.length) return;
     const response = await fetch(ingest, {
       method: "POST",
       headers: { Authorization: "Bearer " + token, "Content-Type": "application/json", "User-Agent": USER_AGENT },
-      body: JSON.stringify({ scanId: checkedAt.slice(0, 7), checkedAt, year, total: selected.length, errors, results: batch }),
+      body: JSON.stringify({ scanId: checkedAt.slice(0, 7), checkedAt, year, total: selected.length, errors, results }),
       signal: AbortSignal.timeout(30000),
     });
     if (!response.ok) throw new Error("Onay kuyruğuna yazılamadı: HTTP " + response.status);
-    if (cacheDir) await writeFile(cacheDir + "/lodging-offset.txt", String(offset + index + batch.length));
   }
+  for (const place of slice) {
+    let text = "";
+    if (place.officialUrl) {
+      try { text = await fetchText(place.officialUrl); } catch { text = ""; }
+      await delay(Number(process.env.LODGING_DELAY_MS || 800));
+    }
+    const item = { il: place.il, isim: place.isim, ilce: place.ilce, tip: place.tip, officialUrl: place.officialUrl, text };
+    const extra = JSON.stringify(item).length + 1;
+    if (batch.length && batchBytes + extra > maxBytes) {
+      await send(batch);
+      if (cacheDir) await writeFile(cacheDir + "/lodging-offset.txt", String(offset + scanned));
+      batch = [];
+      batchBytes = 200;
+    }
+    batch.push(item);
+    batchBytes += extra;
+    scanned += 1;
+  }
+  await send(batch);
   console.log(JSON.stringify({ total: selected.length, scanned, errors, offset }));
 }
 
