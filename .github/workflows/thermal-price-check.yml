@@ -1,0 +1,57 @@
+name: thermal-price-check
+
+on:
+  schedule:
+    # 1. gün 05:00 UTC = Türkiye saatiyle 08:00. Yaz saati uygulanmaz.
+    - cron: "0 5 1 * *"
+  workflow_dispatch:
+    inputs:
+      lodgingOffset:
+        description: Konaklama taramasında başlangıç sırası
+        required: false
+        default: "0"
+      lodgingLimit:
+        description: Bu çalışmada taranacak tesis sayısı. 0 bütün kalanları tarar.
+        required: false
+        default: "0"
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Resmî termal fiyatlarını tara
+        env:
+          THERMAL_SCAN_TOKEN: ${{ secrets.THERMAL_SCAN_TOKEN }}
+          THERMAL_INGEST_URL: https://admin.rotalink.tr/api/thermal-prices/ingest
+          KIS_KESFET_URL: https://raw.githubusercontent.com/Serdarza/rotalink-data/main/kis_kesfet/data/kis_kesfet.json
+          THERMAL_DELAY_MS: "1500"
+          THERMAL_CACHE_DIR: ${{ runner.temp }}/thermal-cache
+        run: node scripts/thermal_price_scan.mjs
+
+  lodging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    concurrency:
+      group: lodging-price-check
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Konaklama fiyatlarını tara
+        env:
+          THERMAL_SCAN_TOKEN: ${{ secrets.THERMAL_SCAN_TOKEN }}
+          LODGING_INGEST_URL: https://admin.rotalink.tr/api/lodging-prices/ingest
+          LODGING_CATALOG_URL: https://raw.githubusercontent.com/Serdarza/rotalink-data/main/master_database_updated.json
+          LODGING_PRICES_URL: https://raw.githubusercontent.com/Serdarza/rotalink-data/main/fiyatlar.json
+          LODGING_DELAY_MS: "800"
+          LODGING_OFFSET: ${{ github.event.inputs.lodgingOffset || '0' }}
+          LODGING_LIMIT: ${{ github.event.inputs.lodgingLimit || '0' }}
+          LODGING_CACHE_DIR: ${{ runner.temp }}/lodging-cache
+        run: node scripts/lodging_price_scan.mjs
