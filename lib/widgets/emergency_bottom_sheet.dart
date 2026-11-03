@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../services/simple_location_service.dart';
 import '../theme/app_colors.dart';
+import '../utils/maps_launch.dart';
 
 /// Kotlin [MainActivity.showEmergencySheet] + [bottom_sheet_emergency.xml].
 Future<void> showEmergencyBottomSheet(BuildContext context) {
@@ -114,7 +115,11 @@ class _EmergencySheetScaffoldState extends State<_EmergencySheetScaffold> {
   }
 
   Future<void> _openMaps(String query) async {
-    final uri = _mapsSearchUri(query);
+    final choice = await chooseMapApp(context);
+    if (!mounted || choice == null) return;
+    final uri = choice == MapApp.apple
+        ? appleMapSearchUri(query, latitude: _lat, longitude: _lon)
+        : _mapsSearchUri(query);
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {

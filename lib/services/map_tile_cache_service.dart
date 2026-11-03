@@ -16,9 +16,14 @@ class MapTileCacheService {
 
   static final MapTileCacheService instance = MapTileCacheService._();
 
+  /// OSM / FOSSGIS tile usage policy: identifiable app UA (not a library default).
+  static const userAgent =
+      'Rotalink/1 (+https://rotalink.tr; contact: rotalinkinfo@gmail.com)';
   static const _memoryMaxEntries = 500;
+  static const _maxConcurrentFetches = 6;
   static const _networkTimeout = Duration(seconds: 6);
   static const _legacyPrefsPrefix = 'tile_cache_';
+  static const _cacheVersion = 'v3';
 
   Directory? _cacheDir;
   final LinkedHashMap<String, Uint8List> _memory = LinkedHashMap();
@@ -26,6 +31,8 @@ class MapTileCacheService {
   StreamSubscription<bool>? _connectivitySub;
   bool _online = true;
   bool _initialized = false;
+  int _activeFetches = 0;
+  final Queue<Completer<void>> _fetchWaiters = Queue();
 
   bool get isOnline => _online;
 
@@ -33,7 +40,7 @@ class MapTileCacheService {
     if (_initialized) return;
 
     final base = await getApplicationCacheDirectory();
-    _cacheDir = Directory('${base.path}/osm_tiles');
+    _cacheDir = Directory('${base.path}/osm_tiles/$_cacheVersion');
     await _cacheDir!.create(recursive: true);
 
     _online = await NetworkService.instance.isConnected();
@@ -81,9 +88,16 @@ class MapTileCacheService {
 
     if (!_online) return null;
 
+    await _acquireFetchSlot();
     try {
       final response = await http
-          .get(Uri.parse(url))
+          .get(
+            Uri.parse(url),
+            headers: const {
+              'User-Agent': userAgent,
+              'Accept': 'image/png,image/*;q=0.8,*/*;q=0.5',
+            },
+          )
           .timeout(_networkTimeout, onTimeout: () => http.Response('', 408));
       if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
         final bytes = Uint8List.fromList(response.bodyBytes);
@@ -91,9 +105,29 @@ class MapTileCacheService {
         unawaited(_writeDisk(url, bytes));
         return bytes;
       }
-    } catch (_) {}
+    } catch (_) {
+    } finally {
+      _releaseFetchSlot();
+    }
 
     return null;
+  }
+
+  Future<void> _acquireFetchSlot() async {
+    if (_activeFetches < _maxConcurrentFetches) {
+      _activeFetches += 1;
+      return;
+    }
+    final waiter = Completer<void>();
+    _fetchWaiters.add(waiter);
+    await waiter.future;
+    _activeFetches += 1;
+  }
+
+  void _releaseFetchSlot() {
+    _activeFetches -= 1;
+    if (_fetchWaiters.isEmpty) return;
+    _fetchWaiters.removeFirst().complete();
   }
 
   Uint8List? _readMemory(String url) {

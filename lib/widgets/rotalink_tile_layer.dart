@@ -12,7 +12,8 @@ class RotalinkTileLayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TileLayer(
-      urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      // FOSSGIS OSM karoları; tile.openstreetmap.org uygulama trafiğini engelliyor.
+      urlTemplate: 'https://tile.openstreetmap.de/{z}/{x}/{y}.png',
       userAgentPackageName: 'com.serdarza.rotalink',
       tileProvider: RotalinkCachedTileProvider.instance,
       tileDisplay: const TileDisplay.fadeIn(

@@ -502,6 +502,17 @@ class PriceMetaFooter extends StatelessWidget {
     this.kaynak,
   });
 
+  /// Pro olmadan da görünen geçerlilik / güncelleme satırı.
+  factory PriceMetaFooter.publicValidity({
+    Key? key,
+    String? gecerlilik,
+    String? guncelleme,
+  }) => PriceMetaFooter(
+    key: key,
+    gecerlilik: gecerlilik,
+    guncelleme: guncelleme,
+  );
+
   final String? gecerlilik;
   final String? guncelleme;
   final TariffVerification? dogrulama;

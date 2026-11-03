@@ -255,12 +255,32 @@ Future<bool?> showRoutePlanPreviewSheet({
                       ] else if (navigationWaypoints != null &&
                           navigationWaypoints.length >= 2) ...[
                         const SizedBox(height: 10),
-                        OutlinedButton.icon(
-                          onPressed: () =>
-                              openGoogleDirectionsWaypoints(ctx, navigationWaypoints),
-                          icon: const Icon(Icons.navigation_rounded, size: 18),
-                          label: const Text(AppStrings.routePlanNavGoogle),
-                        ),
+                        if (appleMapsOptionAvailable)
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => openGoogleDirectionsWaypoints(ctx, navigationWaypoints),
+                                  icon: const Icon(Icons.navigation_rounded, size: 18),
+                                  label: const Text(AppStrings.routePlanNavGoogle),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: OutlinedButton.icon(
+                                  onPressed: () => openAppleDirectionsWaypoints(ctx, navigationWaypoints),
+                                  icon: const Icon(Icons.map_rounded, size: 18),
+                                  label: const Text(AppStrings.routePlanNavApple),
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          OutlinedButton.icon(
+                            onPressed: () => openGoogleDirectionsWaypoints(ctx, navigationWaypoints),
+                            icon: const Icon(Icons.navigation_rounded, size: 18),
+                            label: const Text(AppStrings.routePlanNavGoogle),
+                          ),
                       ],
                       const SizedBox(height: 10),
                       FilledButton(

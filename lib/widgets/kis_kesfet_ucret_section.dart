@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../billing/free_price_quota.dart';
 import '../billing/premium_account_bridge.dart';
@@ -204,13 +205,40 @@ class KisKesfetUcretSection extends StatelessWidget {
             ),
           const SizedBox(height: 8),
           Text(
+            'Kaynak: Resmî tesis fiyat tarifesi',
+            style: TextStyle(color: muted, fontSize: 12),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Son doğrulama: ${KisKesfetUi.formatDate(bilgi.sonKontrol)}',
+            style: TextStyle(color: muted, fontSize: 12),
+          ),
+          const SizedBox(height: 4),
+          Text(
             'Ücret son kontrol: ${KisKesfetUi.formatDate(bilgi.sonKontrol)}',
             style: TextStyle(color: muted, fontSize: 12),
           ),
+          const SizedBox(height: 8),
+          Text(
+            FacilityPricing.note,
+            style: TextStyle(color: muted, fontSize: 12, height: 1.4),
+          ),
+          if (thermalSourceOpen(place))
+            TextButton.icon(
+              onPressed: () => _openTariff(kalemler.first.kaynakUrl),
+              icon: const Icon(Icons.open_in_new_rounded, size: 16),
+              label: const Text('Tarifeyi aç'),
+            ),
         ],
       ],
     );
   }
+}
+
+Future<void> _openTariff(String raw) async {
+  final uri = Uri.tryParse(raw.trim());
+  if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return;
+  await launchUrl(uri, mode: LaunchMode.externalApplication);
 }
 
 class _ThermalPriceLock extends StatefulWidget {
@@ -314,6 +342,13 @@ class _ThermalPriceLockState extends State<_ThermalPriceLock> {
             ],
           ),
           if (!widget.compact) ...[
+            if (widget.place?.ucretBilgisi?.sonKontrol.isNotEmpty == true) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Son güncelleme: ${KisKesfetUi.formatDate(widget.place!.ucretBilgisi!.sonKontrol)}',
+                style: TextStyle(color: muted, fontSize: 12),
+              ),
+            ],
             const SizedBox(height: 6),
             Text(
               _paidPlan

@@ -79,7 +79,99 @@ void _mapSearchLaunchFailed(BuildContext context) {
   );
 }
 
-/// Google Haritalar metin araması: `[İl] [Yer adı]` — standart `api=1` URL + [Uri.encodeComponent].
+/// iPhone’da Apple Haritalar seçeneği gösterilir. Android doğrudan Google Haritalar açar.
+bool get appleMapsOptionAvailable => !kIsWeb && Platform.isIOS;
+
+enum MapApp { apple, google }
+
+Future<MapApp?> chooseMapApp(BuildContext context) async {
+  if (!appleMapsOptionAvailable) return MapApp.google;
+  return showModalBottomSheet<MapApp>(
+    context: context,
+    useRootNavigator: true,
+    showDragHandle: true,
+    builder: (ctx) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+            child: Text(
+              'Haritayı aç',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.map_rounded),
+            title: const Text('Apple Haritalar'),
+            onTap: () => Navigator.pop(ctx, MapApp.apple),
+          ),
+          ListTile(
+            leading: const Icon(Icons.map_outlined),
+            title: const Text('Google Haritalar'),
+            onTap: () => Navigator.pop(ctx, MapApp.google),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+Uri appleMapSearchUri(String query, {double? latitude, double? longitude}) {
+  final q = Uri.encodeComponent(query);
+  final hasCoords = latitude != null && longitude != null && latitude != 0 && longitude != 0;
+  if (hasCoords) return Uri.parse('http://maps.apple.com/?ll=$latitude,$longitude&q=$q');
+  return Uri.parse('http://maps.apple.com/?q=$q');
+}
+
+Uri googleMapSearchUri(String query) {
+  return Uri.parse('https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(query)}');
+}
+
+String _mapPoint(String value) {
+  if (RegExp(r'^-?\d+(?:\.\d+)?,-?\d+(?:\.\d+)?$').hasMatch(value)) return value;
+  return Uri.encodeComponent(value);
+}
+
+Uri appleDirectionsUri({
+  required String origin,
+  required List<String> destinations,
+  bool walking = false,
+}) {
+  final buffer = StringBuffer('http://maps.apple.com/?dirflg=${walking ? 'w' : 'd'}');
+  buffer.write('&saddr=${_mapPoint(origin)}');
+  for (final destination in destinations) {
+    buffer.write('&daddr=${_mapPoint(destination)}');
+  }
+  return Uri.parse(buffer.toString());
+}
+
+Uri googleDirectionsUri({
+  required String origin,
+  required String destination,
+  String travelMode = 'driving',
+  List<String> waypoints = const [],
+}) {
+  return Uri.https('www.google.com', '/maps/dir/', {
+    'api': '1',
+    'origin': origin,
+    'destination': destination,
+    'travelmode': travelMode,
+    if (waypoints.isNotEmpty) 'waypoints': waypoints.join('|'),
+  });
+}
+
+Future<void> _launchChosenMap(BuildContext context, Uri uri) async {
+  try {
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && context.mounted) _mapSearchLaunchFailed(context);
+  } catch (_) {
+    if (context.mounted) _mapSearchLaunchFailed(context);
+  }
+}
+
+/// Google Haritalar metin araması. iPhone’da önce Apple Haritalar seçeneği sorulur.
 Future<void> openMapSearch(
   BuildContext context,
   String province,
@@ -89,21 +181,66 @@ Future<void> openMapSearch(
   final n = placeName.trim();
   if (p.isEmpty && n.isEmpty) return;
   final raw = p.isEmpty ? n : (n.isEmpty ? p : '$p $n');
-  final enc = Uri.encodeComponent(raw);
-  final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$enc');
-  try {
-    final can = await canLaunchUrl(uri);
-    if (!context.mounted) return;
-    if (!can) {
-      _mapSearchLaunchFailed(context);
-      return;
-    }
-    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!context.mounted) return;
-    if (!ok) _mapSearchLaunchFailed(context);
-  } catch (_) {
-    if (context.mounted) _mapSearchLaunchFailed(context);
+  final choice = await chooseMapApp(context);
+  if (!context.mounted || choice == null) return;
+  final uri = choice == MapApp.apple ? appleMapSearchUri(raw) : googleMapSearchUri(raw);
+  await _launchChosenMap(context, uri);
+}
+
+Future<void> openExternalDirections(
+  BuildContext context, {
+  required double originLat,
+  required double originLon,
+  required double destLat,
+  required double destLon,
+  bool walking = false,
+}) async {
+  final choice = await chooseMapApp(context);
+  if (!context.mounted || choice == null) return;
+  final origin = '$originLat,$originLon';
+  final destination = '$destLat,$destLon';
+  final uri = choice == MapApp.apple
+      ? appleDirectionsUri(origin: origin, destinations: [destination], walking: walking)
+      : googleDirectionsUri(
+          origin: origin,
+          destination: destination,
+          travelMode: walking ? 'walking' : 'driving',
+        );
+  await _launchChosenMap(context, uri);
+}
+
+Future<void> openAppleDirectionsWaypoints(
+  BuildContext context,
+  List<LatLng> waypoints,
+) async {
+  if (waypoints.length < 2) return;
+  final points = waypoints.map((point) => '${point.latitude},${point.longitude}').toList();
+  await _launchChosenMap(
+    context,
+    appleDirectionsUri(origin: points.first, destinations: points.sublist(1)),
+  );
+}
+
+Future<void> openExternalDirectionsWaypoints(
+  BuildContext context,
+  List<LatLng> waypoints,
+) async {
+  if (waypoints.length < 2) return;
+  final choice = await chooseMapApp(context);
+  if (!context.mounted || choice == null) return;
+  if (choice == MapApp.apple) {
+    await openAppleDirectionsWaypoints(context, waypoints);
+    return;
   }
+  final points = waypoints.map((point) => '${point.latitude},${point.longitude}').toList();
+  await _launchChosenMap(
+    context,
+    googleDirectionsUri(
+      origin: points.first,
+      destination: points.last,
+      waypoints: points.length > 2 ? points.sublist(1, points.length - 1) : const [],
+    ),
+  );
 }
 
 /// Google Haritalar yönlendirme: başlangıç, isteğe bağlı ara duraklar, varış (araç).

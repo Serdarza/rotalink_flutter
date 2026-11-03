@@ -4018,7 +4018,7 @@ class _MainMapScreenState extends ConsumerState<MainMapScreen>
                         ),
                         title: const Text(AppStrings.routePlanStartNavigation),
                         onTap: () {
-                          openGoogleDirectionsWaypoints(sheetCtx, navWaypoints);
+                          unawaited(openExternalDirectionsWaypoints(sheetCtx, navWaypoints));
                         },
                       ),
                     ],

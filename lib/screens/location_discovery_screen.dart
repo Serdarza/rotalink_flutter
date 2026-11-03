@@ -8,7 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+import '../utils/maps_launch.dart';
 
 import '../billing/free_nearby_quota.dart';
 import '../billing/premium_account_bridge.dart';
@@ -1996,20 +1996,14 @@ class _LocationDiscoveryScreenState extends State<LocationDiscoveryScreen> {
       setState(() => _error = 'Önce haritada bir yer işaretleyin.');
       return;
     }
-    final uri = Uri.https('www.google.com', '/maps/dir/', {
-      'api': '1',
-      'origin': '${start.latitude},${start.longitude}',
-      'destination': '${item.facility.latitude},${item.facility.longitude}',
-      'travelmode': mode == 'walk' ? 'walking' : 'driving',
-    });
-    try {
-      if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
-    } catch (_) {
-      /* Show the same actionable error below. */
-    }
-    if (mounted) {
-      setState(() => _error = 'Google Haritalar yol tarifi açılamadı.');
-    }
+    await openExternalDirections(
+      context,
+      originLat: start.latitude,
+      originLon: start.longitude,
+      destLat: item.facility.latitude,
+      destLon: item.facility.longitude,
+      walking: mode == 'walk',
+    );
   }
 
   @override

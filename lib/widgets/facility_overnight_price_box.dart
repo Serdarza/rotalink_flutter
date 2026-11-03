@@ -335,6 +335,12 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
         kaynak: entry?.kaynak,
       );
 
+  static PriceMetaFooter _publicValidityFor(FacilityPriceEntry? entry) =>
+      PriceMetaFooter.publicValidity(
+        gecerlilik: entry?.gecerlilik ?? entry?.tarife?.donem,
+        guncelleme: entry?.tarife?.guncelleme,
+      );
+
   Future<void> _openTariffSheet(Misafirhane priced) async {
     final entry = priced.fiyatKaydi;
     final tariff = entry?.tarife;
@@ -593,6 +599,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
     }
 
     if (!_unlocked) {
+      final publicValidity = _publicValidityFor(priced.fiyatKaydi);
       return Padding(
         padding: EdgeInsets.only(top: widget.topSpacing),
         child: DecoratedBox(
@@ -612,6 +619,10 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                   titleColor: titleColor,
                   bodyColor: labelColor,
                 ),
+                if (!publicValidity.isEmpty) ...[
+                  const SizedBox(height: 10),
+                  publicValidity,
+                ],
                 const SizedBox(height: 12),
                 _ProPreview(
                   facility: priced,
@@ -1213,8 +1224,7 @@ class _ProPreview extends StatelessWidget {
         'Personel türüne göre gecelik fiyatlar',
       if (StayCostCalculator.isAvailable(tariff)) FacilityPricing.calcPerk,
       if (tariff != null) ..._tariffPerks(tariff),
-      if (entry?.kaynak != null || entry?.gecerlilik != null)
-        'Fiyat kaynağı ve geçerlilik bilgisi',
+      if (entry?.kaynak != null) 'Fiyatın resmî kaynağı',
     ];
 
     return Column(
