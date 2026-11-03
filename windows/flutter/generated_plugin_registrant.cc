@@ -11,6 +11,7 @@
 #include <connectivity_plus/connectivity_plus_windows_plugin.h>
 #include <firebase_auth/firebase_auth_plugin_c_api.h>
 #include <firebase_core/firebase_core_plugin_c_api.h>
+#include <firebase_remote_config/firebase_remote_config_plugin_c_api.h>
 #include <flutter_secure_storage_windows/flutter_secure_storage_windows_plugin.h>
 #include <geolocator_windows/geolocator_windows.h>
 #include <share_plus/share_plus_windows_plugin_c_api.h>
@@ -28,6 +29,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("FirebaseAuthPluginCApi"));
   FirebaseCorePluginCApiRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FirebaseCorePluginCApi"));
+  FirebaseRemoteConfigPluginCApiRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("FirebaseRemoteConfigPluginCApi"));
   FlutterSecureStorageWindowsPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FlutterSecureStorageWindowsPlugin"));
   GeolocatorWindowsRegisterWithRegistrar(

@@ -1,5 +1,8 @@
 platform :ios, '13.0'
 
+# eMudhra ara CA güvenlik yaması — Firebase iOS SDK 12.19.3+ (FlutterFire BoM 4.20.2).
+$FirebaseSDKVersion = '12.19.3'
+
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 maps_key = ENV['GOOGLE_MAPS_API_KEY'].to_s.strip
