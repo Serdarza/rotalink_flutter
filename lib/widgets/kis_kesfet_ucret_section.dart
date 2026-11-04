@@ -186,7 +186,8 @@ class KisKesfetUcretSection extends StatelessWidget {
                       style: TextStyle(color: muted, fontSize: 12),
                     ),
                   ],
-                  if (kalem.gecerlilikBitis.isNotEmpty) ...[
+                  if (thermalSourceOpen(place) &&
+                      kalem.gecerlilikBitis.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(
                       'Geçerlilik sonu: ${KisKesfetUi.formatDate(kalem.gecerlilikBitis)}',

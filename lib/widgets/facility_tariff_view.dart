@@ -502,14 +502,12 @@ class PriceMetaFooter extends StatelessWidget {
     this.kaynak,
   });
 
-  /// Pro olmadan da görünen geçerlilik / güncelleme satırı.
-  factory PriceMetaFooter.publicValidity({
+  /// Pro olmadan da görünen son güncelleme satırı (geçerlilik Pro'da).
+  factory PriceMetaFooter.publicUpdate({
     Key? key,
-    String? gecerlilik,
     String? guncelleme,
   }) => PriceMetaFooter(
     key: key,
-    gecerlilik: gecerlilik,
     guncelleme: guncelleme,
   );
 
@@ -543,11 +541,12 @@ class PriceMetaFooter extends StatelessWidget {
     final style = TextStyle(color: p.label, fontSize: 11.5, height: 1.35);
     final uri = kaynak == null ? null : Uri.tryParse(kaynak!);
     final isLink = uri != null && uri.hasScheme && uri.host.isNotEmpty;
-    // Kaynak yalnızca ücretli Pro/pakette; ücretsiz hakla açılan tarifede görünmez.
+    // Geçerlilik ve kaynak yalnızca ücretli Pro/pakette.
+    final showGecerlilik = gecerlilik != null && _paidProSeesSource;
     final showKaynak = kaynak != null && _paidProSeesSource;
 
     if (dogrulama == null &&
-        gecerlilik == null &&
+        !showGecerlilik &&
         guncelleme == null &&
         !showKaynak) {
       return const SizedBox.shrink();
@@ -578,7 +577,7 @@ class PriceMetaFooter extends StatelessWidget {
               ],
             ),
           ),
-        if (gecerlilik != null) Text('Geçerlilik: $gecerlilik', style: style),
+        if (showGecerlilik) Text('Geçerlilik: $gecerlilik', style: style),
         if (guncelleme != null)
           Text('Son güncelleme: ${_formatDate(guncelleme!)}', style: style),
         if (showKaynak)

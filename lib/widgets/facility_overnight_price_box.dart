@@ -335,11 +335,8 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
         kaynak: entry?.kaynak,
       );
 
-  static PriceMetaFooter _publicValidityFor(FacilityPriceEntry? entry) =>
-      PriceMetaFooter.publicValidity(
-        gecerlilik: entry?.gecerlilik ?? entry?.tarife?.donem,
-        guncelleme: entry?.tarife?.guncelleme,
-      );
+  static PriceMetaFooter _publicUpdateFor(FacilityPriceEntry? entry) =>
+      PriceMetaFooter.publicUpdate(guncelleme: entry?.tarife?.guncelleme);
 
   Future<void> _openTariffSheet(Misafirhane priced) async {
     final entry = priced.fiyatKaydi;
@@ -599,7 +596,7 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
     }
 
     if (!_unlocked) {
-      final publicValidity = _publicValidityFor(priced.fiyatKaydi);
+      final publicUpdate = _publicUpdateFor(priced.fiyatKaydi);
       return Padding(
         padding: EdgeInsets.only(top: widget.topSpacing),
         child: DecoratedBox(
@@ -619,9 +616,9 @@ class _FacilityOvernightPriceBoxState extends State<FacilityOvernightPriceBox> {
                   titleColor: titleColor,
                   bodyColor: labelColor,
                 ),
-                if (!publicValidity.isEmpty) ...[
+                if (!publicUpdate.isEmpty) ...[
                   const SizedBox(height: 10),
-                  publicValidity,
+                  publicUpdate,
                 ],
                 const SizedBox(height: 12),
                 _ProPreview(
