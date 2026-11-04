@@ -203,32 +203,30 @@ class KisKesfetUcretSection extends StatelessWidget {
               bilgi.aciklama,
               style: TextStyle(color: muted, fontSize: 12, height: 1.5),
             ),
-          const SizedBox(height: 8),
-          Text(
-            'Kaynak: Resmî tesis fiyat tarifesi',
-            style: TextStyle(color: muted, fontSize: 12),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Son doğrulama: ${KisKesfetUi.formatDate(bilgi.sonKontrol)}',
-            style: TextStyle(color: muted, fontSize: 12),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Ücret son kontrol: ${KisKesfetUi.formatDate(bilgi.sonKontrol)}',
-            style: TextStyle(color: muted, fontSize: 12),
-          ),
+          if (bilgi.sonKontrol.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Son güncelleme: ${KisKesfetUi.formatDate(bilgi.sonKontrol)}',
+              style: TextStyle(color: muted, fontSize: 12),
+            ),
+          ],
           const SizedBox(height: 8),
           Text(
             FacilityPricing.note,
             style: TextStyle(color: muted, fontSize: 12, height: 1.4),
           ),
-          if (thermalSourceOpen(place))
+          if (thermalSourceOpen(place)) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Kaynak: Resmî tesis fiyat tarifesi',
+              style: TextStyle(color: muted, fontSize: 12),
+            ),
             TextButton.icon(
               onPressed: () => _openTariff(kalemler.first.kaynakUrl),
               icon: const Icon(Icons.open_in_new_rounded, size: 16),
               label: const Text('Tarifeyi aç'),
             ),
+          ],
         ],
       ],
     );

@@ -136,12 +136,13 @@ void main() {
       await tester.tap(find.text('Detay'));
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
-        find.text('Ücret son kontrol: 24.10.2026'),
+        find.text('Son güncelleme: 24.10.2026'),
         200,
         scrollable: find.byType(Scrollable).last,
       );
+      expect(find.text('Son güncelleme: 24.10.2026'), findsWidgets);
+      // Debug'da PriceAccess açık olduğu için kaynak görünür; mağazada Pro gerekir.
       expect(find.text('Kaynak: Resmî tesis fiyat tarifesi'), findsOneWidget);
-      expect(find.text('Son doğrulama: 24.10.2026'), findsOneWidget);
       expect(find.text('Yetişkin havuz'), findsWidgets);
       expect(find.text('İki kişilik oda'), findsOneWidget);
       expect(find.text('2.000 TL / oda / gece'), findsOneWidget);
@@ -188,7 +189,7 @@ void main() {
     );
     expect(find.text('Ücret bilgisi bulunamadı'), findsNothing);
     expect(find.text('Ücretler'), findsNothing);
-    expect(find.textContaining('Ücret son kontrol:'), findsNothing);
+    expect(find.textContaining('Son güncelleme:'), findsNothing);
     expect(find.text('Kaynak: Resmî tesis fiyat tarifesi'), findsNothing);
     expect(find.text('Resmî kaynak'), findsOneWidget);
   });

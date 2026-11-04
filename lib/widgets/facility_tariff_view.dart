@@ -543,8 +543,8 @@ class PriceMetaFooter extends StatelessWidget {
     final style = TextStyle(color: p.label, fontSize: 11.5, height: 1.35);
     final uri = kaynak == null ? null : Uri.tryParse(kaynak!);
     final isLink = uri != null && uri.hasScheme && uri.host.isNotEmpty;
-    final showKaynak =
-        kaynak != null && (!isLink || _paidProSeesSource);
+    // Kaynak yalnızca ücretli Pro/pakette; ücretsiz hakla açılan tarifede görünmez.
+    final showKaynak = kaynak != null && _paidProSeesSource;
 
     if (dogrulama == null &&
         gecerlilik == null &&
