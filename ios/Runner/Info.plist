@@ -104,6 +104,10 @@
 		</array>
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>RotaLink, bulunduğunuz bölgenin anlık hava durumunu sunmak, acil (SOS) durumlarda hızlı konum paylaşımı sağlamak ve kamu misafirhaneleri ile tesislerin size olan kesin mesafesini hesaplamak için konum bilginize ihtiyaç duyar.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>RotaLink, bulunduğunuz bölgenin anlık hava durumunu sunmak, acil (SOS) durumlarda hızlı konum paylaşımı sağlamak ve kamu misafirhaneleri ile tesislerin size olan kesin mesafesini hesaplamak için konum bilginize ihtiyaç duyar. Arka planda sürekli konum takibi yapılmaz.</string>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>RotaLink, bulunduğunuz bölgenin anlık hava durumunu sunmak, acil (SOS) durumlarda hızlı konum paylaşımı sağlamak ve kamu misafirhaneleri ile tesislerin size olan kesin mesafesini hesaplamak için konum bilginize ihtiyaç duyar. Arka planda sürekli konum takibi yapılmaz.</string>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>Sesli arama için mikrofon izni gerekir.</string>
 		<key>NSSpeechRecognitionUsageDescription</key>
