@@ -502,12 +502,17 @@ class _PlanCard extends StatelessWidget {
               ),
               if (offer != null) ...[
                 const SizedBox(width: 8),
-                Text(
-                  offer.product.price,
-                  style: TextStyle(
-                    color: accent,
-                    fontSize: featured ? 18 : 15,
-                    fontWeight: FontWeight.w800,
+                Flexible(
+                  child: Text(
+                    '${offer.product.price}/${plan.yearly ? 'yıl' : 'ay'}',
+                    textAlign: TextAlign.end,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: featured ? 18 : 15,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],

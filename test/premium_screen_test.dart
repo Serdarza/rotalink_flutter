@@ -253,7 +253,8 @@ void main() {
         expect(find.text('Altın Pro'), findsOneWidget);
         expect(find.text('Platin Pro'), findsOneWidget);
         expect(find.text('ÖNERİLEN PAKET'), findsOneWidget);
-        expect(find.text('€12,34'), findsNWidgets(3));
+        expect(find.text('€12,34/ay'), findsNWidgets(2));
+        expect(find.text('€12,34/yıl'), findsOneWidget);
         expect(find.byType(LinearProgressIndicator), findsNothing);
         expect(find.text('Aboneliği başlat'), findsOneWidget);
         final buy = tester.widget<FilledButton>(
