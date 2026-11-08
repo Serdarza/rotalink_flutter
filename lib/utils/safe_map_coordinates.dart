@@ -12,6 +12,10 @@ bool isValidWgs84LatLng(double lat, double lon) {
   return true;
 }
 
+/// Cihaz konumu olarak kullanılabilir mi? (0,0) “konum yok” sayılır.
+bool isUsableDeviceLocation(double lat, double lon) =>
+    isValidWgs84LatLng(lat, lon) && !(lat == 0 && lon == 0);
+
 /// Geçersiz [lat]/[lon] için [fallback] döner (varsayılan Türkiye merkezi).
 LatLng latLngOrFallback(
   double lat,
