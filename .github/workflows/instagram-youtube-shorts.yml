@@ -1,0 +1,32 @@
+name: instagram-youtube-shorts
+
+on:
+  schedule:
+    # Yaklaşık 15 dakikada bir (GitHub cron en iyi çabayla çalışır).
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Manuel çalıştırma nedeni
+        required: false
+        default: "manual"
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    concurrency:
+      group: instagram-youtube-shorts
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: ffprobe kur
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Instagram Reels → YouTube Shorts
+        env:
+          YOUTUBE_AUTOMATION_TOKEN: ${{ secrets.YOUTUBE_AUTOMATION_TOKEN }}
+          YOUTUBE_AUTOMATION_URL: https://admin.rotalink.tr
+        run: node scripts/instagram_youtube_shorts.mjs
