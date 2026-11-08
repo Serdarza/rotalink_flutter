@@ -367,7 +367,7 @@ export async function main() {
   const results = [];
   const tempDir = await mkdtemp(join(tmpdir(), "rotalink-shorts-"));
   try {
-    for (const media of fresh.slice(0, 3)) {
+    for (const media of fresh.slice(0, 5)) {
       console.log(`İşleniyor: ${media.id}`);
       try {
         const result = await processMedia({ media, job, tempDir });
