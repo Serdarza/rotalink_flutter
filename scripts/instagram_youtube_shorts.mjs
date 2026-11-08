@@ -90,7 +90,9 @@ async function adminJson(path, init = {}) {
     throw new Error(`Admin yanıtı JSON değil (${response.status}).`);
   }
   if (!response.ok) {
-    throw new Error(data.error || `Admin HTTP ${response.status}`);
+    throw new Error(
+      data.error || data.message || `Admin HTTP ${response.status}`,
+    );
   }
   return data;
 }
